@@ -18,7 +18,27 @@ as:
 
 - orchestration is required
 - direct parent-only execution is not the preferred path
-- the parent should form and supervise a worker team
+- the parent should choose and supervise the correct orchestration shape
+
+The parent must route `/sub` to one of two execution paths:
+
+- `team mode`: one-off bounded work using `start-codex-subagent-team.ps1`
+- `queue mode`: unattended tracker-driven work using `start-codex-subagent-queue.ps1`
+
+Default routing:
+
+- choose `team mode` for finite requests such as:
+  - fix or implement a specific task
+  - work one ticket or one deliverable
+  - review or verify a bounded artifact
+  - generate one bounded output
+- choose `queue mode` for ongoing requests such as:
+  - watch a local queue file
+  - watch a local tasks folder
+  - keep processing tickets as they arrive
+  - run unattended in the background
+  - handle multiple tracker issues over time
+  - maintain one workspace per issue automatically
 
 ## Parent Actions
 
@@ -26,17 +46,21 @@ When `/sub` is used, the parent should:
 
 1. strip the `/sub` prefix
 2. interpret the remaining text as the true task request
-3. decide whether the task needs one worker or a team
-4. choose worker roles autonomously
-5. choose model, sandbox, and reasoning per worker
-6. launch and supervise the workers
-7. validate outputs before reporting back
-8. preserve enough evidence for later review: manifest, prompt files, worker summaries, and a per-run archive with worker-specific folders
-9. if the parent recovers from a wrong delivery path or wrong workspace root, run the reviewer or verifier again against the final successful artifact before accepting it
-10. if a reviewer finds a material issue, launch a bounded fixer worker instead of patching the deliverable directly in the parent
-11. when building a launcher spec for deliverable work, include `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"` so unsafe team shapes fail fast
+3. decide whether the request should run in `team mode` or `queue mode`
+4. if `team mode`, decide whether the task needs one worker or a team
+5. choose worker roles autonomously
+6. choose model, sandbox, and reasoning per worker
+7. launch and supervise the workers or the queue runner
+8. validate outputs before reporting back
+9. preserve enough evidence for later review: manifest, prompt files, worker summaries, queue state, and per-run archives
+10. if the parent recovers from a wrong delivery path or wrong workspace root, run the reviewer or verifier again against the final successful artifact before accepting it
+11. if a reviewer finds a material issue, launch a bounded fixer worker instead of patching the deliverable directly in the parent
+12. when building a launcher spec for deliverable work, include `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"` so unsafe team shapes fail fast
+13. when building a queue config, prefer one workspace per issue, `hooks.after_create`, and auto-detected `AGENTS.md`/`WORKFLOW.md`
 
 ## Team Sizing Rule
+
+This section applies after `/sub` has already resolved to `team mode`.
 
 The team should be chosen autonomously.
 
@@ -98,6 +122,21 @@ Run workers in parallel only when:
 When the launcher is used, prefer same-stage parallel workers plus a later-stage reviewer or validator instead of putting writers and reviewers in the same stage.
 
 If those conditions are not met, use staged execution instead.
+
+## Queue Rule
+
+Choose `queue mode` when the request implies repetition, monitoring, or unattended tracker work.
+
+In `queue mode`, the parent should:
+
+- prepare a queue config instead of a one-off team spec
+- prefer local `tracker.kind = "local-json"` or `tracker.kind = "local-files"` when the user did not explicitly ask for an external tracker
+- use one workspace per issue
+- prefer `hooks.after_create` for workspace bootstrap
+- let the downstream launcher auto-detect `AGENTS.md` and `WORKFLOW.md` after bootstrap
+- preserve `queue-state.json`, `queue-report.md`, per-issue generated specs, per-issue logs, and per-issue launcher outputs
+
+Do not use `queue mode` for a single bounded request unless the user explicitly wants polling or repeated dispatch.
 
 ## Reporting Rule
 

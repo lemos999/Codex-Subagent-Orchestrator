@@ -1,0 +1,51 @@
+{
+  "tracker": {
+    "kind": "local-files",
+    "source_dir": "tasks",
+    "include_globs": [
+      "*.md",
+      "*.json"
+    ],
+    "recurse": true,
+    "active_states": [
+      "Todo",
+      "In Progress"
+    ],
+    "terminal_states": [
+      "Done",
+      "Closed",
+      "Cancelled"
+    ]
+  },
+  "polling": {
+    "interval_seconds": 5,
+    "max_polls": 8,
+    "drain_on_exit": true
+  },
+  "workspace": {
+    "root": "workspaces"
+  },
+  "output": {
+    "root": "queue-output"
+  },
+  "hooks": {
+    "after_create": "git clone --depth 1 https://github.com/your-org/your-repo.git .",
+    "after_create_sentinel_paths": [
+      ".git",
+      "AGENTS.md",
+      "WORKFLOW.md"
+    ]
+  },
+  "launcher": {
+    "max_concurrent_issues": 1,
+    "execution_mode": "sequential",
+    "shared_directive_mode": "reference",
+    "defaults": {
+      "sandbox": "workspace-write",
+      "reasoning_effort": "low",
+      "prompt_profile": "compact",
+      "response_style": "compact",
+      "max_response_lines": 4
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "tracker": {
+    "kind": "linear",
+    "project_slug": "your-project-slug",
+    "api_key_env": "LINEAR_API_KEY",
+    "active_states": [
+      "Todo",
+      "In Progress",
+      "Rework",
+      "Merging"
+    ],
+    "terminal_states": [
+      "Done",
+      "Closed",
+      "Cancelled",
+      "Duplicate"
+    ]
+  },
+  "polling": {
+    "interval_seconds": 5,
+    "max_polls": 0,
+    "drain_on_exit": true
+  },
+  "workspace": {
+    "root": "workspaces"
+  },
+  "output": {
+    "root": "queue-output"
+  },
+  "hooks": {
+    "after_create": "git clone --depth 1 git@github.com:your-org/your-repo.git .",
+    "after_create_sentinel_paths": [
+      ".git",
+      "AGENTS.md",
+      "WORKFLOW.md"
+    ]
+  },
+  "launcher": {
+    "max_concurrent_issues": 2,
+    "execution_mode": "sequential",
+    "shared_directive_mode": "reference",
+    "defaults": {
+      "sandbox": "workspace-write",
+      "reasoning_effort": "low",
+      "prompt_profile": "compact",
+      "response_style": "compact",
+      "max_response_lines": 4
+    }
+  }
+}

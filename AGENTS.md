@@ -14,6 +14,9 @@ For this workspace, prefer local skills over globally installed skills when both
 
 - If the user starts with `/sub`, you must treat that as a workspace-local subagent orchestration request.
 - For `/sub` and other obvious subagent orchestration requests, open and follow `./skills/codex-subagent-orchestrator/SKILL.md`.
+- For `/sub`, choose the orchestration shape autonomously from the request context:
+  - use the team launcher path for one-off bounded tasks, single tickets, or finite delivery requests
+  - use the queue runner path for unattended polling, repeated ticket dispatch, background issue handling, tracker monitoring, or "keep processing work" requests
 - Resolve all relative paths from `./skills/codex-subagent-orchestrator/` first.
 - If both a local and a global copy of the same skill exist, the local workspace copy wins for this workspace.
 - Keep the workflow self-contained in this workspace when possible. Do not require a global skill path if the local copy under `./skills` is present.
@@ -22,3 +25,4 @@ For this workspace, prefer local skills over globally installed skills when both
 - For `/sub` work, if a fixer or recovery worker changes a deliverable, run a reviewer or validator again against the final artifact before accepting it.
 - For `/sub` work that uses the launcher, prefer top-level spec fields `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"`.
 - For `/sub` work that uses `custom` workers to supervise nested teams, also set worker-level `required_paths` and preferably `required_non_empty_paths` so false-success runs are rejected before acceptance.
+- For `/sub` work that bootstraps or creates a workspace, prefer auto-detecting `AGENTS.md` and `WORKFLOW.md` from the workspace after bootstrap instead of hardcoding them into every worker prompt.

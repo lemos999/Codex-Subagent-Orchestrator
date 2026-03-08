@@ -1,0 +1,85 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/workflow-issue",
+  "skip_git_repo_check": true,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "shared_directive_mode": "reference",
+  "workflow_file": "WORKFLOW.md",
+  "workflow_prompt_mode": "prepend",
+  "workflow_context": {
+    "attempt": 1,
+    "issue": {
+      "identifier": "ABC-123",
+      "title": "Fix flaky test in CI",
+      "description": "The integration test intermittently fails on Windows runners.",
+      "state": "In Progress",
+      "labels": [
+        "backend",
+        "ci"
+      ],
+      "url": "https://tracker.example.com/ABC-123"
+    }
+  },
+  "hooks": {
+    "after_create": "git clone --depth 1 https://github.com/your-org/your-repo.git .",
+    "after_create_sentinel_paths": [
+      ".git",
+      "README.md"
+    ]
+  },
+  "requested_deliverables": [
+    "README.md"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "defaults": {
+    "model": "gpt-5.4",
+    "sandbox": "workspace-write",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 4
+  },
+  "agents": [
+    {
+      "name": "workflow-implementer",
+      "kind": "implementer",
+      "role": "issue implementer",
+      "mission": "Execute the current issue against the local repository while keeping the writable scope narrow.",
+      "task": "Implement the requested issue in this repository, validate the change, and stop after the acceptance criteria are met.",
+      "writable_scope": [
+        "README.md"
+      ],
+      "validation": [
+        "Confirm the requested deliverable files exist.",
+        "Confirm the implementation stays within the declared writable scope."
+      ],
+      "return_contract": [
+        "Return a short implementation summary and concrete validation notes."
+      ]
+    },
+    {
+      "name": "workflow-reviewer",
+      "kind": "reviewer",
+      "stage": 2,
+      "sandbox": "read-only",
+      "role": "final reviewer",
+      "mission": "Review the final workspace state after the workflow-driven implementation.",
+      "task": "Review the requested deliverables for correctness, scope compliance, and readiness for handoff.",
+      "read_first": [
+        "README.md"
+      ],
+      "validation": [
+        "Confirm the deliverables required by the issue are present.",
+        "Confirm no obvious scope violations or missing validation remain."
+      ],
+      "return_contract": [
+        "Return a concise review verdict and only the material issues, if any."
+      ]
+    }
+  ]
+}

@@ -240,6 +240,651 @@ function Get-UniqueStringList {
     return [string[]]$items.ToArray()
 }
 
+function ConvertTo-TemplateContextValue {
+    param($Value)
+
+    if ($null -eq $Value) {
+        return $null
+    }
+
+    if ($Value -is [DateTime]) {
+        return $Value.ToUniversalTime().ToString("o")
+    }
+
+    if ($Value -is [DateTimeOffset]) {
+        return $Value.ToUniversalTime().ToString("o")
+    }
+
+    if ($Value -is [System.Collections.IDictionary]) {
+        $map = [ordered]@{}
+        foreach ($key in $Value.Keys) {
+            $map[[string]$key] = ConvertTo-TemplateContextValue $Value[$key]
+        }
+
+        return $map
+    }
+
+    if ($Value -is [pscustomobject]) {
+        $map = [ordered]@{}
+        foreach ($property in $Value.PSObject.Properties) {
+            $map[[string]$property.Name] = ConvertTo-TemplateContextValue $property.Value
+        }
+
+        return $map
+    }
+
+    if ($Value -is [System.Collections.IEnumerable] -and -not ($Value -is [string])) {
+        $items = New-Object System.Collections.Generic.List[object]
+        foreach ($entry in $Value) {
+            $items.Add((ConvertTo-TemplateContextValue $entry))
+        }
+
+        return @($items.ToArray())
+    }
+
+    return $Value
+}
+
+function ConvertTo-TemplateContextMap {
+    param($Value)
+
+    if ($null -eq $Value) {
+        return [ordered]@{}
+    }
+
+    $converted = ConvertTo-TemplateContextValue $Value
+    if ($converted -isnot [System.Collections.IDictionary]) {
+        throw "workflow_context must resolve to an object."
+    }
+
+    return $converted
+}
+
+function Merge-TemplateContextMaps {
+    param(
+        [System.Collections.IDictionary]$Base,
+        [System.Collections.IDictionary]$Overlay
+    )
+
+    if ($null -eq $Base -or $Base.Count -eq 0) {
+        return ConvertTo-TemplateContextMap $Overlay
+    }
+
+    if ($null -eq $Overlay -or $Overlay.Count -eq 0) {
+        return ConvertTo-TemplateContextMap $Base
+    }
+
+    $merged = [ordered]@{}
+    foreach ($key in $Base.Keys) {
+        $merged[[string]$key] = ConvertTo-TemplateContextValue $Base[$key]
+    }
+
+    foreach ($key in $Overlay.Keys) {
+        $stringKey = [string]$key
+        $overlayValue = ConvertTo-TemplateContextValue $Overlay[$key]
+        if ($merged.Contains($stringKey) -and
+            $merged[$stringKey] -is [System.Collections.IDictionary] -and
+            $overlayValue -is [System.Collections.IDictionary]) {
+            $merged[$stringKey] = Merge-TemplateContextMaps -Base $merged[$stringKey] -Overlay $overlayValue
+            continue
+        }
+
+        $merged[$stringKey] = $overlayValue
+    }
+
+    return $merged
+}
+
+function Split-WorkflowDocument {
+    param([string]$Content)
+
+    $lines = @([regex]::Split([string]$Content, "\r?\n"))
+    if (@($lines).Count -eq 0) {
+        return [pscustomobject]@{
+            front_matter_text = $null
+            prompt_template = ""
+        }
+    }
+
+    if ($lines[0].Trim() -ne "---") {
+        return [pscustomobject]@{
+            front_matter_text = $null
+            prompt_template = ([string]$Content).Trim()
+        }
+    }
+
+    $frontMatterLines = New-Object System.Collections.Generic.List[string]
+    $promptLines = New-Object System.Collections.Generic.List[string]
+    $inFrontMatter = $true
+
+    for ($index = 1; $index -lt $lines.Count; $index += 1) {
+        $line = $lines[$index]
+        if ($inFrontMatter -and $line.Trim() -eq "---") {
+            $inFrontMatter = $false
+            continue
+        }
+
+        if ($inFrontMatter) {
+            $frontMatterLines.Add($line)
+        } else {
+            $promptLines.Add($line)
+        }
+    }
+
+    $frontMatterText = if (@($frontMatterLines).Count -gt 0) {
+        ($frontMatterLines -join [Environment]::NewLine).Trim()
+    } else {
+        $null
+    }
+    $promptTemplate = ($promptLines -join [Environment]::NewLine).Trim()
+
+    return [pscustomobject]@{
+        front_matter_text = $frontMatterText
+        prompt_template = $promptTemplate
+    }
+}
+
+function Get-TemplateContextValue {
+    param(
+        $Context,
+        [string]$Path,
+        [switch]$AllowMissing
+    )
+
+    $current = $Context
+    foreach ($segment in @($Path -split '\.')) {
+        if ([string]::IsNullOrWhiteSpace($segment)) {
+            continue
+        }
+
+        if ($current -is [System.Collections.IDictionary]) {
+            if (-not $current.Contains($segment)) {
+                if ($AllowMissing) {
+                    return $null
+                }
+
+                throw "workflow template variable not found: $Path"
+            }
+
+            $current = $current[$segment]
+            continue
+        }
+
+        if ($current -is [pscustomobject]) {
+            $property = $current.PSObject.Properties[$segment]
+            if ($null -eq $property) {
+                if ($AllowMissing) {
+                    return $null
+                }
+
+                throw "workflow template variable not found: $Path"
+            }
+
+            $current = $property.Value
+            continue
+        }
+
+        if ($AllowMissing) {
+            return $null
+        }
+
+        throw "workflow template variable not found: $Path"
+    }
+
+    return $current
+}
+
+function Test-TemplateTruthy {
+    param($Value)
+
+    if ($null -eq $Value) {
+        return $false
+    }
+
+    if ($Value -is [bool]) {
+        return [bool]$Value
+    }
+
+    if ($Value -is [string]) {
+        return (-not [string]::IsNullOrWhiteSpace($Value))
+    }
+
+    if ($Value -is [System.Collections.IEnumerable] -and -not ($Value -is [string])) {
+        foreach ($item in $Value) {
+            return $true
+        }
+
+        return $false
+    }
+
+    return $true
+}
+
+function Convert-TemplateValueToString {
+    param($Value)
+
+    if ($null -eq $Value) {
+        return ""
+    }
+
+    if ($Value -is [string]) {
+        return $Value
+    }
+
+    if ($Value -is [bool]) {
+        return $(if ($Value) { "true" } else { "false" })
+    }
+
+    if ($Value -is [System.Collections.IDictionary] -or ($Value -is [pscustomobject])) {
+        return ((ConvertTo-TemplateContextValue $Value) | ConvertTo-Json -Depth 8 -Compress)
+    }
+
+    if ($Value -is [System.Collections.IEnumerable] -and -not ($Value -is [string])) {
+        $values = @()
+        foreach ($entry in $Value) {
+            $values += Convert-TemplateValueToString $entry
+        }
+
+        return ($values -join ", ")
+    }
+
+    return [string]$Value
+}
+
+function Render-WorkflowTemplate {
+    param(
+        [string]$Template,
+        $Context,
+        [bool]$StrictVariables = $true
+    )
+
+    $pattern = [regex]'(?s)(\{\{\s*([^}]+?)\s*\}\}|\{%\s*(if\s+(.+?)|else|endif)\s*%\})'
+    $frames = New-Object System.Collections.Stack
+    $builder = New-Object System.Text.StringBuilder
+    $lastIndex = 0
+    $currentEnabled = $true
+
+    foreach ($match in $pattern.Matches($Template)) {
+        if ($currentEnabled -and $match.Index -gt $lastIndex) {
+            [void]$builder.Append($Template.Substring($lastIndex, $match.Index - $lastIndex))
+        }
+
+        $lastIndex = $match.Index + $match.Length
+        $fullToken = $match.Groups[1].Value
+        $variablePath = $match.Groups[2].Value
+        $ifExpression = $match.Groups[4].Value
+
+        if (-not [string]::IsNullOrWhiteSpace($variablePath)) {
+            if (-not $currentEnabled) {
+                continue
+            }
+
+            $resolvedValue = if ($StrictVariables) {
+                Get-TemplateContextValue -Context $Context -Path $variablePath.Trim()
+            } else {
+                Get-TemplateContextValue -Context $Context -Path $variablePath.Trim() -AllowMissing
+            }
+            [void]$builder.Append((Convert-TemplateValueToString $resolvedValue))
+            continue
+        }
+
+        $directive = $fullToken.Trim()
+        if ($directive -match '^\{%\s*if\b') {
+            $condition = $false
+            if ($currentEnabled) {
+                $conditionValue = Get-TemplateContextValue -Context $Context -Path $ifExpression.Trim() -AllowMissing
+                $condition = Test-TemplateTruthy $conditionValue
+            }
+
+            $frames.Push([pscustomobject]@{
+                    parent_enabled = $currentEnabled
+                    condition = $condition
+                    else_seen = $false
+                })
+            $currentEnabled = ($currentEnabled -and $condition)
+            continue
+        }
+
+        if ($directive -match '^\{%\s*else\s*%\}$') {
+            if ($frames.Count -lt 1) {
+                throw "workflow template has unmatched else directive."
+            }
+
+            $frame = $frames.Peek()
+            if ($frame.else_seen) {
+                throw "workflow template has duplicate else directive in the same block."
+            }
+
+            $frame.else_seen = $true
+            $currentEnabled = ($frame.parent_enabled -and (-not $frame.condition))
+            continue
+        }
+
+        if ($directive -match '^\{%\s*endif\s*%\}$') {
+            if ($frames.Count -lt 1) {
+                throw "workflow template has unmatched endif directive."
+            }
+
+            $frame = $frames.Pop()
+            $currentEnabled = [bool]$frame.parent_enabled
+            continue
+        }
+    }
+
+    if ($currentEnabled -and $lastIndex -lt $Template.Length) {
+        [void]$builder.Append($Template.Substring($lastIndex))
+    }
+
+    if ($frames.Count -gt 0) {
+        throw "workflow template has unterminated if block."
+    }
+
+    return $builder.ToString().Trim()
+}
+
+function Get-WorkflowInfo {
+    param(
+        $Spec,
+        [string]$WorkspaceRoot,
+        [string]$SpecDirectory
+    )
+
+    $workflowFileValue = Get-OptionalProperty $Spec "workflow_file"
+    $workflowAutoDetect = Get-BoolValue (Get-OptionalProperty $Spec "workflow_auto_detect") $true
+    if (-not $workflowFileValue -and $workflowAutoDetect) {
+        foreach ($candidate in @(
+                (Join-Path $WorkspaceRoot "WORKFLOW.md"),
+                (Join-Path $SpecDirectory "WORKFLOW.md")
+            )) {
+            if (Test-Path -LiteralPath $candidate) {
+                $workflowFileValue = $candidate
+                break
+            }
+        }
+    }
+
+    if (-not $workflowFileValue) {
+        return [pscustomobject]@{
+            enabled = $false
+            source = $null
+            prompt_template = $null
+            front_matter_text = $null
+            prompt_mode = "disabled"
+            strict_render = $true
+            auto_detected = $false
+            context = [ordered]@{}
+        }
+    }
+
+    $workflowPath = Resolve-AbsolutePath -Path ([string]$workflowFileValue) -BaseDirectory $SpecDirectory
+    $workflowContent = Get-Content -LiteralPath $workflowPath -Raw
+    $workflowDocument = Split-WorkflowDocument -Content $workflowContent
+
+    $workflowContext = [ordered]@{}
+    $workflowContextFileValue = Get-OptionalProperty $Spec "workflow_context_file"
+    if ($workflowContextFileValue) {
+        $workflowContextFilePath = Resolve-AbsolutePath -Path ([string]$workflowContextFileValue) -BaseDirectory $SpecDirectory
+        $workflowContextFileText = Get-Content -LiteralPath $workflowContextFilePath -Raw
+        $workflowContext = Merge-TemplateContextMaps `
+            -Base $workflowContext `
+            -Overlay (ConvertTo-TemplateContextMap ($workflowContextFileText | ConvertFrom-Json -ErrorAction Stop))
+    }
+
+    $workflowContext = Merge-TemplateContextMaps `
+        -Base $workflowContext `
+        -Overlay (ConvertTo-TemplateContextMap (Get-OptionalProperty $Spec "workflow_context"))
+    $workflowContext = Merge-TemplateContextMaps `
+        -Base $workflowContext `
+        -Overlay ([ordered]@{
+                workflow = [ordered]@{
+                    source = $workflowPath
+                    workspace_root = $WorkspaceRoot
+                }
+            })
+
+    return [pscustomobject]@{
+        enabled = $true
+        source = $workflowPath
+        prompt_template = $workflowDocument.prompt_template
+        front_matter_text = $workflowDocument.front_matter_text
+        prompt_mode = Get-NormalizedChoice `
+            -Primary (Get-OptionalProperty $Spec "workflow_prompt_mode") `
+            -Fallback $null `
+            -Default "prepend" `
+            -AllowedValues @("prepend", "replace", "disabled") `
+            -FieldName "workflow_prompt_mode"
+        strict_render = Get-BoolValue (Get-OptionalProperty $Spec "workflow_render_strict") $true
+        auto_detected = (-not (Get-OptionalProperty $Spec "workflow_file"))
+        context = $workflowContext
+    }
+}
+
+function Get-AgentWorkflowContext {
+    param(
+        $WorkflowInfo,
+        $Agent,
+        [string]$WorkerName,
+        [string]$WorkerKind,
+        [int]$Stage,
+        [string]$WorkerCwd,
+        [string]$WorkspaceRoot
+    )
+
+    if ($null -eq $WorkflowInfo -or -not $WorkflowInfo.enabled) {
+        return [ordered]@{}
+    }
+
+    $context = ConvertTo-TemplateContextMap $WorkflowInfo.context
+    $agentContextFileValue = Get-OptionalProperty $Agent "workflow_context_file"
+    if ($agentContextFileValue) {
+        $agentContextFilePath = Resolve-AbsolutePath -Path ([string]$agentContextFileValue) -BaseDirectory $WorkspaceRoot
+        $agentContextFileText = Get-Content -LiteralPath $agentContextFilePath -Raw
+        $context = Merge-TemplateContextMaps `
+            -Base $context `
+            -Overlay (ConvertTo-TemplateContextMap ($agentContextFileText | ConvertFrom-Json -ErrorAction Stop))
+    }
+
+    $context = Merge-TemplateContextMaps `
+        -Base $context `
+        -Overlay (ConvertTo-TemplateContextMap (Get-OptionalProperty $Agent "workflow_context"))
+    $context = Merge-TemplateContextMaps `
+        -Base $context `
+        -Overlay ([ordered]@{
+                agent = [ordered]@{
+                    name = $WorkerName
+                    kind = $WorkerKind
+                    stage = $Stage
+                    cwd = $WorkerCwd
+                    role = [string](Get-OptionalProperty $Agent "role")
+                    mission = [string](Get-OptionalProperty $Agent "mission")
+                }
+                run = [ordered]@{
+                    worker_name = $WorkerName
+                    worker_kind = $WorkerKind
+                    stage = $Stage
+                    worker_cwd = $WorkerCwd
+                    workspace_root = $WorkspaceRoot
+                }
+            })
+
+    return $context
+}
+
+function Get-AgentWorkflowRenderInfo {
+    param(
+        $WorkflowInfo,
+        $Agent,
+        [string]$WorkerName,
+        [string]$WorkerKind,
+        [int]$Stage,
+        [string]$WorkerCwd,
+        [string]$WorkspaceRoot
+    )
+
+    if ($null -eq $WorkflowInfo -or -not $WorkflowInfo.enabled -or $WorkflowInfo.prompt_mode -eq "disabled") {
+        return [pscustomobject]@{
+            enabled = $false
+            mode = "disabled"
+            text = $null
+            context = [ordered]@{}
+        }
+    }
+
+    $agentPromptMode = Get-OptionalProperty $Agent "workflow_prompt_mode"
+    $effectiveMode = Get-NormalizedChoice `
+        -Primary $agentPromptMode `
+        -Fallback $WorkflowInfo.prompt_mode `
+        -Default "prepend" `
+        -AllowedValues @("prepend", "replace", "disabled") `
+        -FieldName "workflow_prompt_mode"
+    if ($effectiveMode -eq "disabled") {
+        return [pscustomobject]@{
+            enabled = $false
+            mode = "disabled"
+            text = $null
+            context = [ordered]@{}
+        }
+    }
+
+    $context = Get-AgentWorkflowContext `
+        -WorkflowInfo $WorkflowInfo `
+        -Agent $Agent `
+        -WorkerName $WorkerName `
+        -WorkerKind $WorkerKind `
+        -Stage $Stage `
+        -WorkerCwd $WorkerCwd `
+        -WorkspaceRoot $WorkspaceRoot
+    $renderedText = Render-WorkflowTemplate `
+        -Template $WorkflowInfo.prompt_template `
+        -Context $context `
+        -StrictVariables $WorkflowInfo.strict_render
+
+    return [pscustomobject]@{
+        enabled = $true
+        mode = $effectiveMode
+        text = $renderedText
+        context = $context
+    }
+}
+
+function Test-DirectoryIsEmpty {
+    param([string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $true
+    }
+
+    return @(Get-ChildItem -LiteralPath $Path -Force -ErrorAction SilentlyContinue).Count -eq 0
+}
+
+function Invoke-PowerShellHook {
+    param(
+        [string]$Command,
+        [string]$RunCwd,
+        [string]$StdoutPath,
+        [string]$StderrPath
+    )
+
+    $stdoutDirectory = Split-Path -Parent $StdoutPath
+    $stderrDirectory = Split-Path -Parent $StderrPath
+    if (-not [string]::IsNullOrWhiteSpace($stdoutDirectory)) {
+        New-Item -ItemType Directory -Path $stdoutDirectory -Force | Out-Null
+    }
+    if (-not [string]::IsNullOrWhiteSpace($stderrDirectory)) {
+        New-Item -ItemType Directory -Path $stderrDirectory -Force | Out-Null
+    }
+
+    $encodedCommand = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($Command))
+    try {
+        $process = Start-Process `
+            -FilePath "powershell.exe" `
+            -ArgumentList "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encodedCommand" `
+            -WorkingDirectory $RunCwd `
+            -RedirectStandardOutput $StdoutPath `
+            -RedirectStandardError $StderrPath `
+            -PassThru `
+            -Wait `
+            -NoNewWindow
+        $exitCode = [int]$process.ExitCode
+    } catch {
+        $message = $_ | Out-String
+        Add-Content -LiteralPath $StderrPath -Value $message -Encoding utf8
+        $exitCode = -1
+    }
+
+    return [pscustomobject]@{
+        exit_code = $exitCode
+        stdout = $StdoutPath
+        stderr = $StderrPath
+        command = $Command
+    }
+}
+
+function Get-AfterCreateHookInfo {
+    param(
+        $Spec,
+        [string]$WorkspaceRoot,
+        [string]$OutputDir
+    )
+
+    $hooks = Get-OptionalProperty $Spec "hooks"
+    if ($null -eq $hooks) {
+        return [pscustomobject]@{
+            enabled = $false
+            command = $null
+            sentinel_paths = @()
+            if_workspace_empty = $false
+            stdout = $null
+            stderr = $null
+        }
+    }
+
+    $afterCreateCommand = Get-OptionalProperty $hooks "after_create"
+    if (-not $afterCreateCommand) {
+        return [pscustomobject]@{
+            enabled = $false
+            command = $null
+            sentinel_paths = @()
+            if_workspace_empty = $false
+            stdout = $null
+            stderr = $null
+        }
+    }
+
+    $sentinelPaths = @(
+        Get-UniqueStringList (Get-OptionalProperty $hooks "after_create_sentinel_paths") |
+            ForEach-Object { Resolve-AbsolutePath -Path $_ -BaseDirectory $WorkspaceRoot -AllowMissing }
+    )
+    $ifWorkspaceEmptyValue = Get-OptionalProperty $hooks "after_create_if_workspace_empty"
+    $ifWorkspaceEmpty = if ($null -ne $ifWorkspaceEmptyValue) {
+        [bool]$ifWorkspaceEmptyValue
+    } elseif (@($sentinelPaths).Count -eq 0) {
+        $true
+    } else {
+        $false
+    }
+
+    $stdoutPathValue = Get-OptionalProperty $hooks "after_create_stdout_file"
+    $stderrPathValue = Get-OptionalProperty $hooks "after_create_stderr_file"
+
+    return [pscustomobject]@{
+        enabled = $true
+        command = [string]$afterCreateCommand
+        sentinel_paths = [string[]]$sentinelPaths
+        if_workspace_empty = $ifWorkspaceEmpty
+        stdout = if ($stdoutPathValue) {
+            Resolve-AbsolutePath -Path ([string]$stdoutPathValue) -BaseDirectory $WorkspaceRoot -AllowMissing
+        } else {
+            Resolve-AbsolutePath -Path (Join-Path $OutputDir "workspace-bootstrap.stdout.log") -BaseDirectory $WorkspaceRoot -AllowMissing
+        }
+        stderr = if ($stderrPathValue) {
+            Resolve-AbsolutePath -Path ([string]$stderrPathValue) -BaseDirectory $WorkspaceRoot -AllowMissing
+        } else {
+            Resolve-AbsolutePath -Path (Join-Path $OutputDir "workspace-bootstrap.stderr.log") -BaseDirectory $WorkspaceRoot -AllowMissing
+        }
+    }
+}
+
 function Add-SectionLines {
     param(
         [System.Collections.Generic.List[string]]$Lines,
@@ -467,6 +1112,8 @@ function Export-RunArchiveContent {
         [string]$SummaryPath,
         [string]$DebugLogPath,
         $SharedDirectiveInfo,
+        $WorkflowInfo,
+        $AfterCreateHookResult,
         [string[]]$RequestedDeliverables,
         $Results
     )
@@ -501,6 +1148,13 @@ function Export-RunArchiveContent {
         $sharedDirectiveLeaf = Split-Path -Leaf $SharedDirectiveInfo.source
         $sharedDirectiveDestination = Join-Path $ArchiveInfo.supervisor_directory ("shared-directive-source-{0}" -f $sharedDirectiveLeaf)
         Copy-ExistingFile -SourcePath $SharedDirectiveInfo.source -DestinationPath $sharedDirectiveDestination | Out-Null
+    }
+    if ($WorkflowInfo -and $WorkflowInfo.enabled -and -not [string]::IsNullOrWhiteSpace($WorkflowInfo.source) -and (Test-Path -LiteralPath $WorkflowInfo.source)) {
+        Copy-ExistingFile -SourcePath $WorkflowInfo.source -DestinationPath (Join-Path $ArchiveInfo.supervisor_directory (Split-Path -Leaf $WorkflowInfo.source)) | Out-Null
+    }
+    if ($AfterCreateHookResult -and $AfterCreateHookResult.ran) {
+        Copy-ExistingFile -SourcePath $AfterCreateHookResult.stdout -DestinationPath (Join-Path $ArchiveInfo.supervisor_directory "workspace-bootstrap.stdout.log") | Out-Null
+        Copy-ExistingFile -SourcePath $AfterCreateHookResult.stderr -DestinationPath (Join-Path $ArchiveInfo.supervisor_directory "workspace-bootstrap.stderr.log") | Out-Null
     }
 
     foreach ($deliverable in @($RequestedDeliverables)) {
@@ -551,6 +1205,8 @@ function Export-RunArchiveContent {
             actual_approval = $result.actual_approval
             actual_workdir = $result.actual_workdir
             footer_tokens_used = $result.footer_tokens_used
+            workflow_prompt_mode = $result.workflow_prompt_mode
+            workflow_prompt_chars = $result.workflow_prompt_chars
             command = $result.command
             source_paths = [ordered]@{
                 prompt = $result.prompt
@@ -700,6 +1356,7 @@ function New-WorkerPrompt {
     param(
         $Agent,
         $SharedDirectiveInfo,
+        $WorkflowRenderInfo,
         [string]$PromptProfile,
         [string]$ResponseStyle,
         [int]$MaxResponseLines
@@ -746,11 +1403,29 @@ function New-WorkerPrompt {
         $lines.Add("You are a bounded codex exec worker in the assigned working directory.")
     }
 
+    $workflowText = if ($WorkflowRenderInfo -and $WorkflowRenderInfo.enabled -and -not [string]::IsNullOrWhiteSpace($WorkflowRenderInfo.text)) {
+        [string]$WorkflowRenderInfo.text
+    } else {
+        $null
+    }
+    $workflowMode = if ($workflowText) {
+        [string]$WorkflowRenderInfo.mode
+    } else {
+        "disabled"
+    }
+
     $promptValue = Get-OptionalProperty $Agent "prompt"
     if ($promptValue) {
+        $resolvedPromptText = [string]$promptValue
+        if ($workflowMode -eq "replace") {
+            $resolvedPromptText = $workflowText
+        } elseif ($workflowMode -eq "prepend") {
+            $resolvedPromptText = @($workflowText, [string]$promptValue) -join ([Environment]::NewLine + [Environment]::NewLine)
+        }
+
         $lines.Add("")
         $lines.Add("Task:")
-        $lines.Add([string]$promptValue)
+        $lines.Add($resolvedPromptText)
         Add-SectionLines -Lines $lines -Title "Stop when:" -Items (Get-StringList (Get-OptionalProperty $Agent "stop_when"))
         if ($compactResponse) {
             Add-SectionLines -Lines $lines -Title "Response style:" -Items @(
@@ -770,7 +1445,13 @@ function New-WorkerPrompt {
 
     $lines.Add("")
     $lines.Add("Task:")
-    $lines.Add([string]$taskValue)
+    if ($workflowMode -eq "replace") {
+        $lines.Add($workflowText)
+    } elseif ($workflowMode -eq "prepend") {
+        $lines.Add(@($workflowText, [string]$taskValue) -join ([Environment]::NewLine + [Environment]::NewLine))
+    } else {
+        $lines.Add([string]$taskValue)
+    }
 
     Add-SectionLines -Lines $lines -Title ($(if ($compactPrompt) { "Skills:" } else { "Use these skills if they trigger:" })) -Items (Get-StringList (Get-OptionalProperty $Agent "skills"))
     Add-SectionLines -Lines $lines -Title "Read first:" -Items (Get-StringList (Get-OptionalProperty $Agent "read_first"))
@@ -980,16 +1661,15 @@ function Get-StructureEfficiencySignals {
     ).Count
 
     $promptCharsMeasure = $Results | Measure-Object -Property prompt_chars -Sum
-    $promptCharsTotal = if ($null -ne $promptCharsMeasure.Sum) {
+    $promptCharsTotal = if ($null -ne $promptCharsMeasure -and $null -ne $promptCharsMeasure.Sum) {
         [int]$promptCharsMeasure.Sum
     } else {
         0
     }
 
-    $footerTokensMeasure = $Results |
-        Where-Object { $null -ne $_.footer_tokens_used } |
-        Measure-Object -Property footer_tokens_used -Sum
-    $footerTokensTotal = if ($null -ne $footerTokensMeasure.Sum) {
+    $footerTokenResults = @($Results | Where-Object { $null -ne $_.footer_tokens_used })
+    $footerTokensTotal = if (@($footerTokenResults).Count -gt 0) {
+        $footerTokensMeasure = $footerTokenResults | Measure-Object -Property footer_tokens_used -Sum
         [int]$footerTokensMeasure.Sum
     } else {
         0
@@ -1061,6 +1741,8 @@ function New-RunSummaryText {
         [string]$WorkspaceRoot,
         [string]$ExecutionMode,
         $SharedDirectiveInfo,
+        $WorkflowInfo,
+        $AfterCreateHookResult,
         $Results,
         [string]$ManifestPath,
         $PolicyEvaluation,
@@ -1072,16 +1754,15 @@ function New-RunSummaryText {
     $successCount = @($Results | Where-Object { $_.succeeded }).Count
     $totalCount = @($Results).Count
     $promptCharsMeasure = $Results | Measure-Object -Property prompt_chars -Sum
-    $promptCharsTotal = if ($null -ne $promptCharsMeasure.Sum) {
+    $promptCharsTotal = if ($null -ne $promptCharsMeasure -and $null -ne $promptCharsMeasure.Sum) {
         [int]$promptCharsMeasure.Sum
     } else {
         0
     }
 
-    $footerTokensMeasure = $Results |
-        Where-Object { $null -ne $_.footer_tokens_used } |
-        Measure-Object -Property footer_tokens_used -Sum
-    $footerTokensTotal = if ($null -ne $footerTokensMeasure.Sum) {
+    $footerTokenResults = @($Results | Where-Object { $null -ne $_.footer_tokens_used })
+    $footerTokensTotal = if (@($footerTokenResults).Count -gt 0) {
+        $footerTokensMeasure = $footerTokenResults | Measure-Object -Property footer_tokens_used -Sum
         [int]$footerTokensMeasure.Sum
     } else {
         0
@@ -1094,6 +1775,17 @@ function New-RunSummaryText {
     $lines.Add([string]::Format('- workers_succeeded: {0}/{1}', $successCount, $totalCount))
     $lines.Add([string]::Format('- shared_directive_mode: {0}', $SharedDirectiveInfo.effective_mode))
     $lines.Add([string]::Format('- shared_directive_chars: {0} -> {1}', $SharedDirectiveInfo.original_char_count, $SharedDirectiveInfo.effective_char_count))
+    if ($WorkflowInfo -and $WorkflowInfo.enabled) {
+        $lines.Add([string]::Format('- workflow_file: `{0}`', $WorkflowInfo.source))
+        $lines.Add([string]::Format('- workflow_prompt_mode: {0}', $WorkflowInfo.prompt_mode))
+    }
+    if ($AfterCreateHookResult -and $AfterCreateHookResult.enabled) {
+        $lines.Add([string]::Format('- workspace_bootstrap_ran: {0}', $AfterCreateHookResult.ran))
+        if ($AfterCreateHookResult.ran) {
+            $lines.Add([string]::Format('- workspace_bootstrap_exit_code: {0}', $AfterCreateHookResult.exit_code))
+            $lines.Add([string]::Format('- workspace_bootstrap_trigger: {0}', $AfterCreateHookResult.trigger))
+        }
+    }
     $lines.Add([string]::Format('- total_prompt_chars: {0}', $promptCharsTotal))
     $lines.Add([string]::Format('- total_footer_tokens: {0}', $footerTokensTotal))
     $lines.Add([string]::Format('- supervisor_only: {0}', $PolicyEvaluation.supervisor_only))
@@ -1123,7 +1815,7 @@ function New-RunSummaryText {
     foreach ($result in $Results) {
         $status = if ($result.succeeded) { "ok" } else { "failed" }
         $footerValue = if ($null -ne $result.footer_tokens_used) { $result.footer_tokens_used } else { "n/a" }
-        $lines.Add([string]::Format('- `{0}`: {1}; stage={2}; kind={3}; read_only={4}; full_auto={5}; model={6}; sandbox={7}; reasoning={8}; prompt_chars={9}; footer_tokens={10}',
+        $lines.Add([string]::Format('- `{0}`: {1}; stage={2}; kind={3}; read_only={4}; full_auto={5}; model={6}; sandbox={7}; reasoning={8}; prompt_chars={9}; footer_tokens={10}; workflow_mode={11}',
                 $result.name,
                 $status,
                 $result.stage,
@@ -1134,7 +1826,8 @@ function New-RunSummaryText {
                 $result.actual_sandbox,
                 $result.actual_reasoning_effort,
                 $result.prompt_chars,
-                $footerValue))
+                $footerValue,
+                $result.workflow_prompt_mode))
 
         if (-not [string]::IsNullOrWhiteSpace($result.last_message_preview)) {
             $lines.Add(("  preview: {0}" -f $result.last_message_preview))
@@ -1438,6 +2131,8 @@ function Complete-WorkerResult {
         prompt = $Run.prompt
         prompt_sha256 = $Run.prompt_sha256
         prompt_chars = $Run.prompt_chars
+        workflow_prompt_mode = $Run.workflow_prompt_mode
+        workflow_prompt_chars = $Run.workflow_prompt_chars
         command = $Run.command
         last_exists = (Test-Path -LiteralPath $Run.last)
         last_message_preview = Get-PreviewText -Text $lastText
@@ -1534,7 +2229,6 @@ $materialIssueStrategy = Get-NormalizedChoice `
     -AllowedValues @("none", "fixer_then_rereview") `
     -FieldName "material_issue_strategy"
 $resolvedCodexExecutable = Resolve-CommandPath -Executable $CodexExecutable
-$sharedDirectiveInfo = Get-SharedDirectiveInfo -Spec $spec -WorkspaceRoot $cwd -SpecDirectory $specDirectory
 $specHash = Get-TextHash -Text $specText
 
 if ($executionMode -notin @("parallel", "sequential")) {
@@ -1542,6 +2236,17 @@ if ($executionMode -notin @("parallel", "sequential")) {
 }
 
 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+$afterCreateHookInfo = Get-AfterCreateHookInfo -Spec $spec -WorkspaceRoot $cwd -OutputDir $outputDir
+$afterCreateHookResult = [pscustomobject]@{
+    enabled = [bool]$afterCreateHookInfo.enabled
+    ran = $false
+    trigger = $null
+    exit_code = $null
+    missing_sentinel_paths = @()
+    workspace_was_empty = $false
+    stdout = $afterCreateHookInfo.stdout
+    stderr = $afterCreateHookInfo.stderr
+}
 
 if ($debugLogFile) {
     $debugDirectory = Split-Path -Parent $debugLogFile
@@ -1558,11 +2263,71 @@ if ($debugLogFile) {
     Write-LauncherDebug ("cwd_resolution_base={0}" -f $cwdBaseDirectory)
     Write-LauncherDebug ("workspace_root={0}" -f $cwd)
     Write-LauncherDebug ("execution_mode={0}" -f $executionMode)
+    if ($afterCreateHookInfo.enabled) {
+        Write-LauncherDebug "after_create_hook_configured=True"
+    }
     Write-LauncherDebug ("write_run_archive={0}" -f $writeRunArchive)
     if ($archiveInfo.enabled) {
         Write-LauncherDebug ("archive_root={0}" -f $archiveInfo.root)
         Write-LauncherDebug ("archive_run_directory={0}" -f $archiveInfo.run_directory)
     }
+}
+
+if ($afterCreateHookInfo.enabled) {
+    $missingSentinelPaths = New-Object System.Collections.Generic.List[string]
+    foreach ($sentinelPath in @($afterCreateHookInfo.sentinel_paths)) {
+        if (-not (Test-Path -LiteralPath $sentinelPath)) {
+            $missingSentinelPaths.Add([string]$sentinelPath)
+        }
+    }
+
+    $workspaceWasEmpty = $false
+    if ($afterCreateHookInfo.if_workspace_empty) {
+        $workspaceWasEmpty = Test-DirectoryIsEmpty -Path $cwd
+    }
+
+    $triggerReasons = New-Object System.Collections.Generic.List[string]
+    if (@($missingSentinelPaths).Count -gt 0) {
+        $triggerReasons.Add("missing_sentinel_paths")
+    }
+    if ($workspaceWasEmpty) {
+        $triggerReasons.Add("workspace_empty")
+    }
+
+    $afterCreateHookResult = [pscustomobject]@{
+        enabled = $true
+        ran = (@($triggerReasons).Count -gt 0)
+        trigger = if (@($triggerReasons).Count -gt 0) { @($triggerReasons) -join "," } else { "skipped" }
+        exit_code = $null
+        missing_sentinel_paths = [string[]]$missingSentinelPaths.ToArray()
+        workspace_was_empty = $workspaceWasEmpty
+        stdout = $afterCreateHookInfo.stdout
+        stderr = $afterCreateHookInfo.stderr
+    }
+
+    Write-LauncherDebug ("after_create_hook_evaluated ran={0} trigger={1}" -f $afterCreateHookResult.ran, $afterCreateHookResult.trigger)
+    if ($afterCreateHookResult.ran) {
+        $hookRun = Invoke-PowerShellHook `
+            -Command $afterCreateHookInfo.command `
+            -RunCwd $cwd `
+            -StdoutPath $afterCreateHookInfo.stdout `
+            -StderrPath $afterCreateHookInfo.stderr
+        $afterCreateHookResult.exit_code = [int]$hookRun.exit_code
+        Write-LauncherDebug ("after_create_hook_exit_code={0}" -f $hookRun.exit_code)
+        if ($hookRun.exit_code -ne 0) {
+            throw "hooks.after_create failed with exit code $($hookRun.exit_code). See: $($hookRun.stderr)"
+        }
+    }
+}
+
+$sharedDirectiveInfo = Get-SharedDirectiveInfo -Spec $spec -WorkspaceRoot $cwd -SpecDirectory $specDirectory
+$workflowInfo = Get-WorkflowInfo -Spec $spec -WorkspaceRoot $cwd -SpecDirectory $specDirectory
+Write-LauncherDebug ("shared_directive_source={0}" -f $sharedDirectiveInfo.source)
+Write-LauncherDebug ("shared_directive_mode={0}" -f $sharedDirectiveInfo.effective_mode)
+if ($workflowInfo.enabled) {
+    Write-LauncherDebug ("workflow_file={0}" -f $workflowInfo.source)
+    Write-LauncherDebug ("workflow_prompt_mode={0}" -f $workflowInfo.prompt_mode)
+    Write-LauncherDebug ("workflow_auto_detected={0}" -f $workflowInfo.auto_detected)
 }
 
 $runs = @()
@@ -1645,9 +2410,18 @@ foreach ($agent in $spec.agents) {
         0
     }
 
+    $workflowRenderInfo = Get-AgentWorkflowRenderInfo `
+        -WorkflowInfo $workflowInfo `
+        -Agent $agent `
+        -WorkerName $name `
+        -WorkerKind $workerKind `
+        -Stage $stage `
+        -WorkerCwd $workerCwd `
+        -WorkspaceRoot $cwd
     $promptText = New-WorkerPrompt `
         -Agent $agent `
         -SharedDirectiveInfo $sharedDirectiveInfo `
+        -WorkflowRenderInfo $workflowRenderInfo `
         -PromptProfile $promptProfile `
         -ResponseStyle $responseStyle `
         -MaxResponseLines $maxResponseLines
@@ -1779,6 +2553,8 @@ foreach ($agent in $spec.agents) {
         prompt_profile = $promptProfile
         response_style = $responseStyle
         max_response_lines = $maxResponseLines
+        workflow_prompt_mode = $workflowRenderInfo.mode
+        workflow_prompt_chars = if ($workflowRenderInfo.text) { $workflowRenderInfo.text.Length } else { 0 }
         command = Join-ArgLine -Items (@($resolvedCodexExecutable) + $cmdArgs.ToArray())
         args = [string[]]$cmdArgs.ToArray()
         arg_line = Join-ArgLine -Items $cmdArgs.ToArray()
@@ -1833,7 +2609,7 @@ if (-not [string]::IsNullOrWhiteSpace($manifestDirectory)) {
 
 $manifest = [ordered]@{
     created_at_utc = (Get-Date).ToUniversalTime().ToString("o")
-    launcher_version = "2026-03-07-v4"
+    launcher_version = "2026-03-08-v5"
     launcher_script = $MyInvocation.MyCommand.Path
     spec_path = $specPathResolved
     spec_directory = $specDirectory
@@ -1859,6 +2635,20 @@ $manifest = [ordered]@{
         original_char_count = $sharedDirectiveInfo.original_char_count
         effective_char_count = $sharedDirectiveInfo.effective_char_count
     }
+    workflow = [ordered]@{
+        enabled = [bool]$workflowInfo.enabled
+        source = $workflowInfo.source
+        prompt_mode = $workflowInfo.prompt_mode
+        strict_render = $workflowInfo.strict_render
+        auto_detected = $workflowInfo.auto_detected
+        front_matter_text = $workflowInfo.front_matter_text
+        prompt_template_sha256 = if ($workflowInfo.prompt_template) { Get-TextHash -Text $workflowInfo.prompt_template } else { $null }
+        prompt_template_chars = if ($workflowInfo.prompt_template) { $workflowInfo.prompt_template.Length } else { 0 }
+        context = $workflowInfo.context
+    }
+    hooks = [ordered]@{
+        after_create = $afterCreateHookResult
+    }
     policy = $policyEvaluation
     efficiency_signals = $efficiencySignals
     stage_plan = $stagePlan
@@ -1880,6 +2670,8 @@ if ($writeSummaryFile) {
         -WorkspaceRoot $cwd `
         -ExecutionMode $executionMode `
         -SharedDirectiveInfo $sharedDirectiveInfo `
+        -WorkflowInfo $workflowInfo `
+        -AfterCreateHookResult $afterCreateHookResult `
         -Results $results `
         -ManifestPath $manifestFile `
         -PolicyEvaluation $policyEvaluation `
@@ -1899,6 +2691,8 @@ if ($archiveInfo.enabled) {
         -SummaryPath $summaryFile `
         -DebugLogPath $debugLogFile `
         -SharedDirectiveInfo $sharedDirectiveInfo `
+        -WorkflowInfo $workflowInfo `
+        -AfterCreateHookResult $afterCreateHookResult `
         -RequestedDeliverables $requestedDeliverables `
         -Results $results
     Write-LauncherDebug "archive_copy_completed"
@@ -1911,6 +2705,8 @@ $finalOutput = [pscustomobject]@{
     execution_mode = $executionMode
     workspace_root = $cwd
     output_dir = $outputDir
+    workflow = $manifest.workflow
+    hooks = $manifest.hooks
     policy = $policyEvaluation
     stage_plan = $stagePlan
     results = $results

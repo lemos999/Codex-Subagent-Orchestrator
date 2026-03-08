@@ -13,6 +13,7 @@ The parent should:
 
 - treat `/sub <request>` as an orchestration entrypoint
 - classify the task
+- decide whether `/sub` should resolve to a one-off team run or a queue run
 - decide whether subagents are justified
 - autonomously choose team size and team shape
 - choose the smallest useful skill set
@@ -28,6 +29,7 @@ The parent should:
 - Read `references/sub-command-protocol.md` when the user request starts with `/sub`.
 - Read `references/spec-format.md` when you need the launcher input format or want to create a reusable worker-team spec.
 - Read `references/testing-playbook.md` when you need to validate the launcher itself or prepare a reproducible handoff to another session.
+- Read `references/queue-runner.md` when you need tracker polling, issue workspaces, or a Symphony-lite unattended supervisor loop.
 - Use `scripts/start-codex-subagent-team.ps1` when you want deterministic local execution of one or more workers from a JSON spec.
 
 ## Operating Rules
@@ -35,6 +37,9 @@ The parent should:
 - Keep the parent responsible for decomposition, acceptance criteria, and rollback thinking.
 - Keep the parent out of requested deliverable-file edits whenever a bounded worker can do the work instead.
 - Treat the text after `/sub` as the actual user request.
+- Route `/sub` automatically:
+  - choose the team launcher for finite work such as "fix this bug", "implement this file", "work this one ticket", or "review these changes"
+  - choose the queue runner for ongoing work such as "keep processing queue.json", "watch the tasks folder", "run unattended", "poll for new issues", or "handle all matching tasks in the background"
 - Keep each worker focused on one bounded deliverable.
 - Use the workspace `AGENTS.md` as the primary shared operating contract when it exists.
 - Inject the shared principal-engineer operating contract into every worker, but do not duplicate long instructions unless the worker genuinely needs them.
@@ -106,3 +111,10 @@ Use `scripts/start-codex-subagent-team.ps1` with a JSON spec when:
 - you want prompt files, `last.txt`, and a manifest for later supervision or forensics
 
 If the request is simple enough, you may still invoke `codex exec` directly without the launcher.
+
+Use `scripts/start-codex-subagent-queue.ps1` with a queue config when:
+
+- the user wants one `/sub` request to keep processing multiple issues over time
+- the user wants local backlog polling or background issue dispatch
+- the work should continue unattended until the queue is drained or stopped
+- each issue should get its own workspace and per-issue launcher evidence

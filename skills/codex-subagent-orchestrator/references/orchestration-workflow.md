@@ -39,6 +39,7 @@ If the user starts with `/sub`, treat that as an explicit instruction to use thi
 Determine:
 
 - whether the request entered through `/sub`
+- whether `/sub` implies `team mode` or `queue mode`
 - task type
 - required files
 - writable scope
@@ -46,7 +47,11 @@ Determine:
 - risk level
 - whether workers can run in parallel
 
+Route to `queue mode` when the request implies repeated polling, background work, unattended local backlog execution, or unattended tracker execution. Otherwise route to `team mode`.
+
 ### 2. Choose the team shape
+
+This stage applies only after the parent has chosen `team mode`.
 
 Use one worker for:
 
@@ -198,6 +203,15 @@ Use `scripts/start-codex-subagent-team.ps1` for:
 - a run archive with copied launcher files, deliverables, and per-worker evidence folders
 - stage-based mixed parallel execution where workers in the same stage run together and later stages wait
 - preflight validation that reviewers remain read-only and that the last writable worker is followed by a final read-only review when the spec requires it
+- workflow-driven issue execution where `WORKFLOW.md` and `AGENTS.md` are auto-detected after a bootstrap hook creates the workspace
+
+Use `scripts/start-codex-subagent-queue.ps1` when:
+
+- work should be pulled from a tracker instead of being launched manually one spec at a time
+- the work source is a local `queue.json` or `tasks/` directory rather than a chat message
+- you want one workspace per issue
+- you want bounded concurrent issue dispatch over the existing launcher
+- you want queue state, retries, and per-issue launcher evidence preserved on disk
 
 If the launcher path fails and the parent pivots to direct `codex exec`, preserve the intended cost controls on the fallback path:
 
@@ -205,6 +219,19 @@ If the launcher path fails and the parent pivots to direct `codex exec`, preserv
 - pass `-m` explicitly when model choice matters
 - pass `-c 'model_reasoning_effort="low"'` for routine workers unless the task risk justifies more
 - keep `-o` enabled so the worker's final message is preserved
+
+### 6A. Launch queue mode
+
+Use `scripts/start-codex-subagent-queue.ps1` when the parent classified the request as ongoing tracker work.
+
+Queue-mode parent responsibilities:
+
+- build a queue config instead of a one-shot worker spec
+- point tracker config at a local `queue.json`, local `tasks/` directory, or an optional external adapter
+- set one workspace root for issue-specific workspaces
+- set `hooks.after_create` for workspace bootstrap
+- let the downstream launcher auto-detect `AGENTS.md` and `WORKFLOW.md` from the created workspace
+- preserve queue state, queue report, and per-issue launcher outputs for audit
 
 ### 7. Validate results
 

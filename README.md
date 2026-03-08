@@ -89,6 +89,11 @@ The repository includes reusable JSON specs under `skills/codex-subagent-orchest
 - `implementer-reviewer.template.json`: one implementer followed by a read-only reviewer
 - `parallel-implementers-reviewer.template.json`: two parallel implementers followed by a read-only reviewer
 - `nested-root-safety.template.json`: workspace root resolution and nested-run safety validation
+- `workflow-issue.template.json`: a Symphony-style `WORKFLOW.md` issue run while keeping the existing launcher command
+- `queue-local-json.template.json`: a local `queue.json` backlog for unattended `/sub` queue runs
+- `queue-local-files.template.json`: a local `tasks/` directory queue for unattended `/sub` queue runs
+- `queue-mock.template.json`: a local mock-tracker queue config for end-to-end Symphony-lite runs
+- `queue-linear.template.json`: an optional Linear-backed queue config for unattended issue polling
 
 These templates are intended as launcher and workflow examples, not domain examples such as crawlers or games.
 
@@ -114,6 +119,15 @@ Top-level fields commonly used in a spec:
 - `material_issue_strategy`
 - `defaults`
 - `agents`
+
+Symphony-inspired workflow fields are also supported:
+
+- `workflow_file`
+- `workflow_prompt_mode`
+- `workflow_context`
+- `workflow_context_file`
+- `workflow_render_strict`
+- `hooks.after_create`
 
 For deliverable-oriented `/sub` workflows, prefer:
 
@@ -164,6 +178,51 @@ A healthy run typically produces:
 - an optional per-run archive with copied deliverables and worker evidence
 
 By default, examples write outputs under `subagent-runs/`.
+
+## Symphony Compatibility
+
+The launcher can now absorb the repo-owned workflow contract idea from `openai/symphony` without changing the user-facing command shape.
+
+- Keep using `/sub` in chat and `start-codex-subagent-team.ps1 -SpecPath ...` in PowerShell.
+- Point `workflow_file` at a `WORKFLOW.md` file and pass issue data through `workflow_context` or `workflow_context_file`.
+- The launcher renders `{{ issue.* }}` variables and `{% if attempt %}...{% endif %}` blocks before composing each worker prompt.
+- Use `hooks.after_create` plus sentinel paths when you want a one-shot workspace bootstrap similar to Symphony's workspace creation hook.
+
+This is intentionally not a long-running tracker poller. It imports the in-repo workflow contract and bootstrap pattern while keeping the current supervisor/worker model.
+
+## Symphony-Lite Queue Runner
+
+The repository now also includes a queue runner for unattended issue dispatch:
+
+```powershell
+& ".\skills\codex-subagent-orchestrator\scripts\start-codex-subagent-queue.ps1" `
+  -ConfigPath ".\queue-local-json.json" `
+  -AsJson
+```
+
+What it does:
+
+- polls a local `queue.json`, a local `tasks/` directory, or an optional external tracker adapter
+- creates one workspace per issue
+- uses `hooks.after_create` to bootstrap missing workspaces
+- auto-detects `AGENTS.md` and `WORKFLOW.md` after bootstrap
+- generates one launcher spec per issue
+- launches the existing team runner with bounded concurrency
+- writes `queue-state.json`, `queue-report.md`, per-issue manifests, summaries, and worker evidence
+- skips redispatching unchanged tasks that already completed successfully
+
+This still keeps the current command family. The queue runner is a thin supervisor above the existing launcher, not a separate orchestration stack.
+
+## `/sub` Routing
+
+`/sub` is intended to stay the only chat command.
+
+From the skill contract:
+
+- if the request is a one-off bounded task, `/sub` should route to the team launcher path
+- if the request means "keep watching", "run unattended", "drain queue.json", "watch a tasks folder", or "handle tracker work over time", `/sub` should route to the queue runner path
+
+That means the user should not need separate chat commands such as `/sub-team` or `/sub-queue`. The parent Codex instance is expected to decide automatically from context.
 
 ## How the Skill Is Intended to Work
 

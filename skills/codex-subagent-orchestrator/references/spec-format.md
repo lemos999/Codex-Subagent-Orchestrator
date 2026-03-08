@@ -31,6 +31,25 @@ Use this format when you want repeatable worker orchestration with per-worker se
   "require_final_read_only_review": true,
   "material_issue_strategy": "fixer_then_rereview",
   "shared_directive_mode": "reference",
+  "workflow_file": "WORKFLOW.md",
+  "workflow_auto_detect": true,
+  "workflow_prompt_mode": "prepend",
+  "workflow_context": {
+    "attempt": 1,
+    "issue": {
+      "identifier": "ABC-123",
+      "title": "Fix flaky test",
+      "description": "The CI test is intermittently failing."
+    }
+  },
+  "workflow_render_strict": true,
+  "hooks": {
+    "after_create": "git clone --depth 1 https://github.com/your-org/your-repo.git .",
+    "after_create_sentinel_paths": [
+      ".git",
+      "README.md"
+    ]
+  },
   "defaults": {
     "model": "gpt-5.4",
     "sandbox": "workspace-write",
@@ -76,6 +95,13 @@ Use this format when you want repeatable worker orchestration with per-worker se
 | `shared_directive_text` | no | Inline shared directive text when you do not want to use `AGENTS.md` |
 | `inject_shared_directive` | no | Disable shared directive injection entirely when false |
 | `shared_directive_mode` | no | `full`, `compact`, `reference`, or `disabled`; defaults to `full` |
+| `workflow_file` | no | Optional `WORKFLOW.md`-style prompt template file to render into each worker prompt |
+| `workflow_auto_detect` | no | When true, the launcher will also look for `WORKFLOW.md` in the workspace root after bootstrap; defaults to `true` |
+| `workflow_prompt_mode` | no | `prepend`, `replace`, or `disabled`; controls how rendered workflow text combines with worker `prompt` or `task` |
+| `workflow_context` | no | Inline JSON object exposed to the workflow template, typically with keys such as `issue` and `attempt` |
+| `workflow_context_file` | no | Path to a JSON file merged into `workflow_context` before rendering |
+| `workflow_render_strict` | no | When true, missing `{{ variable }}` references fail the run; defaults to `true` |
+| `hooks` | no | Optional launcher-side hook object, currently supporting `after_create` bootstrap behavior |
 | `defaults` | no | Default worker settings |
 | `agents` | yes | Array of worker definitions |
 
@@ -94,6 +120,48 @@ Supported fields:
 - `max_response_lines`
 
 Defaults are merged into each worker unless the worker overrides them.
+
+## Workflow Fields
+
+These fields let the launcher absorb the repo-owned workflow contract pattern from Symphony while keeping the existing launcher command.
+
+- `workflow_file` loads a `WORKFLOW.md`-style file.
+- When `workflow_file` is omitted and `workflow_auto_detect` is true, the launcher looks for `WORKFLOW.md` in the workspace root and then in the spec directory.
+- The launcher ignores YAML front matter operationally, but preserves it in the manifest for audit.
+- The Markdown body is treated as the prompt template.
+- Supported template forms are:
+  - `{{ issue.identifier }}`
+  - `{{ attempt }}`
+  - `{% if attempt %}...{% else %}...{% endif %}`
+- `workflow_prompt_mode: "prepend"` keeps the worker's own `task` or `prompt` and adds the rendered workflow text above it.
+- `workflow_prompt_mode: "replace"` uses the rendered workflow text as the task body for that worker.
+
+Top-level `workflow_context` is merged first, then agent-level `workflow_context_file`, then agent-level `workflow_context`. The launcher also injects:
+
+- `agent.name`
+- `agent.kind`
+- `agent.stage`
+- `agent.cwd`
+- `run.worker_name`
+- `run.worker_kind`
+- `run.stage`
+- `run.worker_cwd`
+- `run.workspace_root`
+
+If you want to carry tracker payloads from another system, prefer writing them to a JSON file and pointing `workflow_context_file` at it.
+
+## Hook Fields
+
+The optional top-level `hooks` object currently supports a Symphony-style one-shot bootstrap:
+
+- `after_create`: PowerShell command to run before workers when bootstrap is needed
+- `after_create_sentinel_paths`: if any listed path is missing, the hook runs
+- `after_create_if_workspace_empty`: when true, the hook also runs if the workspace root has no files
+- `after_create_stdout_file`: optional path for captured stdout
+- `after_create_stderr_file`: optional path for captured stderr
+
+If no sentinel paths are provided, `after_create` defaults to running only when the workspace is empty.
+After `after_create` finishes, the launcher re-reads `AGENTS.md` and `WORKFLOW.md` from the workspace before composing worker prompts.
 
 Recommended default split:
 
@@ -144,6 +212,9 @@ Optional fields:
 - `response_style`
 - `max_response_lines`
 - `output_last_message_file`
+- `workflow_prompt_mode`
+- `workflow_context`
+- `workflow_context_file`
 - `stop_when`
 - `extra_args`
 
@@ -370,6 +441,8 @@ When `write_summary_file` is true, the launcher also writes one compact summary 
 - structure-first efficiency signals such as workers-per-deliverable and bounded-repair coverage
 - stage counts and max parallel workers per stage
 - shared directive compression details
+- workflow template metadata and rendered context inputs
+- workspace bootstrap hook decisions and exit status
 - one short line per worker for parent-side handoff
 
 If `debug_log_file` is set, the launcher also writes a lightweight trace of parent-side orchestration events such as process start, timeout, result collection, and manifest write.
@@ -397,6 +470,10 @@ When `write_run_archive` is true, the launcher also creates a per-run archive un
 ## Practical Guidance
 
 - Use `/sub` as the user-facing trigger for this orchestration model.
+- Use `workflow_file` when you want the repository to version the ticket-handling prompt in `WORKFLOW.md`.
+- Keep tracker-derived issue data outside the prompt text itself; pass it through `workflow_context` or `workflow_context_file`.
+- Use `workflow_prompt_mode: "prepend"` for implementers and reviewers that still need worker-local constraints such as writable scope and validation.
+- Use `hooks.after_create` only for idempotent bootstrap steps such as `git clone ... .` or dependency fetches.
 - For mixed parallel-and-review teams, put independent builders in the same `stage` and put the reviewer or validator in a later stage.
 - The top-level `cwd` resolves relative to the launcher's current working directory by default. This keeps `cwd: "."` portable even when the spec file itself lives under `subagent-runs/...`.
 - Set `cwd_resolution: "spec"` only when you intentionally want the top-level `cwd` to resolve relative to the spec file directory.
