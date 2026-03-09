@@ -154,7 +154,7 @@ If you want to carry tracker payloads from another system, prefer writing them t
 
 The optional top-level `hooks` object currently supports a Symphony-style one-shot bootstrap:
 
-- `after_create`: PowerShell command to run before workers when bootstrap is needed
+- `after_create`: PowerShell command to run before workers when bootstrap is needed; the launcher executes it with the current PowerShell host (`pwsh` on Linux/macOS, PowerShell on Windows)
 - `after_create_sentinel_paths`: if any listed path is missing, the hook runs
 - `after_create_if_workspace_empty`: when true, the hook also runs if the workspace root has no files
 - `after_create_stdout_file`: optional path for captured stdout

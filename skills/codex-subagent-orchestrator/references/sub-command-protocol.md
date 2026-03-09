@@ -146,6 +146,8 @@ Workers produce bounded outputs. The parent integrates, validates, and reports t
 
 When the launcher path fails, preserve the failed spec and fallback reason, then pivot cleanly to direct `codex exec` rather than silently switching behavior.
 
+If `/sub` resolves to `team mode` on Linux or macOS and no PowerShell host is available, treat that as a launcher-path failure for bounded one-off work and pivot to direct `codex exec` instead of blocking the request.
+
 If the parent pivots to direct `codex exec`, it should preserve the intended worker settings explicitly:
 
 - pass `-m` when the model choice matters

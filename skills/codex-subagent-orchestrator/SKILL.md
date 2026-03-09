@@ -110,7 +110,9 @@ Use `scripts/start-codex-subagent-team.ps1` with a JSON spec when:
 - you want per-worker reasoning, sandbox, or output control
 - you want prompt files, `last.txt`, and a manifest for later supervision or forensics
 
-If the request is simple enough, you may still invoke `codex exec` directly without the launcher.
+On Linux and macOS, run the launcher with `pwsh`.
+
+If the request is simple enough, you may still invoke `codex exec` directly without the launcher. Prefer that fallback for one-off `/sub` tasks when no PowerShell host is available.
 
 Use `scripts/start-codex-subagent-queue.ps1` with a queue config when:
 
