@@ -9,6 +9,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$script:IsWindowsPlatform = [System.IO.Path]::DirectorySeparatorChar -eq '\'
 
 $FallbackPrincipalEngineerDirective = @'
 You are a principal software engineer, reviewer, and production architect whose goal is to turn every request into code that improves code health, not merely code that runs once. For each task, infer the real objective, runtime environment, interfaces, invariants, data model, trust boundaries, failure modes, concurrency risks, performance limits, rollback needs, then choose the smallest design that fully solves problem without decorative abstraction. Favor clear names, explicit control flow, narrow public surfaces, cohesive modules, visible state, boundary validation, safe defaults, precise errors, and behavior that stays predictable under retries, timeouts, malformed input, partial failure, and load. Follow local conventions first, use idiomatic tooling, prefer the standard library and proven dependencies, preserve behavior during refactoring, and separate structural cleanup from behavior change when practical. Build security, observability, and operability into the code through least privilege, secret-safe handling, logs, metrics, traces, health signals, and graceful failure. Write tests around observable behavior, edge cases, regressions, and critical contracts. When details are missing, state the smallest safe assumption and continue. Before finalizing, run a silent senior review for correctness, simplicity, maintainability, security, performance, and rollback safety, then present brief assumptions and design intent, complete code, tests, and concise verification notes.
@@ -153,6 +154,55 @@ function Resolve-CommandPath {
     }
 
     return $normalized
+}
+
+function Resolve-PowerShellHost {
+    $currentProcessPath = $null
+    try {
+        $currentProcessPath = Get-Process -Id $PID -ErrorAction Stop | Select-Object -ExpandProperty Path -First 1
+    } catch {
+        $currentProcessPath = $null
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($currentProcessPath)) {
+        return [string]$currentProcessPath
+    }
+
+    $candidates = if ($script:IsWindowsPlatform) {
+        @("powershell.exe", "pwsh.exe", "pwsh", "powershell")
+    } else {
+        @("pwsh", "powershell")
+    }
+
+    foreach ($candidate in $candidates) {
+        try {
+            return Resolve-CommandPath -Executable $candidate
+        } catch {
+            continue
+        }
+    }
+
+    throw "Unable to find a PowerShell host. Install PowerShell (`pwsh` on Linux/macOS) or run from PowerShell on Windows."
+}
+
+function Get-PowerShellHostArguments {
+    param([string[]]$AdditionalArguments)
+
+    $arguments = New-Object System.Collections.Generic.List[string]
+    $arguments.Add("-NoProfile")
+
+    if ($script:IsWindowsPlatform) {
+        $arguments.Add("-ExecutionPolicy")
+        $arguments.Add("Bypass")
+    }
+
+    foreach ($entry in @($AdditionalArguments)) {
+        if ($null -ne $entry) {
+            $arguments.Add([string]$entry)
+        }
+    }
+
+    return [string[]]$arguments.ToArray()
 }
 
 function Quote-Arg {
@@ -796,9 +846,11 @@ function Invoke-PowerShellHook {
 
     $encodedCommand = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($Command))
     try {
+        $powerShellHost = Resolve-PowerShellHost
+        $powerShellArgs = Get-PowerShellHostArguments -AdditionalArguments @("-EncodedCommand", $encodedCommand)
         $process = Start-Process `
-            -FilePath "powershell.exe" `
-            -ArgumentList "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encodedCommand" `
+            -FilePath $powerShellHost `
+            -ArgumentList (Join-ArgLine -Items $powerShellArgs) `
             -WorkingDirectory $RunCwd `
             -RedirectStandardOutput $StdoutPath `
             -RedirectStandardError $StderrPath `
@@ -995,7 +1047,7 @@ function Find-SessionLogPath {
         return $null
     }
 
-    $sessionsRoot = Join-Path $HOME ".codex\sessions"
+    $sessionsRoot = Join-Path (Join-Path $HOME ".codex") "sessions"
     if (-not (Test-Path -LiteralPath $sessionsRoot)) {
         return $null
     }

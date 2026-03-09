@@ -13,6 +13,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$script:IsWindowsPlatform = [System.IO.Path]::DirectorySeparatorChar -eq '\'
 
 function Get-OptionalProperty {
     param(
@@ -168,6 +169,55 @@ function Resolve-CommandPath {
     }
 
     return $normalized
+}
+
+function Resolve-PowerShellHost {
+    $currentProcessPath = $null
+    try {
+        $currentProcessPath = Get-Process -Id $PID -ErrorAction Stop | Select-Object -ExpandProperty Path -First 1
+    } catch {
+        $currentProcessPath = $null
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($currentProcessPath)) {
+        return [string]$currentProcessPath
+    }
+
+    $candidates = if ($script:IsWindowsPlatform) {
+        @("powershell.exe", "pwsh.exe", "pwsh", "powershell")
+    } else {
+        @("pwsh", "powershell")
+    }
+
+    foreach ($candidate in $candidates) {
+        try {
+            return Resolve-CommandPath -Executable $candidate
+        } catch {
+            continue
+        }
+    }
+
+    throw "Unable to find a PowerShell host. Install PowerShell (`pwsh` on Linux/macOS) or run from PowerShell on Windows."
+}
+
+function Get-PowerShellHostArguments {
+    param([string[]]$AdditionalArguments)
+
+    $arguments = New-Object System.Collections.Generic.List[string]
+    $arguments.Add("-NoProfile")
+
+    if ($script:IsWindowsPlatform) {
+        $arguments.Add("-ExecutionPolicy")
+        $arguments.Add("Bypass")
+    }
+
+    foreach ($entry in @($AdditionalArguments)) {
+        if ($null -ne $entry) {
+            $arguments.Add([string]$entry)
+        }
+    }
+
+    return [string[]]$arguments.ToArray()
 }
 
 function Get-SafePathSegment {
@@ -1282,10 +1332,8 @@ function Start-IssueProcess {
     $stdoutPath = Resolve-AbsolutePath -Path (Join-Path $logRoot "launcher.stdout.log") -BaseDirectory $logRoot -AllowMissing
     $stderrPath = Resolve-AbsolutePath -Path (Join-Path $logRoot "launcher.stderr.log") -BaseDirectory $logRoot -AllowMissing
 
-    $args = @(
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
+    $powerShellHost = Resolve-PowerShellHost
+    $args = Get-PowerShellHostArguments -AdditionalArguments @(
         "-File",
         $QueueConfig.launcher_script,
         "-SpecPath",
@@ -1296,7 +1344,7 @@ function Start-IssueProcess {
     )
 
     $process = Start-Process `
-        -FilePath "powershell.exe" `
+        -FilePath $powerShellHost `
         -ArgumentList (Join-ArgLine -Items $args) `
         -WorkingDirectory $QueueConfig.config_directory `
         -RedirectStandardOutput $stdoutPath `

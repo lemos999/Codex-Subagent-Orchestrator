@@ -30,7 +30,7 @@ It is designed for tasks where the parent should stay in supervisor mode, split 
 ## Requirements
 
 - A Codex environment with `codex exec` available on `PATH`
-- PowerShell
+- PowerShell (`pwsh` on Linux/macOS, Windows PowerShell or `pwsh` on Windows)
 - A workspace where local skills under `./skills` are supported
 
 This repository is already arranged as a Codex workspace. The root `AGENTS.md` wires `/sub` requests to the local orchestrator skill.
@@ -70,6 +70,14 @@ Copy-Item `
 
 & ".\skills\codex-subagent-orchestrator\scripts\start-codex-subagent-team.ps1" `
   -SpecPath ".\minimal-write.json" `
+  -AsJson
+```
+
+On Ubuntu or other Linux environments, run the same launcher with `pwsh`:
+
+```bash
+pwsh -File ./skills/codex-subagent-orchestrator/scripts/start-codex-subagent-team.ps1 \
+  -SpecPath ./skills/codex-subagent-orchestrator/assets/spec-templates/minimal-write.template.json \
   -AsJson
 ```
 
@@ -223,6 +231,8 @@ From the skill contract:
 - if the request means "keep watching", "run unattended", "drain queue.json", "watch a tasks folder", or "handle tracker work over time", `/sub` should route to the queue runner path
 
 That means the user should not need separate chat commands such as `/sub-team` or `/sub-queue`. The parent Codex instance is expected to decide automatically from context.
+
+On Linux and macOS, `/sub` should prefer the launcher path when `pwsh` is available. If the task is a bounded one-off request and no PowerShell host is available, the parent should fall back to direct `codex exec` rather than fail the `/sub` request outright.
 
 ## How the Skill Is Intended to Work
 
