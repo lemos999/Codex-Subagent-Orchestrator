@@ -14,7 +14,8 @@
   "supervisor_only": true,
   "require_final_read_only_review": true,
   "material_issue_strategy": "fixer_then_rereview",
-  "shared_directive_mode": "reference",
+  "shared_directive_mode": "hybrid",
+  "persona_guide_mode": "dynamic",
   "defaults": {
     "model": "gpt-5.4",
     "reasoning_effort": "low",

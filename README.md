@@ -41,6 +41,8 @@ These files keep token use down by replacing repeated chat retellings with stabl
 ```text
 .
 |-- AGENTS.md
+|-- scripts/
+|   `-- package-deploy.ps1
 `-- skills/
     |-- codex-parent-session-orchestrator/
     |   |-- SKILL.md
@@ -156,6 +158,22 @@ The legacy launcher command is unchanged:
   -SpecPath ".\your-spec.json" `
   -AsJson
 ```
+
+When a `/sub` spec omits `shared_directive_mode`, the launcher now defaults to a hybrid policy:
+
+- `implementer` and `fixer` workers get the full shared directive
+- `reviewer`, `validator`, `planner`, and read-only `custom` workers get the compact shared directive
+
+`/sub` also supports a distilled persona layer. `persona_guide_mode: "dynamic"` now compiles a task-specific zero-shot working persona from the built-in guide, so workers infer the smallest fitting expert blend from the request instead of replaying large persona source files. Use `compact` when you want the raw guide injected as-is, `reference` when you want workers to reopen the guide file themselves, and `disabled` when you want no persona overlay.
+
+## Guardrails
+
+Use the guardrails below to avoid the mistakes that showed up during optimization and benchmarking:
+
+- build deployment zips with `.\scripts\package-deploy.ps1` instead of manual staging; it uses an allowlist and rejects benchmark/test artifacts
+- keep `/sub` benchmarks rooted at the real repo workspace; the benchmark runner now refuses to run if `AGENTS.md` or `./skills` are missing
+- score worker quality from `last.txt`, reviewer JSON, manifest metadata, and footer tokens first
+- treat Windows PowerShell `stderr` as diagnostic only, because encoding can be lossy even when the worker run is valid
 
 ## Documentation Map
 

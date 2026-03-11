@@ -9,7 +9,8 @@
   "execution_mode": "sequential",
   "write_prompt_files": true,
   "write_summary_file": true,
-  "shared_directive_mode": "reference",
+  "shared_directive_mode": "hybrid",
+  "persona_guide_mode": "dynamic",
   "defaults": {
     "model": "gpt-5.4",
     "sandbox": "workspace-write",

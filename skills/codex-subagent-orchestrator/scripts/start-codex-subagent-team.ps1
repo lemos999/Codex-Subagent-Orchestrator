@@ -15,12 +15,7 @@ You are a principal software engineer, reviewer, and production architect whose 
 '@
 
 $CompactPrincipalEngineerDirective = @'
-Use a compact engineering contract for this run:
-- keep scope narrow and follow local conventions
-- prefer the smallest safe change over decorative abstraction
-- validate observable behavior and critical contracts
-- do not modify unrelated files
-- return a brief summary with concrete verification
+You are a principal engineer, reviewer, and production architect optimizing for long-term code health. Infer the real objective and operating envelope: runtime, interfaces, invariants, model, trust boundaries, failure, concurrency, performance, and rollback. Solve with the smallest complete design, not decorative abstraction. Prefer clear naming, explicit flow, narrow surfaces, cohesive modules, visible state, validated boundaries, safe defaults, precise errors, and predictable behavior under retries, timeouts, malformed input, partial failure, and load. Follow local conventions, idiomatic tooling, standard library first, proven dependencies next; preserve behavior in refactors and separate cleanup from behavior change. Build in least privilege, secret-safe handling, logs, metrics, traces, health signals, and graceful failure. Test observable behavior, edge cases, regressions, and critical contracts. Stay within assigned scope, do not modify unrelated files, state the smallest safe assumption when needed, and finish with concise verification.
 '@
 
 $script:LauncherDebugPath = $null
@@ -1112,6 +1107,7 @@ function Export-RunArchiveContent {
         [string]$SummaryPath,
         [string]$DebugLogPath,
         $SharedDirectiveInfo,
+        $PersonaGuideInfo,
         $WorkflowInfo,
         $AfterCreateHookResult,
         [string[]]$RequestedDeliverables,
@@ -1148,6 +1144,11 @@ function Export-RunArchiveContent {
         $sharedDirectiveLeaf = Split-Path -Leaf $SharedDirectiveInfo.source
         $sharedDirectiveDestination = Join-Path $ArchiveInfo.supervisor_directory ("shared-directive-source-{0}" -f $sharedDirectiveLeaf)
         Copy-ExistingFile -SourcePath $SharedDirectiveInfo.source -DestinationPath $sharedDirectiveDestination | Out-Null
+    }
+    if ($PersonaGuideInfo -and -not [string]::IsNullOrWhiteSpace($PersonaGuideInfo.source) -and (Test-Path -LiteralPath $PersonaGuideInfo.source)) {
+        $personaGuideLeaf = Split-Path -Leaf $PersonaGuideInfo.source
+        $personaGuideDestination = Join-Path $ArchiveInfo.supervisor_directory ("persona-guide-source-{0}" -f $personaGuideLeaf)
+        Copy-ExistingFile -SourcePath $PersonaGuideInfo.source -DestinationPath $personaGuideDestination | Out-Null
     }
     if ($WorkflowInfo -and $WorkflowInfo.enabled -and -not [string]::IsNullOrWhiteSpace($WorkflowInfo.source) -and (Test-Path -LiteralPath $WorkflowInfo.source)) {
         Copy-ExistingFile -SourcePath $WorkflowInfo.source -DestinationPath (Join-Path $ArchiveInfo.supervisor_directory (Split-Path -Leaf $WorkflowInfo.source)) | Out-Null
@@ -1267,6 +1268,555 @@ function Get-DirectiveReferenceText {
     return ("Read and follow the shared directive file before editing: {0}" -f $Source)
 }
 
+function Get-DefaultPersonaGuidePath {
+    $candidate = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\references\subagent-persona-guide.md"))
+    if (-not (Test-Path -LiteralPath $candidate)) {
+        throw "Built-in persona guide is missing: $candidate"
+    }
+
+    return $candidate
+}
+
+function Get-PersonaGuideReferenceText {
+    param([string]$Source)
+
+    if ([string]::IsNullOrWhiteSpace($Source) -or $Source -eq "spec.persona_guide_text") {
+        return "Derive the smallest task-appropriate working persona from the persona guide already supplied. Keep it implicit, practical, and non-theatrical."
+    }
+
+    return ("Read the persona guide before acting if it will sharpen judgment: {0}. Derive only the smallest task-appropriate working persona, keep it implicit, and do not roleplay it." -f $Source)
+}
+
+function Join-NaturalLanguageList {
+    param([string[]]$Items)
+
+    $values = @()
+    foreach ($item in @($Items)) {
+        if (-not [string]::IsNullOrWhiteSpace($item)) {
+            $values += ([string]$item).Trim()
+        }
+    }
+
+    $values = @($values | Select-Object -Unique)
+    if ($values.Count -eq 0) {
+        return ""
+    }
+
+    if ($values.Count -eq 1) {
+        return $values[0]
+    }
+
+    if ($values.Count -eq 2) {
+        return ("{0} and {1}" -f $values[0], $values[1])
+    }
+
+    return ((@($values[0..($values.Count - 2)]) -join ", ") + ", and " + $values[$values.Count - 1])
+}
+
+function Get-AgentPersonaContextText {
+    param($Agent)
+
+    $parts = New-Object System.Collections.Generic.List[string]
+
+    foreach ($fieldName in @("role", "mission", "task", "prompt")) {
+        $value = Get-OptionalProperty $Agent $fieldName
+        if (-not [string]::IsNullOrWhiteSpace([string]$value)) {
+            $parts.Add(([string]$value).Trim())
+        }
+    }
+
+    foreach ($fieldName in @("success_criteria", "coordination_notes", "return_contract", "stop_when")) {
+        foreach ($item in Get-StringList (Get-OptionalProperty $Agent $fieldName)) {
+            if (-not [string]::IsNullOrWhiteSpace($item)) {
+                $parts.Add($item.Trim())
+            }
+        }
+    }
+
+    foreach ($fieldName in @("read_first", "required_paths", "required_non_empty_paths", "writable_scope")) {
+        foreach ($item in Get-StringList (Get-OptionalProperty $Agent $fieldName)) {
+            if (-not [string]::IsNullOrWhiteSpace($item)) {
+                $parts.Add((Split-Path -Leaf $item).Trim())
+            }
+        }
+    }
+
+    return ($parts -join [Environment]::NewLine)
+}
+
+function Get-KeywordMatchCount {
+    param(
+        [string]$Text,
+        [string[]]$Patterns
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Text) -or -not $Patterns) {
+        return 0
+    }
+
+    $score = 0
+    foreach ($pattern in $Patterns) {
+        if ([string]::IsNullOrWhiteSpace($pattern)) {
+            continue
+        }
+
+        if ([regex]::IsMatch($Text, $pattern)) {
+            $score += 1
+        }
+    }
+
+    return $score
+}
+
+function Get-PersonaDomainCatalog {
+    return @(
+        [pscustomobject]@{
+            id = "frontend"
+            label = "frontend product engineer"
+            guidance = "Favor accessible interaction, responsive layout, browser correctness, clear component state, and implementation-ready polish."
+            patterns = @('\bfront[\s-]?end\b', '\bhtml\b', '\bcss\b', '\bdom\b', '\bbrowser\b', '\breact\b', '\bvue\b', '\bsvelte\b', '\bnext(?:\.js)?\b', '\bcomponent\b', '\btsx\b', '\bjsx\b', '\bresponsive\b', '\bui\b')
+        }
+        [pscustomobject]@{
+            id = "design"
+            label = "visual interaction designer"
+            guidance = "Protect hierarchy, typography, spacing, contrast, motion restraint, and a visual system that feels intentional rather than generic."
+            patterns = @('\bdesign\b', '\bvisual\b', '\btypography\b', '\bcolor\b', '\bpalette\b', '\bspacing\b', '\blayout\b', '\bhero\b', '\bbrand\b', '\bfigma\b', '\bwireframe\b', '\bmockup\b', '\banimation\b', '\bmotion\b', '\bux\b')
+        }
+        [pscustomobject]@{
+            id = "game"
+            label = "gameplay interaction designer"
+            guidance = "Preserve feedback loops, rule clarity, pacing, difficulty signaling, and game feel that stays readable under repeated play."
+            patterns = @('\bgame\b', '\bgameplay\b', '\bscore\b', '\blevel\b', '\bplayer\b', '\bmine(?:sweeper)?\b', '\bdifficulty\b', '\bgame over\b', '\bleaderboard\b', '\bwin\b', '\blose\b')
+        }
+        [pscustomobject]@{
+            id = "backend"
+            label = "backend systems engineer"
+            guidance = "Think in contracts, idempotency, concurrency, state transitions, explicit failure handling, and rollback-safe behavior."
+            patterns = @('\bback[\s-]?end\b', '\bapi\b', '\bserver\b', '\bservice\b', '\bworker\b', '\bqueue\b', '\bretry\b', '\blease\b', '\bidempot', '\bmessage\b', '\bjob\b', '\bpostgres\b', '\bmysql\b', '\bredis\b', '\bdb\b', '\bdatabase\b')
+        }
+        [pscustomobject]@{
+            id = "security"
+            label = "security-minded application engineer"
+            guidance = "Guard trust boundaries, secret handling, abuse paths, permission edges, and input validation before convenience."
+            patterns = @('\bsecurity\b', '\bauth\b', '\boauth\b', '\brbac\b', '\bpermission\b', '\bsecret\b', '\btoken\b', '\bencrypt', '\bxss\b', '\bcsrf\b', '\binjection\b', '\bsandbox\b')
+        }
+        [pscustomobject]@{
+            id = "data"
+            label = "data systems analyst"
+            guidance = "Favor traceable transformations, schema clarity, measurable outputs, and checks that make the data story auditable."
+            patterns = @('\bdata\b', '\bdataset\b', '\banalytics\b', '\betl\b', '\bcsv\b', '\btable\b', '\bsql\b', '\bquery\b', '\bmetric\b', '\bstat', '\bwarehouse\b')
+        }
+        [pscustomobject]@{
+            id = "narrative"
+            label = "novelist and scene architect"
+            guidance = "Protect voice consistency, scene logic, emotional progression, concrete detail, and character intent without losing clarity."
+            patterns = @('\bnovel\b', '\bstory\b', '\bfiction\b', '\bchapter\b', '\bscene\b', '\bdialogue\b', '\bcharacter\b', '\bplot\b', '\bworldbuild', '\bprose\b', '\bpoem\b', '\bscript\b')
+        }
+        [pscustomobject]@{
+            id = "editorial"
+            label = "editor with line-level discipline"
+            guidance = "Tighten structure, diction, rhythm, and redundancy so the output reads intentional, clean, and controlled."
+            patterns = @('\bedit\b', '\brewrite\b', '\bpolish\b', '\bvoice\b', '\bstyle\b', '\bline edit\b', '\bcopy edit\b', '\bproofread\b')
+        }
+        [pscustomobject]@{
+            id = "documentation"
+            label = "technical writer"
+            guidance = "Favor fast comprehension, reliable examples, stepwise structure, and explanations that survive first contact."
+            patterns = @('\breadme\b', '\bdocumentation\b', '\bdocs\b', '\btutorial\b', '\bwalkthrough\b', '\bapi reference\b', '\boperator runbook\b')
+        }
+        [pscustomobject]@{
+            id = "product"
+            label = "product systems thinker"
+            guidance = "Sharpen user intent, success criteria, tradeoffs, scope boundaries, and the sequence that turns goals into delivery."
+            patterns = @('\brequirement', '\bspec\b', '\broadmap\b', '\buser flow\b', '\bacceptance\b', '\bdeliverable\b', '\bstakeholder\b', '\bproduct\b')
+        }
+        [pscustomobject]@{
+            id = "performance"
+            label = "performance engineer"
+            guidance = "Protect latency, throughput, memory shape, and measurement discipline instead of speculative tuning."
+            patterns = @('\bperformance\b', '\blatency\b', '\bthroughput\b', '\bbenchmark\b', '\bprofile\b', '\bmemory\b', '\bcpu\b', '\boptimi[sz]e\b')
+        }
+    )
+}
+
+function Get-PersonaDomainMatches {
+    param([string]$ContextText)
+
+    $matches = @()
+    foreach ($domain in Get-PersonaDomainCatalog) {
+        $score = Get-KeywordMatchCount -Text $ContextText -Patterns $domain.patterns
+        if ($score -gt 0) {
+            $matches += [pscustomobject]@{
+                id = $domain.id
+                label = $domain.label
+                guidance = $domain.guidance
+                score = $score
+            }
+        }
+    }
+
+    return @(
+        $matches |
+            Sort-Object -Property @(
+                @{ Expression = "score"; Descending = $true },
+                @{ Expression = "label"; Descending = $false }
+            ) |
+            Select-Object -First 3
+    )
+}
+
+function Get-WorkerRolePersonaFrame {
+    param(
+        [string]$WorkerKind,
+        [bool]$IsReadOnly,
+        [string]$ContextText
+    )
+
+    switch ($WorkerKind) {
+        "implementer" {
+            return [pscustomobject]@{
+                id = "implementer"
+                label = "pragmatic builder"
+                guidance = "Favor the smallest dependable change, visible state, rollback safety, and direct verification against the real task."
+            }
+        }
+        "fixer" {
+            return [pscustomobject]@{
+                id = "fixer"
+                label = "surgical recovery engineer"
+                guidance = "Target the material defect directly, preserve working behavior, and leave a narrow, verifiable repair."
+            }
+        }
+        "reviewer" {
+            return [pscustomobject]@{
+                id = "reviewer"
+                label = "skeptical production examiner"
+                guidance = "Look for hidden failure, missing evidence, weak contracts, scope creep, and edge conditions that will surface after release."
+            }
+        }
+        "validator" {
+            return [pscustomobject]@{
+                id = "validator"
+                label = "strict contract validator"
+                guidance = "Judge only against observable requirements, evidence, and final artifact quality rather than intent alone."
+            }
+        }
+        "planner" {
+            return [pscustomobject]@{
+                id = "planner"
+                label = "systems planner"
+                guidance = "Clarify intent, sequence, risk, dependencies, and handoff boundaries before detail."
+            }
+        }
+    }
+
+    if ($IsReadOnly) {
+        return [pscustomobject]@{
+            id = "read_only_custom"
+            label = "critical analyst"
+            guidance = "Interrogate ambiguity, evidence, and hidden downside while staying factual and compact."
+        }
+    }
+
+    if ($ContextText -match '\b(novel|story|fiction|chapter|scene|dialogue|character|plot|prose|copy|essay|script)\b') {
+        return [pscustomobject]@{
+            id = "creative_custom"
+            label = "craft-focused maker"
+            guidance = "Use structure and taste deliberately, but keep the result useful, scoped, and revision-ready."
+        }
+    }
+
+    return [pscustomobject]@{
+        id = "custom"
+        label = "versatile specialist"
+        guidance = "Infer the shortest path to a strong result, keep state explicit, and stay grounded in the actual request."
+    }
+}
+
+function New-DynamicPersonaGuideInfoRecord {
+    param(
+        [string]$RawText,
+        [string]$Source,
+        $Agent,
+        [string]$WorkerKind,
+        [bool]$IsReadOnly
+    )
+
+    $contextText = Get-AgentPersonaContextText -Agent $Agent
+    $contextLower = if ([string]::IsNullOrWhiteSpace($contextText)) { "" } else { $contextText.ToLowerInvariant() }
+    $domains = @(Get-PersonaDomainMatches -ContextText $contextLower)
+    $roleFrame = Get-WorkerRolePersonaFrame -WorkerKind $WorkerKind -IsReadOnly $IsReadOnly -ContextText $contextLower
+
+    $labels = @($roleFrame.label)
+    foreach ($domain in @($domains | Select-Object -First 2)) {
+        if ($domain.label -notin $labels) {
+            $labels += $domain.label
+        }
+    }
+
+    $guidanceParts = @($roleFrame.guidance)
+    foreach ($domain in @($domains | Select-Object -First 2)) {
+        if ($domain.guidance -notin $guidanceParts) {
+            $guidanceParts += $domain.guidance
+        }
+    }
+
+    $personaText = @(
+        ("Summon the smallest fitting expert blend directly from the request itself and work as a {0}." -f (Join-NaturalLanguageList -Items $labels)),
+        (($guidanceParts | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join " "),
+        "Keep the persona implicit, MM-dense, factual, and subordinate to AGENTS.md, task acceptance criteria, sandbox limits, and required output format."
+    ) -join " "
+
+    return [pscustomobject]@{
+        text = $personaText.Trim()
+        source = $Source
+        requested_mode = "dynamic"
+        effective_mode = "dynamic"
+        raw_text = $RawText
+        original_char_count = if ($RawText) { $RawText.Length } else { 0 }
+        effective_char_count = $personaText.Trim().Length
+        domain_ids = [string[]]@($domains | Select-Object -ExpandProperty id)
+        role_frame = [string]$roleFrame.id
+    }
+}
+
+function New-PersonaGuideInfoRecord {
+    param(
+        [string]$RequestedMode,
+        [string]$RawText,
+        [string]$Source
+    )
+
+    if ($RequestedMode -eq "disabled") {
+        return [pscustomobject]@{
+            text = $null
+            source = "disabled"
+            requested_mode = $RequestedMode
+            effective_mode = "disabled"
+            raw_text = $null
+            original_char_count = 0
+            effective_char_count = 0
+            domain_ids = [string[]]@()
+            role_frame = $null
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($RawText)) {
+        throw "persona_guide_mode '$RequestedMode' requires persona guide text."
+    }
+
+    $effectiveText = switch ($RequestedMode) {
+        "compact" {
+            $RawText.Trim()
+            break
+        }
+        "dynamic" {
+            $RawText.Trim()
+            break
+        }
+        "reference" {
+            Get-PersonaGuideReferenceText -Source $Source
+            break
+        }
+    }
+
+    return [pscustomobject]@{
+        text = $effectiveText
+        source = $Source
+        requested_mode = $RequestedMode
+        effective_mode = $RequestedMode
+        raw_text = $RawText
+        original_char_count = $RawText.Length
+        effective_char_count = if ($effectiveText) { $effectiveText.Length } else { 0 }
+        domain_ids = [string[]]@()
+        role_frame = $null
+    }
+}
+
+function Get-WorkerPersonaGuideInfo {
+    param(
+        $PersonaGuideInfo,
+        $Agent,
+        [string]$WorkerKind,
+        [bool]$IsReadOnly
+    )
+
+    if ($null -eq $PersonaGuideInfo -or $PersonaGuideInfo.requested_mode -eq "disabled") {
+        return $PersonaGuideInfo
+    }
+
+    $requestedMode = Get-NormalizedChoice `
+        -Primary (Get-OptionalProperty $Agent "persona_guide_mode") `
+        -Fallback $PersonaGuideInfo.requested_mode `
+        -Default $PersonaGuideInfo.requested_mode `
+        -AllowedValues @("compact", "dynamic", "reference", "disabled") `
+        -FieldName "persona_guide_mode"
+
+    if ($requestedMode -eq "dynamic") {
+        return New-DynamicPersonaGuideInfoRecord `
+            -RawText ([string]$PersonaGuideInfo.raw_text) `
+            -Source ([string]$PersonaGuideInfo.source) `
+            -Agent $Agent `
+            -WorkerKind $WorkerKind `
+            -IsReadOnly $IsReadOnly
+    }
+
+    return New-PersonaGuideInfoRecord `
+        -RequestedMode $requestedMode `
+        -RawText ([string]$PersonaGuideInfo.raw_text) `
+        -Source ([string]$PersonaGuideInfo.source)
+}
+
+function Get-PersonaGuideInfo {
+    param(
+        $Spec,
+        [string]$SpecDirectory
+    )
+
+    $requestedMode = Get-NormalizedChoice `
+        -Primary (Get-OptionalProperty $Spec "persona_guide_mode") `
+        -Fallback $null `
+        -Default "dynamic" `
+        -AllowedValues @("compact", "dynamic", "reference", "disabled") `
+        -FieldName "persona_guide_mode"
+
+    if ($requestedMode -eq "disabled") {
+        return New-PersonaGuideInfoRecord -RequestedMode "disabled" -RawText $null -Source "disabled"
+    }
+
+    $rawText = $null
+    $source = $null
+
+    $inlineGuide = Get-OptionalProperty $Spec "persona_guide_text"
+    if ($inlineGuide) {
+        $rawText = ([string]$inlineGuide).Trim()
+        $source = "spec.persona_guide_text"
+    }
+
+    if ($null -eq $rawText) {
+        $guideFileValue = Get-OptionalProperty $Spec "persona_guide_file"
+        if ($guideFileValue) {
+            $guidePath = Resolve-AbsolutePath -Path ([string]$guideFileValue) -BaseDirectory $SpecDirectory
+            $rawText = (Get-Content -LiteralPath $guidePath -Raw).Trim()
+            $source = $guidePath
+        }
+    }
+
+    if ($null -eq $rawText) {
+        $defaultGuidePath = Get-DefaultPersonaGuidePath
+        $rawText = (Get-Content -LiteralPath $defaultGuidePath -Raw).Trim()
+        $source = $defaultGuidePath
+    }
+
+    return New-PersonaGuideInfoRecord -RequestedMode $requestedMode -RawText $rawText -Source $source
+}
+
+function New-SharedDirectiveInfoRecord {
+    param(
+        [string]$RequestedMode,
+        [string]$RawText,
+        [string]$Source
+    )
+
+    if ($RequestedMode -eq "disabled") {
+        return [pscustomobject]@{
+            text = $null
+            source = "disabled"
+            requested_mode = $RequestedMode
+            effective_mode = "disabled"
+            raw_text = $null
+            original_char_count = 0
+            effective_char_count = 0
+        }
+    }
+
+    $effectiveMode = $RequestedMode
+    $effectiveText = switch ($RequestedMode) {
+        "full" {
+            $RawText
+            break
+        }
+        "compact" {
+            Get-CompactDirectiveText -SourceText $RawText -Source $Source
+            break
+        }
+        "reference" {
+            if ($Source -eq "spec.shared_directive_text") {
+                $effectiveMode = "compact"
+                Get-CompactDirectiveText -SourceText $RawText -Source $Source
+            } else {
+                Get-DirectiveReferenceText -Source $Source
+            }
+            break
+        }
+        "hybrid" {
+            $RawText
+            break
+        }
+    }
+
+    return [pscustomobject]@{
+        text = $effectiveText
+        source = $Source
+        requested_mode = $RequestedMode
+        effective_mode = $effectiveMode
+        raw_text = $RawText
+        original_char_count = if ($RawText) { $RawText.Length } else { 0 }
+        effective_char_count = if ($effectiveText) { $effectiveText.Length } else { 0 }
+    }
+}
+
+function Get-HybridSharedDirectiveModeForWorker {
+    param(
+        [string]$WorkerKind,
+        [bool]$IsReadOnly
+    )
+
+    if ($WorkerKind -in @("implementer", "fixer")) {
+        return "full"
+    }
+
+    if ($WorkerKind -in @("reviewer", "validator", "planner")) {
+        return "compact"
+    }
+
+    if ($WorkerKind -eq "custom" -and $IsReadOnly) {
+        return "compact"
+    }
+
+    return "full"
+}
+
+function Get-WorkerSharedDirectiveInfo {
+    param(
+        $SharedDirectiveInfo,
+        $Agent,
+        [string]$WorkerKind,
+        [bool]$IsReadOnly
+    )
+
+    if ($null -eq $SharedDirectiveInfo -or $SharedDirectiveInfo.requested_mode -eq "disabled") {
+        return $SharedDirectiveInfo
+    }
+
+    $agentRequestedMode = Get-OptionalProperty $Agent "shared_directive_mode"
+    $requestedMode = Get-NormalizedChoice `
+        -Primary $agentRequestedMode `
+        -Fallback $SharedDirectiveInfo.requested_mode `
+        -Default $SharedDirectiveInfo.requested_mode `
+        -AllowedValues @("full", "compact", "reference", "disabled", "hybrid") `
+        -FieldName "shared_directive_mode"
+
+    if ($requestedMode -eq "hybrid") {
+        $requestedMode = Get-HybridSharedDirectiveModeForWorker -WorkerKind $WorkerKind -IsReadOnly $IsReadOnly
+    }
+
+    return New-SharedDirectiveInfoRecord `
+        -RequestedMode $requestedMode `
+        -RawText ([string]$SharedDirectiveInfo.raw_text) `
+        -Source ([string]$SharedDirectiveInfo.source)
+}
+
 function Get-SharedDirectiveInfo {
     param(
         $Spec,
@@ -1277,20 +1827,12 @@ function Get-SharedDirectiveInfo {
     $requestedMode = Get-NormalizedChoice `
         -Primary (Get-OptionalProperty $Spec "shared_directive_mode") `
         -Fallback $null `
-        -Default "full" `
-        -AllowedValues @("full", "compact", "reference", "disabled") `
+        -Default "hybrid" `
+        -AllowedValues @("full", "compact", "reference", "disabled", "hybrid") `
         -FieldName "shared_directive_mode"
 
     if ($requestedMode -eq "disabled" -or -not (Get-BoolValue (Get-OptionalProperty $Spec "inject_shared_directive") $true)) {
-        return [pscustomobject]@{
-            text = $null
-            source = "disabled"
-            requested_mode = $requestedMode
-            effective_mode = "disabled"
-            raw_text = $null
-            original_char_count = 0
-            effective_char_count = 0
-        }
+        return New-SharedDirectiveInfoRecord -RequestedMode "disabled" -RawText $null -Source "disabled"
     }
 
     $rawText = $null
@@ -1320,42 +1862,14 @@ function Get-SharedDirectiveInfo {
         $source = "launcher fallback directive"
     }
 
-    $effectiveMode = $requestedMode
-    $effectiveText = switch ($requestedMode) {
-        "full" {
-            $rawText
-            break
-        }
-        "compact" {
-            Get-CompactDirectiveText -SourceText $rawText -Source $source
-            break
-        }
-        "reference" {
-            if ($source -eq "spec.shared_directive_text") {
-                $effectiveMode = "compact"
-                Get-CompactDirectiveText -SourceText $rawText -Source $source
-            } else {
-                Get-DirectiveReferenceText -Source $source
-            }
-            break
-        }
-    }
-
-    return [pscustomobject]@{
-        text = $effectiveText
-        source = $source
-        requested_mode = $requestedMode
-        effective_mode = $effectiveMode
-        raw_text = $rawText
-        original_char_count = if ($rawText) { $rawText.Length } else { 0 }
-        effective_char_count = if ($effectiveText) { $effectiveText.Length } else { 0 }
-    }
+    return New-SharedDirectiveInfoRecord -RequestedMode $requestedMode -RawText $rawText -Source $source
 }
 
 function New-WorkerPrompt {
     param(
         $Agent,
         $SharedDirectiveInfo,
+        $PersonaGuideInfo,
         $WorkflowRenderInfo,
         [string]$PromptProfile,
         [string]$ResponseStyle,
@@ -1377,6 +1891,12 @@ function New-WorkerPrompt {
             $lines.Add("Shared contract:")
         }
         $lines.Add($SharedDirectiveInfo.text)
+    }
+
+    if ($PersonaGuideInfo -and -not [string]::IsNullOrWhiteSpace($PersonaGuideInfo.text)) {
+        $lines.Add("")
+        $lines.Add($(if ($PersonaGuideInfo.effective_mode -eq "reference") { "Persona guide:" } else { "Working persona:" }))
+        $lines.Add($PersonaGuideInfo.text)
     }
 
     $roleValue = Get-OptionalProperty $Agent "role"
@@ -1741,6 +2261,7 @@ function New-RunSummaryText {
         [string]$WorkspaceRoot,
         [string]$ExecutionMode,
         $SharedDirectiveInfo,
+        $PersonaGuideInfo,
         $WorkflowInfo,
         $AfterCreateHookResult,
         $Results,
@@ -1774,7 +2295,17 @@ function New-RunSummaryText {
     $lines.Add([string]::Format('- execution_mode: {0}', $ExecutionMode))
     $lines.Add([string]::Format('- workers_succeeded: {0}/{1}', $successCount, $totalCount))
     $lines.Add([string]::Format('- shared_directive_mode: {0}', $SharedDirectiveInfo.effective_mode))
-    $lines.Add([string]::Format('- shared_directive_chars: {0} -> {1}', $SharedDirectiveInfo.original_char_count, $SharedDirectiveInfo.effective_char_count))
+    if ($SharedDirectiveInfo.effective_mode -eq "hybrid") {
+        $lines.Add([string]::Format('- shared_directive_chars: {0} -> per-worker (implementer/fixer=full; reviewer/validator/planner/read-only custom=compact)', $SharedDirectiveInfo.original_char_count))
+    } else {
+        $lines.Add([string]::Format('- shared_directive_chars: {0} -> {1}', $SharedDirectiveInfo.original_char_count, $SharedDirectiveInfo.effective_char_count))
+    }
+    $lines.Add([string]::Format('- persona_guide_mode: {0}', $PersonaGuideInfo.effective_mode))
+    if ($PersonaGuideInfo.effective_mode -eq "disabled") {
+        $lines.Add('- persona_guide_chars: 0')
+    } else {
+        $lines.Add([string]::Format('- persona_guide_chars: {0} -> {1}', $PersonaGuideInfo.original_char_count, $PersonaGuideInfo.effective_char_count))
+    }
     if ($WorkflowInfo -and $WorkflowInfo.enabled) {
         $lines.Add([string]::Format('- workflow_file: `{0}`', $WorkflowInfo.source))
         $lines.Add([string]::Format('- workflow_prompt_mode: {0}', $WorkflowInfo.prompt_mode))
@@ -2120,6 +2651,14 @@ function Complete-WorkerResult {
         prompt_profile = $Run.prompt_profile
         response_style = $Run.response_style
         max_response_lines = $Run.max_response_lines
+        requested_shared_directive_mode = $Run.requested_shared_directive_mode
+        effective_shared_directive_mode = $Run.effective_shared_directive_mode
+        shared_directive_chars = $Run.shared_directive_chars
+        requested_persona_guide_mode = $Run.requested_persona_guide_mode
+        effective_persona_guide_mode = $Run.effective_persona_guide_mode
+        persona_guide_chars = $Run.persona_guide_chars
+        persona_role_frame = $Run.persona_role_frame
+        persona_domain_ids = [string[]]$Run.persona_domain_ids
         actual_approval = $executionMetadata.actual_approval
         actual_workdir = $executionMetadata.actual_workdir
         output_mode = $executionMetadata.output_mode
@@ -2321,9 +2860,12 @@ if ($afterCreateHookInfo.enabled) {
 }
 
 $sharedDirectiveInfo = Get-SharedDirectiveInfo -Spec $spec -WorkspaceRoot $cwd -SpecDirectory $specDirectory
+$personaGuideInfo = Get-PersonaGuideInfo -Spec $spec -SpecDirectory $specDirectory
 $workflowInfo = Get-WorkflowInfo -Spec $spec -WorkspaceRoot $cwd -SpecDirectory $specDirectory
 Write-LauncherDebug ("shared_directive_source={0}" -f $sharedDirectiveInfo.source)
 Write-LauncherDebug ("shared_directive_mode={0}" -f $sharedDirectiveInfo.effective_mode)
+Write-LauncherDebug ("persona_guide_source={0}" -f $personaGuideInfo.source)
+Write-LauncherDebug ("persona_guide_mode={0}" -f $personaGuideInfo.effective_mode)
 if ($workflowInfo.enabled) {
     Write-LauncherDebug ("workflow_file={0}" -f $workflowInfo.source)
     Write-LauncherDebug ("workflow_prompt_mode={0}" -f $workflowInfo.prompt_mode)
@@ -2410,6 +2952,24 @@ foreach ($agent in $spec.agents) {
         0
     }
 
+    $sandboxValue = Get-OptionalProperty $agent "sandbox"
+    if (-not $sandboxValue) {
+        $sandboxValue = Get-OptionalProperty $defaults "sandbox"
+    }
+    $sandbox = if ($sandboxValue) { [string]$sandboxValue } else { $null }
+    $isReadOnly = Test-IsReadOnlySandbox -Sandbox $sandbox
+
+    $workerSharedDirectiveInfo = Get-WorkerSharedDirectiveInfo `
+        -SharedDirectiveInfo $sharedDirectiveInfo `
+        -Agent $agent `
+        -WorkerKind $workerKind `
+        -IsReadOnly $isReadOnly
+    $workerPersonaGuideInfo = Get-WorkerPersonaGuideInfo `
+        -PersonaGuideInfo $personaGuideInfo `
+        -Agent $agent `
+        -WorkerKind $workerKind `
+        -IsReadOnly $isReadOnly
+
     $workflowRenderInfo = Get-AgentWorkflowRenderInfo `
         -WorkflowInfo $workflowInfo `
         -Agent $agent `
@@ -2420,7 +2980,8 @@ foreach ($agent in $spec.agents) {
         -WorkspaceRoot $cwd
     $promptText = New-WorkerPrompt `
         -Agent $agent `
-        -SharedDirectiveInfo $sharedDirectiveInfo `
+        -SharedDirectiveInfo $workerSharedDirectiveInfo `
+        -PersonaGuideInfo $workerPersonaGuideInfo `
         -WorkflowRenderInfo $workflowRenderInfo `
         -PromptProfile $promptProfile `
         -ResponseStyle $responseStyle `
@@ -2428,13 +2989,6 @@ foreach ($agent in $spec.agents) {
     if ($writePromptFiles) {
         Set-Content -LiteralPath $promptPath -Value $promptText -Encoding utf8
     }
-
-    $sandboxValue = Get-OptionalProperty $agent "sandbox"
-    if (-not $sandboxValue) {
-        $sandboxValue = Get-OptionalProperty $defaults "sandbox"
-    }
-    $sandbox = if ($sandboxValue) { [string]$sandboxValue } else { $null }
-    $isReadOnly = Test-IsReadOnlySandbox -Sandbox $sandbox
 
     $cmdArgs = New-Object System.Collections.Generic.List[string]
     $agentFullAutoValue = Get-OptionalProperty $agent "full_auto"
@@ -2553,6 +3107,14 @@ foreach ($agent in $spec.agents) {
         prompt_profile = $promptProfile
         response_style = $responseStyle
         max_response_lines = $maxResponseLines
+        requested_shared_directive_mode = $sharedDirectiveInfo.requested_mode
+        effective_shared_directive_mode = $workerSharedDirectiveInfo.effective_mode
+        shared_directive_chars = $workerSharedDirectiveInfo.effective_char_count
+        requested_persona_guide_mode = $personaGuideInfo.requested_mode
+        effective_persona_guide_mode = $workerPersonaGuideInfo.effective_mode
+        persona_guide_chars = $workerPersonaGuideInfo.effective_char_count
+        persona_role_frame = $workerPersonaGuideInfo.role_frame
+        persona_domain_ids = [string[]]$workerPersonaGuideInfo.domain_ids
         workflow_prompt_mode = $workflowRenderInfo.mode
         workflow_prompt_chars = if ($workflowRenderInfo.text) { $workflowRenderInfo.text.Length } else { 0 }
         command = Join-ArgLine -Items (@($resolvedCodexExecutable) + $cmdArgs.ToArray())
@@ -2634,6 +3196,16 @@ $manifest = [ordered]@{
         char_count = if ($sharedDirectiveInfo.text) { $sharedDirectiveInfo.text.Length } else { 0 }
         original_char_count = $sharedDirectiveInfo.original_char_count
         effective_char_count = $sharedDirectiveInfo.effective_char_count
+        hybrid_policy = if ($sharedDirectiveInfo.effective_mode -eq "hybrid") { "implementer/fixer=full; reviewer/validator/planner/read-only custom=compact" } else { $null }
+    }
+    persona_guide = [ordered]@{
+        source = $personaGuideInfo.source
+        requested_mode = $personaGuideInfo.requested_mode
+        effective_mode = $personaGuideInfo.effective_mode
+        sha256 = if ($personaGuideInfo.text) { Get-TextHash -Text $personaGuideInfo.text } else { $null }
+        char_count = if ($personaGuideInfo.text) { $personaGuideInfo.text.Length } else { 0 }
+        original_char_count = $personaGuideInfo.original_char_count
+        effective_char_count = $personaGuideInfo.effective_char_count
     }
     workflow = [ordered]@{
         enabled = [bool]$workflowInfo.enabled
@@ -2670,6 +3242,7 @@ if ($writeSummaryFile) {
         -WorkspaceRoot $cwd `
         -ExecutionMode $executionMode `
         -SharedDirectiveInfo $sharedDirectiveInfo `
+        -PersonaGuideInfo $personaGuideInfo `
         -WorkflowInfo $workflowInfo `
         -AfterCreateHookResult $afterCreateHookResult `
         -Results $results `
@@ -2691,6 +3264,7 @@ if ($archiveInfo.enabled) {
         -SummaryPath $summaryFile `
         -DebugLogPath $debugLogFile `
         -SharedDirectiveInfo $sharedDirectiveInfo `
+        -PersonaGuideInfo $personaGuideInfo `
         -WorkflowInfo $workflowInfo `
         -AfterCreateHookResult $afterCreateHookResult `
         -RequestedDeliverables $requestedDeliverables `
@@ -2717,7 +3291,7 @@ if ($AsJson) {
     $finalOutput | ConvertTo-Json -Depth 8
 } else {
     $results |
-        Select-Object name, mode, exit_code, succeeded, session_id, requested_model, actual_model, requested_sandbox, actual_sandbox, requested_reasoning_effort, actual_reasoning_effort, footer_tokens_used, last |
+        Select-Object name, mode, worker_kind, requested_shared_directive_mode, effective_shared_directive_mode, requested_persona_guide_mode, effective_persona_guide_mode, persona_role_frame, persona_domain_ids, exit_code, succeeded, session_id, requested_model, actual_model, requested_sandbox, actual_sandbox, requested_reasoning_effort, actual_reasoning_effort, footer_tokens_used, last |
         Format-Table -AutoSize
     Write-Output ""
     Write-Output ("Manifest: {0}" -f $manifestFile)

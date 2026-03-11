@@ -6,7 +6,7 @@
   "execution_mode": "sequential",
   "write_prompt_files": true,
   "write_summary_file": true,
-  "shared_directive_mode": "reference",
+  "shared_directive_mode": "hybrid",
   "workflow_file": "WORKFLOW.md",
   "workflow_prompt_mode": "prepend",
   "workflow_context": {

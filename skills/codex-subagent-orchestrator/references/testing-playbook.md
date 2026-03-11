@@ -77,9 +77,11 @@ in the spec before running.
 ## Efficiency Checklist
 
 - Use `low` reasoning for routine writer and reviewer workers.
-- Prefer `shared_directive_mode: "reference"` for routine workspace-local workers.
+- Default to `shared_directive_mode: "hybrid"` for mixed `/sub` teams so implementers/fixers keep the full contract while reviewers, validators, planners, and read-only custom workers stay compact.
+- Prefer `shared_directive_mode: "reference"` only when you explicitly want workers to reopen the local directive file.
 - Use `shared_directive_mode: "compact"` when you want a short inlined contract and do not want to rely on a file reference.
 - Prefer compact response style and consume `orchestration-summary.md` before reading raw logs.
+- On Windows PowerShell, treat `stderr` as diagnostic only; use `last.txt`, reviewer output, manifest metadata, and footer tokens as the primary truth sources when logs look mojibaked.
 - Pass `-m` explicitly when you care about reproducibility.
 - Avoid replaying full worker stdout into the parent context.
 - Keep the team small unless the task has real parallel branches.

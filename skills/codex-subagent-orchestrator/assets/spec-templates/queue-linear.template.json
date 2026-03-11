@@ -38,7 +38,7 @@
   "launcher": {
     "max_concurrent_issues": 2,
     "execution_mode": "sequential",
-    "shared_directive_mode": "reference",
+    "shared_directive_mode": "hybrid",
     "defaults": {
       "sandbox": "workspace-write",
       "reasoning_effort": "low",

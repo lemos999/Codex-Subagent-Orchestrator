@@ -30,7 +30,8 @@ Use this format when you want repeatable worker orchestration with per-worker se
   "supervisor_only": true,
   "require_final_read_only_review": true,
   "material_issue_strategy": "fixer_then_rereview",
-  "shared_directive_mode": "reference",
+  "shared_directive_mode": "hybrid",
+  "persona_guide_mode": "dynamic",
   "workflow_file": "WORKFLOW.md",
   "workflow_auto_detect": true,
   "workflow_prompt_mode": "prepend",
@@ -94,7 +95,10 @@ Use this format when you want repeatable worker orchestration with per-worker se
 | `shared_directive_file` | no | File to inject into every worker before role-specific instructions |
 | `shared_directive_text` | no | Inline shared directive text when you do not want to use `AGENTS.md` |
 | `inject_shared_directive` | no | Disable shared directive injection entirely when false |
-| `shared_directive_mode` | no | `full`, `compact`, `reference`, or `disabled`; defaults to `full` |
+| `shared_directive_mode` | no | `full`, `compact`, `reference`, `hybrid`, or `disabled`; defaults to `hybrid` |
+| `persona_guide_file` | no | File containing a persona-design guide for `/sub` workers |
+| `persona_guide_text` | no | Inline persona-design guide text when you do not want to use the built-in guide |
+| `persona_guide_mode` | no | `dynamic`, `compact`, `reference`, or `disabled`; defaults to `dynamic` |
 | `workflow_file` | no | Optional `WORKFLOW.md`-style prompt template file to render into each worker prompt |
 | `workflow_auto_detect` | no | When true, the launcher will also look for `WORKFLOW.md` in the workspace root after bootstrap; defaults to `true` |
 | `workflow_prompt_mode` | no | `prepend`, `replace`, or `disabled`; controls how rendered workflow text combines with worker `prompt` or `task` |
@@ -348,7 +352,7 @@ Use this when you want independent implementers first and a final read-only revi
   "supervisor_only": true,
   "require_final_read_only_review": true,
   "material_issue_strategy": "fixer_then_rereview",
-  "shared_directive_mode": "reference",
+  "shared_directive_mode": "hybrid",
   "defaults": {
     "model": "gpt-5.4",
     "sandbox": "workspace-write",
@@ -481,7 +485,8 @@ When `write_run_archive` is true, the launcher also creates a per-run archive un
 - Absolute paths are allowed, but they should be treated as deployment-specific rather than reusable defaults.
 - Keep worker prompts narrow.
 - Use `read-only` for reviewers and validators unless they truly need write access.
-- Prefer `shared_directive_mode: "reference"` for routine workspace-local workers.
+- Default to `shared_directive_mode: "hybrid"` when you want full instructions on implementers/fixers but compact instructions on reviewers, validators, planners, and read-only custom workers.
+- Prefer `shared_directive_mode: "reference"` only when you intentionally want workers to reopen a local directive file instead of receiving inline instructions.
 - Use `shared_directive_mode: "compact"` when you want a short inlined contract instead of a file reference.
 - Prefer `response_style: "compact"` plus a small `max_response_lines` value for routine workers.
 - For `/sub` implementation work, set `requested_deliverables`, enable `supervisor_only`, and keep `require_final_read_only_review` enabled.

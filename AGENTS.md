@@ -17,6 +17,8 @@ For this workspace, prefer local skills over globally installed skills when both
 - For normal implementation work in this workspace, prefer the parent-session workflow unless the user explicitly asks for child-worker execution or `/sub`.
 - If the user starts with `/sub`, you must treat that as a workspace-local subagent orchestration request.
 - For `/sub` and other obvious subagent orchestration requests, open and follow `./skills/codex-subagent-orchestrator/SKILL.md`.
+- If a `/sub` spec does not set `shared_directive_mode`, the launcher defaults to a hybrid policy: `implementer` and `fixer` stay on `full`; `reviewer`, `validator`, `planner`, and read-only `custom` workers use `compact`.
+- For `/sub`, prefer the distilled persona layer over replaying large persona source files; `persona_guide_mode: "dynamic"` should infer the smallest task-appropriate expert blend from the request unless you explicitly need `compact`, `reference`, or `disabled`.
 - Use `./skills/codex-parent-session-orchestrator/scripts/start-codex-parent-session.ps1` when you want deterministic phase files, checkpoints, and compact handoff artifacts on disk.
 - For `/sub`, choose the orchestration shape autonomously from the request context:
   - use the team launcher path for one-off bounded tasks, single tickets, or finite delivery requests
