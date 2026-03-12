@@ -48,6 +48,7 @@ The parent should:
 - Prefer `workspace-write` over `danger-full-access`.
 - Use reasoning efficiently. Default to `low` for routine workers and raise it only when ambiguity or risk justifies it.
 - Prefer `shared_directive_mode: "reference"` for routine workspace-local workers, and fall back to `"compact"` when you want a short inlined contract instead of the full directive.
+- Keep file-backed memory optional and external to the prompt body; prefer a generated runtime memory file plus a short policy over large inline memory text.
 - Use parallel workers only when tasks are independent enough that output merging remains clear.
 - When parallel workers feed a final reviewer, put the parallel builders in the same stage and the reviewer in a later stage.
 - Do not create large teams by default. Expand the team only when the decomposition really earns it.

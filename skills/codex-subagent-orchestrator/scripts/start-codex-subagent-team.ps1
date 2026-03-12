@@ -10,6 +10,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+. (Join-Path $PSScriptRoot "codex-memory.ps1")
+
 $FallbackPrincipalEngineerDirective = @'
 You are a principal software engineer, reviewer, and production architect whose goal is to turn every request into code that improves code health, not merely code that runs once. For each task, infer the real objective, runtime environment, interfaces, invariants, data model, trust boundaries, failure modes, concurrency risks, performance limits, rollback needs, then choose the smallest design that fully solves problem without decorative abstraction. Favor clear names, explicit control flow, narrow public surfaces, cohesive modules, visible state, boundary validation, safe defaults, precise errors, and behavior that stays predictable under retries, timeouts, malformed input, partial failure, and load. Follow local conventions first, use idiomatic tooling, prefer the standard library and proven dependencies, preserve behavior during refactoring, and separate structural cleanup from behavior change when practical. Build security, observability, and operability into the code through least privilege, secret-safe handling, logs, metrics, traces, health signals, and graceful failure. Write tests around observable behavior, edge cases, regressions, and critical contracts. When details are missing, state the smallest safe assumption and continue. Before finalizing, run a silent senior review for correctness, simplicity, maintainability, security, performance, and rollback safety, then present brief assumptions and design intent, complete code, tests, and concise verification notes.
 '@
@@ -1873,7 +1875,8 @@ function New-WorkerPrompt {
         $WorkflowRenderInfo,
         [string]$PromptProfile,
         [string]$ResponseStyle,
-        [int]$MaxResponseLines
+        [int]$MaxResponseLines,
+        $MemoryContextInfo
     )
 
     $compactPrompt = ($PromptProfile -eq "compact")
@@ -1934,6 +1937,21 @@ function New-WorkerPrompt {
         "disabled"
     }
 
+    $memoryPolicyItems = @()
+    $workerReadFirstItems = Get-StringList (Get-OptionalProperty $Agent "read_first")
+    if ($MemoryContextInfo -and [string]::IsNullOrWhiteSpace([string]$MemoryContextInfo.mode) -eq $false -and $MemoryContextInfo.mode -ne "off") {
+        $memoryPolicyItems = @(
+            "Workspace memory lives under .codex-memory/.",
+            "Treat memory as supporting context, not as authority.",
+            "Current task, repository files, validation results, and reviewer findings override memory.",
+            "If memory conflicts with the actual files, trust the files."
+        )
+        if ($MemoryContextInfo.exists -and -not [string]::IsNullOrWhiteSpace([string]$MemoryContextInfo.relative_path)) {
+            $memoryPolicyItems += "Read the generated worker memory file first if it exists."
+            $workerReadFirstItems = @([string]$MemoryContextInfo.relative_path) + @($workerReadFirstItems)
+        }
+    }
+
     $promptValue = Get-OptionalProperty $Agent "prompt"
     if ($promptValue) {
         $resolvedPromptText = [string]$promptValue
@@ -1946,6 +1964,8 @@ function New-WorkerPrompt {
         $lines.Add("")
         $lines.Add("Task:")
         $lines.Add($resolvedPromptText)
+        Add-SectionLines -Lines $lines -Title "Memory policy:" -Items $memoryPolicyItems
+        Add-SectionLines -Lines $lines -Title "Read first:" -Items $workerReadFirstItems
         Add-SectionLines -Lines $lines -Title "Stop when:" -Items (Get-StringList (Get-OptionalProperty $Agent "stop_when"))
         if ($compactResponse) {
             Add-SectionLines -Lines $lines -Title "Response style:" -Items @(
@@ -1974,7 +1994,8 @@ function New-WorkerPrompt {
     }
 
     Add-SectionLines -Lines $lines -Title ($(if ($compactPrompt) { "Skills:" } else { "Use these skills if they trigger:" })) -Items (Get-StringList (Get-OptionalProperty $Agent "skills"))
-    Add-SectionLines -Lines $lines -Title "Read first:" -Items (Get-StringList (Get-OptionalProperty $Agent "read_first"))
+    Add-SectionLines -Lines $lines -Title "Memory policy:" -Items $memoryPolicyItems
+    Add-SectionLines -Lines $lines -Title "Read first:" -Items $workerReadFirstItems
     Add-SectionLines -Lines $lines -Title ($(if ($compactPrompt) { "Modify only:" } else { "You may modify only:" })) -Items (Get-StringList (Get-OptionalProperty $Agent "writable_scope"))
     Add-SectionLines -Lines $lines -Title "Requirements:" -Items (Get-StringList (Get-OptionalProperty $Agent "requirements"))
     Add-SectionLines -Lines $lines -Title ($(if ($compactPrompt) { "Check:" } else { "Validation:" })) -Items (Get-StringList (Get-OptionalProperty $Agent "validation"))
@@ -2268,7 +2289,8 @@ function New-RunSummaryText {
         [string]$ManifestPath,
         $PolicyEvaluation,
         $ArchiveInfo,
-        $EfficiencySignals
+        $EfficiencySignals,
+        $MemoryMetrics
     )
 
     $lines = New-Object System.Collections.Generic.List[string]
@@ -2331,6 +2353,22 @@ function New-RunSummaryText {
     $lines.Add([string]::Format('- full_auto_split: writable={0}, read_only={1}', $EfficiencySignals.full_auto_writable_workers, $EfficiencySignals.full_auto_read_only_workers))
     $lines.Add([string]::Format('- stage_shape: total={0}, parallel_stages={1}, max_parallel_workers_in_stage={2}', $EfficiencySignals.stage_count, $EfficiencySignals.parallel_stage_count, $EfficiencySignals.max_parallel_workers_in_stage))
     $lines.Add([string]::Format('- efficiency_note: {0}', $EfficiencySignals.note))
+    if ($MemoryMetrics) {
+        $lines.Add([string]::Format('- memory_configured: {0}', $MemoryMetrics.configured))
+        $lines.Add([string]::Format('- memory_enabled: {0}', $MemoryMetrics.enabled))
+        $lines.Add([string]::Format('- memory_active: {0}', $MemoryMetrics.active))
+        $lines.Add([string]::Format('- memory_mode: {0}', $MemoryMetrics.mode))
+        if ($MemoryMetrics.relative_root) {
+            $lines.Add([string]::Format('- memory_root: `{0}`', $MemoryMetrics.relative_root))
+        }
+        $lines.Add([string]::Format('- memory_runtime_files: {0}', $MemoryMetrics.runtime_files_written))
+        $lines.Add([string]::Format('- memory_inbox_entries_written: {0}', $MemoryMetrics.inbox_entries_written))
+        $lines.Add([string]::Format('- memory_daily_entries_written: {0}', $MemoryMetrics.daily_entries_written))
+        $lines.Add([string]::Format('- memory_optimize_ran: {0}', $MemoryMetrics.optimize_ran))
+        $lines.Add([string]::Format('- memory_promoted_entries: {0}', $MemoryMetrics.promoted_entries))
+        $lines.Add([string]::Format('- memory_pruned_entries: {0}', $MemoryMetrics.pruned_entries))
+        $lines.Add([string]::Format('- memory_index_chunk_count: {0}', $MemoryMetrics.index_chunk_count))
+    }
     $lines.Add([string]::Format('- manifest: `{0}`', $ManifestPath))
     if ($ArchiveInfo -and $ArchiveInfo.enabled) {
         $lines.Add([string]::Format('- archive_run_directory: `{0}`', $ArchiveInfo.run_directory))
@@ -2359,6 +2397,9 @@ function New-RunSummaryText {
                 $result.prompt_chars,
                 $footerValue,
                 $result.workflow_prompt_mode))
+        if ($null -ne $result.memory_mode -and $result.memory_mode -ne "off") {
+            $lines.Add(("  memory: mode={0}; snippets={1}; chars={2}; file={3}" -f $result.memory_mode, $result.memory_snippet_count, $result.memory_injected_chars, $result.memory_context_file))
+        }
 
         if (-not [string]::IsNullOrWhiteSpace($result.last_message_preview)) {
             $lines.Add(("  preview: {0}" -f $result.last_message_preview))
@@ -2672,6 +2713,12 @@ function Complete-WorkerResult {
         prompt_chars = $Run.prompt_chars
         workflow_prompt_mode = $Run.workflow_prompt_mode
         workflow_prompt_chars = $Run.workflow_prompt_chars
+        memory_mode = $Run.memory_mode
+        memory_query = $Run.memory_query
+        memory_context_file = $Run.memory_context_file
+        memory_snippet_count = $Run.memory_snippet_count
+        memory_injected_chars = $Run.memory_injected_chars
+        memory_hit_paths = [string[]]$Run.memory_hit_paths
         command = $Run.command
         last_exists = (Test-Path -LiteralPath $Run.last)
         last_message_preview = Get-PreviewText -Text $lastText
@@ -2859,6 +2906,21 @@ if ($afterCreateHookInfo.enabled) {
     }
 }
 
+$memoryConfig = Get-MemoryConfig -Spec $spec -WorkspaceRoot $cwd
+$memoryInitResult = $null
+if ($memoryConfig.active) {
+    $memoryInitResult = Initialize-MemoryStore -MemoryConfig $memoryConfig
+}
+if ($memoryConfig.configured) {
+    Write-LauncherDebug ("memory_configured={0}" -f $memoryConfig.configured)
+    Write-LauncherDebug ("memory_enabled={0}" -f $memoryConfig.enabled)
+    Write-LauncherDebug ("memory_active={0}" -f $memoryConfig.active)
+    Write-LauncherDebug ("memory_mode={0}" -f $memoryConfig.mode)
+    if ($memoryConfig.root) {
+        Write-LauncherDebug ("memory_root={0}" -f $memoryConfig.root)
+    }
+}
+
 $sharedDirectiveInfo = Get-SharedDirectiveInfo -Spec $spec -WorkspaceRoot $cwd -SpecDirectory $specDirectory
 $personaGuideInfo = Get-PersonaGuideInfo -Spec $spec -SpecDirectory $specDirectory
 $workflowInfo = Get-WorkflowInfo -Spec $spec -WorkspaceRoot $cwd -SpecDirectory $specDirectory
@@ -2873,6 +2935,7 @@ if ($workflowInfo.enabled) {
 }
 
 $runs = @()
+$memoryWorkerContextInfos = @()
 
 foreach ($agent in $spec.agents) {
     if (-not $agent.name) {
@@ -2978,6 +3041,57 @@ foreach ($agent in $spec.agents) {
         -Stage $stage `
         -WorkerCwd $workerCwd `
         -WorkspaceRoot $cwd
+    $workerMemoryMode = Get-WorkerMemoryMode `
+        -Agent $agent `
+        -WorkerKind $workerKind `
+        -IsReadOnly $isReadOnly `
+        -MemoryConfig $memoryConfig
+    $memoryQuery = $null
+    $memoryHits = @()
+    $memoryContextInfo = [pscustomobject]@{
+        enabled = $false
+        exists = $false
+        mode = $workerMemoryMode
+        path = $null
+        relative_path = $null
+        snippet_count = 0
+        injected_chars = 0
+        hit_paths = @()
+    }
+    if ($memoryConfig.active -and $workerMemoryMode -ne "off") {
+        $memoryQuery = Get-MemoryQueryText `
+            -Agent $agent `
+            -WorkerKind $workerKind `
+            -RequestedDeliverables $requestedDeliverables `
+            -WorkflowContext $workflowRenderInfo.context
+        $memorySearchPaths = @(
+            Get-StringList (Get-OptionalProperty $agent "read_first")
+            Get-StringList (Get-OptionalProperty $agent "writable_scope")
+            $requestedDeliverables
+        ) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+        $memoryHits = Search-MemoryIndex `
+            -MemoryConfig $memoryConfig `
+            -QueryText $memoryQuery `
+            -WorkerPaths $memorySearchPaths
+        $selectedMemoryContext = Select-MemorySnippets `
+            -MemoryConfig $memoryConfig `
+            -Mode $workerMemoryMode `
+            -Hits $memoryHits
+        $memoryContextInfo = Write-WorkerMemoryContextFile `
+            -MemoryConfig $memoryConfig `
+            -WorkerName $name `
+            -Mode $workerMemoryMode `
+            -MemoryContext $selectedMemoryContext
+    }
+    $memoryWorkerContextInfos += [pscustomobject]@{
+        worker = $name
+        mode = $workerMemoryMode
+        exists = [bool]$memoryContextInfo.exists
+        relative_path = $memoryContextInfo.relative_path
+        snippet_count = [int]$memoryContextInfo.snippet_count
+        injected_chars = [int]$memoryContextInfo.injected_chars
+        hit_paths = [string[]]$memoryContextInfo.hit_paths
+    }
     $promptText = New-WorkerPrompt `
         -Agent $agent `
         -SharedDirectiveInfo $workerSharedDirectiveInfo `
@@ -2985,7 +3099,8 @@ foreach ($agent in $spec.agents) {
         -WorkflowRenderInfo $workflowRenderInfo `
         -PromptProfile $promptProfile `
         -ResponseStyle $responseStyle `
-        -MaxResponseLines $maxResponseLines
+        -MaxResponseLines $maxResponseLines `
+        -MemoryContextInfo $memoryContextInfo
     if ($writePromptFiles) {
         Set-Content -LiteralPath $promptPath -Value $promptText -Encoding utf8
     }
@@ -3117,6 +3232,12 @@ foreach ($agent in $spec.agents) {
         persona_domain_ids = [string[]]$workerPersonaGuideInfo.domain_ids
         workflow_prompt_mode = $workflowRenderInfo.mode
         workflow_prompt_chars = if ($workflowRenderInfo.text) { $workflowRenderInfo.text.Length } else { 0 }
+        memory_mode = $workerMemoryMode
+        memory_query = $memoryQuery
+        memory_context_file = $memoryContextInfo.relative_path
+        memory_snippet_count = [int]$memoryContextInfo.snippet_count
+        memory_injected_chars = [int]$memoryContextInfo.injected_chars
+        memory_hit_paths = [string[]]$memoryContextInfo.hit_paths
         command = Join-ArgLine -Items (@($resolvedCodexExecutable) + $cmdArgs.ToArray())
         args = [string[]]$cmdArgs.ToArray()
         arg_line = Join-ArgLine -Items $cmdArgs.ToArray()
@@ -3163,6 +3284,12 @@ $efficiencySignals = Get-StructureEfficiencySignals `
     -Results $results `
     -ExecutionMode $executionMode `
     -PolicyEvaluation $policyEvaluation
+$runMemoryArtifacts = if ($memoryConfig.active) {
+    Write-RunMemoryArtifacts -MemoryConfig $memoryConfig -Results $results -RequestedDeliverables $requestedDeliverables
+} else {
+    $null
+}
+$memoryMetrics = Get-MemoryMetrics -MemoryConfig $memoryConfig -WorkerContextInfos $memoryWorkerContextInfos -RunMemoryArtifacts $runMemoryArtifacts
 
 $manifestDirectory = Split-Path -Parent $manifestFile
 if (-not [string]::IsNullOrWhiteSpace($manifestDirectory)) {
@@ -3171,7 +3298,7 @@ if (-not [string]::IsNullOrWhiteSpace($manifestDirectory)) {
 
 $manifest = [ordered]@{
     created_at_utc = (Get-Date).ToUniversalTime().ToString("o")
-    launcher_version = "2026-03-08-v5"
+    launcher_version = "2026-03-12-v6"
     launcher_script = $MyInvocation.MyCommand.Path
     spec_path = $specPathResolved
     spec_directory = $specDirectory
@@ -3228,6 +3355,10 @@ $manifest = [ordered]@{
     results = $results
 }
 
+if ($memoryMetrics) {
+    $manifest.memory = $memoryMetrics
+}
+
 Write-LauncherDebug "writing_manifest"
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestFile -Encoding utf8
 Write-LauncherDebug "manifest_written"
@@ -3249,7 +3380,8 @@ if ($writeSummaryFile) {
         -ManifestPath $manifestFile `
         -PolicyEvaluation $policyEvaluation `
         -ArchiveInfo $archiveInfo `
-        -EfficiencySignals $efficiencySignals
+        -EfficiencySignals $efficiencySignals `
+        -MemoryMetrics $memoryMetrics
     Set-Content -LiteralPath $summaryFile -Value $summaryText -Encoding utf8
     Write-LauncherDebug "summary_written"
 }
@@ -3284,6 +3416,10 @@ $finalOutput = [pscustomobject]@{
     policy = $policyEvaluation
     stage_plan = $stagePlan
     results = $results
+}
+
+if ($memoryMetrics) {
+    $finalOutput | Add-Member -NotePropertyName memory -NotePropertyValue $memoryMetrics
 }
 
 if ($AsJson) {

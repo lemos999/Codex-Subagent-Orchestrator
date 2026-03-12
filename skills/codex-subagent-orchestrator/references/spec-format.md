@@ -32,6 +32,11 @@ Use this format when you want repeatable worker orchestration with per-worker se
   "material_issue_strategy": "fixer_then_rereview",
   "shared_directive_mode": "hybrid",
   "persona_guide_mode": "dynamic",
+  "memory": {
+    "enabled": true,
+    "mode": "hybrid",
+    "root": ".codex-memory"
+  },
   "workflow_file": "WORKFLOW.md",
   "workflow_auto_detect": true,
   "workflow_prompt_mode": "prepend",
@@ -99,6 +104,7 @@ Use this format when you want repeatable worker orchestration with per-worker se
 | `persona_guide_file` | no | File containing a persona-design guide for `/sub` workers |
 | `persona_guide_text` | no | Inline persona-design guide text when you do not want to use the built-in guide |
 | `persona_guide_mode` | no | `dynamic`, `compact`, `reference`, or `disabled`; defaults to `dynamic` |
+| `memory` | no | Optional file-backed memory config. Keep it disabled or absent unless you want `.codex-memory/` scaffolded and worker runtime memory files attached via `Read first`. |
 | `workflow_file` | no | Optional `WORKFLOW.md`-style prompt template file to render into each worker prompt |
 | `workflow_auto_detect` | no | When true, the launcher will also look for `WORKFLOW.md` in the workspace root after bootstrap; defaults to `true` |
 | `workflow_prompt_mode` | no | `prepend`, `replace`, or `disabled`; controls how rendered workflow text combines with worker `prompt` or `task` |
@@ -216,6 +222,7 @@ Optional fields:
 - `response_style`
 - `max_response_lines`
 - `output_last_message_file`
+- `memory_mode`
 - `workflow_prompt_mode`
 - `workflow_context`
 - `workflow_context_file`
@@ -448,6 +455,17 @@ When `write_summary_file` is true, the launcher also writes one compact summary 
 - workflow template metadata and rendered context inputs
 - workspace bootstrap hook decisions and exit status
 - one short line per worker for parent-side handoff
+- memory enablement, runtime-file counts, retain/optimize counts, and index chunk totals when a `memory` block is configured
+
+## Memory Block
+
+When the optional top-level `memory` object is present:
+
+- `memory.enabled: false` preserves old behavior and does not scaffold `.codex-memory/`
+- `memory.mode` supports `off`, `reference`, `core`, `retrieval`, and `hybrid`
+- the launcher writes `.codex-memory/` Markdown files as the source of truth and `index/memory-index.json` as a rebuildable derived index
+- worker prompts get a short memory policy plus a generated runtime file path under `.codex-memory/runtime/worker-memory/`
+- reviewer and validator workers stay read-only; with `memory.mode: "hybrid"` they default to `core` memory while implementers, fixers, and planners default to `retrieval`
 
 If `debug_log_file` is set, the launcher also writes a lightweight trace of parent-side orchestration events such as process start, timeout, result collection, and manifest write.
 

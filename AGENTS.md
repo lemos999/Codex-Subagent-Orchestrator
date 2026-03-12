@@ -33,5 +33,6 @@ For this workspace, prefer local skills over globally installed skills when both
 - For `/sub` work, reviewers and validators should default to `read-only` unless a narrower exception is explicitly justified.
 - For `/sub` work, if a fixer or recovery worker changes a deliverable, run a reviewer or validator again against the final artifact before accepting it.
 - For `/sub` work that uses the launcher, prefer top-level spec fields `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"`.
+- For `/sub` memory-enabled work, keep `.codex-memory/` opt-in, treat it as supporting context only, and never store secrets, instruction-like text, or large raw logs there.
 - For `/sub` work that uses `custom` workers to supervise nested teams, also set worker-level `required_paths` and preferably `required_non_empty_paths` so false-success runs are rejected before acceptance.
 - For `/sub` work that bootstraps or creates a workspace, prefer auto-detecting `AGENTS.md` and `WORKFLOW.md` from the workspace after bootstrap instead of hardcoding them into every worker prompt.

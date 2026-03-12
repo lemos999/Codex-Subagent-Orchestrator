@@ -23,6 +23,11 @@
   "output": {
     "root": "queue-output"
   },
+  "memory": {
+    "enabled": true,
+    "mode": "hybrid",
+    "root": ".codex-memory"
+  },
   "hooks": {
     "after_create": "git clone --depth 1 https://github.com/your-org/your-repo.git .",
     "after_create_sentinel_paths": [

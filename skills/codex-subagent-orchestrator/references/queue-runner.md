@@ -51,6 +51,11 @@ Arguments:
     "root": "queue-output",
     "report_file": "queue-output/queue-report.md"
   },
+  "memory": {
+    "enabled": true,
+    "mode": "hybrid",
+    "root": ".codex-memory"
+  },
   "hooks": {
     "after_create": "git clone --depth 1 https://github.com/your-org/your-repo.git .",
     "after_create_sentinel_paths": [".git", "WORKFLOW.md", "AGENTS.md"]
@@ -179,6 +184,10 @@ The queue runner only reads tracker state. Ticket edits, state transitions, PR l
 8. Track completion, backoff, and per-issue artifacts in `queue-state.json`
 9. Write a human-readable `queue-report.md`
 10. Skip redispatching unchanged completed task versions
+
+## Memory Propagation
+
+If the queue config includes a top-level `memory` block, the queue runner copies that block into every generated per-issue launcher spec. This keeps memory opt-in, preserves disabled behavior when the block is absent, and lets issue workspaces reuse the same `.codex-memory/` settings without expanding worker prompts inline.
 
 ## Auto-Detected Contracts
 

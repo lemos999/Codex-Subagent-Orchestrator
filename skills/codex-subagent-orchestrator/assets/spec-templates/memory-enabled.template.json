@@ -1,0 +1,115 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/memory-enabled",
+  "manifest_file": "subagent-runs/memory-enabled/orchestration-manifest.json",
+  "summary_file": "subagent-runs/memory-enabled/orchestration-summary.md",
+  "debug_log_file": "subagent-runs/memory-enabled/launcher-debug.log",
+  "skip_git_repo_check": true,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "requested_deliverables": [
+    "memory-demo/note.txt"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "shared_directive_mode": "hybrid",
+  "persona_guide_mode": "dynamic",
+  "memory": {
+    "enabled": true,
+    "mode": "hybrid",
+    "root": ".codex-memory",
+    "core": {
+      "max_chars": 500
+    },
+    "retrieval": {
+      "max_snippets": 4,
+      "max_chars": 1400,
+      "min_score": 0.18,
+      "attach_as_read_first": true,
+      "write_runtime_file": true
+    },
+    "search": {
+      "candidate_limit": 12,
+      "recency": {
+        "enabled": true,
+        "half_life_days": 21
+      },
+      "dedupe": {
+        "enabled": true,
+        "jaccard_threshold": 0.75
+      }
+    },
+    "retain": {
+      "enabled": true,
+      "max_entry_chars": 500
+    },
+    "optimize": {
+      "enabled": true,
+      "every_completed_runs": 5,
+      "memory_max_chars": 4000,
+      "active_max_chars": 2500,
+      "daily_max_chars": 12000,
+      "prune_ttl_days": 45
+    }
+  },
+  "defaults": {
+    "model": "gpt-5.4",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 4
+  },
+  "agents": [
+    {
+      "name": "memory-implementer",
+      "kind": "implementer",
+      "role": "implementer",
+      "mission": "Create a small deliverable while using the generated memory runtime file as supporting context only.",
+      "sandbox": "workspace-write",
+      "task": "Create or replace memory-demo/note.txt with exactly two lines: MEMORY and ENABLED.",
+      "read_first": [
+        "README.md"
+      ],
+      "required_paths": [
+        "memory-demo/note.txt"
+      ],
+      "required_non_empty_paths": [
+        "memory-demo/note.txt"
+      ],
+      "writable_scope": [
+        "memory-demo/note.txt"
+      ],
+      "validation": [
+        "Ensure memory-demo/note.txt exists.",
+        "Ensure the file contains exactly two lines: MEMORY and ENABLED."
+      ],
+      "return_contract": [
+        "Confirm the file was created and validated."
+      ]
+    },
+    {
+      "name": "memory-reviewer",
+      "kind": "reviewer",
+      "role": "reviewer",
+      "mission": "Review the final deliverable without modifying anything and treat memory as supporting context only.",
+      "sandbox": "read-only",
+      "task": "Review memory-demo/note.txt and confirm whether it exists and contains exactly the lines MEMORY and ENABLED. Do not modify files.",
+      "read_first": [
+        "README.md",
+        "memory-demo/note.txt"
+      ],
+      "validation": [
+        "Check that the file exists.",
+        "Check that the file has exactly two lines.",
+        "Check that the lines are MEMORY and ENABLED."
+      ],
+      "return_contract": [
+        "If there is a problem, list it first.",
+        "If there is no problem, state that the sample file is correct."
+      ]
+    }
+  ]
+}

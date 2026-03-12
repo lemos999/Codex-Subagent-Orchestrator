@@ -14,6 +14,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+. (Join-Path $PSScriptRoot "codex-memory.ps1")
+
 function Get-OptionalProperty {
     param(
         $Object,
@@ -515,6 +517,7 @@ function Get-QueueConfig {
     $output = ConvertTo-NormalizedMap (Get-OptionalProperty $RawConfig "output")
     $launcher = ConvertTo-NormalizedMap (Get-OptionalProperty $RawConfig "launcher")
     $hooks = ConvertTo-NormalizedMap (Get-OptionalProperty $RawConfig "hooks")
+    $memory = Get-MemorySpecValue -Object $RawConfig
 
     $trackerKind = [string](Get-OptionalProperty $tracker "kind")
     if ([string]::IsNullOrWhiteSpace($trackerKind)) {
@@ -654,6 +657,7 @@ function Get-QueueConfig {
             agents_template = ConvertTo-NormalizedValue $agentsTemplate
         }
         hooks = $hooks
+        memory = $memory
     }
 }
 
@@ -1133,7 +1137,14 @@ function Load-StateFile {
         }
     }
 
-    $decoded = (Get-Content -LiteralPath $StateFile -Raw) | ConvertFrom-Json -ErrorAction Stop
+    $decoded = Read-RollbackSafeJsonFile -Path $StateFile
+    if ($null -eq $decoded) {
+        return [ordered]@{
+            updated_at_utc = $null
+            issues = [ordered]@{}
+        }
+    }
+
     $issues = ConvertTo-NormalizedMap (Get-OptionalProperty $decoded "issues")
     return [ordered]@{
         updated_at_utc = [string](Get-OptionalProperty $decoded "updated_at_utc")
@@ -1153,7 +1164,7 @@ function Save-StateFile {
     }
 
     $State.updated_at_utc = Get-TimestampUtc
-    $State | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $StateFile -Encoding utf8
+    Write-RollbackSafeFile -Path $StateFile -Content ($State | ConvertTo-Json -Depth 12) | Out-Null
 }
 
 function Get-IssueStateRecord {
@@ -1253,13 +1264,16 @@ function New-IssueLauncherSpec {
     if ($QueueConfig.workflow_file) {
         $spec.workflow_file = $QueueConfig.workflow_file
     }
+    if ($QueueConfig.memory) {
+        $spec.memory = $QueueConfig.memory
+    }
 
     $directory = Split-Path -Parent $generatedSpecPath
     if (-not [string]::IsNullOrWhiteSpace($directory)) {
         New-Item -ItemType Directory -Path $directory -Force | Out-Null
     }
 
-    $spec | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $generatedSpecPath -Encoding utf8
+    Write-RollbackSafeFile -Path $generatedSpecPath -Content ($spec | ConvertTo-Json -Depth 12) | Out-Null
 
     return [pscustomobject]@{
         spec_path = $generatedSpecPath
@@ -1495,7 +1509,7 @@ function Write-QueueReport {
         }
     }
 
-    [string]::Join([Environment]::NewLine, $lines) | Set-Content -LiteralPath $reportPath -Encoding utf8
+    Write-RollbackSafeFile -Path $reportPath -Content ([string]::Join([Environment]::NewLine, $lines)) | Out-Null
 }
 
 if (-not (Test-Path -LiteralPath $ConfigPath)) {

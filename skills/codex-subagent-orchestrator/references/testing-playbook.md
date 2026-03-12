@@ -21,8 +21,10 @@ A healthy launcher run should produce:
 2. Run two independent workers in parallel.
 3. Run two independent writers in parallel and a read-only reviewer in a later stage.
 4. Run a nested-spec root-safety check where the spec file itself lives under `subagent-runs/...` but `cwd: "."` still resolves to the real workspace root.
-5. Re-run at least one spec with an absolute non-ASCII workspace path if you need portability confidence for extracted folders.
-6. Only after those pass, test a full `/sub` request from chat.
+5. Run a memory-enabled launcher spec and confirm `.codex-memory/runtime/worker-memory/*.md` plus manifest memory metrics are written.
+6. Re-run at least one spec with `memory.enabled: false` and confirm prompt files and summaries still work without memory injection.
+7. Re-run at least one spec with an absolute non-ASCII workspace path if you need portability confidence for extracted folders.
+8. Only after those pass, test a full `/sub` request from chat.
 
 ## Template Specs
 
@@ -32,6 +34,7 @@ Use the bundled templates under `assets/spec-templates/`:
 - `parallel-two-files.template.json`
 - `parallel-implementers-reviewer.template.json`
 - `implementer-reviewer.template.json`
+- `memory-enabled.template.json`
 - `nested-root-safety.template.json`
 
 The bundled templates now default to:
@@ -73,6 +76,7 @@ in the spec before running.
 - The manifest `stage_plan` matches the intended parallel grouping.
 - If `debug_log_file` is enabled, the trace reaches `manifest_written`.
 - If a recovery run creates a second delivery attempt, run a reviewer worker against the final successful artifact before accepting it.
+- If memory is enabled, confirm the reviewer still runs with `read-only`, the runtime memory file exists only for non-`off` workers, and manifest `memory.*` fields match the run.
 
 ## Efficiency Checklist
 
