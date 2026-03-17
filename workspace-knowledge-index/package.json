@@ -1,0 +1,38 @@
+{
+  "name": "workspace-knowledge-index",
+  "version": "0.1.0",
+  "description": "Workspace Knowledge Index - semantic code search for AI agents",
+  "type": "module",
+  "bin": {
+    "wki": "dist/index.js",
+    "wki-mcp": "dist/mcp/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "dev": "tsc --watch"
+  },
+  "engines": {
+    "node": "^20 || ^22 || ^24"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.0.0",
+    "picomatch": "^4.0.3",
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
+    "@lancedb/lancedb": "^0.26.2",
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "better-sqlite3": "^12.8.0",
+    "openai": "^6.29.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "zod": "^4.3.6"
+  }
+}

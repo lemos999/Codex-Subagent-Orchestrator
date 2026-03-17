@@ -1,0 +1,66 @@
+{
+  "projects": [
+    {
+      "name": "my-project",
+      "root": ".",
+      "exclude": ["node_modules", "dist", ".next", "dev.db"]
+    }
+  ],
+
+  "storage": {
+    "index_root": ".knowledge",
+    "vector_backend": "lancedb",
+    "lancedb": {
+      "path": ".knowledge/{project}/vectors.lance"
+    },
+    "qdrant": {
+      "url": "http://localhost:6333",
+      "api_key": null
+    }
+  },
+
+  "embedding": {
+    "provider": "local",
+    "openai": {
+      "model": "text-embedding-3-large",
+      "dimensions": 768
+    },
+    "voyage": {
+      "model": "voyage-4-lite",
+      "dimensions": 1024
+    },
+    "local": {
+      "runtime": "transformers.js",
+      "model": "Xenova/bge-small-en-v1.5",
+      "dimensions": 384
+    }
+  },
+
+  "schema_version": 1,
+
+  "chunking": {
+    "max_lines": 200,
+    "overlap_lines": 50,
+    "max_tokens": 1000
+  },
+
+  "indexing": {
+    "concurrency": 4,
+    "max_file_size_mb": 10,
+    "follow_gitignore": true,
+    "timeout_ms": 30000,
+    "retry": 2
+  },
+
+  "logging": {
+    "level": "info"
+  },
+
+  "search": {
+    "fts_db": ".knowledge/{project}/fts.db",
+    "fusion": {
+      "strategy": "weighted_sum",
+      "weights": { "fts": 0.4, "vector": 0.6 }
+    }
+  }
+}
