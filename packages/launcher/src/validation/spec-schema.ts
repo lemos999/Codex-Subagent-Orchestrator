@@ -29,13 +29,6 @@ const WorkerKindSchema = z.enum([
 // ============================================================
 
 const UNSUPPORTED_TOP_LEVEL_FIELDS = [
-  'workflow_file',
-  'workflow_auto_detect',
-  'workflow_prompt_mode',
-  'workflow_context',
-  'workflow_context_file',
-  'workflow_render_strict',
-  'hooks',
   'write_run_archive',
   'archive_root',
   'archive_run_label',

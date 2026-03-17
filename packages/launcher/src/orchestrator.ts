@@ -13,6 +13,8 @@ import { writeManifest } from './evidence/manifest-writer.js';
 import { writeSummary } from './evidence/summary-writer.js';
 import { UsageMonitor } from './workers/usage-monitor.js';
 import { validatePolicies } from './supervisor/policy.js';
+import { runAfterCreateHook } from './supervisor/hooks.js';
+import { loadWorkflow } from './supervisor/workflow.js';
 import type { LauncherSpec } from './types/spec.js';
 import type {
   Manifest,
@@ -226,6 +228,8 @@ function buildManifest(
   results: WorkerResult[],
   sharedDirective: { text: string | null; source: string | null; sha256: string | null },
   specSha256: string,
+  hookResult?: import('./supervisor/hooks.js').HookResult,
+  workflowInfo?: import('./supervisor/workflow.js').WorkflowInfo,
 ): Manifest {
   const defaultEngine = spec.defaults?.engine ?? 'codex';
   const succeededCount = results.filter((r) => r.succeeded).length;
@@ -311,28 +315,30 @@ function buildManifest(
     effective_char_count: directiveCharCount,
   };
 
+  const wf = workflowInfo;
   const workflow: ManifestWorkflow = {
-    enabled: false,
-    source: null,
-    prompt_mode: 'disabled',
-    strict_render: true,
-    auto_detected: false,
+    enabled: wf?.enabled ?? false,
+    source: wf?.source ?? null,
+    prompt_mode: wf?.promptMode ?? 'disabled',
+    strict_render: wf?.strictRender ?? true,
+    auto_detected: wf?.autoDetected ?? false,
     front_matter_text: null,
-    prompt_template_sha256: null,
-    prompt_template_chars: 0,
-    context: {},
+    prompt_template_sha256: wf?.templateSha256 ?? null,
+    prompt_template_chars: wf?.templateChars ?? 0,
+    context: wf?.context ?? {},
   };
 
+  const hr = hookResult;
   const hooks: ManifestHooks = {
     after_create: {
-      enabled: false,
-      ran: false,
-      trigger: null,
-      exit_code: null,
-      missing_sentinel_paths: [],
-      workspace_was_empty: false,
-      stdout: null,
-      stderr: null,
+      enabled: spec.hooks?.after_create !== undefined,
+      ran: hr?.ran ?? false,
+      trigger: hr?.trigger ?? null,
+      exit_code: hr?.exitCode ?? null,
+      missing_sentinel_paths: hr?.missingPaths ?? [],
+      workspace_was_empty: hr?.workspaceWasEmpty ?? false,
+      stdout: hr?.stdout ?? null,
+      stderr: hr?.stderr ?? null,
     },
   };
 
@@ -456,8 +462,12 @@ export async function orchestrate(
   // Ensure output directory exists
   await fs.mkdir(resolvedPaths.outputDir, { recursive: true });
 
-  // Phase 4: Bootstrap (shared directive)
+  // Phase 3.5: Run after_create hook
+  const hookResult = await runAfterCreateHook(spec.hooks, resolvedPaths.workspaceRoot);
+
+  // Phase 4: Bootstrap (shared directive + workflow)
   const sharedDirective = await loadSharedDirective(spec, resolvedPaths);
+  const workflow = await loadWorkflow(spec, resolvedPaths.workspaceRoot);
 
   // Phase 5: Build stage plan and validate policies
   const stagePlan = buildStagePlan(spec);
@@ -504,6 +514,8 @@ export async function orchestrate(
     results,
     sharedDirective,
     specSha256,
+    hookResult,
+    workflow,
   );
 
   // Phase 8: Write evidence
