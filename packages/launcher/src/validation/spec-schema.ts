@@ -39,9 +39,6 @@ const UNSUPPORTED_TOP_LEVEL_FIELDS = [
   'write_run_archive',
   'archive_root',
   'archive_run_label',
-  'require_final_read_only_review',
-  'material_issue_strategy',
-  'supervisor_only',
 ] as const;
 
 const UNSUPPORTED_AGENT_FIELDS = [

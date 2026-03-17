@@ -12,6 +12,7 @@ import { runStages } from './supervisor/stage-runner.js';
 import { writeManifest } from './evidence/manifest-writer.js';
 import { writeSummary } from './evidence/summary-writer.js';
 import { UsageMonitor } from './workers/usage-monitor.js';
+import { validatePolicies } from './supervisor/policy.js';
 import type { LauncherSpec } from './types/spec.js';
 import type {
   Manifest,
@@ -458,8 +459,20 @@ export async function orchestrate(
   // Phase 4: Bootstrap (shared directive)
   const sharedDirective = await loadSharedDirective(spec, resolvedPaths);
 
-  // Phase 5: Build stage plan and resolve workers
+  // Phase 5: Build stage plan and validate policies
   const stagePlan = buildStagePlan(spec);
+
+  // Policy enforcement — reject invalid team shapes before execution
+  const policyViolations = validatePolicies(spec, stagePlan);
+  const policyErrors = policyViolations.filter((v) => v.severity === 'error');
+  if (policyErrors.length > 0) {
+    const messages = policyErrors.map((v) => `[${v.rule}] ${v.message}`).join('\n');
+    throw new Error(`Policy violations:\n${messages}`);
+  }
+  // Log warnings
+  for (const v of policyViolations.filter((w) => w.severity === 'warning')) {
+    console.error(`[policy warning] ${v.rule}: ${v.message}`);
+  }
   const workers = resolveWorkers(spec, resolvedPaths, sharedDirective.text);
 
   // Phase 5.5: Initialize usage monitor (if configured)
