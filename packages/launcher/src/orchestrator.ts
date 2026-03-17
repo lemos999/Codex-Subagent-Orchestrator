@@ -11,6 +11,7 @@ import { resolvePaths } from './supervisor/path-resolver.js';
 import { runStages } from './supervisor/stage-runner.js';
 import { writeManifest } from './evidence/manifest-writer.js';
 import { writeSummary } from './evidence/summary-writer.js';
+import { UsageMonitor } from './workers/usage-monitor.js';
 import type { LauncherSpec } from './types/spec.js';
 import type {
   Manifest,
@@ -452,9 +453,26 @@ export async function orchestrate(
   const stagePlan = buildStagePlan(spec);
   const workers = resolveWorkers(spec, resolvedPaths, sharedDirective.text);
 
+  // Phase 5.5: Initialize usage monitor (if configured)
+  let usageMonitor: UsageMonitor | undefined;
+  if (spec.live_usage?.enabled) {
+    const usageStatusFile = spec.live_usage.status_file
+      ? path.resolve(resolvedPaths.outputDir, spec.live_usage.status_file)
+      : path.resolve(resolvedPaths.outputDir, 'orchestration-usage.json');
+    usageMonitor = new UsageMonitor({
+      ...spec.live_usage,
+      status_file: usageStatusFile,
+    });
+    usageMonitor.start();
+  }
+
   // Phase 6: Execute
   const executionMode = spec.execution_mode ?? 'parallel';
-  const results = await runStages(stagePlan, workers, executionMode);
+  const results = await runStages(stagePlan, workers, executionMode, usageMonitor);
+
+  // Phase 6.5: Stop usage monitor and get final snapshot
+  const usageSnapshot = usageMonitor ? await usageMonitor.stop() : null;
+  void usageSnapshot; // Available for manifest enhancement in Phase 3
 
   // Phase 7: Build manifest
   const manifest = buildManifest(

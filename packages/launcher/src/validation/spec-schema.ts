@@ -36,7 +36,6 @@ const UNSUPPORTED_TOP_LEVEL_FIELDS = [
   'workflow_context_file',
   'workflow_render_strict',
   'hooks',
-  'live_usage',
   'write_run_archive',
   'archive_root',
   'archive_run_label',

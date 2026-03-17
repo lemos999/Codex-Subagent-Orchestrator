@@ -13,6 +13,7 @@ import {
   toWorkerResult,
   type ResolvedWorkerSpec,
 } from '../workers/spawn.js';
+import type { UsageMonitor } from '../workers/usage-monitor.js';
 
 // ============================================================
 // Path validation helpers
@@ -49,7 +50,13 @@ async function findEmptyPaths(paths: string[]): Promise<string[]> {
 // Single worker execution with validation
 // ============================================================
 
-async function executeWorker(spec: ResolvedWorkerSpec): Promise<WorkerResult> {
+async function executeWorker(spec: ResolvedWorkerSpec, monitor?: UsageMonitor): Promise<WorkerResult> {
+  // Register with usage monitor before spawn
+  if (monitor?.enabled) {
+    const stdoutPath = `${spec.outputDir}/${spec.name}.stdout.log`;
+    monitor.registerWorker(spec.name, stdoutPath);
+  }
+
   const output = await spawnWorker(spec);
 
   const missingPaths = await findMissingPaths(spec.requiredPaths);
@@ -67,6 +74,11 @@ async function executeWorker(spec: ResolvedWorkerSpec): Promise<WorkerResult> {
     );
   }
 
+  // Notify usage monitor
+  if (monitor?.enabled) {
+    monitor.markWorkerDone(spec.name, output.exitCode);
+  }
+
   return toWorkerResult(spec, output, validationFailures, missingPaths, emptyPaths);
 }
 
@@ -78,6 +90,7 @@ export async function runStages(
   stages: StagePlan[],
   workers: ResolvedWorkerSpec[],
   executionMode: ExecutionMode = 'sequential',
+  monitor?: UsageMonitor,
 ): Promise<WorkerResult[]> {
   const results: WorkerResult[] = [];
   const workerMap = new Map(workers.map((w) => [w.name, w]));
@@ -95,7 +108,7 @@ export async function runStages(
     if (executionMode === 'parallel' && stageWorkers.length > 1) {
       // Parallel: same-stage workers run concurrently
       const settled = await Promise.allSettled(
-        stageWorkers.map((w) => executeWorker(w)),
+        stageWorkers.map((w) => executeWorker(w, monitor)),
       );
 
       for (let i = 0; i < settled.length; i++) {
@@ -157,7 +170,7 @@ export async function runStages(
     } else {
       // Sequential: one worker at a time
       for (const spec of stageWorkers) {
-        const result = await executeWorker(spec);
+        const result = await executeWorker(spec, monitor);
         results.push(result);
       }
     }
