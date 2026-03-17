@@ -6,6 +6,7 @@
  */
 
 import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 import type { StagePlan, WorkerResult } from '../types/manifest.js';
 import type { ExecutionMode } from '../types/engine.js';
 import {
@@ -53,7 +54,7 @@ async function findEmptyPaths(paths: string[]): Promise<string[]> {
 async function executeWorker(spec: ResolvedWorkerSpec, monitor?: UsageMonitor): Promise<WorkerResult> {
   // Register with usage monitor before spawn
   if (monitor?.enabled) {
-    const stdoutPath = `${spec.outputDir}/${spec.name}.stdout.log`;
+    const stdoutPath = path.resolve(spec.outputDir, `${spec.name}.stdout.log`);
     monitor.registerWorker(spec.name, stdoutPath);
   }
 

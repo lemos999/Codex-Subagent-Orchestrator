@@ -275,11 +275,14 @@ function buildManifest(
     0,
   );
 
+  const liveUsageCfg = spec.live_usage;
   const liveUsage: ManifestLiveUsage = {
-    enabled: false,
-    display_mode: 'none',
-    poll_interval_ms: 500,
-    status_file: null,
+    enabled: liveUsageCfg?.enabled ?? false,
+    display_mode: liveUsageCfg?.display_mode ?? 'none',
+    poll_interval_ms: liveUsageCfg?.poll_interval_ms ?? 500,
+    status_file: liveUsageCfg?.status_file
+      ? path.resolve(resolvedPaths.outputDir, liveUsageCfg.status_file)
+      : null,
     json_output_forced: false,
   };
 
@@ -366,9 +369,11 @@ function buildManifest(
     full_auto_writable_workers: fullAutoWritable,
     full_auto_read_only_workers: fullAutoReadOnly,
     stage_count: stagePlan.length,
-    parallel_stage_count: 0, // Phase 1: no parallel
+    parallel_stage_count: (spec.execution_mode ?? 'sequential') === 'parallel'
+      ? stagePlan.filter((s) => s.worker_count > 1).length
+      : 0,
     max_parallel_workers_in_stage: maxParallelInStage,
-    uses_parallel_execution: false,
+    uses_parallel_execution: (spec.execution_mode ?? 'sequential') === 'parallel',
     uses_supervisor_only_policy: false,
     uses_bounded_repair_policy: false,
     final_read_only_review_present: false,
@@ -378,11 +383,15 @@ function buildManifest(
 
   const defaults: Record<string, unknown> = {};
   if (spec.defaults) {
-    if (spec.defaults.engine) defaults.engine = spec.defaults.engine;
-    if (spec.defaults.model) defaults.model = spec.defaults.model;
-    if (spec.defaults.sandbox) defaults.sandbox = spec.defaults.sandbox;
-    if (spec.defaults.reasoning_effort)
-      defaults.reasoning_effort = spec.defaults.reasoning_effort;
+    const d = spec.defaults;
+    if (d.engine !== undefined) defaults.engine = d.engine;
+    if (d.model !== undefined) defaults.model = d.model;
+    if (d.sandbox !== undefined) defaults.sandbox = d.sandbox;
+    if (d.reasoning_effort !== undefined) defaults.reasoning_effort = d.reasoning_effort;
+    if (d.json !== undefined) defaults.json = d.json;
+    if (d.prompt_profile !== undefined) defaults.prompt_profile = d.prompt_profile;
+    if (d.response_style !== undefined) defaults.response_style = d.response_style;
+    if (d.max_response_lines !== undefined) defaults.max_response_lines = d.max_response_lines;
   }
 
   return {
@@ -394,7 +403,7 @@ function buildManifest(
     spec_sha256: specSha256,
     codex_executable: 'codex',
     claude_executable: 'claude',
-    gemini_executable: 'npx.cmd',
+    gemini_executable: process.platform === 'win32' ? 'npx.cmd' : 'npx',
     invocation_cwd: resolvedPaths.invocationCwd,
     cwd_requested: spec.cwd,
     cwd_resolution_mode: spec.cwd_resolution ?? 'invocation',
@@ -467,7 +476,7 @@ export async function orchestrate(
   }
 
   // Phase 6: Execute
-  const executionMode = spec.execution_mode ?? 'parallel';
+  const executionMode = spec.execution_mode ?? 'sequential';
   const results = await runStages(stagePlan, workers, executionMode, usageMonitor);
 
   // Phase 6.5: Stop usage monitor and get final snapshot
