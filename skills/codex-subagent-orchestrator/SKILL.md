@@ -1,9 +1,9 @@
 ---
-name: codex-subagent-orchestrator
+name: subagent-orchestrator
 description: Orchestrate one or more `codex exec` subagents for delegated implementation, review, analysis, or generation work. Use when Codex should act as a supervisor that decomposes a user request, autonomously decides team size and worker roles, assigns bounded tasks to child Codex runs, adjusts model, sandbox, and reasoning effort per worker, runs workers sequentially or in parallel, resumes workers as needed, and validates outputs before reporting back. Trigger when the user explicitly starts a request with `/sub`, or asks for subagents, worker teams, parallel Codex execution, delegated task execution, supervisory workflows, or multi-agent delivery inside a local workspace.
 ---
 
-# Codex Subagent Orchestrator
+# Subagent Orchestrator
 
 ## Overview
 
@@ -56,6 +56,7 @@ The parent should:
 - Keep `last.txt`, prompt files, and the launcher manifest unless the user explicitly wants cleanup.
 - Prefer the generated orchestration summary over raw stdout when bringing worker results back into parent context.
 - Validate files and summaries before accepting a worker result.
+- **Evidence는 필수이며 생략 불가.** 런처가 `output_dir`에 evidence를 생성했는지 확인. `orchestration-summary.md`, `orchestration-manifest.json`, prompt 파일이 없으면 직접 작성. 사용자에게 결과 보고 전에 evidence 존재를 확인해야 한다.
 - Evaluate efficiency structure-first: fewer parent interventions, fewer full reruns, bounded fixer loops, and clean reviewer coverage matter more than raw token totals alone.
 - Default reviewers and validators to `read-only`. If they need write access, the parent should justify that deviation explicitly.
 - If a reviewer or validator finds a material issue, launch a bounded fixer worker and then re-run review or validation on the repaired artifact before acceptance.

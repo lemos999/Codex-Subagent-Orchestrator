@@ -4,11 +4,24 @@ param(
 
     [string]$CodexExecutable = "codex",
 
+    # claude engine용 실행 파일
+    [string]$ClaudeExecutable = "claude",
+
+    # gemini engine용 실행 파일 (npx를 통해 @google/gemini-cli 실행)
+    # Windows에서 Start-Process는 .cmd 래퍼를 직접 실행할 수 없으므로 npx.cmd로 지정
+    [string]$GeminiExecutable = "npx.cmd",
+
     [switch]$AsJson
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+# UTF-8 인코딩 강제 — CLI 도구(claude, codex, gemini)는 모두 UTF-8 출력
+# Start-Process -RedirectStandardOutput는 [Console]::OutputEncoding을 따름
+$previousOutputEncoding = [Console]::OutputEncoding
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 
 $FallbackPrincipalEngineerDirective = @'
 You are a principal software engineer, reviewer, and production architect whose goal is to turn every request into code that improves code health, not merely code that runs once. For each task, infer the real objective, runtime environment, interfaces, invariants, data model, trust boundaries, failure modes, concurrency risks, performance limits, rollback needs, then choose the smallest design that fully solves problem without decorative abstraction. Favor clear names, explicit control flow, narrow public surfaces, cohesive modules, visible state, boundary validation, safe defaults, precise errors, and behavior that stays predictable under retries, timeouts, malformed input, partial failure, and load. Follow local conventions first, use idiomatic tooling, prefer the standard library and proven dependencies, preserve behavior during refactoring, and separate structural cleanup from behavior change when practical. Build security, observability, and operability into the code through least privilege, secret-safe handling, logs, metrics, traces, health signals, and graceful failure. Write tests around observable behavior, edge cases, regressions, and critical contracts. When details are missing, state the smallest safe assumption and continue. Before finalizing, run a silent senior review for correctness, simplicity, maintainability, security, performance, and rollback safety, then present brief assumptions and design intent, complete code, tests, and concise verification notes.
@@ -80,6 +93,41 @@ function Get-NormalizedChoice {
     }
 
     return $normalized
+}
+
+# agent 수준 engine > defaults.engine > "codex" (하위 호환)
+function Get-ResolvedEngine {
+    param(
+        $Agent,
+        $Defaults
+    )
+
+    $agentEngine = Get-OptionalProperty $Agent "engine"
+    if ($agentEngine) { return ([string]$agentEngine).ToLowerInvariant() }
+
+    if ($Defaults) {
+        $defaultEngine = Get-OptionalProperty $Defaults "engine"
+        if ($defaultEngine) { return ([string]$defaultEngine).ToLowerInvariant() }
+    }
+
+    return "codex"
+}
+
+# engine별 실행 파일 경로 반환
+function Get-EngineExecutable {
+    param(
+        [string]$Engine,
+        [string]$ResolvedCodexExe,
+        [string]$ClaudeExe,
+        [string]$GeminiExe
+    )
+
+    switch ($Engine) {
+        "codex"  { return $ResolvedCodexExe }
+        "claude" { return $ClaudeExe }
+        "gemini" { return $GeminiExe }
+        default  { throw "지원하지 않는 engine: $Engine. 허용 값: codex, claude, gemini" }
+    }
 }
 
 function Normalize-PathInput {
@@ -238,6 +286,583 @@ function Get-UniqueStringList {
     }
 
     return [string[]]$items.ToArray()
+}
+
+function Get-OptionalPropertyAny {
+    param(
+        $Object,
+        [string[]]$Names
+    )
+
+    foreach ($name in @($Names)) {
+        $value = Get-OptionalProperty -Object $Object -Name $name
+        if ($null -ne $value) {
+            return $value
+        }
+    }
+
+    return $null
+}
+
+function Get-NullableInt64 {
+    param($Value)
+
+    if ($null -eq $Value) {
+        return $null
+    }
+
+    if ($Value -is [byte] -or
+        $Value -is [int16] -or
+        $Value -is [int32] -or
+        $Value -is [int64] -or
+        $Value -is [uint16] -or
+        $Value -is [uint32] -or
+        $Value -is [uint64] -or
+        $Value -is [decimal] -or
+        $Value -is [double] -or
+        $Value -is [single]) {
+        return [int64]$Value
+    }
+
+    $text = ([string]$Value).Trim() -replace ",", ""
+    if ($text -match '^-?\d+$') {
+        return [int64]$text
+    }
+
+    return $null
+}
+
+function Get-TokenUsageBreakdown {
+    param($UsageObject)
+
+    if ($null -eq $UsageObject) {
+        return $null
+    }
+
+    $totalTokens = Get-NullableInt64 (Get-OptionalPropertyAny -Object $UsageObject -Names @("totalTokens", "total_tokens"))
+    if ($null -eq $totalTokens) {
+        return $null
+    }
+
+    return [pscustomobject]@{
+        cached_input_tokens = Get-NullableInt64 (Get-OptionalPropertyAny -Object $UsageObject -Names @("cachedInputTokens", "cached_input_tokens"))
+        input_tokens = Get-NullableInt64 (Get-OptionalPropertyAny -Object $UsageObject -Names @("inputTokens", "input_tokens"))
+        output_tokens = Get-NullableInt64 (Get-OptionalPropertyAny -Object $UsageObject -Names @("outputTokens", "output_tokens"))
+        reasoning_output_tokens = Get-NullableInt64 (Get-OptionalPropertyAny -Object $UsageObject -Names @("reasoningOutputTokens", "reasoning_output_tokens"))
+        total_tokens = $totalTokens
+    }
+}
+
+function Get-LiveUsageConfig {
+    param(
+        $Spec,
+        [string]$WorkspaceRoot,
+        [string]$OutputDir
+    )
+
+    $liveUsage = Get-OptionalProperty -Object $Spec -Name "live_usage"
+    if ($null -eq $liveUsage) {
+        return [pscustomobject]@{
+            enabled = $false
+            display_mode = "none"
+            write_progress = $false
+            write_status_file = $false
+            status_file = $null
+            poll_interval_ms = 500
+            forces_json = $false
+        }
+    }
+
+    $enabled = Get-BoolValue (Get-OptionalProperty -Object $liveUsage -Name "enabled") $false
+    $displayMode = Get-NormalizedChoice `
+        -Primary (Get-OptionalProperty -Object $liveUsage -Name "display_mode") `
+        -Fallback $null `
+        -Default $(if ($enabled) { "both" } else { "none" }) `
+        -AllowedValues @("none", "progress", "file", "both") `
+        -FieldName "live_usage.display_mode"
+    $statusFileValue = Get-OptionalProperty -Object $liveUsage -Name "status_file"
+    $statusFile = if ($statusFileValue) {
+        Resolve-AbsolutePath -Path ([string]$statusFileValue) -BaseDirectory $WorkspaceRoot -AllowMissing
+    } else {
+        Resolve-AbsolutePath -Path (Join-Path $OutputDir "orchestration-usage.json") -BaseDirectory $WorkspaceRoot -AllowMissing
+    }
+    $pollIntervalMs = Get-NullableInt64 (Get-OptionalProperty -Object $liveUsage -Name "poll_interval_ms")
+    if ($null -eq $pollIntervalMs -or $pollIntervalMs -lt 100) {
+        $pollIntervalMs = 500
+    }
+
+    return [pscustomobject]@{
+        enabled = [bool]$enabled
+        display_mode = $displayMode
+        write_progress = ($enabled -and $displayMode -in @("progress", "both"))
+        write_status_file = ($enabled -and $displayMode -in @("file", "both"))
+        status_file = $statusFile
+        poll_interval_ms = [int]$pollIntervalMs
+        forces_json = [bool]$enabled
+    }
+}
+
+function New-LiveUsageState {
+    param($Run)
+
+    return [pscustomobject]@{
+        name = $Run.name
+        stage = $Run.stage
+        worker_kind = $Run.worker_kind
+        is_read_only = $Run.is_read_only
+        requested_model = $Run.requested_model
+        actual_model = $null
+        stdout_path = $Run.stdout
+        stderr_path = $Run.stderr
+        status = "queued"
+        thread_id = $null
+        turn_id = $null
+        session_id = $null
+        total_tokens = $null
+        last_total_tokens = $null
+        cached_input_tokens = $null
+        input_tokens = $null
+        output_tokens = $null
+        reasoning_output_tokens = $null
+        model_context_window = $null
+        last_error = $null
+        started_at_utc = $null
+        completed_at_utc = $null
+        last_update_utc = $null
+        stdout_cursor = [pscustomobject]@{
+            offset = [int64]0
+            remainder = ""
+        }
+        stderr_cursor = [pscustomobject]@{
+            offset = [int64]0
+            remainder = ""
+        }
+    }
+}
+
+function Mark-LiveUsageStateStarted {
+    param($State)
+
+    if ($null -eq $State) {
+        return
+    }
+
+    if ($null -eq $State.started_at_utc) {
+        $State.started_at_utc = (Get-Date).ToUniversalTime().ToString("o")
+    }
+    $State.status = "running"
+    $State.last_update_utc = (Get-Date).ToUniversalTime().ToString("o")
+}
+
+function Mark-LiveUsageStateCompleted {
+    param(
+        $State,
+        [int]$ExitCode
+    )
+
+    if ($null -eq $State) {
+        return
+    }
+
+    $State.status = if ($ExitCode -eq 0) { "completed" } else { "failed" }
+    $State.completed_at_utc = (Get-Date).ToUniversalTime().ToString("o")
+    $State.last_update_utc = $State.completed_at_utc
+}
+
+function Read-AppendedTextLines {
+    param(
+        [string]$Path,
+        $Cursor
+    )
+
+    if ($null -eq $Cursor -or [string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path -LiteralPath $Path)) {
+        return @()
+    }
+
+    $stream = $null
+    $reader = $null
+    $text = $null
+    try {
+        $stream = [System.IO.File]::Open($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+        if ([int64]$Cursor.offset -gt $stream.Length) {
+            $Cursor.offset = [int64]0
+            $Cursor.remainder = ""
+        }
+        $null = $stream.Seek([int64]$Cursor.offset, [System.IO.SeekOrigin]::Begin)
+        $reader = New-Object System.IO.StreamReader($stream, [System.Text.Encoding]::UTF8, $true, 1024, $true)
+        $text = $reader.ReadToEnd()
+        $Cursor.offset = [int64]$stream.Position
+    } catch {
+        return @()
+    } finally {
+        if ($reader) {
+            $reader.Dispose()
+        }
+        if ($stream) {
+            $stream.Dispose()
+        }
+    }
+
+    if ([string]::IsNullOrEmpty($text)) {
+        return @()
+    }
+
+    $combined = [string]::Concat([string]$Cursor.remainder, [string]$text)
+    $normalized = $combined -replace "`r`n", "`n" -replace "`r", "`n"
+    if ($normalized.Length -eq 0) {
+        $Cursor.remainder = ""
+        return @()
+    }
+
+    $parts = @($normalized -split "`n")
+    if ($normalized.EndsWith("`n")) {
+        $Cursor.remainder = ""
+        if (@($parts).Count -gt 0 -and $parts[-1] -eq "") {
+            $parts = if (@($parts).Count -gt 1) {
+                @($parts[0..(@($parts).Count - 2)])
+            } else {
+                @()
+            }
+        }
+    } else {
+        $Cursor.remainder = $parts[-1]
+        $parts = if (@($parts).Count -gt 1) {
+            @($parts[0..(@($parts).Count - 2)])
+        } else {
+            @()
+        }
+    }
+
+    return @($parts)
+}
+
+function Update-LiveUsageStateFromBreakdown {
+    param(
+        $State,
+        $TotalBreakdown,
+        $LastBreakdown,
+        $ModelContextWindow
+    )
+
+    if ($null -eq $State) {
+        return
+    }
+
+    if ($TotalBreakdown) {
+        $State.cached_input_tokens = $TotalBreakdown.cached_input_tokens
+        $State.input_tokens = $TotalBreakdown.input_tokens
+        $State.output_tokens = $TotalBreakdown.output_tokens
+        $State.reasoning_output_tokens = $TotalBreakdown.reasoning_output_tokens
+        $State.total_tokens = $TotalBreakdown.total_tokens
+    }
+
+    if ($LastBreakdown) {
+        $State.last_total_tokens = $LastBreakdown.total_tokens
+    }
+
+    if ($null -ne $ModelContextWindow) {
+        $State.model_context_window = [int64]$ModelContextWindow
+    }
+
+    $State.last_update_utc = (Get-Date).ToUniversalTime().ToString("o")
+}
+
+function Update-LiveUsageStateFromJsonEntry {
+    param(
+        $State,
+        $Entry
+    )
+
+    if ($null -eq $State -or $null -eq $Entry) {
+        return
+    }
+
+    $entryType = Get-OptionalProperty -Object $Entry -Name "type"
+    $entryMethod = Get-OptionalProperty -Object $Entry -Name "method"
+    $normalizedType = if (-not [string]::IsNullOrWhiteSpace([string]$entryType)) {
+        [string]$entryType
+    } elseif (-not [string]::IsNullOrWhiteSpace([string]$entryMethod)) {
+        [string]$entryMethod
+    } else {
+        $null
+    }
+    $payload = Get-OptionalPropertyAny -Object $Entry -Names @("payload", "params")
+
+    if ($normalizedType -eq "session_meta") {
+        $sessionId = Get-OptionalProperty -Object $payload -Name "id"
+        if (-not $sessionId) {
+            $sessionId = Get-OptionalProperty -Object $Entry -Name "id"
+        }
+        if ($sessionId) {
+            $State.session_id = [string]$sessionId
+        }
+    }
+
+    if ($normalizedType -eq "turn_context") {
+        $model = Get-OptionalProperty -Object $payload -Name "model"
+        if ($model) {
+            $State.actual_model = [string]$model
+        }
+    }
+
+    if ($normalizedType -in @("thread.started", "thread/started")) {
+        $threadId = Get-OptionalPropertyAny -Object $Entry -Names @("thread_id", "threadId")
+        if (-not $threadId) {
+            $threadId = Get-OptionalPropertyAny -Object $payload -Names @("thread_id", "threadId")
+        }
+        if ($threadId) {
+            $State.thread_id = [string]$threadId
+        }
+        Mark-LiveUsageStateStarted -State $State
+    }
+
+    if ($normalizedType -in @("turn.started", "turn/started")) {
+        $turnId = Get-OptionalPropertyAny -Object $Entry -Names @("turn_id", "turnId")
+        if (-not $turnId) {
+            $turnId = Get-OptionalPropertyAny -Object $payload -Names @("turn_id", "turnId")
+        }
+        if ($turnId) {
+            $State.turn_id = [string]$turnId
+        }
+        Mark-LiveUsageStateStarted -State $State
+    }
+
+    if ($normalizedType -in @("turn.failed", "turn/failed")) {
+        $State.status = "failed"
+        $errorInfo = Get-OptionalProperty -Object $Entry -Name "error"
+        $errorMessage = if ($errorInfo) {
+            Get-OptionalProperty -Object $errorInfo -Name "message"
+        } else {
+            Get-OptionalProperty -Object $Entry -Name "message"
+        }
+        if ($errorMessage) {
+            $State.last_error = [string]$errorMessage
+        }
+        $State.last_update_utc = (Get-Date).ToUniversalTime().ToString("o")
+    }
+
+    if ($normalizedType -eq "error") {
+        $errorMessage = Get-OptionalProperty -Object $Entry -Name "message"
+        if ($errorMessage -and ($State.status -ne "failed" -or [string]::IsNullOrWhiteSpace([string]$State.last_error))) {
+            $State.last_error = [string]$errorMessage
+        }
+        $State.last_update_utc = (Get-Date).ToUniversalTime().ToString("o")
+    }
+
+    if ($normalizedType -eq "event_msg" -and (Get-OptionalProperty -Object $payload -Name "type") -eq "token_count") {
+        $info = Get-OptionalProperty -Object $payload -Name "info"
+        $totalUsage = Get-OptionalPropertyAny -Object $info -Names @("total_token_usage", "totalTokenUsage")
+        $lastUsage = Get-OptionalPropertyAny -Object $info -Names @("last_token_usage", "lastTokenUsage")
+        Update-LiveUsageStateFromBreakdown `
+            -State $State `
+            -TotalBreakdown (Get-TokenUsageBreakdown -UsageObject $totalUsage) `
+            -LastBreakdown (Get-TokenUsageBreakdown -UsageObject $lastUsage) `
+            -ModelContextWindow (Get-NullableInt64 (Get-OptionalPropertyAny -Object $info -Names @("model_context_window", "modelContextWindow")))
+        return
+    }
+
+    if ($normalizedType -in @("thread/tokenUsage/updated", "thread.tokenUsage.updated")) {
+        $tokenUsage = Get-OptionalPropertyAny -Object $payload -Names @("tokenUsage", "token_usage")
+        Update-LiveUsageStateFromBreakdown `
+            -State $State `
+            -TotalBreakdown (Get-TokenUsageBreakdown -UsageObject (Get-OptionalPropertyAny -Object $tokenUsage -Names @("total", "total_token_usage"))) `
+            -LastBreakdown (Get-TokenUsageBreakdown -UsageObject (Get-OptionalPropertyAny -Object $tokenUsage -Names @("last", "last_token_usage"))) `
+            -ModelContextWindow (Get-NullableInt64 (Get-OptionalPropertyAny -Object $tokenUsage -Names @("modelContextWindow", "model_context_window")))
+        $threadId = Get-OptionalPropertyAny -Object $payload -Names @("threadId", "thread_id")
+        if ($threadId) {
+            $State.thread_id = [string]$threadId
+        }
+        $turnId = Get-OptionalPropertyAny -Object $payload -Names @("turnId", "turn_id")
+        if ($turnId) {
+            $State.turn_id = [string]$turnId
+        }
+        if ($State.status -eq "queued") {
+            Mark-LiveUsageStateStarted -State $State
+        }
+        return
+    }
+}
+
+function Update-LiveUsageStateFromTextLine {
+    param(
+        $State,
+        [string]$Line,
+        [string]$Source
+    )
+
+    if ($null -eq $State -or [string]::IsNullOrWhiteSpace($Line)) {
+        return
+    }
+
+    try {
+        $entry = $Line | ConvertFrom-Json -ErrorAction Stop
+        Update-LiveUsageStateFromJsonEntry -State $State -Entry $entry
+        return
+    } catch {
+    }
+
+    if ($Source -eq "stderr") {
+        $trimmed = $Line.Trim()
+        if (-not [string]::IsNullOrWhiteSpace($trimmed) -and ($State.status -ne "failed" -or [string]::IsNullOrWhiteSpace([string]$State.last_error))) {
+            $State.last_error = $trimmed
+            $State.last_update_utc = (Get-Date).ToUniversalTime().ToString("o")
+        }
+    }
+}
+
+function Update-LiveUsageStateFromFiles {
+    param($State)
+
+    if ($null -eq $State) {
+        return
+    }
+
+    foreach ($line in @(Read-AppendedTextLines -Path $State.stdout_path -Cursor $State.stdout_cursor)) {
+        Update-LiveUsageStateFromTextLine -State $State -Line ([string]$line) -Source "stdout"
+    }
+    foreach ($line in @(Read-AppendedTextLines -Path $State.stderr_path -Cursor $State.stderr_cursor)) {
+        Update-LiveUsageStateFromTextLine -State $State -Line ([string]$line) -Source "stderr"
+    }
+}
+
+function Sync-LiveUsageStateFromWorkerResult {
+    param(
+        $State,
+        $Result
+    )
+
+    if ($null -eq $State -or $null -eq $Result) {
+        return
+    }
+
+    if ($Result.actual_model) {
+        $State.actual_model = [string]$Result.actual_model
+    }
+    if ($Result.session_id) {
+        $State.session_id = [string]$Result.session_id
+    }
+    if ($null -eq $State.total_tokens -and $null -ne $Result.footer_tokens_used) {
+        $State.total_tokens = [int64]$Result.footer_tokens_used
+    }
+    if ($null -ne $Result.footer_tokens_used) {
+        $State.last_total_tokens = [int64]$Result.footer_tokens_used
+    }
+    $State.status = if ($Result.turn_failed -or -not $Result.succeeded) { "failed" } else { "completed" }
+    if ($Result.failure_message) {
+        $State.last_error = [string]$Result.failure_message
+    } elseif (-not $Result.succeeded -and $Result.stderr_preview) {
+        $State.last_error = [string]$Result.stderr_preview
+    }
+    if ($null -eq $State.completed_at_utc) {
+        $State.completed_at_utc = (Get-Date).ToUniversalTime().ToString("o")
+    }
+    $State.last_update_utc = (Get-Date).ToUniversalTime().ToString("o")
+}
+
+function Get-LiveUsageSnapshot {
+    param(
+        $LiveUsageStates,
+        $LiveUsageConfig
+    )
+
+    $workers = @(
+        $LiveUsageStates.Values |
+            Sort-Object stage, name |
+            ForEach-Object {
+                [pscustomobject]@{
+                    name = $_.name
+                    stage = $_.stage
+                    worker_kind = $_.worker_kind
+                    is_read_only = $_.is_read_only
+                    status = $_.status
+                    thread_id = $_.thread_id
+                    turn_id = $_.turn_id
+                    session_id = $_.session_id
+                    requested_model = $_.requested_model
+                    actual_model = $_.actual_model
+                    total_tokens = $_.total_tokens
+                    last_total_tokens = $_.last_total_tokens
+                    cached_input_tokens = $_.cached_input_tokens
+                    input_tokens = $_.input_tokens
+                    output_tokens = $_.output_tokens
+                    reasoning_output_tokens = $_.reasoning_output_tokens
+                    model_context_window = $_.model_context_window
+                    started_at_utc = $_.started_at_utc
+                    completed_at_utc = $_.completed_at_utc
+                    last_update_utc = $_.last_update_utc
+                    last_error = $_.last_error
+                    stdout = $_.stdout_path
+                    stderr = $_.stderr_path
+                }
+            }
+    )
+
+    $knownTokenWorkers = @($workers | Where-Object { $null -ne $_.total_tokens })
+    $totalKnownTokens = if (@($knownTokenWorkers).Count -gt 0) {
+        $measure = $knownTokenWorkers | Measure-Object -Property total_tokens -Sum
+        [int64]$measure.Sum
+    } else {
+        $null
+    }
+
+    return [ordered]@{
+        updated_at_utc = (Get-Date).ToUniversalTime().ToString("o")
+        enabled = [bool]$LiveUsageConfig.enabled
+        display_mode = $LiveUsageConfig.display_mode
+        poll_interval_ms = $LiveUsageConfig.poll_interval_ms
+        worker_count = @($workers).Count
+        active_workers = @($workers | Where-Object { $_.status -in @("running", "turn_completed") }).Count
+        completed_workers = @($workers | Where-Object { $_.status -eq "completed" }).Count
+        failed_workers = @($workers | Where-Object { $_.status -eq "failed" }).Count
+        total_known_tokens = $totalKnownTokens
+        workers = @($workers)
+    }
+}
+
+function Write-LiveUsageOutputs {
+    param(
+        $LiveUsageConfig,
+        $LiveUsageStates
+    )
+
+    if ($null -eq $LiveUsageConfig -or -not $LiveUsageConfig.enabled) {
+        return $null
+    }
+
+    $snapshot = Get-LiveUsageSnapshot -LiveUsageStates $LiveUsageStates -LiveUsageConfig $LiveUsageConfig
+
+    if ($LiveUsageConfig.write_status_file -and -not [string]::IsNullOrWhiteSpace($LiveUsageConfig.status_file)) {
+        $statusDirectory = Split-Path -Parent $LiveUsageConfig.status_file
+        if (-not [string]::IsNullOrWhiteSpace($statusDirectory)) {
+            New-Item -ItemType Directory -Path $statusDirectory -Force | Out-Null
+        }
+        $snapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $LiveUsageConfig.status_file -Encoding utf8
+    }
+
+    if ($LiveUsageConfig.write_progress) {
+        $tokenSummary = if ($null -ne $snapshot.total_known_tokens) {
+            [string]$snapshot.total_known_tokens
+        } else {
+            "n/a"
+        }
+        $statusText = "active=$($snapshot.active_workers); completed=$($snapshot.completed_workers); failed=$($snapshot.failed_workers); total_tokens=$tokenSummary"
+        $workerText = @(
+            @($snapshot.workers | ForEach-Object {
+                    $workerTokenText = if ($null -ne $_.total_tokens) { $_.total_tokens } else { "n/a" }
+                    "{0}={1} ({2})" -f $_.name, $workerTokenText, $_.status
+                })
+        ) -join " | "
+        if ($workerText.Length -gt 220) {
+            $workerText = $workerText.Substring(0, 217) + "..."
+        }
+        Write-Progress -Id 1 -Activity "Codex live usage" -Status $statusText -CurrentOperation $workerText
+    }
+
+    return $snapshot
+}
+
+function Clear-LiveUsageProgress {
+    Write-Progress -Id 1 -Activity "Codex live usage" -Completed
 }
 
 function ConvertTo-TemplateContextValue {
@@ -923,7 +1548,7 @@ function Get-FileTextSafe {
         return $null
     }
 
-    return Get-Content -LiteralPath $Path -Raw
+    return Get-Content -LiteralPath $Path -Raw -Encoding utf8
 }
 
 function Get-PreviewText {
@@ -1742,6 +2367,7 @@ function New-RunSummaryText {
         [string]$ExecutionMode,
         $SharedDirectiveInfo,
         $WorkflowInfo,
+        $LiveUsageConfig,
         $AfterCreateHookResult,
         $Results,
         [string]$ManifestPath,
@@ -1775,6 +2401,14 @@ function New-RunSummaryText {
     $lines.Add([string]::Format('- workers_succeeded: {0}/{1}', $successCount, $totalCount))
     $lines.Add([string]::Format('- shared_directive_mode: {0}', $SharedDirectiveInfo.effective_mode))
     $lines.Add([string]::Format('- shared_directive_chars: {0} -> {1}', $SharedDirectiveInfo.original_char_count, $SharedDirectiveInfo.effective_char_count))
+    $lines.Add([string]::Format('- live_usage_enabled: {0}', $LiveUsageConfig.enabled))
+    if ($LiveUsageConfig.enabled) {
+        $lines.Add([string]::Format('- live_usage_display_mode: {0}', $LiveUsageConfig.display_mode))
+        $lines.Add([string]::Format('- live_usage_poll_interval_ms: {0}', $LiveUsageConfig.poll_interval_ms))
+        if ($LiveUsageConfig.write_status_file -and $LiveUsageConfig.status_file) {
+            $lines.Add([string]::Format('- live_usage_status_file: `{0}`', $LiveUsageConfig.status_file))
+        }
+    }
     if ($WorkflowInfo -and $WorkflowInfo.enabled) {
         $lines.Add([string]::Format('- workflow_file: `{0}`', $WorkflowInfo.source))
         $lines.Add([string]::Format('- workflow_prompt_mode: {0}', $WorkflowInfo.prompt_mode))
@@ -1815,9 +2449,11 @@ function New-RunSummaryText {
     foreach ($result in $Results) {
         $status = if ($result.succeeded) { "ok" } else { "failed" }
         $footerValue = if ($null -ne $result.footer_tokens_used) { $result.footer_tokens_used } else { "n/a" }
-        $lines.Add([string]::Format('- `{0}`: {1}; stage={2}; kind={3}; read_only={4}; full_auto={5}; model={6}; sandbox={7}; reasoning={8}; prompt_chars={9}; footer_tokens={10}; workflow_mode={11}',
+        $resultEngine = if ($result.engine) { $result.engine } else { "codex" }
+        $lines.Add([string]::Format('- `{0}`: {1}; engine={2}; stage={3}; kind={4}; read_only={5}; full_auto={6}; model={7}; sandbox={8}; reasoning={9}; prompt_chars={10}; footer_tokens={11}; workflow_mode={12}',
                 $result.name,
                 $status,
+                $resultEngine,
                 $result.stage,
                 $result.worker_kind,
                 $result.is_read_only,
@@ -1858,6 +2494,8 @@ function Get-ExecutionMetadata {
         actual_reasoning_effort = $null
         footer_tokens_used = $null
         output_mode = $null
+        turn_failed = $false
+        failure_message = $null
     }
 
     $stdoutLines = if (Test-Path -LiteralPath $StdoutPath) { @(Get-Content -LiteralPath $StdoutPath) } else { @() }
@@ -1877,30 +2515,76 @@ function Get-ExecutionMetadata {
         try {
             $entry = $line | ConvertFrom-Json -ErrorAction Stop
             $parsedJson = $true
+            $entryType = Get-OptionalProperty -Object $entry -Name "type"
+            $entryMethod = Get-OptionalProperty -Object $entry -Name "method"
+            $normalizedType = if (-not [string]::IsNullOrWhiteSpace([string]$entryType)) {
+                [string]$entryType
+            } elseif (-not [string]::IsNullOrWhiteSpace([string]$entryMethod)) {
+                [string]$entryMethod
+            } else {
+                $null
+            }
+            $payload = Get-OptionalPropertyAny -Object $entry -Names @("payload", "params")
 
             if ($entry.type -eq "session_meta") {
-                $metadata.session_id = Get-OptionalProperty $entry.payload "id"
-                $metadata.actual_workdir = Get-OptionalProperty $entry.payload "cwd"
+                $metadata.session_id = Get-OptionalProperty $payload "id"
+                $metadata.actual_workdir = Get-OptionalProperty $payload "cwd"
             }
 
             if ($entry.type -eq "turn_context") {
-                $metadata.actual_workdir = Get-OptionalProperty $entry.payload "cwd"
-                $metadata.actual_model = Get-OptionalProperty $entry.payload "model"
-                $metadata.actual_approval = Get-OptionalProperty $entry.payload "approval_policy"
+                $metadata.actual_workdir = Get-OptionalProperty $payload "cwd"
+                $metadata.actual_model = Get-OptionalProperty $payload "model"
+                $metadata.actual_approval = Get-OptionalProperty $payload "approval_policy"
 
-                $sandboxPolicy = Get-OptionalProperty $entry.payload "sandbox_policy"
+                $sandboxPolicy = Get-OptionalProperty $payload "sandbox_policy"
                 if ($sandboxPolicy) {
                     $metadata.actual_sandbox = Get-OptionalProperty $sandboxPolicy "type"
                 }
 
-                $metadata.actual_reasoning_effort = Get-OptionalProperty $entry.payload "effort"
+                $metadata.actual_reasoning_effort = Get-OptionalProperty $payload "effort"
             }
 
             if ($entry.type -eq "event_msg" -and (Get-OptionalProperty $entry.payload "type") -eq "token_count") {
-                $info = Get-OptionalProperty $entry.payload "info"
-                $totalUsage = Get-OptionalProperty $info "total_token_usage"
-                if ($totalUsage) {
-                    $metadata.footer_tokens_used = Get-OptionalProperty $totalUsage "total_tokens"
+                $info = Get-OptionalProperty $payload "info"
+                $totalUsage = Get-OptionalPropertyAny -Object $info -Names @("total_token_usage", "totalTokenUsage")
+                $totalBreakdown = Get-TokenUsageBreakdown -UsageObject $totalUsage
+                if ($totalBreakdown) {
+                    $metadata.footer_tokens_used = $totalBreakdown.total_tokens
+                }
+            }
+
+            if (($entryType -eq "thread.started" -or $entryMethod -eq "thread/started") -and $null -eq $metadata.session_id) {
+                $metadata.session_id = Get-OptionalPropertyAny -Object $entry -Names @("thread_id", "threadId")
+                if ($null -eq $metadata.session_id) {
+                    $metadata.session_id = Get-OptionalPropertyAny -Object $payload -Names @("thread_id", "threadId")
+                }
+            }
+
+            if ($entryMethod -eq "thread/tokenUsage/updated" -or $entryType -eq "thread.tokenUsage.updated") {
+                $tokenUsage = Get-OptionalPropertyAny -Object $payload -Names @("tokenUsage", "token_usage")
+                $totalBreakdown = Get-TokenUsageBreakdown -UsageObject (Get-OptionalPropertyAny -Object $tokenUsage -Names @("total", "total_token_usage"))
+                if ($totalBreakdown) {
+                    $metadata.footer_tokens_used = $totalBreakdown.total_tokens
+                }
+            }
+
+            if ($normalizedType -eq "error") {
+                $errorMessage = Get-OptionalProperty -Object $entry -Name "message"
+                if ($errorMessage -and (-not $metadata.turn_failed -or [string]::IsNullOrWhiteSpace([string]$metadata.failure_message))) {
+                    $metadata.failure_message = [string]$errorMessage
+                }
+            }
+
+            if ($normalizedType -in @("turn.failed", "turn/failed")) {
+                $metadata.turn_failed = $true
+                $errorInfo = Get-OptionalProperty -Object $entry -Name "error"
+                $errorMessage = if ($errorInfo) {
+                    Get-OptionalProperty -Object $errorInfo -Name "message"
+                } else {
+                    Get-OptionalProperty -Object $entry -Name "message"
+                }
+                if ($errorMessage) {
+                    $metadata.failure_message = [string]$errorMessage
                 }
             }
         } catch {
@@ -1965,7 +2649,10 @@ function Invoke-WorkerCommand {
         [string]$RunCwd,
         [string]$RunArgLine,
         [string]$StdoutPath,
-        [string]$StderrPath
+        [string]$StderrPath,
+        [string]$PromptFilePath,
+        $LiveUsageConfig,
+        $LiveUsageState
     )
 
     $stdoutDirectory = Split-Path -Parent $StdoutPath
@@ -1980,19 +2667,41 @@ function Invoke-WorkerCommand {
     }
 
     try {
-        $process = Start-Process `
-            -FilePath $Executable `
-            -ArgumentList $RunArgLine `
-            -WorkingDirectory $RunCwd `
-            -RedirectStandardOutput $StdoutPath `
-            -RedirectStandardError $StderrPath `
-            -PassThru `
-            -Wait `
-            -NoNewWindow
+        $startParams = @{
+            FilePath               = $Executable
+            ArgumentList           = $RunArgLine
+            WorkingDirectory       = $RunCwd
+            RedirectStandardOutput = $StdoutPath
+            RedirectStandardError  = $StderrPath
+            PassThru               = $true
+            NoNewWindow            = $true
+        }
+        if ($PromptFilePath -and (Test-Path $PromptFilePath)) {
+            $startParams["RedirectStandardInput"] = $PromptFilePath
+        }
+        $process = Start-Process @startParams
+        Mark-LiveUsageStateStarted -State $LiveUsageState
+        Write-LiveUsageOutputs -LiveUsageConfig $LiveUsageConfig -LiveUsageStates @{ $LiveUsageState.name = $LiveUsageState } | Out-Null
+        while (-not $process.HasExited) {
+            Update-LiveUsageStateFromFiles -State $LiveUsageState
+            Write-LiveUsageOutputs -LiveUsageConfig $LiveUsageConfig -LiveUsageStates @{ $LiveUsageState.name = $LiveUsageState } | Out-Null
+            Start-Sleep -Milliseconds $(if ($LiveUsageConfig -and $LiveUsageConfig.enabled) { $LiveUsageConfig.poll_interval_ms } else { 500 })
+        }
         $exitCode = [int]$process.ExitCode
+        Update-LiveUsageStateFromFiles -State $LiveUsageState
+        Mark-LiveUsageStateCompleted -State $LiveUsageState -ExitCode $exitCode
+        Write-LiveUsageOutputs -LiveUsageConfig $LiveUsageConfig -LiveUsageStates @{ $LiveUsageState.name = $LiveUsageState } | Out-Null
+        $process.Dispose()
     } catch {
         $message = $_ | Out-String
         Add-Content -LiteralPath $StderrPath -Value $message -Encoding utf8
+        if ($LiveUsageState) {
+            $LiveUsageState.status = "failed"
+            $LiveUsageState.last_error = $message.Trim()
+            $LiveUsageState.completed_at_utc = (Get-Date).ToUniversalTime().ToString("o")
+            $LiveUsageState.last_update_utc = $LiveUsageState.completed_at_utc
+            Write-LiveUsageOutputs -LiveUsageConfig $LiveUsageConfig -LiveUsageStates @{ $LiveUsageState.name = $LiveUsageState } | Out-Null
+        }
         $exitCode = -1
     }
 
@@ -2006,7 +2715,9 @@ function Invoke-ParallelRunBatch {
         $Runs,
         [string]$ResolvedCodexExecutable,
         [int]$TimeoutSeconds,
-        [string]$StageLabel
+        [string]$StageLabel,
+        $LiveUsageConfig,
+        $LiveUsageStates
     )
 
     $results = @()
@@ -2023,19 +2734,33 @@ function Invoke-ParallelRunBatch {
         }
 
         try {
-            $process = Start-Process `
-                -FilePath $ResolvedCodexExecutable `
-                -ArgumentList $run.arg_line `
-                -WorkingDirectory $run.cwd `
-                -RedirectStandardOutput $run.stdout `
-                -RedirectStandardError $run.stderr `
-                -PassThru `
-                -NoNewWindow
-            Write-LauncherDebug ("started_process stage={0} name={1} pid={2}" -f $StageLabel, $run.name, $process.Id)
+            # run별 engine_executable 사용 (engine별 분기 지원)
+            $runExecutable = if ($run.engine_executable) { $run.engine_executable } else { $ResolvedCodexExecutable }
+            $startParams = @{
+                FilePath               = $runExecutable
+                ArgumentList           = $run.arg_line
+                WorkingDirectory       = $run.cwd
+                RedirectStandardOutput = $run.stdout
+                RedirectStandardError  = $run.stderr
+                PassThru               = $true
+                NoNewWindow            = $true
+            }
+            if ($run.prompt_file -and (Test-Path $run.prompt_file)) {
+                $startParams["RedirectStandardInput"] = $run.prompt_file
+            }
+            $process = Start-Process @startParams
+            Write-LauncherDebug ("started_process stage={0} name={1} engine={2} pid={3}" -f $StageLabel, $run.name, $run.engine, $process.Id)
+            Mark-LiveUsageStateStarted -State $LiveUsageStates[$run.name]
         } catch {
             $message = $_ | Out-String
             Add-Content -LiteralPath $run.stderr -Value $message -Encoding utf8
             Write-LauncherDebug ("start_failed stage={0} name={1} error={2}" -f $StageLabel, $run.name, ($message.Trim()))
+            if ($LiveUsageStates.ContainsKey($run.name)) {
+                $LiveUsageStates[$run.name].status = "failed"
+                $LiveUsageStates[$run.name].last_error = $message.Trim()
+                $LiveUsageStates[$run.name].completed_at_utc = (Get-Date).ToUniversalTime().ToString("o")
+                $LiveUsageStates[$run.name].last_update_utc = $LiveUsageStates[$run.name].completed_at_utc
+            }
             $results += Complete-WorkerResult -Run $run -ExitCode -1
             continue
         }
@@ -2046,8 +2771,16 @@ function Invoke-ParallelRunBatch {
         }
     }
 
+    Write-LiveUsageOutputs -LiveUsageConfig $LiveUsageConfig -LiveUsageStates $LiveUsageStates | Out-Null
     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     while (@($processRuns | Where-Object { -not $_.process.HasExited }).Count -gt 0) {
+        foreach ($processRun in $processRuns) {
+            if ($LiveUsageStates.ContainsKey($processRun.run.name)) {
+                Update-LiveUsageStateFromFiles -State $LiveUsageStates[$processRun.run.name]
+            }
+        }
+        Write-LiveUsageOutputs -LiveUsageConfig $LiveUsageConfig -LiveUsageStates $LiveUsageStates | Out-Null
+
         if ($TimeoutSeconds -gt 0 -and $stopwatch.Elapsed.TotalSeconds -ge $TimeoutSeconds) {
             Write-LauncherDebug ("timeout_reached stage={0} seconds={1}" -f $StageLabel, $TimeoutSeconds)
             foreach ($processRun in @($processRuns | Where-Object { -not $_.process.HasExited })) {
@@ -2060,16 +2793,25 @@ function Invoke-ParallelRunBatch {
             break
         }
 
-        Start-Sleep -Milliseconds 500
+        Start-Sleep -Milliseconds $(if ($LiveUsageConfig -and $LiveUsageConfig.enabled) { $LiveUsageConfig.poll_interval_ms } else { 500 })
     }
     $stopwatch.Stop()
 
     foreach ($processRun in $processRuns) {
         $exitCode = if ($processRun.process.HasExited) { [int]$processRun.process.ExitCode } else { -1 }
         Write-LauncherDebug ("collecting_result stage={0} name={1} exit_code={2}" -f $StageLabel, $processRun.run.name, $exitCode)
-        $results += Complete-WorkerResult -Run $processRun.run -ExitCode $exitCode
+        if ($LiveUsageStates.ContainsKey($processRun.run.name)) {
+            Update-LiveUsageStateFromFiles -State $LiveUsageStates[$processRun.run.name]
+            Mark-LiveUsageStateCompleted -State $LiveUsageStates[$processRun.run.name] -ExitCode $exitCode
+        }
+        $result = Complete-WorkerResult -Run $processRun.run -ExitCode $exitCode
+        if ($LiveUsageStates.ContainsKey($processRun.run.name)) {
+            Sync-LiveUsageStateFromWorkerResult -State $LiveUsageStates[$processRun.run.name] -Result $result
+        }
+        $results += $result
         $processRun.process.Dispose()
     }
+    Write-LiveUsageOutputs -LiveUsageConfig $LiveUsageConfig -LiveUsageStates $LiveUsageStates | Out-Null
 
     return @($results)
 }
@@ -2083,8 +2825,69 @@ function Complete-WorkerResult {
     $stdoutText = Get-FileTextSafe -Path $Run.stdout
     $stderrText = Get-FileTextSafe -Path $Run.stderr
     $lastText = Get-FileTextSafe -Path $Run.last
-    $executionMetadata = Get-ExecutionMetadata -StdoutPath $Run.stdout -StderrPath $Run.stderr
     $requiredPathCheck = Test-WorkerRequiredPaths -Run $Run
+
+    $runEngine = if ($Run.engine) { $Run.engine } else { "codex" }
+
+    # engine별 출력 파싱 분기
+    switch ($runEngine) {
+        "codex" {
+            # 기존 codex 파싱 로직: JSON 이벤트 스트림에서 메타데이터 추출
+            $executionMetadata = Get-ExecutionMetadata -StdoutPath $Run.stdout -StderrPath $Run.stderr
+        }
+        "claude" {
+            # claude --print: stdout 전체가 응답. token usage는 불가
+            $executionMetadata = [pscustomobject][ordered]@{
+                session_id = $null
+                actual_workdir = $null
+                actual_model = $Run.requested_model
+                actual_approval = $null
+                actual_sandbox = $null
+                actual_reasoning_effort = $null
+                footer_tokens_used = $null
+                output_mode = "text"
+                turn_failed = ($ExitCode -ne 0)
+                failure_message = if ($ExitCode -ne 0 -and $stderrText) { (Get-PreviewText -Text $stderrText) } else { $null }
+            }
+            # claude의 stdout를 last 파일로 기록 (codex의 -o 옵션에 대응)
+            if ($stdoutText) {
+                Set-Content -LiteralPath $Run.last -Value $stdoutText -Encoding utf8
+                $lastText = $stdoutText
+            }
+        }
+        "gemini" {
+            # gemini: stdout에서 응답 추출. YOLO mode 메타 출력 스킵
+            $filteredStdout = $stdoutText
+            if ($filteredStdout) {
+                # "YOLO mode..." 같은 gemini-cli 메타 출력 제거
+                $filteredLines = @($filteredStdout -split "`n" | Where-Object {
+                    $_ -notmatch '^\s*YOLO mode' -and $_ -notmatch '^\s*Gemini CLI'
+                })
+                $filteredStdout = ($filteredLines -join "`n").Trim()
+            }
+            $executionMetadata = [pscustomobject][ordered]@{
+                session_id = $null
+                actual_workdir = $null
+                actual_model = $Run.requested_model
+                actual_approval = $null
+                actual_sandbox = $null
+                actual_reasoning_effort = $null
+                footer_tokens_used = $null
+                output_mode = "text"
+                turn_failed = ($ExitCode -ne 0)
+                failure_message = if ($ExitCode -ne 0 -and $stderrText) { (Get-PreviewText -Text $stderrText) } else { $null }
+            }
+            # gemini의 stdout를 last 파일로 기록
+            if ($filteredStdout) {
+                Set-Content -LiteralPath $Run.last -Value $filteredStdout -Encoding utf8
+                $lastText = $filteredStdout
+            }
+        }
+        default {
+            # 알 수 없는 engine은 codex 기본 파싱으로 폴백
+            $executionMetadata = Get-ExecutionMetadata -StdoutPath $Run.stdout -StderrPath $Run.stderr
+        }
+    }
 
     $validationFailures = New-Object System.Collections.Generic.List[string]
     foreach ($missingPath in @($requiredPathCheck.missing_paths)) {
@@ -2093,11 +2896,19 @@ function Complete-WorkerResult {
     foreach ($emptyPath in @($requiredPathCheck.empty_paths)) {
         $validationFailures.Add("required path is empty: $emptyPath")
     }
+    if ($executionMetadata.turn_failed) {
+        if ($executionMetadata.failure_message) {
+            $validationFailures.Add("worker reported turn.failed: $($executionMetadata.failure_message)")
+        } else {
+            $validationFailures.Add("worker reported turn.failed")
+        }
+    }
 
-    $succeeded = ($ExitCode -eq 0 -and $requiredPathCheck.passed)
+    $succeeded = ($ExitCode -eq 0 -and $requiredPathCheck.passed -and -not $executionMetadata.turn_failed)
 
     return [pscustomobject]@{
         name = $Run.name
+        engine = $runEngine
         mode = $Run.mode
         stage = $Run.stage
         worker_kind = $Run.worker_kind
@@ -2112,6 +2923,7 @@ function Complete-WorkerResult {
         validation_failures = [string[]]$validationFailures.ToArray()
         requested_model = $Run.requested_model
         requested_full_auto = $Run.requested_full_auto
+        requested_json_output = $Run.requested_json_output
         actual_model = $executionMetadata.actual_model
         requested_sandbox = $Run.requested_sandbox
         actual_sandbox = $executionMetadata.actual_sandbox
@@ -2125,6 +2937,8 @@ function Complete-WorkerResult {
         output_mode = $executionMetadata.output_mode
         session_id = $executionMetadata.session_id
         footer_tokens_used = $executionMetadata.footer_tokens_used
+        turn_failed = [bool]$executionMetadata.turn_failed
+        failure_message = $executionMetadata.failure_message
         stdout = $Run.stdout
         stderr = $Run.stderr
         last = $Run.last
@@ -2236,6 +3050,7 @@ if ($executionMode -notin @("parallel", "sequential")) {
 }
 
 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+$liveUsageConfig = Get-LiveUsageConfig -Spec $spec -WorkspaceRoot $cwd -OutputDir $outputDir
 $afterCreateHookInfo = Get-AfterCreateHookInfo -Spec $spec -WorkspaceRoot $cwd -OutputDir $outputDir
 $afterCreateHookResult = [pscustomobject]@{
     enabled = [bool]$afterCreateHookInfo.enabled
@@ -2263,6 +3078,12 @@ if ($debugLogFile) {
     Write-LauncherDebug ("cwd_resolution_base={0}" -f $cwdBaseDirectory)
     Write-LauncherDebug ("workspace_root={0}" -f $cwd)
     Write-LauncherDebug ("execution_mode={0}" -f $executionMode)
+    Write-LauncherDebug ("live_usage_enabled={0}" -f $liveUsageConfig.enabled)
+    if ($liveUsageConfig.enabled) {
+        Write-LauncherDebug ("live_usage_display_mode={0}" -f $liveUsageConfig.display_mode)
+        Write-LauncherDebug ("live_usage_status_file={0}" -f $liveUsageConfig.status_file)
+        Write-LauncherDebug ("live_usage_poll_interval_ms={0}" -f $liveUsageConfig.poll_interval_ms)
+    }
     if ($afterCreateHookInfo.enabled) {
         Write-LauncherDebug "after_create_hook_configured=True"
     }
@@ -2425,9 +3246,8 @@ foreach ($agent in $spec.agents) {
         -PromptProfile $promptProfile `
         -ResponseStyle $responseStyle `
         -MaxResponseLines $maxResponseLines
-    if ($writePromptFiles) {
-        Set-Content -LiteralPath $promptPath -Value $promptText -Encoding utf8
-    }
+    # 프롬프트 파일은 항상 생성 (stdin redirect로 멀티라인 프롬프트를 전달하기 위해 필수)
+    Set-Content -LiteralPath $promptPath -Value $promptText -Encoding utf8
 
     $sandboxValue = Get-OptionalProperty $agent "sandbox"
     if (-not $sandboxValue) {
@@ -2435,6 +3255,46 @@ foreach ($agent in $spec.agents) {
     }
     $sandbox = if ($sandboxValue) { [string]$sandboxValue } else { $null }
     $isReadOnly = Test-IsReadOnlySandbox -Sandbox $sandbox
+
+    # engine 해석: agent 수준 > defaults > "codex" (하위 호환)
+    $engine = Get-ResolvedEngine -Agent $agent -Defaults $defaults
+
+    # model/reasoning은 engine 공통으로 해석
+    $modelValue = Get-OptionalProperty $agent "model"
+    if (-not $modelValue) {
+        $modelValue = Get-OptionalProperty $defaults "model"
+    }
+    $model = if ($modelValue) { [string]$modelValue } else { $null }
+
+    # engine-model 교차 검증: 잘못된 조합 방지
+    $engineModelDefaults = @{
+        "codex"  = @{ allowed = @("gpt-5.4", "o3", "o4-mini"); default = "gpt-5.4" }
+        "claude" = @{ allowed = @("haiku", "sonnet", "opus"); default = "sonnet" }
+        "gemini" = @{ allowed = @("gemini-2.5-pro", "gemini-2.5-flash"); default = "gemini-2.5-pro" }
+    }
+    if ($engineModelDefaults.ContainsKey($engine)) {
+        $engineInfo = $engineModelDefaults[$engine]
+        if ($model) {
+            if ($model -notin $engineInfo.allowed) {
+                $oldModel = $model
+                $model = $engineInfo.default
+                Write-Warning "[engine-model] Agent '$name': model '$oldModel' is not valid for engine '$engine'. Replaced with '$model'."
+            }
+        }
+        # model이 없으면 engine 기본값 사용하지 않음 — CLI가 자체 기본값 사용
+    }
+
+    $reasoningValue = Get-OptionalProperty $agent "reasoning_effort"
+    if (-not $reasoningValue) {
+        $reasoningValue = Get-OptionalProperty $defaults "reasoning_effort"
+    }
+    $reasoning = if ($reasoningValue) { [string]$reasoningValue } else { $null }
+
+    $useJsonOutput = if ($liveUsageConfig.forces_json) {
+        $true
+    } else {
+        Get-BoolValue (Get-OptionalProperty $agent "json") (Get-OptionalProperty $defaults "json")
+    }
 
     $cmdArgs = New-Object System.Collections.Generic.List[string]
     $agentFullAutoValue = Get-OptionalProperty $agent "full_auto"
@@ -2449,90 +3309,143 @@ foreach ($agent in $spec.agents) {
         $useFullAuto = ($mode -eq "exec")
     }
 
-    if ($mode -eq "resume") {
-        $cmdArgs.Add("resume")
-        if (Get-BoolValue (Get-OptionalProperty $agent "resume_last") $false) {
-            $cmdArgs.Add("--last")
-        } else {
-            $sessionIdValue = Get-OptionalProperty $agent "session_id"
-            if ($sessionIdValue) {
-                $cmdArgs.Add([string]$sessionIdValue)
+    # engine별 실행 파일 해석
+    $engineExecutable = Get-EngineExecutable `
+        -Engine $engine `
+        -ResolvedCodexExe $resolvedCodexExecutable `
+        -ClaudeExe $ClaudeExecutable `
+        -GeminiExe $GeminiExecutable
+
+    # engine별 명령줄 빌드 분기
+    switch ($engine) {
+        "codex" {
+            # 기존 codex exec 명령줄 빌드 로직 유지
+            if ($mode -eq "resume") {
+                $cmdArgs.Add("resume")
+                if (Get-BoolValue (Get-OptionalProperty $agent "resume_last") $false) {
+                    $cmdArgs.Add("--last")
+                } else {
+                    $sessionIdValue = Get-OptionalProperty $agent "session_id"
+                    if ($sessionIdValue) {
+                        $cmdArgs.Add([string]$sessionIdValue)
+                    } else {
+                        throw "Resume agent '$name' must set either 'resume_last' or 'session_id'."
+                    }
+                }
             } else {
-                throw "Resume agent '$name' must set either 'resume_last' or 'session_id'."
+                if ($useFullAuto) {
+                    $cmdArgs.Add("--full-auto")
+                }
+                $cmdArgs.Add("exec")
+            }
+
+            if ($skipGit) {
+                $cmdArgs.Add("--skip-git-repo-check")
+            }
+
+            $cmdArgs.Add("-C")
+            $cmdArgs.Add($workerCwd)
+
+            if ($sandbox) {
+                $cmdArgs.Add("-s")
+                $cmdArgs.Add($sandbox)
+            }
+
+            if ($model) {
+                $cmdArgs.Add("-m")
+                $cmdArgs.Add($model)
+            }
+
+            if ($reasoning) {
+                $cmdArgs.Add("-c")
+                $cmdArgs.Add("model_reasoning_effort=""$reasoning""")
+            }
+
+            if ($useJsonOutput) {
+                $cmdArgs.Add("--json")
+            }
+
+            $outputSchemaValue = Get-OptionalProperty $agent "output_schema"
+            if (-not $outputSchemaValue) {
+                $outputSchemaValue = Get-OptionalProperty $defaults "output_schema"
+            }
+            if ($outputSchemaValue) {
+                $resolvedOutputSchema = Resolve-AbsolutePath -Path ([string]$outputSchemaValue) -BaseDirectory $workerCwd
+                $cmdArgs.Add("--output-schema")
+                $cmdArgs.Add($resolvedOutputSchema)
+            }
+
+            if (Get-BoolValue (Get-OptionalProperty $agent "ephemeral") (Get-OptionalProperty $defaults "ephemeral")) {
+                $cmdArgs.Add("--ephemeral")
+            }
+
+            $cmdArgs.Add("-o")
+            $cmdArgs.Add($lastPath)
+
+            $extraArgsValue = Get-OptionalProperty $agent "extra_args"
+            if ($extraArgsValue) {
+                foreach ($extraArg in $extraArgsValue) {
+                    $cmdArgs.Add([string]$extraArg)
+                }
+            }
+
+            # 프롬프트는 stdin redirect로 전달 (멀티라인 지원)
+        }
+        "claude" {
+            # claude --print 명령줄 빌드
+            $cmdArgs.Add("--print")
+
+            if ($model) {
+                $cmdArgs.Add("--model")
+                $cmdArgs.Add($model)
+            }
+
+            if ($useJsonOutput) {
+                $cmdArgs.Add("--output-format")
+                $cmdArgs.Add("json")
+            }
+
+            $extraArgsValue = Get-OptionalProperty $agent "extra_args"
+            if ($extraArgsValue) {
+                foreach ($extraArg in $extraArgsValue) {
+                    $cmdArgs.Add([string]$extraArg)
+                }
+            }
+
+            # 프롬프트는 stdin redirect로 전달 (멀티라인 지원)
+        }
+        "gemini" {
+            # npx @google/gemini-cli --prompt 명령줄 빌드
+            if ($useJsonOutput) {
+                Write-Warning "[gemini-json] Agent '$name': gemini CLI does not support JSON output mode. forces_json/json flag will be ignored. Token usage parsing will not be available."
+                $useJsonOutput = $false
+            }
+            $cmdArgs.Add("@google/gemini-cli")
+            # 프롬프트는 stdin redirect로 전달 (멀티라인 지원)
+            $cmdArgs.Add("--yolo")
+
+            if ($model) {
+                $cmdArgs.Add("--model")
+                $cmdArgs.Add($model)
+            }
+
+            $extraArgsValue = Get-OptionalProperty $agent "extra_args"
+            if ($extraArgsValue) {
+                foreach ($extraArg in $extraArgsValue) {
+                    $cmdArgs.Add([string]$extraArg)
+                }
             }
         }
-    } else {
-        if ($useFullAuto) {
-            $cmdArgs.Add("--full-auto")
-        }
-        $cmdArgs.Add("exec")
-    }
-
-    if ($skipGit) {
-        $cmdArgs.Add("--skip-git-repo-check")
-    }
-
-    $cmdArgs.Add("-C")
-    $cmdArgs.Add($workerCwd)
-
-    if ($sandbox) {
-        $cmdArgs.Add("-s")
-        $cmdArgs.Add($sandbox)
-    }
-
-    $modelValue = Get-OptionalProperty $agent "model"
-    if (-not $modelValue) {
-        $modelValue = Get-OptionalProperty $defaults "model"
-    }
-    $model = if ($modelValue) { [string]$modelValue } else { $null }
-    if ($model) {
-        $cmdArgs.Add("-m")
-        $cmdArgs.Add($model)
-    }
-
-    $reasoningValue = Get-OptionalProperty $agent "reasoning_effort"
-    if (-not $reasoningValue) {
-        $reasoningValue = Get-OptionalProperty $defaults "reasoning_effort"
-    }
-    $reasoning = if ($reasoningValue) { [string]$reasoningValue } else { $null }
-    if ($reasoning) {
-        $cmdArgs.Add("-c")
-        $cmdArgs.Add("model_reasoning_effort=""$reasoning""")
-    }
-
-    if (Get-BoolValue (Get-OptionalProperty $agent "json") (Get-OptionalProperty $defaults "json")) {
-        $cmdArgs.Add("--json")
-    }
-
-    $outputSchemaValue = Get-OptionalProperty $agent "output_schema"
-    if (-not $outputSchemaValue) {
-        $outputSchemaValue = Get-OptionalProperty $defaults "output_schema"
-    }
-    if ($outputSchemaValue) {
-        $resolvedOutputSchema = Resolve-AbsolutePath -Path ([string]$outputSchemaValue) -BaseDirectory $workerCwd
-        $cmdArgs.Add("--output-schema")
-        $cmdArgs.Add($resolvedOutputSchema)
-    }
-
-    if (Get-BoolValue (Get-OptionalProperty $agent "ephemeral") (Get-OptionalProperty $defaults "ephemeral")) {
-        $cmdArgs.Add("--ephemeral")
-    }
-
-    $cmdArgs.Add("-o")
-    $cmdArgs.Add($lastPath)
-
-    $extraArgsValue = Get-OptionalProperty $agent "extra_args"
-    if ($extraArgsValue) {
-        foreach ($extraArg in $extraArgsValue) {
-            $cmdArgs.Add([string]$extraArg)
+        default {
+            throw "지원하지 않는 engine: $engine. 허용 값: codex, claude, gemini"
         }
     }
-
-    $cmdArgs.Add($promptText)
 
     $runs += [pscustomobject]@{
         name = $name
         original_index = $originalIndex
+        engine = $engine
+        engine_executable = $engineExecutable
         stage = $stage
         mode = $mode
         cwd = $workerCwd
@@ -2542,6 +3455,7 @@ foreach ($agent in $spec.agents) {
         required_paths = [string[]]$requiredPaths
         required_non_empty_paths = [string[]]$requiredNonEmptyPaths
         prompt = $promptPath
+        prompt_file = $promptPath
         prompt_sha256 = Get-TextHash -Text $promptText
         prompt_chars = $promptText.Length
         worker_kind = $workerKind
@@ -2550,12 +3464,13 @@ foreach ($agent in $spec.agents) {
         requested_full_auto = $useFullAuto
         requested_sandbox = $sandbox
         requested_reasoning_effort = $reasoning
+        requested_json_output = [bool]$useJsonOutput
         prompt_profile = $promptProfile
         response_style = $responseStyle
         max_response_lines = $maxResponseLines
         workflow_prompt_mode = $workflowRenderInfo.mode
         workflow_prompt_chars = if ($workflowRenderInfo.text) { $workflowRenderInfo.text.Length } else { 0 }
-        command = Join-ArgLine -Items (@($resolvedCodexExecutable) + $cmdArgs.ToArray())
+        command = Join-ArgLine -Items (@($engineExecutable) + $cmdArgs.ToArray())
         args = [string[]]$cmdArgs.ToArray()
         arg_line = Join-ArgLine -Items $cmdArgs.ToArray()
     }
@@ -2574,6 +3489,12 @@ $policyEvaluation = Assert-OrchestrationPolicy `
 Write-LauncherDebug ("prepared_runs={0}" -f $orderedRuns.Count)
 Write-LauncherDebug ("prepared_stages={0}" -f @($stagePlan).Count)
 
+$liveUsageStates = @{}
+foreach ($run in $orderedRuns) {
+    $liveUsageStates[$run.name] = New-LiveUsageState -Run $run
+}
+Write-LiveUsageOutputs -LiveUsageConfig $liveUsageConfig -LiveUsageStates $liveUsageStates | Out-Null
+
 $results = @()
 
 if ($executionMode -eq "parallel") {
@@ -2586,14 +3507,33 @@ if ($executionMode -eq "parallel") {
             -Runs $stageRuns `
             -ResolvedCodexExecutable $resolvedCodexExecutable `
             -TimeoutSeconds $timeoutSeconds `
-            -StageLabel $stageLabel
+            -StageLabel $stageLabel `
+            -LiveUsageConfig $liveUsageConfig `
+            -LiveUsageStates $liveUsageStates
     }
 } else {
     foreach ($run in $orderedRuns) {
-        Write-LauncherDebug ("running_sequential stage={0} name={1}" -f $run.stage, $run.name)
-        $runOutput = Invoke-WorkerCommand -Executable $resolvedCodexExecutable -RunCwd $run.cwd -RunArgLine $run.arg_line -StdoutPath $run.stdout -StderrPath $run.stderr
-        $results += Complete-WorkerResult -Run $run -ExitCode ([int]$runOutput.exit_code)
+        Write-LauncherDebug ("running_sequential stage={0} name={1} engine={2}" -f $run.stage, $run.name, $run.engine)
+        # run별 engine_executable 사용 (engine별 분기 지원)
+        $seqExecutable = if ($run.engine_executable) { $run.engine_executable } else { $resolvedCodexExecutable }
+        $runOutput = Invoke-WorkerCommand `
+            -Executable $seqExecutable `
+            -RunCwd $run.cwd `
+            -RunArgLine $run.arg_line `
+            -StdoutPath $run.stdout `
+            -StderrPath $run.stderr `
+            -PromptFilePath $run.prompt_file `
+            -LiveUsageConfig $liveUsageConfig `
+            -LiveUsageState $liveUsageStates[$run.name]
+        $result = Complete-WorkerResult -Run $run -ExitCode ([int]$runOutput.exit_code)
+        Sync-LiveUsageStateFromWorkerResult -State $liveUsageStates[$run.name] -Result $result
+        $results += $result
     }
+}
+
+Write-LiveUsageOutputs -LiveUsageConfig $liveUsageConfig -LiveUsageStates $liveUsageStates | Out-Null
+if ($liveUsageConfig.write_progress) {
+    Clear-LiveUsageProgress
 }
 
 Write-LauncherDebug ("results_collected={0}" -f $results.Count)
@@ -2609,12 +3549,14 @@ if (-not [string]::IsNullOrWhiteSpace($manifestDirectory)) {
 
 $manifest = [ordered]@{
     created_at_utc = (Get-Date).ToUniversalTime().ToString("o")
-    launcher_version = "2026-03-08-v5"
+    launcher_version = "2026-03-14-v7"
     launcher_script = $MyInvocation.MyCommand.Path
     spec_path = $specPathResolved
     spec_directory = $specDirectory
     spec_sha256 = $specHash
     codex_executable = $resolvedCodexExecutable
+    claude_executable = $ClaudeExecutable
+    gemini_executable = $GeminiExecutable
     invocation_cwd = $invocationCwd
     cwd_requested = [string]$spec.cwd
     cwd_resolution_mode = $cwdResolutionMode
@@ -2623,6 +3565,13 @@ $manifest = [ordered]@{
     output_dir = $outputDir
     debug_log = $debugLogFile
     summary_file = if ($writeSummaryFile) { $summaryFile } else { $null }
+    live_usage = [ordered]@{
+        enabled = [bool]$liveUsageConfig.enabled
+        display_mode = $liveUsageConfig.display_mode
+        poll_interval_ms = $liveUsageConfig.poll_interval_ms
+        status_file = if ($liveUsageConfig.write_status_file) { $liveUsageConfig.status_file } else { $null }
+        json_output_forced = [bool]$liveUsageConfig.forces_json
+    }
     archive = $archiveInfo
     execution_mode = $executionMode
     skip_git_repo_check = $skipGit
@@ -2671,6 +3620,7 @@ if ($writeSummaryFile) {
         -ExecutionMode $executionMode `
         -SharedDirectiveInfo $sharedDirectiveInfo `
         -WorkflowInfo $workflowInfo `
+        -LiveUsageConfig $liveUsageConfig `
         -AfterCreateHookResult $afterCreateHookResult `
         -Results $results `
         -ManifestPath $manifestFile `
@@ -2705,6 +3655,7 @@ $finalOutput = [pscustomobject]@{
     execution_mode = $executionMode
     workspace_root = $cwd
     output_dir = $outputDir
+    live_usage = $manifest.live_usage
     workflow = $manifest.workflow
     hooks = $manifest.hooks
     policy = $policyEvaluation
@@ -2717,8 +3668,11 @@ if ($AsJson) {
     $finalOutput | ConvertTo-Json -Depth 8
 } else {
     $results |
-        Select-Object name, mode, exit_code, succeeded, session_id, requested_model, actual_model, requested_sandbox, actual_sandbox, requested_reasoning_effort, actual_reasoning_effort, footer_tokens_used, last |
+        Select-Object name, engine, mode, exit_code, succeeded, session_id, requested_model, actual_model, requested_sandbox, actual_sandbox, requested_reasoning_effort, actual_reasoning_effort, footer_tokens_used, last |
         Format-Table -AutoSize
     Write-Output ""
     Write-Output ("Manifest: {0}" -f $manifestFile)
 }
+
+# UTF-8 인코딩 복원
+[Console]::OutputEncoding = $previousOutputEncoding
