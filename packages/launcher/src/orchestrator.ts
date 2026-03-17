@@ -453,7 +453,8 @@ export async function orchestrate(
   const workers = resolveWorkers(spec, resolvedPaths, sharedDirective.text);
 
   // Phase 6: Execute
-  const results = await runStages(stagePlan, workers);
+  const executionMode = spec.execution_mode ?? 'parallel';
+  const results = await runStages(stagePlan, workers, executionMode);
 
   // Phase 7: Build manifest
   const manifest = buildManifest(

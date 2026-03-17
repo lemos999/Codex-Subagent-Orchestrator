@@ -63,6 +63,16 @@
 
 ---
 
+## #5c. claude.exe에 .cmd 접미사를 잘못 추가
+
+- **발생일**: 2026-03-17
+- **상황**: TS 런처에서 claude 엔진 워커 실행 시 `'claude.cmd' is not recognized` 에러
+- **원인**: `winCmd()` 헬퍼가 모든 명령에 `.cmd`를 붙였으나, claude는 npm 설치 도구가 아닌 네이티브 바이너리(`.exe`)
+- **해결**: `NPM_CLI_TOOLS` Set으로 npm 설치 도구(codex, npx)만 `.cmd` 접미사 추가, 나머지는 그대로 유지
+- **수정 파일**: `packages/launcher/src/workers/spawn.ts`
+
+---
+
 ## #6. Cleanup 시 진행 중인 프로젝트 산출물을 잘못 삭제
 
 - **발생일**: 2026-03-17

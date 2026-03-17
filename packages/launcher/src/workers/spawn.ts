@@ -63,9 +63,15 @@ export interface WorkerOutput {
 const IS_WINDOWS = process.platform === 'win32';
 
 /** On Windows, CLI tools installed via npm are .cmd wrappers that
- *  child_process.spawn cannot execute without the extension. */
+ *  child_process.spawn cannot execute without the extension.
+ *  Native binaries (like claude.exe) do NOT need this suffix. */
+const NPM_CLI_TOOLS = new Set(['codex', 'npx']);
+
 function winCmd(name: string): string {
-  return IS_WINDOWS ? `${name}.cmd` : name;
+  if (IS_WINDOWS && NPM_CLI_TOOLS.has(name)) {
+    return `${name}.cmd`;
+  }
+  return name;
 }
 
 // Engine command builders

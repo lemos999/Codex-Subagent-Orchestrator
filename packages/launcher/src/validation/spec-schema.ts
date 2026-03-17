@@ -216,12 +216,7 @@ export function parseSpec(json: unknown): LauncherSpec {
     }
   }
 
-  // Step 4: Validate execution_mode — Phase 1 only supports sequential
-  if (parsed.execution_mode === 'parallel') {
-    throw new Error(
-      'execution_mode "parallel" is not yet supported in TS launcher Phase 1',
-    );
-  }
+  // execution_mode: both 'sequential' and 'parallel' are supported
 
   return parsed as LauncherSpec;
 }
