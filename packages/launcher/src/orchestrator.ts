@@ -14,6 +14,7 @@ import { writeSummary } from './evidence/summary-writer.js';
 import { UsageMonitor } from './workers/usage-monitor.js';
 import { validatePolicies } from './supervisor/policy.js';
 import { runAfterCreateHook } from './supervisor/hooks.js';
+import { writeArchive } from './evidence/archive-writer.js';
 import { loadWorkflow } from './supervisor/workflow.js';
 import type { LauncherSpec } from './types/spec.js';
 import type {
@@ -525,6 +526,24 @@ export async function orchestrate(
   if (resolvedPaths.summaryFile) {
     await writeSummary(resolvedPaths.summaryFile, manifest);
     summaryPath = resolvedPaths.summaryFile;
+  }
+
+  // Phase 8.5: Write archive
+  const archiveResult = await writeArchive(spec, resolvedPaths, manifest, results);
+  // Update manifest archive section with actual values
+  if (archiveResult.enabled) {
+    manifest.archive = {
+      enabled: true,
+      root: spec.archive_root ? path.resolve(resolvedPaths.workspaceRoot, spec.archive_root) : null,
+      run_label: spec.archive_run_label ?? null,
+      run_directory: archiveResult.runDirectory,
+      launcher_directory: archiveResult.launcherDirectory,
+      deliverables_directory: archiveResult.deliverablesDirectory,
+      workers_directory: archiveResult.workersDirectory,
+      supervisor_directory: archiveResult.supervisorDirectory,
+    };
+    // Re-write manifest with updated archive info
+    await writeManifest(resolvedPaths.manifestFile, manifest);
   }
 
   const allSucceeded = results.every((r) => r.succeeded);

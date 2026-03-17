@@ -28,11 +28,7 @@ const WorkerKindSchema = z.enum([
 // Phase 2 field guard — explicit rejection
 // ============================================================
 
-const UNSUPPORTED_TOP_LEVEL_FIELDS = [
-  'write_run_archive',
-  'archive_root',
-  'archive_run_label',
-] as const;
+const UNSUPPORTED_TOP_LEVEL_FIELDS = [] as const;
 
 const UNSUPPORTED_AGENT_FIELDS = [
   'workflow_prompt_mode',
