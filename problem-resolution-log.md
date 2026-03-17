@@ -49,3 +49,25 @@
 - **원인**: `codex exec` CLI가 `--reasoning` 플래그를 지원하지 않음. reasoning effort는 런처의 PowerShell 스크립트 내부에서 처리되는 별도 파라미터이며, `codex exec` 직접 호출 시에는 사용 불가
 - **해결**: `--reasoning` 플래그 없이 `codex exec --full-auto -m gpt-5.4`로 재실행. 향후 `/submix`에서 Codex 직접 호출 시 reasoning 파라미터 처리 방법을 명확히 문서화 필요
 - **수정 파일**: 없음 (런타임 대응)
+
+---
+
+## #5b. TS 런처에서 동일 문제 재발 — codex/claude/gemini .cmd 래퍼 + shell:false + reasoning-effort
+
+- **발생일**: 2026-03-17
+- **상황**: TS 런처 Phase 1 실행 시 (1) `spawn codex ENOENT` (2) `spawn EINVAL` (3) `--reasoning-effort unexpected argument` 3개 연속 발생
+- **원인**: (1) codex → codex.cmd 필요 (2) .cmd 파일은 shell:true 필요 (3) codex exec가 --reasoning-effort 미지원
+- **해결**: `winCmd()` 헬퍼로 Windows .cmd 자동 해석, `shell: IS_WINDOWS` 적용, reasoning-effort 플래그 제거, 프롬프트를 args 대신 stdin으로 전달
+- **수정 파일**: `packages/launcher/src/workers/spawn.ts`
+- **교훈**: problem-resolution-log.md #4, #5에서 이미 발견한 문제였으나 새 코드에 반영되지 않음. 새 코드 작성 시 기존 문제 기록을 먼저 확인할 것.
+
+---
+
+## #6. Cleanup 시 진행 중인 프로젝트 산출물을 잘못 삭제
+
+- **발생일**: 2026-03-17
+- **상황**: cleanup-checklist.md 기준으로 "코드에서 참조 없음"인 디렉터리를 삭제했으나, 별도 진행 중인 프로젝트 산출물이 포함되어 있었음
+- **삭제된 항목**: `shortlive-shop-helper/`, `subagent-records/` (18개), 이전 `subagent-runs/` (42개), 핸드오프 문서 4개
+- **원인**: "코드 참조 없음 = 불필요"로 판단. 사용자에게 별도 진행 중인 프로젝트가 있는지 확인하지 않음
+- **복구**: git untracked 파일이었으므로 복구 불가. `trading-quest/`만 삭제 실패로 보존됨
+- **교훈**: 삭제 전에 반드시 "이 중에 별도로 진행 중인 작업이 있는지" 사용자에게 확인할 것. 코드 참조 여부만으로 판단하면 안 됨

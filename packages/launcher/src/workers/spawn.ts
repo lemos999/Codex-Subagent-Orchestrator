@@ -57,6 +57,17 @@ export interface WorkerOutput {
 }
 
 // ============================================================
+// Windows .cmd wrapper resolution
+// ============================================================
+
+const IS_WINDOWS = process.platform === 'win32';
+
+/** On Windows, CLI tools installed via npm are .cmd wrappers that
+ *  child_process.spawn cannot execute without the extension. */
+function winCmd(name: string): string {
+  return IS_WINDOWS ? `${name}.cmd` : name;
+}
+
 // Engine command builders
 // ============================================================
 
@@ -69,12 +80,11 @@ function buildCodexCommand(spec: ResolvedWorkerSpec): {
   if (spec.model) {
     args.push('-m', spec.model);
   }
-  if (spec.reasoningEffort) {
-    args.push('--reasoning-effort', spec.reasoningEffort);
-  }
-  args.push(spec.prompt);
+  // Note: codex exec does not support --reasoning-effort flag.
+  // Reasoning effort is handled internally by the codex runtime.
   args.push(...spec.extraArgs);
-  return { cmd: 'codex', args };
+  // Pass prompt via stdin to avoid shell escaping issues on Windows
+  return { cmd: winCmd('codex'), args, stdin: spec.prompt };
 }
 
 function buildClaudeCommand(spec: ResolvedWorkerSpec): {
@@ -86,9 +96,9 @@ function buildClaudeCommand(spec: ResolvedWorkerSpec): {
   if (spec.model) {
     args.push('--model', spec.model);
   }
-  args.push(spec.prompt);
   args.push(...spec.extraArgs);
-  return { cmd: 'claude', args };
+  // Pass prompt via stdin (claude --print reads from stdin when no prompt arg given)
+  return { cmd: winCmd('claude'), args, stdin: spec.prompt };
 }
 
 function buildGeminiCommand(spec: ResolvedWorkerSpec): {
@@ -101,8 +111,7 @@ function buildGeminiCommand(spec: ResolvedWorkerSpec): {
     args.push('--model', spec.model);
   }
   args.push(...spec.extraArgs);
-  const cmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-  return { cmd, args, stdin: spec.prompt };
+  return { cmd: winCmd('npx'), args, stdin: spec.prompt };
 }
 
 function buildCommand(spec: ResolvedWorkerSpec): {
@@ -235,7 +244,8 @@ export async function spawnWorker(
       cwd: spec.cwd,
       stdio: ['pipe', 'pipe', 'pipe'],
       signal: controller.signal,
-      shell: false,
+      // Windows .cmd files require shell:true to execute via cmd.exe
+      shell: IS_WINDOWS,
     });
 
     const stdoutChunks: Buffer[] = [];
