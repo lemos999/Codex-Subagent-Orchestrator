@@ -91,6 +91,65 @@ export function detectWkiConfig(workspaceRoot: string): WkiContextConfig | null 
 }
 
 // ============================================================
+// Query expansion for multilingual search
+// ============================================================
+
+/**
+ * Domain-specific Korean→English keyword map.
+ * Helps bridge the gap when documents are in English but queries are in Korean.
+ */
+const KO_EN_KEYWORDS: Record<string, string[]> = {
+  '증거': ['evidence'],
+  '기록': ['recording', 'log', 'manifest'],
+  '규칙': ['rules', 'policy'],
+  '워커': ['worker', 'agent'],
+  '실행': ['execution', 'run', 'launch'],
+  '검증': ['validation', 'review', 'verify'],
+  '오케스트레이션': ['orchestration', 'orchestrator'],
+  '파일': ['file', 'path'],
+  '디렉터리': ['directory', 'folder'],
+  '구조': ['structure', 'architecture'],
+  '설정': ['config', 'settings'],
+  '스펙': ['spec', 'specification'],
+  '매니페스트': ['manifest'],
+  '프롬프트': ['prompt', 'contract'],
+  '에이전트': ['agent', 'worker'],
+  '리뷰': ['review', 'reviewer'],
+  '수정': ['fix', 'fixer', 'repair'],
+  '계획': ['plan', 'planner'],
+  '단계': ['stage', 'phase'],
+  '엔진': ['engine', 'codex', 'claude', 'gemini'],
+  '런처': ['launcher'],
+  '아카이브': ['archive'],
+  '인덱스': ['index', 'indexing'],
+  '검색': ['search', 'query'],
+  '맥락': ['context'],
+  '임베딩': ['embedding'],
+  '토큰': ['token'],
+  '배치': ['batch'],
+};
+
+/**
+ * Expand a query by appending English keywords for Korean terms.
+ * Returns the original query + English expansion.
+ */
+function expandQuery(query: string): string {
+  const hasKorean = /[\uAC00-\uD7AF]/.test(query);
+  if (!hasKorean) return query;
+
+  const englishTerms: string[] = [];
+  for (const [ko, enList] of Object.entries(KO_EN_KEYWORDS)) {
+    if (query.includes(ko)) {
+      englishTerms.push(...enList);
+    }
+  }
+
+  if (englishTerms.length === 0) return query;
+
+  return `${query} ${englishTerms.join(' ')}`;
+}
+
+// ============================================================
 // Auto incremental indexing
 // ============================================================
 
@@ -187,7 +246,10 @@ export async function generateContext(
     const ftsDbResolved = ftsDbTemplate.replace('{project}', config.projectId);
     const ftsDbPath = path.resolve(config.knowledgeDir, '..', ftsDbResolved);
 
-    const contextBlock = await subHookModule.generateAgentContext(query, {
+    // Expand Korean queries with English keywords for better cross-lingual search
+    const expandedQuery = expandQuery(query);
+
+    const contextBlock = await subHookModule.generateAgentContext(expandedQuery, {
       knowledgeDir: config.knowledgeDir,
       projectId: config.projectId,
       ftsDbPath,
