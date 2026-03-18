@@ -10,11 +10,12 @@
  */
 
 import * as fs from 'node:fs/promises';
-import * as fsSync from 'node:fs';
 import * as path from 'node:path';
+
 import type { LauncherSpec } from '../types/spec.js';
 import type { Manifest, WorkerResult } from '../types/manifest.js';
 import type { ResolvedPaths } from '../types/state.js';
+import { copyIfExists, writeFileSafe } from '../common/fs-helpers.js';
 
 export interface ArchiveResult {
   enabled: boolean;
@@ -25,21 +26,22 @@ export interface ArchiveResult {
   supervisorDirectory: string | null;
 }
 
+const EMPTY_RESULT: ArchiveResult = {
+  enabled: false,
+  runDirectory: null,
+  launcherDirectory: null,
+  deliverablesDirectory: null,
+  workersDirectory: null,
+  supervisorDirectory: null,
+};
+
 function formatTimestamp(): string {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-}
-
-async function copyIfExists(src: string, dest: string): Promise<boolean> {
-  try {
-    if (fsSync.existsSync(src)) {
-      await fs.mkdir(path.dirname(dest), { recursive: true });
-      await fs.copyFile(src, dest);
-      return true;
-    }
-  } catch { /* ignore */ }
-  return false;
+  return (
+    `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
+    `-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
+  );
 }
 
 /**
@@ -48,39 +50,51 @@ async function copyIfExists(src: string, dest: string): Promise<boolean> {
 export async function writeArchive(
   spec: LauncherSpec,
   resolvedPaths: ResolvedPaths,
-  manifest: Manifest,
+  _manifest: Manifest,
   results: WorkerResult[],
 ): Promise<ArchiveResult> {
-  if (!spec.write_run_archive) {
-    return { enabled: false, runDirectory: null, launcherDirectory: null, deliverablesDirectory: null, workersDirectory: null, supervisorDirectory: null };
-  }
+  if (!spec.write_run_archive) return EMPTY_RESULT;
 
   const archiveRoot = spec.archive_root
     ? path.resolve(resolvedPaths.workspaceRoot, spec.archive_root)
     : path.resolve(resolvedPaths.workspaceRoot, 'subagent-records');
 
-  const label = spec.archive_run_label ?? path.basename(resolvedPaths.outputDir);
-  const timestamp = formatTimestamp();
-  const runDir = path.resolve(archiveRoot, `${timestamp}-${label}`);
+  const label =
+    spec.archive_run_label ?? path.basename(resolvedPaths.outputDir);
+  const runDir = path.resolve(archiveRoot, `${formatTimestamp()}-${label}`);
 
   const launcherDir = path.resolve(runDir, 'launcher');
   const deliverablesDir = path.resolve(runDir, 'deliverables');
   const workersDir = path.resolve(runDir, 'workers');
   const supervisorDir = path.resolve(runDir, 'supervisor');
 
-  await fs.mkdir(launcherDir, { recursive: true });
-  await fs.mkdir(deliverablesDir, { recursive: true });
-  await fs.mkdir(workersDir, { recursive: true });
-  await fs.mkdir(supervisorDir, { recursive: true });
+  await Promise.all([
+    fs.mkdir(launcherDir, { recursive: true }),
+    fs.mkdir(deliverablesDir, { recursive: true }),
+    fs.mkdir(workersDir, { recursive: true }),
+    fs.mkdir(supervisorDir, { recursive: true }),
+  ]);
 
   // 1. Launcher directory: spec, manifest, summary, debug log
-  await copyIfExists(resolvedPaths.specPath, path.join(launcherDir, path.basename(resolvedPaths.specPath)));
-  await copyIfExists(resolvedPaths.manifestFile, path.join(launcherDir, 'orchestration-manifest.json'));
+  await copyIfExists(
+    resolvedPaths.specPath,
+    path.join(launcherDir, path.basename(resolvedPaths.specPath)),
+  );
+  await copyIfExists(
+    resolvedPaths.manifestFile,
+    path.join(launcherDir, 'orchestration-manifest.json'),
+  );
   if (resolvedPaths.summaryFile) {
-    await copyIfExists(resolvedPaths.summaryFile, path.join(launcherDir, 'orchestration-summary.md'));
+    await copyIfExists(
+      resolvedPaths.summaryFile,
+      path.join(launcherDir, 'orchestration-summary.md'),
+    );
   }
   if (resolvedPaths.debugLogFile) {
-    await copyIfExists(resolvedPaths.debugLogFile, path.join(launcherDir, 'launcher-debug.log'));
+    await copyIfExists(
+      resolvedPaths.debugLogFile,
+      path.join(launcherDir, 'launcher-debug.log'),
+    );
   }
 
   // 2. Deliverables directory: requested deliverables
@@ -96,7 +110,6 @@ export async function writeArchive(
     const workerDir = path.join(workersDir, `${kind}__${result.name}`);
     await fs.mkdir(workerDir, { recursive: true });
 
-    // Worker metadata
     const metadata = {
       name: result.name,
       engine: result.engine,
@@ -107,10 +120,14 @@ export async function writeArchive(
       model: result.actual_model,
       sandbox: result.actual_sandbox,
     };
-    await fs.writeFile(path.join(workerDir, 'worker-metadata.json'), JSON.stringify(metadata, null, 2), 'utf8');
+    await writeFileSafe(
+      path.join(workerDir, 'worker-metadata.json'),
+      JSON.stringify(metadata, null, 2),
+    );
 
-    // Copy worker files
-    if (result.prompt) await copyIfExists(result.prompt, path.join(workerDir, 'prompt.txt'));
+    if (result.prompt) {
+      await copyIfExists(result.prompt, path.join(workerDir, 'prompt.txt'));
+    }
     await copyIfExists(result.stdout, path.join(workerDir, 'stdout.log'));
     await copyIfExists(result.stderr, path.join(workerDir, 'stderr.log'));
     await copyIfExists(result.last, path.join(workerDir, 'last.txt'));

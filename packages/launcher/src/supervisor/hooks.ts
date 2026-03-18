@@ -8,9 +8,9 @@
 import { spawn } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
-import type { HooksSpec } from '../types/spec.js';
+import * as path from 'node:path';
 
-const IS_WINDOWS = process.platform === 'win32';
+import type { HooksSpec } from '../types/spec.js';
 
 export interface HookResult {
   ran: boolean;
@@ -57,7 +57,7 @@ export async function runAfterCreateHook(
   // Check sentinel paths
   if (hook.sentinel_paths) {
     for (const p of hook.sentinel_paths) {
-      const fullPath = `${workspaceRoot}/${p}`;
+      const fullPath = path.resolve(workspaceRoot, p);
       if (!fsSync.existsSync(fullPath)) {
         result.missingPaths.push(p);
       }
@@ -86,12 +86,20 @@ export async function runAfterCreateHook(
     result.stdout = stdout;
     result.stderr = stderr;
 
-    // Write stdout/stderr files if configured
+    // Write stdout/stderr files if configured (with error handling)
     if (hook.stdout_file && stdout) {
-      await fs.writeFile(hook.stdout_file, stdout, 'utf8');
+      try {
+        await fs.writeFile(hook.stdout_file, stdout, 'utf8');
+      } catch {
+        /* ignore write error for hook output files */
+      }
     }
     if (hook.stderr_file && stderr) {
-      await fs.writeFile(hook.stderr_file, stderr, 'utf8');
+      try {
+        await fs.writeFile(hook.stderr_file, stderr, 'utf8');
+      } catch {
+        /* ignore write error for hook output files */
+      }
     }
   } catch (err) {
     result.ran = true;

@@ -11,7 +11,9 @@
 import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
 import * as path from 'node:path';
+
 import type { LauncherSpec, AgentSpec } from '../types/spec.js';
+import { sha256 as computeSha256 } from '../common/fs-helpers.js';
 
 export interface WorkflowInfo {
   enabled: boolean;
@@ -82,11 +84,7 @@ export async function loadWorkflow(
   }
 
   // Compute SHA256
-  let templateSha256: string | null = null;
-  if (templateText) {
-    const crypto = await import('node:crypto');
-    templateSha256 = crypto.createHash('sha256').update(templateText, 'utf8').digest('hex');
-  }
+  const templateSha256 = templateText ? computeSha256(templateText) : null;
 
   return {
     enabled: templateText !== null,

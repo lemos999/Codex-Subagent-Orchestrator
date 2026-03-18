@@ -6,9 +6,11 @@
 import { spawn } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import * as crypto from 'node:crypto';
+
 import type { Engine } from '../types/engine.js';
 import type { WorkerResult } from '../types/manifest.js';
+import { IS_WINDOWS, winCmd } from '../common/platform.js';
+import { sha256 } from '../common/fs-helpers.js';
 
 // ============================================================
 // Resolved worker spec (everything needed to spawn one worker)
@@ -57,61 +59,35 @@ export interface WorkerOutput {
 }
 
 // ============================================================
-// Windows .cmd wrapper resolution
-// ============================================================
-
-const IS_WINDOWS = process.platform === 'win32';
-
-/** On Windows, CLI tools installed via npm are .cmd wrappers that
- *  child_process.spawn cannot execute without the extension.
- *  Native binaries (like claude.exe) do NOT need this suffix. */
-const NPM_CLI_TOOLS = new Set(['codex', 'npx']);
-
-function winCmd(name: string): string {
-  if (IS_WINDOWS && NPM_CLI_TOOLS.has(name)) {
-    return `${name}.cmd`;
-  }
-  return name;
-}
-
 // Engine command builders
 // ============================================================
 
-function buildCodexCommand(spec: ResolvedWorkerSpec): {
+interface SpawnCommand {
   cmd: string;
   args: string[];
   stdin?: string;
-} {
+}
+
+function buildCodexCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   const args = ['exec', '--full-auto'];
   if (spec.model) {
     args.push('-m', spec.model);
   }
   // Note: codex exec does not support --reasoning-effort flag.
-  // Reasoning effort is handled internally by the codex runtime.
   args.push(...spec.extraArgs);
-  // Pass prompt via stdin to avoid shell escaping issues on Windows
   return { cmd: winCmd('codex'), args, stdin: spec.prompt };
 }
 
-function buildClaudeCommand(spec: ResolvedWorkerSpec): {
-  cmd: string;
-  args: string[];
-  stdin?: string;
-} {
+function buildClaudeCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   const args = ['--print'];
   if (spec.model) {
     args.push('--model', spec.model);
   }
   args.push(...spec.extraArgs);
-  // Pass prompt via stdin (claude --print reads from stdin when no prompt arg given)
   return { cmd: winCmd('claude'), args, stdin: spec.prompt };
 }
 
-function buildGeminiCommand(spec: ResolvedWorkerSpec): {
-  cmd: string;
-  args: string[];
-  stdin: string;
-} {
+function buildGeminiCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   const args = ['@google/gemini-cli', '--yolo'];
   if (spec.model) {
     args.push('--model', spec.model);
@@ -120,11 +96,7 @@ function buildGeminiCommand(spec: ResolvedWorkerSpec): {
   return { cmd: winCmd('npx'), args, stdin: spec.prompt };
 }
 
-function buildCommand(spec: ResolvedWorkerSpec): {
-  cmd: string;
-  args: string[];
-  stdin?: string;
-} {
+function buildCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   switch (spec.engine) {
     case 'codex':
       return buildCodexCommand(spec);
@@ -154,7 +126,6 @@ function extractLastMessage(
 
   switch (engine) {
     case 'codex': {
-      // Codex outputs JSON events, try to extract last message
       const lines = stdout.trim().split('\n');
       for (let i = lines.length - 1; i >= 0; i--) {
         try {
@@ -169,14 +140,11 @@ function extractLastMessage(
           // Not JSON, use as-is
         }
       }
-      // Fallback: last non-empty line
       return lines[lines.length - 1] || '';
     }
     case 'claude':
-      // Claude --print outputs full text
       return stdout.trim();
     case 'gemini': {
-      // Filter YOLO announcement lines from output
       const lines = stdout.trim().split('\n');
       const filtered = lines.filter(
         (line) =>
@@ -202,6 +170,67 @@ function preview(text: string, maxLen = 200): string {
 // Main spawn function
 // ============================================================
 
+/**
+ * Spawn a child process and collect its output.
+ * Returns { exitCode, stdoutBuf, stderrBuf } after the process exits.
+ *
+ * Fix for review issue #9: The promise resolves with raw buffers
+ * synchronously on close. File I/O happens after resolution, outside
+ * the Promise constructor.
+ */
+function spawnProcess(
+  cmd: string,
+  args: string[],
+  cwd: string,
+  stdin: string | undefined,
+  timeoutMs: number,
+): Promise<{ exitCode: number; stdoutBuf: string; stderrBuf: string }> {
+  return new Promise((resolve, reject) => {
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    if (timeoutMs > 0) {
+      timer = setTimeout(() => {
+        controller.abort();
+      }, timeoutMs);
+    }
+
+    const child = spawn(cmd, args, {
+      cwd,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      signal: controller.signal,
+      shell: IS_WINDOWS,
+    });
+
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
+
+    child.stdout.on('data', (chunk: Buffer) => stdoutChunks.push(chunk));
+    child.stderr.on('data', (chunk: Buffer) => stderrChunks.push(chunk));
+
+    child.on('close', (code) => {
+      if (timer) clearTimeout(timer);
+      resolve({
+        exitCode: code ?? 1,
+        stdoutBuf: Buffer.concat(stdoutChunks).toString('utf8'),
+        stderrBuf: Buffer.concat(stderrChunks).toString('utf8'),
+      });
+    });
+
+    child.on('error', (err) => {
+      if (timer) clearTimeout(timer);
+      reject(err);
+    });
+
+    if (stdin !== undefined) {
+      child.stdin.write(stdin);
+      child.stdin.end();
+    } else {
+      child.stdin.end();
+    }
+  });
+}
+
 export async function spawnWorker(
   spec: ResolvedWorkerSpec,
 ): Promise<WorkerOutput> {
@@ -212,88 +241,35 @@ export async function spawnWorker(
   await fs.mkdir(spec.outputDir, { recursive: true });
 
   // File paths
-  const stdoutPath = path.resolve(
-    spec.outputDir,
-    `${spec.name}.stdout.log`,
-  );
-  const stderrPath = path.resolve(
-    spec.outputDir,
-    `${spec.name}.stderr.log`,
-  );
+  const stdoutPath = path.resolve(spec.outputDir, `${spec.name}.stdout.log`);
+  const stderrPath = path.resolve(spec.outputDir, `${spec.name}.stderr.log`);
   const lastPath = path.resolve(spec.outputDir, `${spec.name}.last.txt`);
   const promptPath = spec.writePromptFile
     ? path.resolve(spec.outputDir, `${spec.name}.prompt.txt`)
     : null;
 
   // Write prompt file if configured
-  const promptSha256 = crypto
-    .createHash('sha256')
-    .update(spec.prompt, 'utf8')
-    .digest('hex');
+  const promptSha256 = sha256(spec.prompt);
 
   if (promptPath) {
     await fs.writeFile(promptPath, spec.prompt, 'utf8');
   }
 
-  // Spawn process
-  const exitCode = await new Promise<number>((resolve, reject) => {
-    const controller = new AbortController();
-    let timer: ReturnType<typeof setTimeout> | null = null;
+  // Spawn process — returns raw buffers synchronously on close
+  const { exitCode, stdoutBuf, stderrBuf } = await spawnProcess(
+    cmd,
+    args,
+    spec.cwd,
+    stdin,
+    spec.timeoutMs,
+  );
 
-    if (spec.timeoutMs > 0) {
-      timer = setTimeout(() => {
-        controller.abort();
-      }, spec.timeoutMs);
-    }
+  // Write output files (outside Promise constructor — fix #9)
+  await fs.writeFile(stdoutPath, stdoutBuf, 'utf8');
+  await fs.writeFile(stderrPath, stderrBuf, 'utf8');
 
-    const child = spawn(cmd, args, {
-      cwd: spec.cwd,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      signal: controller.signal,
-      // Windows .cmd files require shell:true to execute via cmd.exe
-      shell: IS_WINDOWS,
-    });
-
-    const stdoutChunks: Buffer[] = [];
-    const stderrChunks: Buffer[] = [];
-
-    child.stdout.on('data', (chunk: Buffer) => stdoutChunks.push(chunk));
-    child.stderr.on('data', (chunk: Buffer) => stderrChunks.push(chunk));
-
-    child.on('close', async (code) => {
-      if (timer) clearTimeout(timer);
-      const stdoutBuf = Buffer.concat(stdoutChunks).toString('utf8');
-      const stderrBuf = Buffer.concat(stderrChunks).toString('utf8');
-
-      // Write output files
-      await fs.writeFile(stdoutPath, stdoutBuf, 'utf8');
-      await fs.writeFile(stderrPath, stderrBuf, 'utf8');
-
-      // Extract and write last message
-      const lastMsg = extractLastMessage(spec.engine, stdoutBuf, stderrBuf);
-      await fs.writeFile(lastPath, lastMsg, 'utf8');
-
-      resolve(code ?? 1);
-    });
-
-    child.on('error', (err) => {
-      if (timer) clearTimeout(timer);
-      reject(err);
-    });
-
-    // Pipe stdin for gemini
-    if (stdin !== undefined) {
-      child.stdin.write(stdin);
-      child.stdin.end();
-    } else {
-      child.stdin.end();
-    }
-  });
-
-  // Read back output files for previews
-  const stdoutContent = await fs.readFile(stdoutPath, 'utf8');
-  const stderrContent = await fs.readFile(stderrPath, 'utf8');
-  const lastMessage = await fs.readFile(lastPath, 'utf8');
+  const lastMsg = extractLastMessage(spec.engine, stdoutBuf, stderrBuf);
+  await fs.writeFile(lastPath, lastMsg, 'utf8');
 
   return {
     exitCode,
@@ -301,9 +277,9 @@ export async function spawnWorker(
     stderrPath,
     lastPath,
     promptPath,
-    lastMessage,
-    stdoutPreview: preview(stdoutContent),
-    stderrPreview: preview(stderrContent),
+    lastMessage: lastMsg,
+    stdoutPreview: preview(stdoutBuf),
+    stderrPreview: preview(stderrBuf),
     command,
     promptSha256,
     promptChars: spec.prompt.length,

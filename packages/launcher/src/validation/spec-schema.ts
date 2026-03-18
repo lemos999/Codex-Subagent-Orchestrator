@@ -165,8 +165,27 @@ const LauncherSpecSchema = z.object({
   workflow_context: z.record(z.string(), z.unknown()).optional(),
   workflow_context_file: z.string().nullable().optional(),
   workflow_render_strict: z.boolean().optional(),
-  hooks: z.any().optional(),
-  live_usage: z.any().optional(),
+  hooks: z
+    .object({
+      after_create: z
+        .object({
+          command: z.string(),
+          sentinel_paths: z.array(z.string()).optional(),
+          if_workspace_empty: z.boolean().optional(),
+          stdout_file: z.string().nullable().optional(),
+          stderr_file: z.string().nullable().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+  live_usage: z
+    .object({
+      enabled: z.boolean().optional(),
+      display_mode: z.enum(['none', 'progress', 'file', 'both']).optional(),
+      status_file: z.string().nullable().optional(),
+      poll_interval_ms: z.number().optional(),
+    })
+    .optional(),
 
   // Defaults
   defaults: DefaultsSpecSchema.optional(),

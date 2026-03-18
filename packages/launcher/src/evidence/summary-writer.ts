@@ -3,9 +3,10 @@
  * Format is derived from the real example in subagent-runs/gemini/evidence-verify-2026-03-17/.
  */
 
-import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+
 import type { Manifest } from '../types/manifest.js';
+import { writeFileSafe } from '../common/fs-helpers.js';
 
 /**
  * Format a value for summary display.
@@ -31,7 +32,6 @@ export async function writeSummary(
   filePath: string,
   manifest: Manifest,
 ): Promise<void> {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
 
   const e = manifest.efficiency_signals;
   const p = manifest.policy;
@@ -93,5 +93,5 @@ export async function writeSummary(
 
   lines.push('');
 
-  await fs.writeFile(filePath, lines.join('\n'), 'utf8');
+  await writeFileSafe(filePath, lines.join('\n'));
 }
