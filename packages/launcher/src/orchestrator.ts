@@ -18,6 +18,7 @@ import { runStages } from './supervisor/stage-runner.js';
 import { validatePolicies } from './supervisor/policy.js';
 import { runAfterCreateHook } from './supervisor/hooks.js';
 import { loadWorkflow } from './supervisor/workflow.js';
+import { detectWkiConfig, generateContext, injectContextIntoPrompt, type WkiContextConfig } from './supervisor/wki-context.js';
 import { writeManifest } from './evidence/manifest-writer.js';
 import { writeSummary } from './evidence/summary-writer.js';
 import { writeArchive } from './evidence/archive-writer.js';
@@ -134,11 +135,12 @@ function buildStagePlan(spec: LauncherSpec): StagePlan[] {
 // Resolve workers
 // ============================================================
 
-function resolveWorkers(
+async function resolveWorkers(
   spec: LauncherSpec,
   resolvedPaths: ResolvedPaths,
   sharedDirective: string | null,
-): ResolvedWorkerSpec[] {
+  wkiConfig: WkiContextConfig | null,
+): Promise<ResolvedWorkerSpec[]> {
   const defaultEngine = spec.defaults?.engine ?? 'codex';
   const defaultModel = spec.defaults?.model ?? ENGINE_DEFAULTS[defaultEngine];
   const defaultSandbox = spec.defaults?.sandbox ?? 'workspace-write';
@@ -150,7 +152,7 @@ function resolveWorkers(
   const writePromptFiles = spec.write_prompt_files ?? false;
   const timeoutMs = (spec.timeout_seconds ?? 0) * 1000;
 
-  return spec.agents.map((agent): ResolvedWorkerSpec => {
+  return Promise.all(spec.agents.map(async (agent): Promise<ResolvedWorkerSpec> => {
     const engine = agent.engine ?? defaultEngine;
     const model = agent.model ?? defaultModel;
     const kind = agent.kind ?? 'custom';
@@ -161,13 +163,29 @@ function resolveWorkers(
       ? path.resolve(resolvedPaths.workspaceRoot, agent.cwd)
       : resolvedPaths.workspaceRoot;
 
-    // Build prompt
+    // Build prompt with WKI context injection
+    const taskText = agent.prompt ?? agent.task ?? '';
     const promptParts: string[] = [];
     if (sharedDirective) {
       promptParts.push(sharedDirective);
       promptParts.push('');
     }
-    promptParts.push(agent.prompt ?? agent.task ?? '');
+
+    // WKI context injection — search for relevant context and prepend
+    if (wkiConfig && taskText) {
+      try {
+        const ctx = await generateContext(taskText, wkiConfig);
+        if (ctx.injected) {
+          promptParts.push(injectContextIntoPrompt('', ctx).trim());
+          promptParts.push('');
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        process.stderr.write(`[wki] Context injection failed for "${agent.name}": ${msg}\n`);
+      }
+    }
+
+    promptParts.push(taskText);
 
     const requiredPaths = (agent.required_paths ?? []).map((p) =>
       path.resolve(agentCwd, p),
@@ -199,7 +217,7 @@ function resolveWorkers(
       extraArgs: sanitizeExtraArgs(agent.extra_args ?? []),
       timeoutMs,
     };
-  });
+  }));
 }
 
 // ============================================================
@@ -274,10 +292,16 @@ export async function orchestrate(
   const sharedDirective = await loadSharedDirective(spec, resolvedPaths);
   const workflow = await loadWorkflow(spec, resolvedPaths.workspaceRoot, resolvedPaths.specDirectory);
 
+  // Phase 4.5: Detect WKI for context injection
+  const wkiConfig = detectWkiConfig(resolvedPaths.workspaceRoot);
+  if (wkiConfig) {
+    console.error(`[wki] Context injection enabled (${wkiConfig.knowledgeDir})`);
+  }
+
   // Phase 5: Build stage plan and validate policies
   const stagePlan = buildStagePlan(spec);
   enforcePolicies(spec, stagePlan);
-  const workers = resolveWorkers(spec, resolvedPaths, sharedDirective.text);
+  const workers = await resolveWorkers(spec, resolvedPaths, sharedDirective.text, wkiConfig);
 
   // Phase 5.5: Initialize usage monitor
   const usageMonitor = initUsageMonitor(spec, resolvedPaths.outputDir);
