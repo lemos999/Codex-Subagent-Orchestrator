@@ -31,8 +31,8 @@
     },
     "local": {
       "runtime": "transformers.js",
-      "model": "Xenova/multilingual-e5-base",
-      "dimensions": 768
+      "model": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "dimensions": 384
     }
   },
 

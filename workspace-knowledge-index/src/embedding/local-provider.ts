@@ -45,8 +45,8 @@ const INSTRUCTION_MODELS = new Set([
 export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
   readonly dimensions: number;
   readonly modelName: string;
-  readonly maxBatchSize = 8;  // Reduced from 32 — larger models (768d) hit stack overflow at higher batch sizes
-  readonly maxTokensPerText = 512;
+  readonly maxBatchSize = 4;   // Small batches to prevent stack overflow with multilingual models
+  readonly maxTokensPerText = 256; // Truncate long texts to prevent tokenizer stack overflow
 
   private pipelinePromise: Promise<unknown> | null = null;
   private readonly useInstruction: boolean;
@@ -92,10 +92,17 @@ export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
       options: { pooling: string; normalize: boolean },
     ) => Promise<{ tolist(): number[][] }>;
 
+    // Truncate texts to maxTokensPerText (approximate: 1 token ≈ 4 chars)
+    // This prevents stack overflow in the tokenizer for very long texts
+    const maxChars = this.maxTokensPerText * 4;
+    const truncatedTexts = texts.map((t) =>
+      t.length > maxChars ? t.slice(0, maxChars) : t,
+    );
+
     // BGE models recommend prepending an instruction for queries
     const preparedTexts = this.useInstruction
-      ? texts.map((t) => `Represent this sentence for searching relevant passages: ${t}`)
-      : texts;
+      ? truncatedTexts.map((t) => `Represent this sentence for searching relevant passages: ${t}`)
+      : truncatedTexts;
 
     const output = await pipe(preparedTexts, {
       pooling: 'mean',
