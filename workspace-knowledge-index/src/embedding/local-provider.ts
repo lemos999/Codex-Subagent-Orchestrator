@@ -45,7 +45,7 @@ const INSTRUCTION_MODELS = new Set([
 export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
   readonly dimensions: number;
   readonly modelName: string;
-  readonly maxBatchSize = 4;   // Small batches to prevent stack overflow with multilingual models
+  readonly maxBatchSize = 16;  // Safe now that node_modules excluded (no 4MB+ texts)
   readonly maxTokensPerText = 256; // Truncate long texts to prevent tokenizer stack overflow
 
   private pipelinePromise: Promise<unknown> | null = null;
