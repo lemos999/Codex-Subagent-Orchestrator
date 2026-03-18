@@ -33,6 +33,7 @@ export interface WorkflowInfo {
 export async function loadWorkflow(
   spec: LauncherSpec,
   workspaceRoot: string,
+  specDirectory?: string,
 ): Promise<WorkflowInfo> {
   const mode = spec.workflow_prompt_mode ?? 'disabled';
 
@@ -64,7 +65,8 @@ export async function loadWorkflow(
   }
 
   if (source && !path.isAbsolute(source)) {
-    source = path.resolve(workspaceRoot, source);
+    // PS resolves workflow_file relative to specDirectory, not workspaceRoot
+    source = path.resolve(specDirectory ?? workspaceRoot, source);
   }
 
   let templateText: string | null = null;
@@ -75,7 +77,8 @@ export async function loadWorkflow(
   // Merge context: top-level + context file
   let context: Record<string, unknown> = { ...(spec.workflow_context ?? {}) };
   if (spec.workflow_context_file) {
-    const ctxPath = path.resolve(workspaceRoot, spec.workflow_context_file);
+    // PS resolves workflow_context_file relative to specDirectory
+    const ctxPath = path.resolve(specDirectory ?? workspaceRoot, spec.workflow_context_file);
     if (fsSync.existsSync(ctxPath)) {
       const ctxJson = await fs.readFile(ctxPath, 'utf8');
       const parsed = JSON.parse(ctxJson) as Record<string, unknown>;

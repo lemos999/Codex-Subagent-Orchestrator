@@ -272,7 +272,7 @@ export async function orchestrate(
 
   // Phase 4: Bootstrap (shared directive + workflow)
   const sharedDirective = await loadSharedDirective(spec, resolvedPaths);
-  const workflow = await loadWorkflow(spec, resolvedPaths.workspaceRoot);
+  const workflow = await loadWorkflow(spec, resolvedPaths.workspaceRoot, resolvedPaths.specDirectory);
 
   // Phase 5: Build stage plan and validate policies
   const stagePlan = buildStagePlan(spec);
@@ -329,7 +329,7 @@ export async function orchestrate(
       enabled: true,
       root: spec.archive_root
         ? path.resolve(resolvedPaths.workspaceRoot, spec.archive_root)
-        : null,
+        : path.resolve(resolvedPaths.workspaceRoot, 'subagent-records'),
       run_label: spec.archive_run_label ?? null,
       run_directory: archiveResult.runDirectory,
       launcher_directory: archiveResult.launcherDirectory,

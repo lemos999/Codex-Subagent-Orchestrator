@@ -71,7 +71,7 @@ const DefaultsSpecSchema = z.object({
   prompt_profile: z.enum(['full', 'compact']).optional(),
   response_style: z.enum(['standard', 'compact']).optional(),
   max_response_lines: z.number().optional(),
-});
+}).strict();
 
 // ============================================================
 // AgentSpec schema
@@ -175,8 +175,10 @@ const LauncherSpecSchema = z.object({
           stdout_file: z.string().nullable().optional(),
           stderr_file: z.string().nullable().optional(),
         })
+        .strict()
         .optional(),
     })
+    .strict()
     .optional(),
   live_usage: z
     .object({
@@ -185,6 +187,7 @@ const LauncherSpecSchema = z.object({
       status_file: z.string().nullable().optional(),
       poll_interval_ms: z.number().optional(),
     })
+    .strict()
     .optional(),
 
   // Defaults
@@ -199,6 +202,47 @@ const LauncherSpecSchema = z.object({
  * Parse and validate a spec JSON object.
  * Throws on invalid input or unsupported Phase 2 fields.
  */
+// Known top-level field names (from LauncherSpecSchema)
+const KNOWN_TOP_LEVEL_FIELDS = new Set([
+  'cwd', 'agents', 'cwd_resolution', 'output_dir', 'manifest_file',
+  'debug_log_file', 'summary_file', 'archive_root', 'write_run_archive',
+  'archive_run_label', 'skip_git_repo_check', 'execution_mode',
+  'timeout_seconds', 'write_prompt_files', 'write_summary_file',
+  'requested_deliverables', 'supervisor_only', 'require_final_read_only_review',
+  'material_issue_strategy', 'shared_directive_file', 'shared_directive_text',
+  'inject_shared_directive', 'shared_directive_mode', 'workflow_file',
+  'workflow_auto_detect', 'workflow_prompt_mode', 'workflow_context',
+  'workflow_context_file', 'workflow_render_strict', 'hooks', 'live_usage',
+  'defaults',
+]);
+
+// Known agent-level field names (from AgentSpecSchema)
+const KNOWN_AGENT_FIELDS = new Set([
+  'name', 'prompt', 'task', 'engine', 'mode', 'kind', 'stage', 'resume_last',
+  'session_id', 'cwd', 'role', 'mission', 'success_criteria',
+  'coordination_notes', 'skills', 'read_first', 'writable_scope',
+  'requirements', 'validation', 'return_contract', 'required_paths',
+  'required_non_empty_paths', 'sandbox', 'model', 'reasoning_effort', 'json',
+  'output_schema', 'ephemeral', 'prompt_profile', 'response_style',
+  'max_response_lines', 'output_last_message_file', 'extra_args',
+  'workflow_prompt_mode', 'workflow_context', 'workflow_context_file',
+  'stop_when',
+]);
+
+function rejectUnknownFields(
+  obj: Record<string, unknown>,
+  knownFields: Set<string>,
+  context: string,
+): void {
+  for (const key of Object.keys(obj)) {
+    if (!knownFields.has(key)) {
+      throw new Error(
+        `Unknown field "${key}" in ${context}. Check for typos or consult the spec format reference.`,
+      );
+    }
+  }
+}
+
 export function parseSpec(json: unknown): LauncherSpec {
   // Step 1: Zod structural validation
   const parsed = LauncherSpecSchema.parse(json);
@@ -207,6 +251,9 @@ export function parseSpec(json: unknown): LauncherSpec {
   const rawObj = json as Record<string, unknown>;
   rejectUnsupportedFields(rawObj, UNSUPPORTED_TOP_LEVEL_FIELDS, 'spec');
 
+  // Step 2b: Reject truly unknown fields at top level
+  rejectUnknownFields(rawObj, KNOWN_TOP_LEVEL_FIELDS, 'spec');
+
   // Step 3: Reject unsupported Phase 2 fields in each agent
   if (Array.isArray(rawObj.agents)) {
     for (const agent of rawObj.agents) {
@@ -214,6 +261,12 @@ export function parseSpec(json: unknown): LauncherSpec {
         rejectUnsupportedFields(
           agent as Record<string, unknown>,
           UNSUPPORTED_AGENT_FIELDS,
+          `agent "${(agent as Record<string, unknown>).name}"`,
+        );
+        // Step 3b: Reject unknown fields in agent
+        rejectUnknownFields(
+          agent as Record<string, unknown>,
+          KNOWN_AGENT_FIELDS,
           `agent "${(agent as Record<string, unknown>).name}"`,
         );
       }

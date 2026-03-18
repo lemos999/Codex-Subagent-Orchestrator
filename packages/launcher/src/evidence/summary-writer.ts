@@ -45,6 +45,40 @@ export async function writeSummary(
     `- shared_directive_mode: ${manifest.shared_directive.effective_mode}`,
     `- shared_directive_chars: ${manifest.shared_directive.original_char_count} -> ${manifest.shared_directive.effective_char_count}`,
     `- live_usage_enabled: ${fmt(manifest.live_usage.enabled)}`,
+  ];
+
+  if (manifest.live_usage.enabled) {
+    lines.push(
+      `- live_usage_display_mode: ${manifest.live_usage.display_mode}`,
+      `- live_usage_poll_interval_ms: ${manifest.live_usage.poll_interval_ms}`,
+    );
+    if (manifest.live_usage.status_file) {
+      lines.push(
+        `- live_usage_status_file: ${fmtPath(manifest.live_usage.status_file)}`,
+      );
+    }
+  }
+
+  if (manifest.workflow.enabled) {
+    lines.push(
+      `- workflow_file: ${fmtPath(manifest.workflow.source)}`,
+      `- workflow_prompt_mode: ${manifest.workflow.prompt_mode}`,
+    );
+  }
+
+  if (manifest.hooks.after_create.enabled) {
+    lines.push(
+      `- workspace_bootstrap_ran: ${fmt(manifest.hooks.after_create.ran)}`,
+    );
+    if (manifest.hooks.after_create.ran) {
+      lines.push(
+        `- workspace_bootstrap_exit_code: ${fmt(manifest.hooks.after_create.exit_code)}`,
+        `- workspace_bootstrap_trigger: ${manifest.hooks.after_create.trigger}`,
+      );
+    }
+  }
+
+  lines.push(
     `- total_prompt_chars: ${e.total_prompt_chars}`,
     `- total_footer_tokens: ${e.total_footer_tokens}`,
     `- supervisor_only: ${fmt(p.supervisor_only)}`,
@@ -60,7 +94,7 @@ export async function writeSummary(
     `- stage_shape: total=${e.stage_count}, parallel_stages=${e.parallel_stage_count}, max_parallel_workers_in_stage=${e.max_parallel_workers_in_stage}`,
     `- efficiency_note: ${e.note}`,
     `- manifest: ${fmtPath(manifest.output_dir + path.sep + 'orchestration-manifest.json')}`,
-  ];
+  );
 
   // Archive info (only if enabled)
   if (manifest.archive.enabled && manifest.archive.run_directory) {
@@ -74,19 +108,25 @@ export async function writeSummary(
     }
   }
 
+  if (p.requested_deliverables.length > 0) {
+    lines.push(
+      `- requested_deliverables: ${p.requested_deliverables.join(', ')}`,
+    );
+  }
+
   lines.push('');
   lines.push('## Workers');
   lines.push('');
 
   for (const r of manifest.results) {
-    const status = r.succeeded ? 'ok' : 'FAIL';
+    const status = r.succeeded ? 'ok' : 'failed';
     const sandbox = r.actual_sandbox ?? '';
     const reasoning = r.actual_reasoning_effort ?? '';
     const footerTokens =
       r.footer_tokens_used !== null ? String(r.footer_tokens_used) : 'n/a';
 
     lines.push(
-      `- \`${r.name}\`: ${status}; engine=${r.engine}; stage=${r.stage}; kind=${r.worker_kind}; read_only=${fmt(r.is_read_only)}; full_auto=${fmt(r.requested_full_auto)}; model=${r.requested_model}; sandbox=${sandbox}; reasoning=${reasoning}; prompt_chars=${r.prompt_chars}; footer_tokens=${footerTokens}; workflow_mode=${r.workflow_prompt_mode}`,
+      `- \`${r.name}\`: ${status}; engine=${r.engine}; stage=${r.stage}; kind=${r.worker_kind}; read_only=${fmt(r.is_read_only)}; full_auto=${fmt(r.requested_full_auto)}; model=${r.actual_model}; sandbox=${sandbox}; reasoning=${reasoning}; prompt_chars=${r.prompt_chars}; footer_tokens=${footerTokens}; workflow_mode=${r.workflow_prompt_mode}`,
     );
     lines.push(`  preview: ${r.last_message_preview}`);
   }

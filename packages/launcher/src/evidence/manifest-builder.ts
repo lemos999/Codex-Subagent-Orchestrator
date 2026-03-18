@@ -86,18 +86,32 @@ function buildWorkflowSection(wf?: WorkflowInfo): ManifestWorkflow {
 
 function buildHooksSection(
   spec: LauncherSpec,
+  outputDir: string,
   hr?: HookResult,
 ): ManifestHooks {
+  // PS stores file paths, not content, for stdout/stderr
+  const hookSpec = spec.hooks?.after_create;
+  const stdoutFile = hookSpec
+    ? (hookSpec.stdout_file
+        ? path.resolve(outputDir, hookSpec.stdout_file)
+        : path.resolve(outputDir, 'workspace-bootstrap.stdout.log'))
+    : null;
+  const stderrFile = hookSpec
+    ? (hookSpec.stderr_file
+        ? path.resolve(outputDir, hookSpec.stderr_file)
+        : path.resolve(outputDir, 'workspace-bootstrap.stderr.log'))
+    : null;
+
   return {
     after_create: {
-      enabled: spec.hooks?.after_create !== undefined,
+      enabled: hookSpec !== undefined,
       ran: hr?.ran ?? false,
       trigger: hr?.trigger ?? null,
       exit_code: hr?.exitCode ?? null,
       missing_sentinel_paths: hr?.missingPaths ?? [],
       workspace_was_empty: hr?.workspaceWasEmpty ?? false,
-      stdout: hr?.stdout ?? null,
-      stderr: hr?.stderr ?? null,
+      stdout: stdoutFile,
+      stderr: stderrFile,
     },
   };
 }
@@ -118,16 +132,21 @@ function buildPolicySection(
     0,
   );
 
+  // Find final read-only reviewers: read-only workers in stages after last writable stage
+  const finalReadOnlyReviewerNames = results
+    .filter((r) => r.is_read_only && r.stage > lastWritableStage)
+    .map((r) => r.name);
+
   return {
     execution_mode: spec.execution_mode ?? 'sequential',
-    supervisor_only: false,
-    require_final_read_only_review: false,
+    supervisor_only: spec.supervisor_only ?? false,
+    require_final_read_only_review: spec.require_final_read_only_review ?? false,
     material_issue_strategy: spec.material_issue_strategy ?? 'none',
     requested_deliverables: spec.requested_deliverables ?? [],
     writable_worker_names: writableWorkerNames,
     read_only_reviewer_names: readOnlyReviewerNames,
-    final_read_only_reviewer_names: [],
-    final_read_only_review_present: false,
+    final_read_only_reviewer_names: finalReadOnlyReviewerNames,
+    final_read_only_review_present: finalReadOnlyReviewerNames.length > 0,
     last_writable_stage: lastWritableStage,
   };
 }
@@ -181,6 +200,7 @@ function buildEfficiencySection(
   stagePlan: StagePlan[],
   results: WorkerResult[],
   counts: WorkerCounts,
+  policy: ManifestPolicy,
 ): ManifestEfficiencySignals {
   const succeededCount = results.filter((r) => r.succeeded).length;
   const failedCount = results.length - succeededCount;
@@ -218,9 +238,9 @@ function buildEfficiencySection(
         : 0,
     max_parallel_workers_in_stage: maxParallelInStage,
     uses_parallel_execution: executionMode === 'parallel',
-    uses_supervisor_only_policy: false,
-    uses_bounded_repair_policy: false,
-    final_read_only_review_present: false,
+    uses_supervisor_only_policy: spec.supervisor_only ?? false,
+    uses_bounded_repair_policy: spec.material_issue_strategy === 'fixer_then_rereview',
+    final_read_only_review_present: policy.final_read_only_review_present,
     total_prompt_chars: counts.totalPromptChars,
     total_footer_tokens: 0,
   };
@@ -258,11 +278,17 @@ export function buildManifest(
   workflowInfo?: WorkflowInfo,
 ): Manifest {
   const counts = countWorkers(results);
+  const policySection = buildPolicySection(spec, results, stagePlan);
+
+  const archiveRoot = spec.archive_root
+    ? path.resolve(resolvedPaths.workspaceRoot, spec.archive_root)
+    : path.resolve(resolvedPaths.workspaceRoot, 'subagent-records');
+  const archiveLabel = spec.archive_run_label ?? path.basename(resolvedPaths.outputDir);
 
   const archive: ManifestArchive = {
     enabled: false,
-    root: null,
-    run_label: null,
+    root: archiveRoot,
+    run_label: archiveLabel,
     run_directory: null,
     launcher_directory: null,
     deliverables_directory: null,
@@ -297,9 +323,9 @@ export function buildManifest(
     skip_git_repo_check: spec.skip_git_repo_check ?? false,
     shared_directive: buildSharedDirectiveSection(spec, sharedDirective),
     workflow: buildWorkflowSection(workflowInfo),
-    hooks: buildHooksSection(spec, hookResult),
-    policy: buildPolicySection(spec, results, stagePlan),
-    efficiency_signals: buildEfficiencySection(spec, stagePlan, results, counts),
+    hooks: buildHooksSection(spec, resolvedPaths.outputDir, hookResult),
+    policy: policySection,
+    efficiency_signals: buildEfficiencySection(spec, stagePlan, results, counts, policySection),
     stage_plan: stagePlan,
     defaults: buildDefaultsRecord(spec),
     results,

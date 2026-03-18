@@ -26,6 +26,7 @@ export async function writeFileSafe(
 export async function copyIfExists(
   src: string,
   dest: string,
+  options?: { warnIfMissing?: boolean },
 ): Promise<boolean> {
   try {
     if (fsSync.existsSync(src)) {
@@ -33,8 +34,12 @@ export async function copyIfExists(
       await fs.copyFile(src, dest);
       return true;
     }
-  } catch {
-    /* ignore copy errors */
+    if (options?.warnIfMissing) {
+      process.stderr.write(`[warn] copyIfExists: source not found: ${src}\n`);
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`[warn] copyIfExists failed: ${src} -> ${dest}: ${message}\n`);
   }
   return false;
 }
@@ -55,14 +60,20 @@ export async function findMissingPaths(paths: string[]): Promise<string[]> {
 }
 
 /**
- * Find paths from a list that exist but are empty (0 bytes).
+ * Find paths from a list that exist but are empty (0 bytes for files, 0 children for directories).
+ * PS considers empty directories as "empty" via Test-PathHasContent.
  */
 export async function findEmptyPaths(paths: string[]): Promise<string[]> {
   const empty: string[] = [];
   for (const p of paths) {
     try {
       const stat = await fs.stat(p);
-      if (stat.size === 0) {
+      if (stat.isDirectory()) {
+        const entries = await fs.readdir(p);
+        if (entries.length === 0) {
+          empty.push(p);
+        }
+      } else if (stat.size === 0) {
         empty.push(p);
       }
     } catch {

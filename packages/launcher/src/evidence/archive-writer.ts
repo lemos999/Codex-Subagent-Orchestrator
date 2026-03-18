@@ -26,6 +26,25 @@ export interface ArchiveResult {
   supervisorDirectory: string | null;
 }
 
+/**
+ * Sanitize a string for use as a path segment — replaces invalid/special chars with hyphens.
+ * Matches PS Get-SafePathSegment behavior.
+ */
+function safePathSegment(value: string, fallback = 'item'): string {
+  if (!value || value.trim() === '') return fallback;
+  let safe = value;
+  // Replace characters that are invalid in file names
+  safe = safe.replace(/[<>:"/\\|?*\x00-\x1f]/g, '-');
+  // Replace whitespace runs with single hyphen
+  safe = safe.replace(/\s+/g, '-');
+  // Collapse multiple hyphens
+  safe = safe.replace(/-{2,}/g, '-');
+  // Trim leading/trailing space, dot, hyphen
+  safe = safe.replace(/^[.\- ]+|[.\- ]+$/g, '');
+  if (!safe) return fallback;
+  return safe;
+}
+
 const EMPTY_RESULT: ArchiveResult = {
   enabled: false,
   runDirectory: null,
@@ -106,8 +125,9 @@ export async function writeArchive(
 
   // 3. Workers directory: per-worker evidence
   for (const result of results) {
-    const kind = result.worker_kind || 'custom';
-    const workerDir = path.join(workersDir, `${kind}__${result.name}`);
+    const kind = safePathSegment(result.worker_kind || 'custom', 'worker');
+    const safeName = safePathSegment(result.name, 'worker');
+    const workerDir = path.join(workersDir, `${kind}__${safeName}`);
     await fs.mkdir(workerDir, { recursive: true });
 
     const metadata = {
@@ -131,6 +151,13 @@ export async function writeArchive(
     await copyIfExists(result.stdout, path.join(workerDir, 'stdout.log'));
     await copyIfExists(result.stderr, path.join(workerDir, 'stderr.log'));
     await copyIfExists(result.last, path.join(workerDir, 'last.txt'));
+
+    // Copy session.jsonl if it exists (from output_dir/{name}.session.jsonl)
+    const sessionSrc = path.join(
+      resolvedPaths.outputDir,
+      `${result.name}.session.jsonl`,
+    );
+    await copyIfExists(sessionSrc, path.join(workerDir, 'session.jsonl'));
   }
 
   // 4. Supervisor directory: AGENTS.md
