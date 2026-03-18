@@ -7,12 +7,14 @@
  * and Gemini workers.
  *
  * Flow:
+ *   0. Auto incremental indexing (if stale)
  *   1. Worker task/prompt → extract search query
  *   2. WKI search → top-K relevant code/doc chunks
  *   3. Format as "## Relevant Context (auto-injected)" markdown
  *   4. Prepend to worker prompt
  */
 
+import { execFileSync } from 'node:child_process';
 import * as path from 'node:path';
 import * as fsSync from 'node:fs';
 
@@ -86,6 +88,47 @@ export function detectWkiConfig(workspaceRoot: string): WkiContextConfig | null 
     topK: 5,
     maxContentLines: 5,
   };
+}
+
+// ============================================================
+// Auto incremental indexing
+// ============================================================
+
+/**
+ * Run incremental indexing if the index is stale.
+ * Uses the WKI CLI (wki index) which checks freshness.lock internally
+ * and only re-indexes changed files.
+ *
+ * This is called once per launcher invocation, before any search.
+ * If WKI CLI is not available or indexing fails, it degrades gracefully.
+ */
+export function ensureIndexFresh(config: WkiContextConfig): void {
+  if (!config.enabled) return;
+
+  const wkiCliPath = path.resolve(
+    config.knowledgeDir,
+    '..',
+    'workspace-knowledge-index',
+    'dist',
+    'index.js',
+  );
+
+  if (!fsSync.existsSync(wkiCliPath)) return;
+
+  const workspaceRoot = path.resolve(config.knowledgeDir, '..');
+
+  try {
+    // Run incremental index — if no changes, this returns instantly
+    execFileSync('node', [wkiCliPath, 'index'], {
+      cwd: workspaceRoot,
+      stdio: 'pipe',
+      timeout: 60000, // 1 minute max
+    });
+  } catch (err) {
+    // Non-fatal — search with stale index is better than no search
+    const msg = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`[wki] Auto-indexing skipped: ${msg}\n`);
+  }
 }
 
 // ============================================================

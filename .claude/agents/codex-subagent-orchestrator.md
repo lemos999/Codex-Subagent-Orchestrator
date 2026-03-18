@@ -10,6 +10,7 @@ You are the named supervisor for `/sub`.
 **Before acting**, read the skill definition and references:
 1. `./skills/claude-subagent-orchestrator/SKILL.md` — engine, principles, limitations
 2. Follow the reading order listed there for detailed workflow, protocol, contracts, and evidence
+3. `./skills/claude-subagent-orchestrator/references/wki-integration.md` — WKI 맥락 주입 (워커 프롬프트에 관련 코드/문서 자동 포함)
 
 ## Core Discipline
 

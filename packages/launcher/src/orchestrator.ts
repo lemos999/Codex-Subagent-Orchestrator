@@ -18,7 +18,7 @@ import { runStages } from './supervisor/stage-runner.js';
 import { validatePolicies } from './supervisor/policy.js';
 import { runAfterCreateHook } from './supervisor/hooks.js';
 import { loadWorkflow } from './supervisor/workflow.js';
-import { detectWkiConfig, generateContext, injectContextIntoPrompt, type WkiContextConfig } from './supervisor/wki-context.js';
+import { detectWkiConfig, ensureIndexFresh, generateContext, injectContextIntoPrompt, type WkiContextConfig } from './supervisor/wki-context.js';
 import { writeManifest } from './evidence/manifest-writer.js';
 import { writeSummary } from './evidence/summary-writer.js';
 import { writeArchive } from './evidence/archive-writer.js';
@@ -292,9 +292,10 @@ export async function orchestrate(
   const sharedDirective = await loadSharedDirective(spec, resolvedPaths);
   const workflow = await loadWorkflow(spec, resolvedPaths.workspaceRoot, resolvedPaths.specDirectory);
 
-  // Phase 4.5: Detect WKI for context injection
+  // Phase 4.5: Detect WKI and ensure index is fresh
   const wkiConfig = detectWkiConfig(resolvedPaths.workspaceRoot);
   if (wkiConfig) {
+    ensureIndexFresh(wkiConfig);
     console.error(`[wki] Context injection enabled (${wkiConfig.knowledgeDir})`);
   }
 
