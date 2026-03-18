@@ -63,6 +63,16 @@
 
 ---
 
+## #7. multilingual-e5-base 모델 배치 처리 시 스택 오버플로우
+
+- **발생일**: 2026-03-18
+- **상황**: WKI rebuild 중 `Maximum call stack size exceeded` 에러 (offset=3872에서 발생)
+- **원인**: `maxBatchSize = 32`가 768d 멀티링구얼 모델에서 너무 큼. 모델이 내부적으로 재귀 호출하면서 스택 한계 초과
+- **해결**: `maxBatchSize`를 32 → 8로 감소, `--stack-size=8192`로 Node.js 스택 크기 증가
+- **수정 파일**: `workspace-knowledge-index/src/embedding/local-provider.ts`
+
+---
+
 ## #5c. claude.exe에 .cmd 접미사를 잘못 추가
 
 - **발생일**: 2026-03-17
