@@ -26,6 +26,7 @@ export interface WkiContextConfig {
   projectId: string;
   topK?: number;              // default 5
   maxContentLines?: number;   // default 5
+  minScore?: number;          // minimum relevance score to include (default 0.3)
 }
 
 export interface WkiContextResult {
@@ -156,12 +157,30 @@ export async function generateContext(
       },
     });
 
+    // Filter low-score results to prevent irrelevant context injection
+    // (especially important for non-English queries with English-only embedding model)
+    const minScore = config.minScore ?? 0.3;
+    type ChunkResult = { score?: number; chunk: { filePath: string; startLine: number; endLine: number; chunkType: string; heading?: string; content: string } };
+    const allChunks = contextBlock.chunks as ChunkResult[];
+    const relevantChunks = allChunks.filter(
+      (c) => (c.score ?? 0) >= minScore,
+    );
+
+    if (relevantChunks.length === 0) {
+      return emptyResult;
+    }
+
+    // Rebuild markdown with only relevant chunks
+    const filteredMarkdown = relevantChunks.length === allChunks.length
+      ? contextBlock.markdown
+      : buildFilteredMarkdown(relevantChunks);
+
     return {
-      injected: contextBlock.chunks.length > 0,
+      injected: filteredMarkdown.length > 0,
       query,
-      chunksFound: contextBlock.chunks.length,
+      chunksFound: relevantChunks.length,
       durationMs: contextBlock.durationMs,
-      markdown: contextBlock.markdown,
+      markdown: filteredMarkdown,
     };
   } catch (err) {
     // WKI not available or search failed — degrade gracefully
@@ -169,6 +188,32 @@ export async function generateContext(
     process.stderr.write(`[wki] Context injection skipped: ${msg}\n`);
     return emptyResult;
   }
+}
+
+/**
+ * Rebuild context markdown from filtered chunks.
+ */
+function buildFilteredMarkdown(
+  chunks: Array<{ score?: number; chunk: { filePath: string; startLine: number; endLine: number; chunkType: string; heading?: string; content: string } }>,
+): string {
+  if (chunks.length === 0) return '';
+
+  const sections: string[] = ['## Relevant Context (auto-injected)\n'];
+  for (const { chunk } of chunks) {
+    const lineRange = `lines ${chunk.startLine}-${chunk.endLine}`;
+    const heading = chunk.heading ?? chunk.chunkType;
+    sections.push(`### ${chunk.filePath} (${lineRange})`);
+    sections.push(`**${heading}** — ${chunk.chunkType}`);
+
+    const lines = chunk.content.split('\n').slice(0, 5);
+    if (chunk.chunkType === 'markdown-section') {
+      sections.push(lines.map((l: string) => `> ${l}`).join('\n'));
+    } else {
+      sections.push(`\`\`\`\n${lines.join('\n')}\n\`\`\``);
+    }
+    sections.push('');
+  }
+  return sections.join('\n');
 }
 
 /**
