@@ -105,6 +105,11 @@ export class QueryRouter {
       return 'exact';
     }
 
+    // If any token looks like a filename (has extension), boost FTS
+    if (tokens.some((t) => /\.\w{1,5}$/.test(t) && !t.startsWith('.'))) {
+      return 'hybrid'; // will get FTS-boosted weights below
+    }
+
     if (tokens.length >= 8 && containsNaturalLanguageMarkers(tokens)) {
       return 'semantic';
     }

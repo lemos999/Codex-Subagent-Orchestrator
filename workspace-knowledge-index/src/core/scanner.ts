@@ -13,6 +13,11 @@ const DEFAULT_EXCLUDES = [
   '**/*.db',
   '**/*.lance',
   '**/.knowledge/**',
+  '**/subagent-runs/**',
+  '**/subagent-records/**',
+  '**/tests/artifacts/**',
+  '**/.npm-cache/**',
+  '**/.pytest_cache/**',
 ];
 
 /**
