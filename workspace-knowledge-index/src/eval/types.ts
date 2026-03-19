@@ -1,9 +1,18 @@
+export interface GoldChunk {
+  /** Primary match: file path (partial match supported) */
+  filePath: string;
+  /** Optional: line range for precise matching */
+  startLine?: number;
+  endLine?: number;
+  /** Relevance score: 0=irrelevant, 1=marginal, 2=relevant, 3=highly relevant */
+  relevance: number;
+  /** Legacy: content hash (used as fallback if filePath doesn't match) */
+  chunkId?: string;
+}
+
 export interface GoldQuery {
   query: string;
-  relevantChunks: Array<{
-    chunkId: string;
-    relevance: number; // 0-3: 0=irrelevant, 1=marginal, 2=relevant, 3=highly relevant
-  }>;
+  relevantChunks: GoldChunk[];
   expectedQueryType?: string;
 }
 
@@ -18,6 +27,7 @@ export interface EvalResult {
   query: string;
   ndcg: number;
   resultsCount: number;
+  matchedCount: number;
   expectedType?: string;
   actualType?: string;
 }

@@ -1,0 +1,103 @@
+{
+  "name": "subagent-orchestrator-v2",
+  "description": "Gold set v2 — file_path + line_range matching (stable across code changes)",
+  "queries": [
+    {
+      "query": "evidence recording rules and format",
+      "relevantChunks": [
+        { "filePath": "skills/claude-subagent-orchestrator/references/evidence-format.md", "relevance": 3 },
+        { "filePath": "skills/claude-subagent-orchestrator/references/orchestration-workflow.md", "startLine": 228, "endLine": 290, "relevance": 3 },
+        { "filePath": ".claude/agents/codex-subagent-orchestrator.md", "startLine": 47, "endLine": 62, "relevance": 2 },
+        { "filePath": ".claude/skills/sub/SKILL.md", "relevance": 1 },
+        { "filePath": ".claude/skills/submix/SKILL.md", "relevance": 1 }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "Stage 9 evidence writing mandatory checkpoint",
+      "relevantChunks": [
+        { "filePath": "skills/claude-subagent-orchestrator/references/orchestration-workflow.md", "startLine": 228, "endLine": 261, "relevance": 3 },
+        { "filePath": "skills/claude-subagent-orchestrator/references/evidence-format.md", "relevance": 3 },
+        { "filePath": ".claude/agents/codex-subagent-orchestrator.md", "startLine": 47, "endLine": 62, "relevance": 3 },
+        { "filePath": "skills/gemini-subagent-orchestrator/references/orchestration-workflow.md", "relevance": 2 }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "orchestration workflow stages classify choose team",
+      "relevantChunks": [
+        { "filePath": "skills/claude-subagent-orchestrator/references/orchestration-workflow.md", "startLine": 1, "endLine": 50, "relevance": 3 },
+        { "filePath": "skills/claude-subagent-orchestrator/references/sub-command-protocol.md", "relevance": 2 },
+        { "filePath": "skills/codex-subagent-orchestrator/references/sub-command-protocol.md", "relevance": 2 },
+        { "filePath": "skills/claude-subagent-orchestrator/SKILL.md", "relevance": 1 }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "WKI context injection sub-hook",
+      "relevantChunks": [
+        { "filePath": "packages/launcher/src/supervisor/wki-context.ts", "relevance": 3 },
+        { "filePath": "workspace-knowledge-index/src/context/sub-hook.ts", "relevance": 3 },
+        { "filePath": "workspace-knowledge-index/src/context/context-builder.ts", "relevance": 2 },
+        { "filePath": "skills/claude-subagent-orchestrator/references/wki-integration.md", "relevance": 2 }
+      ],
+      "expectedQueryType": "mixed"
+    },
+    {
+      "query": "engine-adapters.md codex gemini claude compatibility",
+      "relevantChunks": [
+        { "filePath": "skills/claude-subagent-orchestrator/references/engine-adapters.md", "relevance": 3 },
+        { "filePath": "packages/launcher/src/types/engine.ts", "relevance": 2 },
+        { "filePath": "packages/launcher/src/workers/spawn.ts", "relevance": 2 },
+        { "filePath": ".claude/skills/submix/SKILL.md", "relevance": 1 }
+      ],
+      "expectedQueryType": "path"
+    },
+    {
+      "query": "증거 기록 규칙",
+      "relevantChunks": [
+        { "filePath": "skills/claude-subagent-orchestrator/references/evidence-format.md", "relevance": 3 },
+        { "filePath": "skills/claude-subagent-orchestrator/references/orchestration-workflow.md", "startLine": 228, "endLine": 290, "relevance": 3 },
+        { "filePath": ".claude/agents/codex-subagent-orchestrator.md", "startLine": 47, "endLine": 62, "relevance": 2 },
+        { "filePath": "problem-resolution-log.md", "relevance": 1 }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "오케스트레이션 워크플로우 단계",
+      "relevantChunks": [
+        { "filePath": "skills/claude-subagent-orchestrator/references/orchestration-workflow.md", "relevance": 3 },
+        { "filePath": "skills/codex-subagent-orchestrator/references/orchestration-workflow.md", "relevance": 2 },
+        { "filePath": "skills/gemini-subagent-orchestrator/references/orchestration-workflow.md", "relevance": 2 },
+        { "filePath": "packages/launcher/src/orchestrator.ts", "relevance": 1 }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "spawnWorker",
+      "relevantChunks": [
+        { "filePath": "packages/launcher/src/workers/spawn.ts", "relevance": 3 },
+        { "filePath": "packages/launcher/src/supervisor/stage-runner.ts", "relevance": 2 }
+      ],
+      "expectedQueryType": "identifier"
+    },
+    {
+      "query": "packages/launcher/src/orchestrator.ts",
+      "relevantChunks": [
+        { "filePath": "packages/launcher/src/orchestrator.ts", "relevance": 3 },
+        { "filePath": "packages/launcher/CONTRACT.md", "relevance": 1 }
+      ],
+      "expectedQueryType": "path"
+    },
+    {
+      "query": "how does the manifest builder construct the output JSON",
+      "relevantChunks": [
+        { "filePath": "packages/launcher/src/evidence/manifest-builder.ts", "relevance": 3 },
+        { "filePath": "packages/launcher/src/evidence/manifest-writer.ts", "relevance": 2 },
+        { "filePath": "packages/launcher/src/types/manifest.ts", "relevance": 2 },
+        { "filePath": "packages/launcher/CONTRACT.md", "relevance": 1 }
+      ],
+      "expectedQueryType": "natural"
+    }
+  ]
+}
