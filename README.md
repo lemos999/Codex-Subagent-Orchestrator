@@ -1,6 +1,6 @@
-# Codex Subagent Orchestrator
+# Subagent Orchestrator
 
-`codex-subagent-orchestrator` is a workspace-local skill for supervising one or more `codex exec` workers from a parent Codex session.
+`subagent-orchestrator` is a workspace-local skill for supervising one or more `codex exec` workers from a parent Codex session.
 
 It is designed for tasks where the parent should stay in supervisor mode, split work into bounded worker runs, preserve execution evidence, and accept results only after validation.
 
@@ -41,7 +41,7 @@ This repository is already arranged as a Codex workspace. The root `AGENTS.md` w
 
 ```powershell
 git clone <YOUR_REPO_URL>
-cd Codex-Subagent-Orchestrator-main
+cd Subagent-Orchestrator-main
 ```
 
 ### 2. Use the chat entrypoint
@@ -61,7 +61,14 @@ The parent Codex session should:
 
 ### 3. Or run the launcher directly
 
-Copy one of the bundled spec templates into the workspace root and execute it with the PowerShell launcher:
+Copy one of the bundled spec templates into the workspace root and execute it with the TS launcher:
+
+```bash
+cp skills/codex-subagent-orchestrator/assets/spec-templates/minimal-write.template.json minimal-write.json
+node packages/launcher/dist/cli.js --spec minimal-write.json
+```
+
+**Legacy PS launcher (fallback):**
 
 ```powershell
 Copy-Item `
@@ -85,6 +92,7 @@ That means the launcher resolves the worker workspace from the directory where y
 The repository includes reusable JSON specs under `skills/codex-subagent-orchestrator/assets/spec-templates/`:
 
 - `minimal-write.template.json`: one sequential writer that creates a bounded file
+- `live-usage.template.json`: one sequential writer with real-time token usage display and a persisted usage snapshot
 - `parallel-two-files.template.json`: two independent writers running in parallel
 - `implementer-reviewer.template.json`: one implementer followed by a read-only reviewer
 - `parallel-implementers-reviewer.template.json`: two parallel implementers followed by a read-only reviewer
@@ -99,7 +107,17 @@ These templates are intended as launcher and workflow examples, not domain examp
 
 ## Launcher Command Pattern
 
-Use the bundled PowerShell launcher when you want repeatable worker orchestration from JSON:
+### Primary — TS Launcher
+
+Use the TypeScript launcher for repeatable worker orchestration from JSON (supports all engines):
+
+```bash
+node packages/launcher/dist/cli.js --spec your-spec.json
+```
+
+### Legacy — PS Launcher (Fallback)
+
+The PowerShell launcher remains available as a fallback:
 
 ```powershell
 & ".\skills\codex-subagent-orchestrator\scripts\start-codex-subagent-team.ps1" `
@@ -117,6 +135,7 @@ Top-level fields commonly used in a spec:
 - `supervisor_only`
 - `require_final_read_only_review`
 - `material_issue_strategy`
+- `live_usage`
 - `defaults`
 - `agents`
 
@@ -141,7 +160,7 @@ For deliverable-oriented `/sub` workflows, prefer:
 {
   "cwd": ".",
   "cwd_resolution": "invocation",
-  "output_dir": "subagent-runs/minimal-write",
+  "output_dir": "subagent-runs/codex/minimal-write",
   "skip_git_repo_check": true,
   "execution_mode": "sequential",
   "write_prompt_files": true,
@@ -175,9 +194,61 @@ A healthy run typically produces:
 - one `last.txt` file per worker unless overridden
 - `orchestration-manifest.json`
 - `orchestration-summary.md`
+- `run-manifest.md`
+- `run-summary.md`
+- `prompts/*.prompt.md` with the exact parent-written worker prompts
+- `results/*.result.md` with the preserved worker return text
+- `engines/<engine>/*.raw.txt` for mixed-engine runs
+- `orchestration-usage.json` when `live_usage.enabled` is true and `display_mode` includes `file`
 - an optional per-run archive with copied deliverables and worker evidence
 
-By default, examples write outputs under `subagent-runs/`.
+By default, Codex launcher examples write outputs under `subagent-runs/codex/`.
+
+## Live Usage Monitoring
+
+If you want Codex usage to stay visible while workers are running, enable the top-level `live_usage` block in the launcher spec.
+
+```json
+"live_usage": {
+  "enabled": true,
+  "display_mode": "both",
+  "status_file": "subagent-runs/codex/live-usage/orchestration-usage.json",
+  "poll_interval_ms": 500
+}
+```
+
+What this does:
+
+- forces worker `codex exec` runs into `--json` mode so token events can be parsed during execution
+- updates a single-line PowerShell progress display when `display_mode` is `progress` or `both`
+- writes a machine-readable live snapshot when `display_mode` is `file` or `both`
+- stays compatible with both the legacy `event_msg/token_count` footer event and the newer `thread/tokenUsage/updated` event shape
+
+Quick start:
+
+```powershell
+Copy-Item `
+  ".\skills\codex-subagent-orchestrator\assets\spec-templates\live-usage.template.json" `
+  ".\live-usage.json"
+
+& ".\skills\codex-subagent-orchestrator\scripts\start-codex-subagent-team.ps1" `
+  -SpecPath ".\live-usage.json" `
+  -CodexExecutable "codex.cmd" `
+  -AsJson
+```
+
+On Windows, prefer `-CodexExecutable "codex.cmd"` if PowerShell execution policy blocks `codex.ps1`.
+
+If you just want a short command to inspect the latest live snapshot, use the root helper:
+
+```powershell
+.\usage.cmd
+```
+
+Useful variants:
+
+- `.\usage.cmd -Once`: print the latest snapshot once and exit
+- `.\usage.cmd -StatusFile .\subagent-runs\codex\live-usage\orchestration-usage.json`: target a specific run
 
 ## Symphony Compatibility
 

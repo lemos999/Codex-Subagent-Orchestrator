@@ -5,6 +5,12 @@ description: Orchestrate one or more `codex exec` subagents for delegated implem
 
 # Subagent Orchestrator
 
+## Migration Notice
+
+The primary launcher is now the TypeScript launcher at `packages/launcher/dist/cli.js`. The PowerShell script `start-codex-subagent-team.ps1` remains available as a legacy fallback.
+
+TS launcher command: `node packages/launcher/dist/cli.js --spec <spec.json>`
+
 ## Overview
 
 Use this skill when the parent Codex instance should supervise execution rather than perform the whole task directly.
@@ -102,6 +108,19 @@ Use a staged team when:
 - the parent needs to gate each phase
 
 ## Launcher Guidance
+
+### Primary: TS Launcher
+
+Use `node packages/launcher/dist/cli.js --spec <spec.json>` when:
+
+- you want `/sub` requests translated into repeatable worker orchestration
+- you want repeatable worker orchestration
+- you want multiple workers launched in parallel
+- you want per-worker reasoning, sandbox, or output control
+- you want prompt files, `last.txt`, and a manifest for later supervision or forensics
+- you need multi-engine support (codex, claude, gemini) in a single run
+
+### Legacy Fallback: PS Launcher
 
 Use `scripts/start-codex-subagent-team.ps1` with a JSON spec when:
 

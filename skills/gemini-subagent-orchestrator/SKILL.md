@@ -19,7 +19,7 @@ For `/sub`, use the project's **External Pipeline Launcher** for every run. Do n
 
 ## Core Principles
 
-1.  **Strict Pipeline Execution:** Every `/sub` command writes a `.spec.json` file and invokes `start-codex-subagent-team.ps1`.
+1.  **Strict Pipeline Execution:** Every `/sub` command writes a `.spec.json` file and invokes the TS launcher (`node packages/launcher/dist/cli.js --spec <spec.json>`). The PS launcher (`start-codex-subagent-team.ps1`) remains available as a legacy fallback.
 2.  **Supervisor Stays Supervisor:** Never edit requested deliverables directly when a bounded worker can do it.
 3.  **Mixed Engines Are Allowed Through the Launcher:** A Gemini-led run may still use child workers with `engine: "gemini"`, `engine: "codex"`, or `engine: "claude"` when the role split justifies it.
 4.  **Strict Review Gates:** Persistent deliverables require a read-only reviewer before acceptance. Material issues should trigger a scoped fixer and re-review.

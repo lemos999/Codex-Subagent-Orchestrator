@@ -12,7 +12,7 @@ For this workspace, prefer local skills over globally installed skills when both
 
 - `claude-subagent-orchestrator` (mixed-engine mode): Same orchestrator, multi-engine dispatch. Trigger on `/submix` for mixed-engine runs (Claude + Codex/GPT + Gemini). Orchestrator auto-assigns engines based on AI model strengths. File: `./skills/claude-subagent-orchestrator/SKILL.md` + `.claude/skills/submix/SKILL.md`
 
-- `subagent-orchestrator`: Legacy Codex launcher orchestrator using `codex exec` workers and PowerShell scripts. Available as fallback when shell access and Codex CLI are needed. File: `./skills/codex-subagent-orchestrator/SKILL.md`
+- `subagent-orchestrator`: TS launcher (`packages/launcher/dist/cli.js`) — supports all engines (codex, claude, gemini). Legacy PS launcher available as fallback. Command: `node packages/launcher/dist/cli.js --spec <path>`. File: `./skills/codex-subagent-orchestrator/SKILL.md`
 
 ### Workspace local skill rules
 

@@ -1,3 +1,9 @@
+# ============================================================
+# LEGACY LAUNCHER — TS launcher is now the primary entry point.
+# Use: node packages/launcher/dist/cli.js --spec <spec.json>
+# This script remains as a fallback. Same JSON spec format.
+# ============================================================
+
 param(
     [Parameter(Mandatory = $true)]
     [string]$SpecPath,

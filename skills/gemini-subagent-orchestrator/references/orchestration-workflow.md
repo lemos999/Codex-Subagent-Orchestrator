@@ -37,7 +37,15 @@ Prefer these policy fields when a deliverable matters:
 
 ### 3. Execute the Launcher
 
-Run the launcher with the generated spec:
+Run the launcher with the generated spec.
+
+**Primary — TS launcher:**
+
+```bash
+node packages/launcher/dist/cli.js --spec ./<task-name>.spec.json
+```
+
+**Fallback — PS launcher (legacy):**
 
 ```powershell
 & ".\skills\codex-subagent-orchestrator\scripts\start-codex-subagent-team.ps1" -SpecPath ".\<task-name>.spec.json" -AsJson
