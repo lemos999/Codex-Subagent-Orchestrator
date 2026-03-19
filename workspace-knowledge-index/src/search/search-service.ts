@@ -7,6 +7,7 @@ import { ChunkStore } from '../store/chunk-store.js';
 import { LanceVectorStore } from '../store/vector-store.js';
 import type { Chunk, SearchFilter, SearchResult, VectorSearchResult } from '../types/index.js';
 import { QueryRouter, type RouteDecision, type SearchMode } from './query-router.js';
+import { expandKoreanQuery } from './korean-expansion.js';
 
 const CHUNK_ID_BATCH_SIZE = 300;
 const FTS_NORMALIZATION_WINDOW = 50;
@@ -52,7 +53,22 @@ export class SearchService {
       return [];
     }
 
+    // Korean→English query expansion so FTS/vector can match English content
+    const { ftsQuery, vectorQuery, hasKorean } = expandKoreanQuery(normalizedQuery);
+
+    // Path query: search file_path column directly
+    const queryType = this.router.classify(normalizedQuery);
+    if (queryType === 'path') {
+      const pathResults = this.searchByFilePath(normalizedQuery, topK, options);
+      if (pathResults.length > 0) {
+        return pathResults;
+      }
+    }
+
     const hasVectorSearch = this.vectorStore !== null && this.embeddingProvider !== null;
+
+    // For Korean queries, route with the original query (Korean tokens → FTS finds nothing,
+    // which is fine — the dual vector search below does the heavy lifting)
     const decision = this.router.route(normalizedQuery, options.mode, hasVectorSearch);
     const candidateLimit = Math.max(topK * 2, topK);
 
@@ -70,6 +86,15 @@ export class SearchService {
 
       const embedding = await this.embeddingProvider.embed(normalizedQuery);
       vectorResults = await this.vectorStore.search(embedding, candidateLimit, options.filter);
+
+      // For Korean queries: also search with English-expanded query and merge results.
+      // The multilingual model may find different relevant docs for each variant.
+      // Apply a score discount to expanded results so original-query results are preferred.
+      if (hasKorean && ftsQuery !== normalizedQuery) {
+        const expandedEmbedding = await this.embeddingProvider.embed(ftsQuery);
+        const expandedResults = await this.vectorStore.search(expandedEmbedding, candidateLimit, options.filter);
+        vectorResults = mergeVectorResults(vectorResults, expandedResults, candidateLimit);
+      }
     }
 
     const combined = this.combineResults(ftsResults, vectorResults, decision);
@@ -98,6 +123,70 @@ export class SearchService {
       if (results.length >= topK) {
         break;
       }
+    }
+
+    return results;
+  }
+
+  /**
+   * Search chunks by file_path column directly.
+   * Used when the query is classified as a file path.
+   */
+  private searchByFilePath(
+    query: string,
+    topK: number,
+    options: SearchOptions,
+  ): SearchResult[] {
+    const db = this.ftsStore.getDatabase();
+    const normalizedPath = query.replace(/\\/g, '/');
+
+    const whereClauses: string[] = ['chunks_meta.file_path LIKE ?'];
+    const params: Array<string | number> = [`%${normalizedPath}%`];
+
+    if (options.filter?.projectId?.trim()) {
+      whereClauses.push('chunks_meta.project_id = ?');
+      params.push(options.filter.projectId.trim());
+    }
+
+    params.push(topK);
+
+    const sql = `
+      SELECT
+        CASE
+          WHEN chunks_meta.content_hash IS NOT NULL AND chunks_meta.content_hash != ''
+          THEN chunks_meta.file_path || '::' || chunks_meta.content_hash
+          ELSE chunks_meta.file_path || ':' || chunks_meta.ordinal
+        END AS chunk_id,
+        chunks_meta.id AS row_id
+      FROM chunks_meta
+      WHERE ${whereClauses.join(' AND ')}
+      ORDER BY chunks_meta.ordinal ASC
+      LIMIT ?
+    `;
+
+    const rows = db.prepare(sql).all(...params) as Array<{
+      chunk_id: string;
+      row_id: number;
+    }>;
+
+    if (rows.length === 0) {
+      return [];
+    }
+
+    const chunksByRowId = this.chunkStore.getByIds(rows.map((r) => r.row_id));
+    const results: SearchResult[] = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]!;
+      const chunk = chunksByRowId.get(row.row_id);
+      if (!chunk) continue;
+
+      const includeContent = options.includeContent ?? true;
+      results.push({
+        chunk: includeContent ? chunk : { ...chunk, content: '' },
+        score: 1 - i * 0.01, // Decreasing score by ordinal
+        matchType: 'fts',
+      });
     }
 
     return results;
@@ -351,6 +440,33 @@ function inferMatchType(candidate: WeightedCandidate): SearchResult['matchType']
   }
 
   return 'fts';
+}
+
+/**
+ * Merge two sets of vector results, keeping the best score for each chunk.
+ * Returns results sorted by score descending, limited to `limit` entries.
+ */
+function mergeVectorResults(
+  a: VectorSearchResult[],
+  b: VectorSearchResult[],
+  limit: number,
+): VectorSearchResult[] {
+  const best = new Map<string, VectorSearchResult>();
+  for (const r of a) {
+    const existing = best.get(r.chunkId);
+    if (!existing || r.score > existing.score) {
+      best.set(r.chunkId, r);
+    }
+  }
+  for (const r of b) {
+    const existing = best.get(r.chunkId);
+    if (!existing || r.score > existing.score) {
+      best.set(r.chunkId, r);
+    }
+  }
+  return Array.from(best.values())
+    .sort((x, y) => y.score - x.score)
+    .slice(0, limit);
 }
 
 function clamp01(value: number): number {
