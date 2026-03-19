@@ -1,0 +1,230 @@
+{
+  "name": "subagent-orchestrator-v1",
+  "description": "Gold set for WKI search quality evaluation — covers evidence, workflow, context injection, engine adapters, and Korean queries",
+  "queries": [
+    {
+      "query": "evidence recording rules and format",
+      "relevantChunks": [
+        {
+          "chunkId": "25cb8cc96448f1242e5c85f71d90d04d9ffaa859d17c0b68d07969d3e9f6e4d9",
+          "relevance": 3
+        },
+        {
+          "chunkId": "4c4bc18a2d09ee2d4f8cf00159bb955232a4418e6c798f070363369747b06baa",
+          "relevance": 3
+        },
+        {
+          "chunkId": "9a61ba42656f548540e95bad652a87e1e22d96b4feee5647f313c8c5ea5a8099",
+          "relevance": 3
+        },
+        {
+          "chunkId": "1347e894e435103bfd6af9b5abc6dd1a2473490c1c528ecc1147ae735c9fa869",
+          "relevance": 2
+        },
+        {
+          "chunkId": "1104896e38e3a10ed3e1ba69798c852dc6c59b4ff8151e7a265146f6d0c0eb99",
+          "relevance": 2
+        },
+        {
+          "chunkId": "e4b7cffe89f096e2d61dbd7dc820d3e9d64c0d8e015aa304c22e4ae747749f65",
+          "relevance": 2
+        }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "Stage 9 evidence writing mandatory checkpoint",
+      "relevantChunks": [
+        {
+          "chunkId": "25cb8cc96448f1242e5c85f71d90d04d9ffaa859d17c0b68d07969d3e9f6e4d9",
+          "relevance": 3
+        },
+        {
+          "chunkId": "9a61ba42656f548540e95bad652a87e1e22d96b4feee5647f313c8c5ea5a8099",
+          "relevance": 3
+        },
+        {
+          "chunkId": "fa29ff1f566b4429adc48b00cffa5f807715cfa4b3968d9c540123efa4df5202",
+          "relevance": 2
+        },
+        {
+          "chunkId": "e38a85841708f10bb19ff6443b8a9f16a65936cbb7b25c90ecff121a9c6b2110",
+          "relevance": 1
+        }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "orchestration workflow stages classify choose team",
+      "relevantChunks": [
+        {
+          "chunkId": "fa29ff1f566b4429adc48b00cffa5f807715cfa4b3968d9c540123efa4df5202",
+          "relevance": 3
+        },
+        {
+          "chunkId": "9edea1e740162df413b7d6849155dde06f2a4c598ba7903bd150b2cf4d4bfa33",
+          "relevance": 3
+        },
+        {
+          "chunkId": "b69c8d18b7d030b4384c82080c4a63799aeb464f406830ffa305bb7c9237374b",
+          "relevance": 2
+        },
+        {
+          "chunkId": "4bdc1713fc2d34d9ac06f1d1698ce25c55fc7b3a987cbd056de6bee27e4eaef0",
+          "relevance": 2
+        },
+        {
+          "chunkId": "3dbffda0683ac32f4c9a8ee8ad999f66ff6a824d5e4b38b20c92c06b7bcc9167",
+          "relevance": 2
+        }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "WKI context injection sub-hook",
+      "relevantChunks": [
+        {
+          "chunkId": "fcf30c8b819e43e3300278732e7ea178d016b78f6abdea4830dff94ef5cb49da",
+          "relevance": 3
+        },
+        {
+          "chunkId": "7cdf3dc4d0adf191c0b917acf809f6624a586685232ada106e4482717fa27d44",
+          "relevance": 3
+        },
+        {
+          "chunkId": "f9cacde545e9f65831e8865a167363098c62bb4aeab5543c16f6d342d5258f6f",
+          "relevance": 3
+        },
+        {
+          "chunkId": "9b739aafec67ffad52e8e35d41709a9b4c3bc4b2f2933f58971b8c2de3c78458",
+          "relevance": 2
+        },
+        {
+          "chunkId": "81d85639862f543db5727acf214fba6b41e5d6e979f262ffa2b79adc4942007a",
+          "relevance": 2
+        }
+      ],
+      "expectedQueryType": "mixed"
+    },
+    {
+      "query": "engine-adapters.md codex gemini claude compatibility",
+      "relevantChunks": [
+        {
+          "chunkId": "0732e89bb4397a9bf13acac72909d82ee5c3b19d50973cf9b872353402ec37b2",
+          "relevance": 3
+        },
+        {
+          "chunkId": "a5a285055c99381eb5405098cb73abc6a6b51ced9fe4391697f52336e95f634d",
+          "relevance": 3
+        },
+        {
+          "chunkId": "5f694a97656f3305be59e4ff6c55f65c3fb5f7e4cd2db55f2ee086575f468933",
+          "relevance": 3
+        },
+        {
+          "chunkId": "ad4a303dcd08ad9f5791628c06635a0fd1b2ff1c7b90ba4fb609e794d4c1820f",
+          "relevance": 2
+        },
+        {
+          "chunkId": "7b47ba19a4bec9c095d9716ef20ce428c8b058e3a4a793f8b11043932302a173",
+          "relevance": 2
+        }
+      ],
+      "expectedQueryType": "path"
+    },
+    {
+      "query": "증거 기록 규칙",
+      "relevantChunks": [
+        {
+          "chunkId": "25cb8cc96448f1242e5c85f71d90d04d9ffaa859d17c0b68d07969d3e9f6e4d9",
+          "relevance": 3
+        },
+        {
+          "chunkId": "9a61ba42656f548540e95bad652a87e1e22d96b4feee5647f313c8c5ea5a8099",
+          "relevance": 3
+        },
+        {
+          "chunkId": "4c4bc18a2d09ee2d4f8cf00159bb955232a4418e6c798f070363369747b06baa",
+          "relevance": 2
+        },
+        {
+          "chunkId": "1347e894e435103bfd6af9b5abc6dd1a2473490c1c528ecc1147ae735c9fa869",
+          "relevance": 2
+        },
+        {
+          "chunkId": "e38a85841708f10bb19ff6443b8a9f16a65936cbb7b25c90ecff121a9c6b2110",
+          "relevance": 1
+        }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "오케스트레이션 워크플로우 단계",
+      "relevantChunks": [
+        {
+          "chunkId": "fa29ff1f566b4429adc48b00cffa5f807715cfa4b3968d9c540123efa4df5202",
+          "relevance": 3
+        },
+        {
+          "chunkId": "9edea1e740162df413b7d6849155dde06f2a4c598ba7903bd150b2cf4d4bfa33",
+          "relevance": 3
+        },
+        {
+          "chunkId": "b69c8d18b7d030b4384c82080c4a63799aeb464f406830ffa305bb7c9237374b",
+          "relevance": 2
+        },
+        {
+          "chunkId": "4bdc1713fc2d34d9ac06f1d1698ce25c55fc7b3a987cbd056de6bee27e4eaef0",
+          "relevance": 2
+        }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "spawnWorker",
+      "relevantChunks": [
+        {
+          "chunkId": "7b47ba19a4bec9c095d9716ef20ce428c8b058e3a4a793f8b11043932302a173",
+          "relevance": 3
+        },
+        {
+          "chunkId": "e614ace3c9ed518cdadbf66f6c6e6be2779ab0f21e550ac9a4eb0b68bea5ed01",
+          "relevance": 2
+        }
+      ],
+      "expectedQueryType": "identifier"
+    },
+    {
+      "query": "packages/launcher/src/orchestrator.ts",
+      "relevantChunks": [
+        {
+          "chunkId": "fcf30c8b819e43e3300278732e7ea178d016b78f6abdea4830dff94ef5cb49da",
+          "relevance": 1
+        }
+      ],
+      "expectedQueryType": "path"
+    },
+    {
+      "query": "how does the manifest builder construct the output JSON",
+      "relevantChunks": [
+        {
+          "chunkId": "1db725e574dbec936ca7971d27d39f3c8f2d4a2cd428f3fbb9b087b1b5bc0c0b",
+          "relevance": 3
+        },
+        {
+          "chunkId": "1347e894e435103bfd6af9b5abc6dd1a2473490c1c528ecc1147ae735c9fa869",
+          "relevance": 2
+        },
+        {
+          "chunkId": "1104896e38e3a10ed3e1ba69798c852dc6c59b4ff8151e7a265146f6d0c0eb99",
+          "relevance": 2
+        },
+        {
+          "chunkId": "5c687b742730967776792b356dc7b966dddedc0701a3b362c332674fda17e770",
+          "relevance": 2
+        }
+      ],
+      "expectedQueryType": "natural"
+    }
+  ]
+}
