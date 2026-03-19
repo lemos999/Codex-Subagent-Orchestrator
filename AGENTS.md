@@ -8,21 +8,33 @@ For this workspace, prefer local skills over globally installed skills when both
 
 ### Available workspace local skills
 
-- `codex-subagent-orchestrator`: supervise one or more `codex exec` workers for delegated implementation, review, analysis, or generation work. Trigger when the user starts with `/sub`, or asks for subagents, worker teams, delegated execution, parallel Codex runs, supervisory workflows, or multi-agent delivery in this workspace. File: `./skills/codex-subagent-orchestrator/SKILL.md`
+- `claude-subagent-orchestrator`: Claude-native orchestrator using Task tool and built-in subagent types (`sub-implementer`, `sub-reviewer`, `sub-fixer`). Trigger on `/sub` for Claude-only subagent runs. File: `./skills/claude-subagent-orchestrator/SKILL.md`
+
+- `claude-subagent-orchestrator` (mixed-engine mode): Same orchestrator, multi-engine dispatch. Trigger on `/submix` for mixed-engine runs (Claude + Codex/GPT + Gemini). Orchestrator auto-assigns engines based on AI model strengths. File: `./skills/claude-subagent-orchestrator/SKILL.md` + `.claude/skills/submix/SKILL.md`
+
+- `subagent-orchestrator`: Legacy Codex launcher orchestrator using `codex exec` workers and PowerShell scripts. Available as fallback when shell access and Codex CLI are needed. File: `./skills/codex-subagent-orchestrator/SKILL.md`
 
 ### Workspace local skill rules
 
-- If the user starts with `/sub`, you must treat that as a workspace-local subagent orchestration request.
-- For `/sub` and other obvious subagent orchestration requests, open and follow `./skills/codex-subagent-orchestrator/SKILL.md`.
+- If the user starts with `/sub`, treat as **Claude 단독** subagent orchestration.
+- If the user starts with `/submix`, treat as **멀티엔진** (Claude + Codex/GPT + Gemini) orchestration. Read `.claude/skills/submix/SKILL.md` for engine assignment rules.
+- **Default engine**: `/sub` = Claude-only. `/submix` = auto-assign based on AI model strengths.
+- For `/sub` and `/submix`, open and follow the selected skill's `SKILL.md`.
 - For `/sub`, choose the orchestration shape autonomously from the request context:
-  - use the team launcher path for one-off bounded tasks, single tickets, or finite delivery requests
-  - use the queue runner path for unattended polling, repeated ticket dispatch, background issue handling, tracker monitoring, or "keep processing work" requests
-- Resolve all relative paths from `./skills/codex-subagent-orchestrator/` first.
+  - use a small team (1-4 agents) for one-off bounded tasks, single tickets, or finite delivery requests
+  - for queue/polling work, suggest the Codex launcher queue runner as Claude-native does not support unattended polling
+- Resolve all relative paths from the selected skill directory first.
 - If both a local and a global copy of the same skill exist, the local workspace copy wins for this workspace.
-- Keep the workflow self-contained in this workspace when possible. Do not require a global skill path if the local copy under `./skills` is present.
-- For `/sub` work, the parent should stay in supervisor mode for requested deliverable files. If a reviewer or validator finds an issue, launch a bounded fixer worker instead of patching deliverables directly in the parent.
-- For `/sub` work, reviewers and validators should default to `read-only` unless a narrower exception is explicitly justified.
-- For `/sub` work, if a fixer or recovery worker changes a deliverable, run a reviewer or validator again against the final artifact before accepting it.
-- For `/sub` work that uses the launcher, prefer top-level spec fields `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"`.
-- For `/sub` work that uses `custom` workers to supervise nested teams, also set worker-level `required_paths` and preferably `required_non_empty_paths` so false-success runs are rejected before acceptance.
-- For `/sub` work that bootstraps or creates a workspace, prefer auto-detecting `AGENTS.md` and `WORKFLOW.md` from the workspace after bootstrap instead of hardcoding them into every worker prompt.
+- Keep the workflow self-contained in this workspace when possible.
+- For `/sub` work, the parent should stay in supervisor mode for requested deliverable files. If a reviewer finds an issue, launch a bounded fixer worker instead of patching deliverables directly in the parent.
+- For `/sub` work, reviewers and validators should default to read-only.
+- For `/sub` work, if a fixer changes a deliverable, run a reviewer again against the final artifact before accepting it.
+- For `/submix` work, the orchestrator (Claude) dispatches external engine workers via Bash tool: `codex exec --full-auto` (GPT), `echo | npx @google/gemini-cli --yolo` (Gemini).
+- Mixed-engine run evidence is stored in `subagent-runs/mixed/<run-name>/`.
+
+### WKI (Workspace Knowledge Index)
+
+- `.knowledge/` 디렉터리에 코드/문서 인덱스가 저장된다.
+- `/sub`, `/submix` 실행 시 TS 런처가 자동으로 증분 인덱싱 + 맥락 주입을 수행한다.
+- **세션 종료 시**: 일반 챗에서 파일을 수정한 경우, 세션 마무리 전에 `node workspace-knowledge-index/dist/index.js index`를 1회 실행하여 인덱스를 갱신한다.
+- 검색 품질 측정: `node workspace-knowledge-index/dist/index.js eval workspace-knowledge-index/eval/gold-set-v2.json`

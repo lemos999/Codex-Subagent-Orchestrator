@@ -177,16 +177,24 @@ export function ensureIndexFresh(config: WkiContextConfig): void {
   const workspaceRoot = path.resolve(config.knowledgeDir, '..');
 
   try {
-    // Run incremental index — if no changes, this returns instantly
-    execFileSync('node', [wkiCliPath, 'index'], {
+    // Run incremental index — checks freshness.lock internally
+    // If no changes: prints "Index is up to date" and returns instantly (no model loading)
+    // If changes: loads model, re-embeds changed files only
+    const result = execFileSync('node', [wkiCliPath, 'index'], {
       cwd: workspaceRoot,
       stdio: 'pipe',
-      timeout: 60000, // 1 minute max
+      timeout: 300000, // 5 minutes max for model load + embedding
     });
+    const output = result.toString().trim();
+    if (output && !output.includes('up to date')) {
+      process.stderr.write(`[wki] ${output}\n`);
+    }
   } catch (err) {
     // Non-fatal — search with stale index is better than no search
     const msg = err instanceof Error ? err.message : String(err);
-    process.stderr.write(`[wki] Auto-indexing skipped: ${msg}\n`);
+    if (!msg.includes('ETIMEDOUT')) {
+      process.stderr.write(`[wki] Auto-indexing skipped: ${msg}\n`);
+    }
   }
 }
 
