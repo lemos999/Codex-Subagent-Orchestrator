@@ -130,13 +130,45 @@ export class SearchService {
         score: candidate.score,
         matchType: inferMatchType(candidate),
       });
-
-      if (results.length >= topK) {
-        break;
-      }
     }
 
-    return results;
+    // Re-ranking: boost results where query keywords appear in chunk content
+    const reranked = this.rerank(results, normalizedQuery, ftsQuery);
+    return reranked.slice(0, topK);
+  }
+
+  /**
+   * Lightweight re-ranking: boost results where query keywords appear in chunk content.
+   * No additional model needed — uses keyword overlap scoring.
+   */
+  private rerank(results: SearchResult[], query: string, expandedQuery: string): SearchResult[] {
+    if (results.length <= 1) return results;
+
+    // Extract keywords from both original and expanded query
+    const keywords = new Set(
+      `${query} ${expandedQuery}`.toLowerCase()
+        .split(/[\s,.;:!?()\[\]{}"'`]+/)
+        .filter(w => w.length >= 2),
+    );
+
+    if (keywords.size === 0) return results;
+
+    // Score each result by keyword overlap
+    const scored = results.map(r => {
+      const content = (r.chunk.content + ' ' + r.chunk.filePath + ' ' + (r.chunk.heading ?? '')).toLowerCase();
+      let matchCount = 0;
+      for (const kw of keywords) {
+        if (content.includes(kw)) matchCount++;
+      }
+      const overlapRatio = matchCount / keywords.size;
+      // Blend: 70% original score + 30% keyword overlap
+      const rerankScore = r.score * 0.7 + overlapRatio * r.score * 0.3;
+      return { ...r, score: rerankScore };
+    });
+
+    // Sort by reranked score descending
+    scored.sort((a, b) => b.score - a.score);
+    return scored;
   }
 
   /**
