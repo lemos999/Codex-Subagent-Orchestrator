@@ -189,23 +189,30 @@ async function cmdIndex(args: string[]): Promise<void> {
       if (prevState) {
         const changedFiles = freshness.detectChanges(prevState, projectRoot);
 
-        // Filter out files that would be excluded by the scanner
-        // (untracked files in .knowledge/, node_modules/, dist/ etc.)
-        const scanner = new Scanner(excludePatterns);
-        const filterExcluded = (files: string[]) =>
-          files.filter(f => !scanner.shouldExclude(f));
+        // CRITICAL: if git failed, don't trust "no changes" — fall through to full index
+        if (freshness.hasGitFailure()) {
+          console.warn('[wki] Git change detection failed. Running full index as fallback.');
+        } else {
+          // Filter out files that would be excluded by the scanner
+          const scanner = new Scanner(excludePatterns);
+          const filterExcluded = (files: string[]) =>
+            files.filter(f => !scanner.shouldExclude(f));
 
-        const relevantChanges =
-          filterExcluded(changedFiles.added).length +
-          filterExcluded(changedFiles.modified).length +
-          filterExcluded(changedFiles.deleted).length +
-          changedFiles.renamed.length;
+          const relevantChanges =
+            filterExcluded(changedFiles.added).length +
+            filterExcluded(changedFiles.modified).length +
+            filterExcluded(changedFiles.deleted).length +
+            changedFiles.renamed.length;
 
-        if (relevantChanges === 0) {
-          console.log('Index is up to date. No changes detected.');
-          return;
+          if (relevantChanges === 0) {
+            // Update freshness.lock on no-op to prevent repeated git diffs (#3 fix)
+            const newState = freshness.captureState(projectRoot);
+            freshness.save(freshnessPath, newState);
+            console.log('Index is up to date. No changes detected.');
+            return;
+          }
         }
-        // Changes found — proceed with model loading below
+        // Changes found (or git failed) — proceed with model loading
       }
     }
 

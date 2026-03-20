@@ -62,6 +62,7 @@ export class FreshnessManager {
 
     const untracked = this.git(projectRoot, 'ls-files --others --exclude-standard');
     const untrackedFingerprint = this.fingerprint(untracked);
+    const untrackedFiles = untracked.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
     return {
       head_commit: headCommit,
@@ -69,6 +70,7 @@ export class FreshnessManager {
       dirty,
       staged_fingerprint: stagedFingerprint,
       untracked_fingerprint: untrackedFingerprint,
+      untracked_files: untrackedFiles,
       file_hashes: {},
       indexed_at: new Date().toISOString(),
     };
@@ -102,16 +104,36 @@ export class FreshnessManager {
     const staged = this.git(projectRoot, 'diff --cached --name-status -M');
     this.parseNameStatus(staged, result);
 
-    // 4. Untracked files — skip if fingerprint unchanged (same set of untracked files)
+    // 4. Untracked files — compare current list with previous to detect adds/deletes
     const untracked = this.git(projectRoot, 'ls-files --others --exclude-standard');
     const currentUntrackedFingerprint = this.fingerprint(untracked);
     const untrackedChanged = prev.untracked_fingerprint !== currentUntrackedFingerprint;
 
     if (untrackedChanged) {
-      for (const line of untracked.split('\n')) {
-        const trimmed = line.trim();
-        if (trimmed.length > 0 && !result.added.includes(trimmed)) {
-          result.added.push(trimmed);
+      const currentUntracked = new Set(
+        untracked.split('\n').map(l => l.trim()).filter(l => l.length > 0),
+      );
+      const previousUntracked = new Set(prev.untracked_files ?? []);
+
+      // New untracked files → added
+      for (const f of currentUntracked) {
+        if (!previousUntracked.has(f) && !result.added.includes(f)) {
+          result.added.push(f);
+        }
+      }
+
+      // Removed untracked files → deleted (fixes phantom index entries)
+      for (const f of previousUntracked) {
+        if (!currentUntracked.has(f) && !result.deleted.includes(f)) {
+          result.deleted.push(f);
+        }
+      }
+
+      // Modified untracked files (same name, different content) — treat as modified
+      // Since we can't cheaply check content, treat all remaining as potentially modified
+      for (const f of currentUntracked) {
+        if (previousUntracked.has(f) && !result.modified.includes(f)) {
+          result.modified.push(f);
         }
       }
     }
@@ -131,8 +153,13 @@ export class FreshnessManager {
 
   // ---- Private helpers ----
 
+  /** Whether any git command failed during this instance's lifetime. */
+  private gitFailed = false;
+
   /**
-   * Execute a git command and return stdout. Returns empty string on error.
+   * Execute a git command and return stdout.
+   * On failure: sets gitFailed flag and returns empty string.
+   * Callers should check gitFailed to decide fail-closed behavior.
    */
   private git(cwd: string, command: string): string {
     try {
@@ -140,8 +167,14 @@ export class FreshnessManager {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.warn(`[wki] git ${command.split(' ')[0]} failed: ${message.split('\n')[0]}`);
+      this.gitFailed = true;
       return '';
     }
+  }
+
+  /** Returns true if any git command failed (used for fail-closed behavior). */
+  hasGitFailure(): boolean {
+    return this.gitFailed;
   }
 
   /**

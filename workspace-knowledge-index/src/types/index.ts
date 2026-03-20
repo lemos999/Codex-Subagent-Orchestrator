@@ -93,6 +93,7 @@ export interface FreshnessState {
   dirty: boolean;
   staged_fingerprint: string;
   untracked_fingerprint: string;
+  untracked_files?: string[];
   file_hashes: Record<string, string>;
   indexed_at: string;
 }
