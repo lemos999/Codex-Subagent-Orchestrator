@@ -19,11 +19,12 @@
 | 멀티엔진 오케스트레이터 (/submix) | 완료 | `.claude/skills/submix/` |
 | Gemini 오케스트레이터 | 완료 | `skills/gemini-subagent-orchestrator/` |
 | Codex 오케스트레이터 | 완료 | `skills/codex-subagent-orchestrator/` |
+| **토론 시스템 (/discuss)** | **Phase 1 완료** | `packages/launcher/src/discussion/` |
 
 ## 다음 작업 (우선순위 순)
 
-1. **토론 시스템 (Claude + Codex + Gemini 3자 moderator)** — 하나의 주제에 대해 3개 AI가 다중 라운드 토론하고 결과를 저장하는 시스템
-2. **WKI 다중 프로젝트 자동 지원** — 이 폴더에 새 프로젝트 폴더를 복사하면 자동 인덱싱
+1. **토론 시스템 Phase 2** — 다중 라운드 실전 테스트 + 수렴 판정 검증
+2. 토론 시스템 Phase 3 — 고도화 (이력 WKI 인덱싱, 커스터마이징)
 3. **WKI 검색 알고리즘 개선** — 8건의 개선 후보 (re-ranking, query expansion 강화 등)
 4. **큐 러너 TS 전환** — PS 큐 러너를 TS로 이관
 
