@@ -39,8 +39,8 @@
   "schema_version": 1,
 
   "chunking": {
-    "max_lines": 200,
-    "overlap_lines": 50,
+    "max_lines": 100,
+    "overlap_lines": 30,
     "max_tokens": 1000
   },
 

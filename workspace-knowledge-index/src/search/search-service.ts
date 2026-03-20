@@ -70,6 +70,17 @@ export class SearchService {
     // For Korean queries, route with the original query (Korean tokens → FTS finds nothing,
     // which is fine — the dual vector search below does the heavy lifting)
     const decision = this.router.route(normalizedQuery, options.mode, hasVectorSearch);
+
+    // Improvement 1: Dynamic hybrid fusion weights based on query type.
+    // Override generic hybrid weights with query-type-specific weights
+    // from classify() + getWeights() for better precision.
+    if (decision.route === 'hybrid' && (!options.mode || options.mode === 'auto')) {
+      const queryType = this.router.classify(normalizedQuery);
+      const typeWeights = this.router.getWeights(queryType);
+      decision.weights.fts = typeWeights.fts;
+      decision.weights.vector = typeWeights.vector;
+    }
+
     const candidateLimit = Math.max(topK * 2, topK);
 
     let ftsResults: FtsSearchResult[] = [];

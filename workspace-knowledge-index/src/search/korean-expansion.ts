@@ -38,6 +38,25 @@ const KO_EN_KEYWORDS: Record<string, string[]> = {
   '토큰': ['token'],
   '배치': ['batch'],
   '워크플로우': ['workflow'],
+  // Improvement 2: Domain-specific Korean→English mappings
+  '타입': ['type'],
+  '인터페이스': ['interface'],
+  '함수': ['function'],
+  '메서드': ['method'],
+  '모듈': ['module'],
+  '패키지': ['package'],
+  '테스트': ['test'],
+  '빌드': ['build'],
+  '컴파일': ['compile'],
+  '배포': ['deploy'],
+  '릴리스': ['release'],
+  '설계': ['design'],
+  '아키텍처': ['architecture'],
+  '의존성': ['dependency'],
+  '에러': ['error'],
+  '오류': ['exception', 'error'],
+  '성능': ['performance'],
+  '최적화': ['optimize'],
 };
 
 export interface ExpandedQuery {
