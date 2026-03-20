@@ -3,7 +3,7 @@
 > **목적**: 하나의 주제에 대해 Claude + Codex/GPT + Gemini가 다중 라운드 토론하고, 교차 검증으로 답변 품질을 극대화하며, 결과를 저장하는 시스템.
 >
 > **작성일**: 2026-03-20
-> **상태**: Draft v1
+> **상태**: Draft v2 — 3AI 교차 검증 반영 (Claude opus + Codex gpt-5.4 + Gemini pro)
 
 ---
 
@@ -29,28 +29,35 @@
 
 ## 2. 시스템 아키텍처
 
+### 실행 주체: 별도 `discussion-runner` (TS)
+
+> **CRITICAL 결정**: 기존 TS 런처(`packages/launcher`)는 단일 spec 실행이며, 이전 stage 결과를 다음 stage 프롬프트에 반영하는 루프 구조가 없다. 따라서 `/discuss`는 **별도 discussion-runner**가 필요하다. 기존 인프라(`spawn.ts`, `wki-context.ts`, evidence writer)를 재사용하되, 라운드 루프는 새로 구현한다.
+
 ```
 사용자: /discuss "주제"
   ↓
-Moderator (Claude)
+Discussion Runner (새 TS 모듈)
+  ↓
+1. WKI 맥락 검색 (1회, 스냅샷으로 고정)
+  ↓
+2. 실행 계획 표시 → 사용자 승인 (yes/no/modify)
   ↓
 ┌─────────────────────────────────────────┐
-│              Round 1                     │
-│  Claude 의견 → GPT 의견 → Gemini 의견   │
+│              Round 1 (병렬)              │
+│  Claude 의견 ∥ GPT 의견 ∥ Gemini 의견   │
 └─────────────────────────────────────────┘
-  ↓ (각 의견을 다음 라운드에 전달)
+  ↓ Moderator: 수렴 판정
 ┌─────────────────────────────────────────┐
-│              Round 2                     │
-│  Claude 반론 → GPT 반론 → Gemini 반론   │
-│  (Round 1의 다른 AI 의견을 참조)         │
+│              Round 2 (병렬)              │
+│  각 AI에게 다른 2개 의견 전달 → 반론     │
 └─────────────────────────────────────────┘
-  ↓ (수렴 확인)
+  ↓ Moderator: 수렴 판정
 ┌─────────────────────────────────────────┐
 │              Final                       │
 │  Moderator가 합의안 + 쟁점 요약 작성     │
 └─────────────────────────────────────────┘
   ↓
-결과 저장: discussions/<topic>-<date>/
+Evidence 저장: subagent-runs/discuss/<topic>-<date>/
 ```
 
 ---
@@ -61,79 +68,110 @@ Moderator (Claude)
 
 - **역할**: 주제 전달, 라운드 관리, 합의 판정, 결과 정리
 - **엔진**: Claude (항상) — 도구 접근 + 파일 저장 필요
-- **판단 기준**:
-  - 3개 AI가 **같은 결론** → 합의 도출, 토론 종료
-  - **의견 분기** → 추가 라운드 (최대 3라운드)
-  - 3라운드 후에도 합의 안 됨 → 쟁점 요약 + 각 입장 정리
+- **Participant와 분리**: Moderator용 Claude 호출과 Participant용 Claude 호출은 **별도 Task**로 분리. Moderator는 토론에 참여하지 않고 판정만 수행.
+- **수렴 판정 기준**:
+  - 각 참가자가 응답에 **명시적 라벨** 포함: `[AGREE]`, `[PARTIAL]`, `[DISAGREE]`
+  - 3인 모두 `[AGREE]` → 합의 도출, 토론 종료
+  - `[DISAGREE]` 1개 이상 → 추가 라운드 (최대 3라운드)
+  - 3라운드 후에도 `[DISAGREE]` 존재 → 쟁점 요약 + 각 입장 정리
 
 ### 3.2 Participant (토론 참가자)
 
 | 참가자 | 엔진 | 호출 방식 | 강점 |
 |---|---|---|---|
-| Claude | Task tool | 네이티브 | 정밀한 추론, 한글 |
-| GPT (Codex) | `codex exec --full-auto` | Bash | 폭넓은 지식, 코드 생성 |
-| Gemini | `npx @google/gemini-cli --yolo` | Bash | 긴 컨텍스트, 멀티모달 |
+| Claude | `spawn.ts` (stdin) | Bash → `claude --print` | 정밀한 추론, 한글 |
+| GPT (Codex) | `spawn.ts` (stdin) | Bash → `codex exec --full-auto` | 폭넓은 지식, 코드 생성 |
+| Gemini | `spawn.ts` (stdin) | Bash → `npx @google/gemini-cli --yolo` | 긴 컨텍스트, 멀티모달 |
 
 ### 3.3 WKI 연동
 
-- 토론 시작 전 WKI로 **주제 관련 맥락 검색**
-- 검색 결과를 3개 AI 모두에게 동일하게 제공
-- → 동일한 맥락 위에서 토론하므로 **허공 논쟁 방지**
+- 토론 시작 전 WKI로 **주제 관련 맥락 1회 검색**
+- 검색 결과를 **스냅샷으로 고정** — 모든 라운드에서 동일한 맥락 사용
+- → 라운드마다 다른 맥락이 주입되는 문제 방지
 
 ---
 
 ## 4. 토론 프로토콜
 
-### 4.1 Entry
+### 4.1 Entry + 승인
 
 ```
 /discuss <주제>
 ```
 
-또는 spec 파일:
+사용자에게 실행 계획 표시 후 승인 대기 (/submix와 동일):
+
+```markdown
+## /discuss Execution Plan
+
+**Topic**: [주제]
+**Max rounds**: 3
+**Participants**: Claude (sonnet), Codex (gpt-5.4), Gemini (gemini-2.5-flash)
+**Moderator**: Claude (separate, judgment only)
+**WKI context**: [검색된 맥락 요약]
+
+> **yes** — 토론 시작
+> **no** — 취소
+> **modify** — 참가자/라운드 수 변경
+```
+
+### 4.2 Discussion Spec (선택적)
+
+`/discuss`는 기존 런처 spec과 **별도 포맷** 사용:
 
 ```json
 {
+  "type": "discussion",
   "topic": "TypeScript vs Rust for CLI tools",
   "max_rounds": 3,
-  "participants": ["claude", "codex", "gemini"],
-  "moderator": "claude",
-  "output_dir": "discussions/ts-vs-rust-2026-03-20"
+  "participants": [
+    { "engine": "claude", "model": "sonnet" },
+    { "engine": "codex", "model": "gpt-5.4" },
+    { "engine": "gemini", "model": "gemini-2.5-flash" }
+  ],
+  "output_dir": "subagent-runs/discuss/ts-vs-rust-2026-03-20",
+  "response_max_lines": 30,
+  "wki_context_topk": 5
 }
 ```
 
-### 4.2 라운드 구조
+> 이 포맷은 TS 런처의 `LauncherSpec`과 호환되지 않음 — discussion-runner가 자체적으로 파싱.
 
-**Round 1: 초기 의견**
-- 각 AI에게 동일한 주제 + WKI 맥락 전달
+### 4.3 라운드 구조
+
+**Round 1: 초기 의견 (3 AI 병렬)**
+- 각 AI에게 동일한 주제 + WKI 맥락(스냅샷) 전달
 - 각자 독립적으로 의견 제시
-- Moderator가 3개 의견 수집
+- 응답 끝에 반드시 `[POSITION: 한 줄 요약]` 포함
 
-**Round 2+: 교차 검증**
-- 각 AI에게 **다른 2개 AI의 의견**을 전달
-- "동의/반론/보완"으로 응답
-- Moderator가 수렴도 판정
+**Round 2+: 교차 검증 (3 AI 병렬)**
+- 각 AI에게 **Moderator가 요약한 이전 라운드 요약** 전달 (원문이 아닌 요약 — 토큰 절감)
+- 응답에 반드시 `[AGREE]`, `[PARTIAL]`, `[DISAGREE]` 라벨 포함
+- Moderator가 라벨 기반으로 수렴 판정
 
 **Final: 합의 도출**
 - Moderator가 합의점 + 쟁점 정리
-- 결과 파일 저장
+- Evidence 파일 저장
 
-### 4.3 프롬프트 템플릿
+### 4.4 프롬프트 템플릿
 
 **Round 1 (각 참가자에게)**:
 ```
 ## Discussion Topic
 {topic}
 
-## Context (WKI auto-injected)
+## Context (WKI snapshot)
 {wki_context}
 
-## Your Task
-Provide your analysis on this topic. Structure your response:
-1. Position: your main argument
-2. Reasoning: supporting evidence
-3. Concerns: potential risks or downsides
-4. Recommendation: your suggested approach
+## Instructions
+Provide your analysis. Structure your response:
+1. **Position**: your main argument
+2. **Reasoning**: supporting evidence
+3. **Concerns**: potential risks or downsides
+4. **Recommendation**: your suggested approach
+
+End with: [POSITION: one-line summary of your stance]
+Keep response under {response_max_lines} lines.
 ```
 
 **Round 2+ (각 참가자에게)**:
@@ -141,89 +179,129 @@ Provide your analysis on this topic. Structure your response:
 ## Discussion Topic
 {topic}
 
-## Previous Round
-### Claude said:
-{claude_round1}
+## Previous Round Summary (by Moderator)
+{moderator_summary}
 
-### GPT said:
-{gpt_round1}
-
-### Gemini said:
-{gemini_round1}
-
-## Your Task
+## Instructions
 Review the other participants' arguments. Respond with:
-1. Agree: points you agree with and why
-2. Disagree: points you disagree with and why
-3. New insight: anything missed by others
-4. Updated position: has your view changed?
+1. **[AGREE/PARTIAL/DISAGREE]**: your verdict on the overall direction
+2. **Reasoning**: why you agree or disagree
+3. **New insight**: anything missed by others
+4. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under {response_max_lines} lines.
+```
+
+**Moderator 요약 (라운드 간)**:
+```
+## Round {n} Summary Task
+
+Summarize each participant's position in 3 lines max each.
+Identify: areas of agreement, areas of disagreement, open questions.
+Do NOT inject your own opinion. Be neutral.
 ```
 
 ---
 
-## 5. 결과 저장
+## 5. Evidence 저장
+
+> Evidence 정책: `/sub`, `/submix`와 동일하게 **필수이며 생략 불가**.
 
 ```
-discussions/
+subagent-runs/discuss/
 └── <topic-slug>-<YYYY-MM-DD>/
-    ├── discussion-manifest.md    ← 토론 요약 (주제, 참가자, 라운드 수, 합의 여부)
+    ├── discussion-manifest.md    ← 토론 메타 (주제, 참가자, 라운드 수, 합의 여부)
+    ├── discussion-summary.md     ← 최종 합의안 + 쟁점
     ├── round-1/
-    │   ├── claude.md             ← Claude 의견
-    │   ├── codex.md              ← GPT 의견
-    │   └── gemini.md             ← Gemini 의견
+    │   ├── claude.md
+    │   ├── codex.md
+    │   ├── gemini.md
+    │   └── moderator-summary.md  ← Moderator의 라운드 요약
     ├── round-2/
     │   ├── claude.md
     │   ├── codex.md
-    │   └── gemini.md
-    └── conclusion.md             ← 합의안 + 쟁점 요약
+    │   ├── gemini.md
+    │   └── moderator-summary.md
+    └── wki-context-snapshot.md   ← 토론에 사용된 WKI 맥락 (재현용)
 ```
 
 ---
 
-## 6. 구현 계획
+## 6. 에러 처리
+
+| 실패 유형 | 대응 |
+|----------|------|
+| 특정 AI 엔진 실패 (exit != 0) | 1회 재시도. 재실패 시 **2-of-3으로 토론 계속** (해당 AI 의견 "[UNAVAILABLE]"로 표시) |
+| 특정 AI 타임아웃 | 동일 — 2-of-3으로 계속 |
+| 인증 만료 | 사용자에게 에스컬레이션 |
+| Moderator 실패 | 토론 중단, 현재까지의 evidence 저장 |
+| 사용자 중간 취소 | 현재까지의 라운드 결과 저장 + 부분 conclusion 생성 |
+
+---
+
+## 7. 구현 계획
 
 ### Phase 1: MVP (최소 기능)
-- `/discuss` 스킬 정의
-- 1라운드 토론 (3개 AI 의견 수집 + 합의안)
-- 결과 파일 저장
-- WKI 맥락 주입
+- `.claude/skills/discuss/SKILL.md` 작성
+- AGENTS.md에 `/discuss` 라우팅 규칙 추가
+- `packages/launcher/src/discussion/` 디렉터리 생성
+  - `discussion-runner.ts` — 라운드 루프 + 수렴 판정
+  - `discussion-spec.ts` — spec 파싱 (별도 포맷)
+- 1라운드 토론 (3개 AI 병렬 의견 수집 + Moderator 합의안)
+- Evidence 저장 (`subagent-runs/discuss/`)
+- WKI 맥락 스냅샷 주입
+- spawn.ts 재사용 (엔진 호출)
 
 ### Phase 2: 다중 라운드
 - 라운드 2~3 교차 검증
-- 수렴 판정 로직
-- 라운드별 결과 저장
+- Moderator 라운드 요약 (원문 대신 요약 전달 — 토큰 절감)
+- `[AGREE/PARTIAL/DISAGREE]` 라벨 기반 수렴 판정
+- 라운드별 evidence 저장
 
 ### Phase 3: 고도화
-- spec 파일 기반 토론 설정
-- 토론 이력 검색 (WKI 인덱싱)
-- 특정 AI 모델/역할 커스터마이징
-- 토론 결과 기반 자동 작업 생성
+- 사용자 중간 개입 (interactive mode): 라운드 사이에 방향 수정 가능
+- 토론 이력 WKI 인덱싱 (과거 토론 결과 검색)
+- AI 모델/역할 커스터마이징
+- 토론 결과 기반 자동 작업 생성 (`/discuss` → 결론에서 `/sub` 자동 발행)
 
 ---
 
-## 7. 기술 결정 사항
+## 8. 기술 결정 사항
 
 | 결정 | 선택 | 근거 |
 |---|---|---|
-| Moderator 엔진 | Claude | 도구 접근 (파일 저장) + 판단력 |
-| 호출 방식 | TS 런처 or 직접 Bash | 기존 인프라 활용 |
+| 실행 주체 | 별도 discussion-runner (TS) | TS 런처는 단일 spec 실행 — 라운드 루프 불가 |
+| Moderator 엔진 | Claude (별도 Task) | 도구 접근 + 판단력. Participant와 분리하여 편향 방지 |
+| Spec 포맷 | 별도 DiscussionSpec | 런처 LauncherSpec과 호환 불가 (topic, max_rounds 등) |
+| 저장 경로 | `subagent-runs/discuss/` | 기존 evidence 체계와 통합 |
 | 저장 형식 | Markdown | 사람이 읽기 쉬움, WKI 인덱싱 가능 |
 | 최대 라운드 | 3 | 비용 효율 (3라운드 이상은 수렴 어려움) |
-| WKI 연동 | 필수 | 동일 맥락 보장 |
+| WKI 연동 | 1회 스냅샷 고정 | 라운드마다 다른 맥락 주입 방지 |
+| 수렴 판정 | 명시적 라벨 기반 | 자연어 판단보다 신뢰성 높음 |
+| 라운드 간 전달 | Moderator 요약 (원문 X) | 토큰 누적 방지 |
+| 엔진 호출 | spawn.ts 재사용 | 기존 인프라 활용, .cmd 처리 등 해결됨 |
+| 사용자 승인 | /submix와 동일 프로토콜 | 일관된 UX |
 
 ---
 
-## 8. 비용 추정
+## 9. 비용 추정
 
-| 라운드 | AI 호출 | 예상 토큰 |
-|---|---|---|
-| Round 1 | 3회 (각 AI) | ~3,000 토큰 |
-| Round 2 | 3회 (각 AI + 이전 라운드 컨텍스트) | ~6,000 토큰 |
-| Round 3 | 3회 | ~9,000 토큰 |
-| 합의안 | 1회 (Moderator) | ~2,000 토큰 |
-| **합계** | **10회** | **~20,000 토큰** |
+### 운영 비용 (토론 1회당)
 
-로컬 CLI 사용 시 **추가 API 비용 없음** (구독 요금 내).
+| 라운드 | AI 호출 | 입력 토큰 | 출력 토큰 | 합계 |
+|---|---|---|---|---|
+| Round 1 | 3회 (병렬) | ~1,500 (주제+WKI) × 3 | ~1,000 × 3 | ~7,500 |
+| Moderator 요약 | 1회 | ~3,000 (3개 의견) | ~500 | ~3,500 |
+| Round 2 | 3회 (병렬) | ~2,000 (주제+요약) × 3 | ~1,000 × 3 | ~9,000 |
+| Moderator 요약 | 1회 | ~3,000 | ~500 | ~3,500 |
+| Round 3 | 3회 (병렬) | ~2,000 × 3 | ~1,000 × 3 | ~9,000 |
+| 합의안 | 1회 | ~4,000 (전체 요약) | ~1,000 | ~5,000 |
+| **합계** | **12회** | | | **~37,500 토큰** |
+
+> 이전 추정 ~20,000은 입력 토큰을 미포함한 낙관적 수치였음.
+> 현재 추정 ~37,500은 입출력 합산. 실제로는 응답 길이에 따라 변동.
+> 로컬 CLI 사용 시 **추가 API 비용 없음** (구독 요금 내).
 
 ### 개발 비용 예측
 
@@ -237,16 +315,37 @@ discussions/
 
 ---
 
-## 9. `/submix`와의 통합
+## 10. 인프라 재사용
 
-토론 시스템은 `/submix`와 별개 명령이지만, 내부적으로 동일한 인프라를 사용:
+| 기존 모듈 | 재사용 방식 |
+|---|---|
+| `spawn.ts` | 3개 엔진 CLI 호출 (stdin 방식) |
+| `wki-context.ts` | WKI 맥락 검색 (generateContext) |
+| `evidence-format.md` | 저장 형식 참조 |
+| `common/platform.ts` | Windows .cmd 처리 |
+| `common/fs-helpers.ts` | writeFileSafe, sha256 |
 
-- 엔진 호출: TS 런처의 spawn 로직 재사용
-- WKI 맥락: wki-context.ts 재사용
-- 결과 저장: evidence 패턴 참조
+### 새로 구현할 모듈
+
+| 모듈 | 역할 |
+|---|---|
+| `discussion-runner.ts` | 라운드 루프 + 수렴 판정 + evidence 저장 |
+| `discussion-spec.ts` | DiscussionSpec 파싱 |
+| `.claude/skills/discuss/SKILL.md` | 스킬 정의 |
+| AGENTS.md 업데이트 | `/discuss` 라우팅 규칙 |
+
+---
+
+## 11. `/sub`, `/submix`, `/discuss` 통합
 
 ```
-/sub     → 분업 (Claude 단독)
-/submix  → 분업 (3개 AI 혼합)
-/discuss → 토론 (3개 AI 교차 검증)  ← NEW
+/sub     → 분업 (Claude 단독)        → subagent-runs/claude/
+/submix  → 분업 (3개 AI 혼합)        → subagent-runs/mixed/
+/discuss → 토론 (3개 AI 교차 검증)    → subagent-runs/discuss/  ← NEW
 ```
+
+세 명령 모두:
+- Evidence 필수
+- WKI 맥락 주입
+- 사용자 승인 프로토콜
+- `spawn.ts` 기반 엔진 호출
