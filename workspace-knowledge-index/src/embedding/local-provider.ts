@@ -26,12 +26,11 @@ const MODEL_PRESETS: Record<string, number> = {
   'Xenova/bge-base-en-v1.5': 768,
   'Xenova/bge-m3': 1024,
   'Xenova/all-MiniLM-L6-v2': 384,
+  'Xenova/multilingual-e5-small': 384,
   'Xenova/multilingual-e5-base': 768,
   'BAAI/bge-small-en-v1.5': 384,
   'BAAI/bge-base-en-v1.5': 768,
   'BAAI/bge-m3': 1024,
-  'Xenova/multilingual-e5-small': 384,
-  'Xenova/multilingual-e5-base': 768,
 };
 
 // Models that benefit from query instruction prefixes

@@ -6,18 +6,33 @@ import { normalizePath, toRelativePosix } from '../utils/path.js';
 import { EXTENSION_TYPE_MAP } from '../utils/file-types.js';
 
 const DEFAULT_EXCLUDES = [
+  // Build/dependency artifacts
   '**/node_modules/**',
   '**/.git/**',
   '**/.next/**',
   '**/dist/**',
+  '**/.npm-cache/**',
+  '**/.pytest_cache/**',
+  // WKI internal data
   '**/*.db',
   '**/*.lance',
   '**/.knowledge/**',
+  // Run artifacts (regeneratable)
   '**/subagent-runs/**',
   '**/subagent-records/**',
   '**/tests/artifacts/**',
-  '**/.npm-cache/**',
-  '**/.pytest_cache/**',
+  // Security: secrets and credentials
+  '**/.env',
+  '**/.env.*',
+  '**/*.key',
+  '**/*.pem',
+  '**/*.p12',
+  '**/*.pfx',
+  '**/credentials.*',
+  '**/secrets.*',
+  '**/*secret*',
+  '**/.aws/**',
+  '**/.ssh/**',
 ];
 
 /**
