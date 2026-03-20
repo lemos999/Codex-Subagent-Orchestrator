@@ -176,6 +176,8 @@ export function ensureIndexFresh(config: WkiContextConfig): void {
 
   const workspaceRoot = path.resolve(config.knowledgeDir, '..');
 
+  const lockPath = path.resolve(config.knowledgeDir, '.wki.lock');
+
   try {
     // Run incremental index — checks freshness.lock internally
     // If no changes: prints "Index is up to date" and returns instantly (no model loading)
@@ -190,7 +192,19 @@ export function ensureIndexFresh(config: WkiContextConfig): void {
       process.stderr.write(`[wki] ${output}\n`);
     }
   } catch (err) {
-    // Non-fatal — search with stale index is better than no search
+    // Clean up stale lock if timeout killed the child process
+    if (fsSync.existsSync(lockPath)) {
+      try {
+        const lockData = JSON.parse(fsSync.readFileSync(lockPath, 'utf8'));
+        // Check if the PID is still alive
+        try { process.kill(lockData.pid, 0); } catch {
+          // PID is dead — remove stale lock
+          fsSync.unlinkSync(lockPath);
+          process.stderr.write('[wki] Cleaned up stale lock from timed-out indexing.\n');
+        }
+      } catch { /* ignore lock parse errors */ }
+    }
+
     const msg = err instanceof Error ? err.message : String(err);
     if (!msg.includes('ETIMEDOUT')) {
       process.stderr.write(`[wki] Auto-indexing skipped: ${msg}\n`);
