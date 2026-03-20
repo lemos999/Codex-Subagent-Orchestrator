@@ -18,6 +18,7 @@ For this workspace, prefer local skills over globally installed skills when both
 
 - If the user starts with `/sub`, treat as **Claude 단독** subagent orchestration.
 - If the user starts with `/submix`, treat as **멀티엔진** (Claude + Codex/GPT + Gemini) orchestration. Read `.claude/skills/submix/SKILL.md` for engine assignment rules.
+- If the user starts with `/discuss`, treat as **3자 토론** (Claude + Codex/GPT + Gemini 교차 검증). Read `.claude/skills/discuss/SKILL.md`. CLI: `node packages/launcher/dist/discussion/discuss-cli.js "주제"`
 - **Default engine**: `/sub` = Claude-only. `/submix` = auto-assign based on AI model strengths.
 - For `/sub` and `/submix`, open and follow the selected skill's `SKILL.md`.
 - For `/sub`, choose the orchestration shape autonomously from the request context:
