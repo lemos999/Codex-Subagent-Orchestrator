@@ -1,0 +1,9 @@
+.gemini/
+gha-creds-*.json
+.knowledge/
+node_modules/
+dist/
+*.db-wal
+*.db-shm
+.npm-cache/
+.pytest_cache/
