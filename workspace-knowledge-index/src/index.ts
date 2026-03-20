@@ -179,7 +179,30 @@ async function cmdIndex(args: string[]): Promise<void> {
       }
     }
 
+    // OPTIMIZATION: Check for changes BEFORE loading embedding model
+    // If no changes and not full reindex, exit immediately (no model loading)
+    if (!isFullReindex) {
+      const freshness = new FreshnessManager();
+      const freshnessPath = path.join(knowledgeDir, 'freshness.lock');
+      const prevState = freshness.load(freshnessPath);
+      if (prevState) {
+        const changedFiles = freshness.detectChanges(prevState, projectRoot);
+        const totalChanges =
+          changedFiles.added.length +
+          changedFiles.modified.length +
+          changedFiles.deleted.length +
+          changedFiles.renamed.length;
+
+        if (totalChanges === 0) {
+          console.log('Index is up to date. No changes detected.');
+          return;
+        }
+        // Changes found — proceed with model loading below
+      }
+    }
+
     // Conditionally create embedding provider and vector store
+    // Only loaded when changes are detected (optimization: skip for no-change case above)
     let embeddingProvider: EmbeddingProvider | undefined;
     let vectorStore: VectorBackend | undefined;
 
