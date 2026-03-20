@@ -30,9 +30,11 @@ const MODEL_PRESETS: Record<string, number> = {
   'BAAI/bge-small-en-v1.5': 384,
   'BAAI/bge-base-en-v1.5': 768,
   'BAAI/bge-m3': 1024,
+  'Xenova/multilingual-e5-small': 384,
+  'Xenova/multilingual-e5-base': 768,
 };
 
-// Models that benefit from "Represent this sentence for searching relevant passages: " prefix
+// Models that benefit from query instruction prefixes
 const INSTRUCTION_MODELS = new Set([
   'Xenova/bge-small-en-v1.5',
   'Xenova/bge-base-en-v1.5',
@@ -40,6 +42,18 @@ const INSTRUCTION_MODELS = new Set([
   'BAAI/bge-small-en-v1.5',
   'BAAI/bge-base-en-v1.5',
   'BAAI/bge-m3',
+  'Xenova/multilingual-e5-small',
+  'Xenova/multilingual-e5-base',
+  'intfloat/multilingual-e5-small',
+  'intfloat/multilingual-e5-base',
+]);
+
+// E5 models use "query: " prefix instead of BGE's longer instruction
+const E5_MODELS = new Set([
+  'Xenova/multilingual-e5-small',
+  'Xenova/multilingual-e5-base',
+  'intfloat/multilingual-e5-small',
+  'intfloat/multilingual-e5-base',
 ]);
 
 export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
@@ -50,12 +64,14 @@ export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
 
   private pipelinePromise: Promise<unknown> | null = null;
   private readonly useInstruction: boolean;
+  private readonly isE5: boolean;
 
   constructor(options?: { model?: string; dimensions?: number }) {
     super();
     this.modelName = options?.model || 'Xenova/bge-small-en-v1.5';
     this.dimensions = options?.dimensions || MODEL_PRESETS[this.modelName] || 384;
     this.useInstruction = INSTRUCTION_MODELS.has(this.modelName);
+    this.isE5 = E5_MODELS.has(this.modelName);
   }
 
   /**
@@ -99,10 +115,12 @@ export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
       t.length > maxChars ? t.slice(0, maxChars) : t,
     );
 
-    // BGE models recommend prepending an instruction for queries
-    const preparedTexts = this.useInstruction
-      ? truncatedTexts.map((t) => `Represent this sentence for searching relevant passages: ${t}`)
-      : truncatedTexts;
+    // Model-specific query prefixes for better retrieval
+    const preparedTexts = this.isE5
+      ? truncatedTexts.map((t) => `query: ${t}`)
+      : this.useInstruction
+        ? truncatedTexts.map((t) => `Represent this sentence for searching relevant passages: ${t}`)
+        : truncatedTexts;
 
     const output = await pipe(preparedTexts, {
       pooling: 'mean',
