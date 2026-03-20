@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadConfig, resolveFtsDbPath } from './config/schema.js';
+import { Scanner } from './core/scanner.js';
 import type { EmbeddingProvider } from './interfaces/embedding.js';
 import type { VectorBackend } from './interfaces/vector-backend.js';
 import { FileMap } from './core/file-map.js';
@@ -187,13 +188,20 @@ async function cmdIndex(args: string[]): Promise<void> {
       const prevState = freshness.load(freshnessPath);
       if (prevState) {
         const changedFiles = freshness.detectChanges(prevState, projectRoot);
-        const totalChanges =
-          changedFiles.added.length +
-          changedFiles.modified.length +
-          changedFiles.deleted.length +
+
+        // Filter out files that would be excluded by the scanner
+        // (untracked files in .knowledge/, node_modules/, dist/ etc.)
+        const scanner = new Scanner(excludePatterns);
+        const filterExcluded = (files: string[]) =>
+          files.filter(f => !scanner.shouldExclude(f));
+
+        const relevantChanges =
+          filterExcluded(changedFiles.added).length +
+          filterExcluded(changedFiles.modified).length +
+          filterExcluded(changedFiles.deleted).length +
           changedFiles.renamed.length;
 
-        if (totalChanges === 0) {
+        if (relevantChanges === 0) {
           console.log('Index is up to date. No changes detected.');
           return;
         }

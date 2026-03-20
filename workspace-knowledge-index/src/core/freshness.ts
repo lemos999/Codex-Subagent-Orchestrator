@@ -102,12 +102,17 @@ export class FreshnessManager {
     const staged = this.git(projectRoot, 'diff --cached --name-status -M');
     this.parseNameStatus(staged, result);
 
-    // 4. Untracked files
+    // 4. Untracked files — skip if fingerprint unchanged (same set of untracked files)
     const untracked = this.git(projectRoot, 'ls-files --others --exclude-standard');
-    for (const line of untracked.split('\n')) {
-      const trimmed = line.trim();
-      if (trimmed.length > 0 && !result.added.includes(trimmed)) {
-        result.added.push(trimmed);
+    const currentUntrackedFingerprint = this.fingerprint(untracked);
+    const untrackedChanged = prev.untracked_fingerprint !== currentUntrackedFingerprint;
+
+    if (untrackedChanged) {
+      for (const line of untracked.split('\n')) {
+        const trimmed = line.trim();
+        if (trimmed.length > 0 && !result.added.includes(trimmed)) {
+          result.added.push(trimmed);
+        }
       }
     }
 
