@@ -66,6 +66,7 @@ rm .knowledge/.wki.lock
 
 ## 규칙
 
+- **세션 시작 시 WKI 인덱싱 필수** — 첫 작업 전에 `node workspace-knowledge-index/dist/index.js index` 를 1회 실행. 다른 AI/세션의 변경사항이 반영됨. 변경 없으면 즉시 반환 (0초).
 - 파일 삭제 시 반드시 사용자에게 확인 후 진행
 - 이 폴더에는 별도 프로젝트 폴더가 존재할 수 있음 (game-design-director, trading-quest 등)
 - Evidence 기록은 필수 — 결과 보고 전에 반드시 기록

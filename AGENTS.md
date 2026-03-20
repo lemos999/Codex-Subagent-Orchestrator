@@ -35,6 +35,6 @@ For this workspace, prefer local skills over globally installed skills when both
 ### WKI (Workspace Knowledge Index)
 
 - `.knowledge/` 디렉터리에 코드/문서 인덱스가 저장된다.
+- **세션 시작 시**: 첫 작업 전에 `node workspace-knowledge-index/dist/index.js index`를 1회 실행하여 인덱스를 최신으로 갱신한다. 다른 AI/세션의 변경사항도 반영됨. 변경 없으면 즉시 반환.
 - `/sub`, `/submix` 실행 시 TS 런처가 자동으로 증분 인덱싱 + 맥락 주입을 수행한다.
-- **세션 종료 시**: 일반 챗에서 파일을 수정한 경우, 세션 마무리 전에 `node workspace-knowledge-index/dist/index.js index`를 1회 실행하여 인덱스를 갱신한다.
 - 검색 품질 측정: `node workspace-knowledge-index/dist/index.js eval workspace-knowledge-index/eval/gold-set-v2.json`
