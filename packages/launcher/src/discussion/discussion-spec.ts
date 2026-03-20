@@ -6,6 +6,7 @@
 export interface DiscussionParticipant {
   engine: 'claude' | 'codex' | 'gemini';
   model?: string;
+  role?: string;  // e.g., "보안 관점으로 검토", "비용 효율 관점"
 }
 
 export interface DiscussionSpec {
@@ -37,7 +38,7 @@ export function parseDiscussionSpec(input: string | Record<string, unknown>): Di
       topic: input,
       max_rounds: 3,
       participants: DEFAULT_PARTICIPANTS,
-      output_dir: `subagent-runs/discuss/${slug}-${today}`,
+      output_dir: `discussions/${slug}-${today}`,
       response_max_lines: 30,
       wki_context_topk: 5,
     };
@@ -57,7 +58,7 @@ export function parseDiscussionSpec(input: string | Record<string, unknown>): Di
     topic: spec.topic as string,
     max_rounds: (spec.max_rounds as number) ?? 3,
     participants: (spec.participants as DiscussionParticipant[]) ?? DEFAULT_PARTICIPANTS,
-    output_dir: (spec.output_dir as string) ?? `subagent-runs/discuss/${slug}-${today}`,
+    output_dir: (spec.output_dir as string) ?? `discussions/${slug}-${today}`,
     response_max_lines: (spec.response_max_lines as number) ?? 30,
     wki_context_topk: (spec.wki_context_topk as number) ?? 5,
   };

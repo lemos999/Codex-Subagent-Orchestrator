@@ -29,6 +29,21 @@ description: 3개 AI 엔진(Claude + Codex/GPT + Gemini)이 하나의 주제에 
 ```bash
 node packages/launcher/dist/discussion/discuss-cli.js "토론 주제"
 node packages/launcher/dist/discussion/discuss-cli.js --spec discussion.json
+node packages/launcher/dist/discussion/discuss-cli.js --auto "토론 주제"  # 자동 모드
+```
+
+## 역할 커스터마이징
+
+참가자에 역할을 부여하여 특정 관점에서 분석하도록 지시:
+
+```json
+{
+  "participants": [
+    { "engine": "claude", "model": "opus", "role": "보안 관점으로 검토" },
+    { "engine": "codex", "model": "gpt-5.4", "role": "비용 효율 관점" },
+    { "engine": "gemini", "model": "gemini-2.5-pro", "role": "확장성 관점" }
+  ]
+}
 ```
 
 ## 사용자 개입
@@ -37,7 +52,10 @@ node packages/launcher/dist/discussion/discuss-cli.js --spec discussion.json
 - **continue** — 다음 라운드 진행
 - **stop** — 여기서 종료, 합의안 생성
 - **guide "지시"** — 다음 라운드에 추가 관점 주입
-- **modify** — 참가자/모델 변경
+
+## 자동 작업 생성
+
+합의안에서 구체적 실행 항목이 도출되면 `/sub` 또는 `/submix` 명령으로 자동 추천됩니다.
 
 ## Evidence
 
