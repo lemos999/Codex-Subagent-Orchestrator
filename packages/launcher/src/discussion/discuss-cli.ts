@@ -68,19 +68,24 @@ Usage:
 
 Options:
   --spec <path>   JSON spec file for advanced configuration
+  --auto          Auto mode: skip approval, run all rounds without user input
   --help          Show this help
 `);
     process.exit(0);
   }
 
+  // Check for --auto flag
+  const autoMode = args.includes('--auto');
+  const filteredArgs = args.filter((a) => a !== '--auto');
+
   // Parse spec
   let spec;
-  if (args[0] === '--spec' && args[1]) {
-    const specPath = path.resolve(args[1]);
+  if (filteredArgs[0] === '--spec' && filteredArgs[1]) {
+    const specPath = path.resolve(filteredArgs[1]);
     const raw = JSON.parse(await fs.readFile(specPath, 'utf8'));
     spec = parseDiscussionSpec(raw);
   } else {
-    spec = parseDiscussionSpec(args.join(' '));
+    spec = parseDiscussionSpec(filteredArgs.join(' '));
   }
 
   // #4 fix: fetch WKI context BEFORE showing approval plan
@@ -105,14 +110,17 @@ ${'='.repeat(60)}
     ${wkiPreview}
 `);
 
-  const rl = createReadline();
-  // #3 fix: removed 'modify' from options (not implemented)
-  const approval = await askUser(rl, '  > yes — 토론 시작 / no — 취소: ');
+  const rl = autoMode ? null : createReadline();
 
-  if (approval.toLowerCase() !== 'yes' && approval.toLowerCase() !== 'y') {
-    console.log('  취소되었습니다.');
-    rl.close();
-    process.exit(0);
+  if (!autoMode) {
+    const approval = await askUser(rl!, '  > yes — 토론 시작 / no — 취소: ');
+    if (approval.toLowerCase() !== 'yes' && approval.toLowerCase() !== 'y') {
+      console.log('  취소되었습니다.');
+      rl!.close();
+      process.exit(0);
+    }
+  } else {
+    console.log('  [auto] 자동 모드 — 승인 스킵, 전체 라운드 실행');
   }
 
   // Run discussion (pass pre-fetched WKI context)
@@ -120,8 +128,12 @@ ${'='.repeat(60)}
     onRoundComplete: async (round: RoundResult) => {
       displayRoundResult(round);
 
-      // #3 fix: only show implemented options, validate input
-      const answer = await askUser(rl, '  > continue — 다음 라운드 / stop — 종료 / guide "지시" — 방향 추가: ');
+      if (autoMode) {
+        console.log('  [auto] 자동으로 다음 라운드 진행');
+        return { action: 'continue' as const };
+      }
+
+      const answer = await askUser(rl!, '  > continue — 다음 라운드 / stop — 종료 / guide "지시" — 방향 추가: ');
       const lower = answer.toLowerCase();
 
       if (lower === 'stop' || lower === 's') {
@@ -139,7 +151,6 @@ ${'='.repeat(60)}
         return { action: 'continue' as const };
       }
 
-      // Unrecognized input → ask again
       console.log('  인식할 수 없는 입력입니다. continue로 진행합니다.');
       return { action: 'continue' as const };
     },
@@ -148,7 +159,7 @@ ${'='.repeat(60)}
     },
   });
 
-  rl.close();
+  if (rl) rl.close();
 
   // Display final result
   console.log(`
