@@ -144,8 +144,19 @@ Evidence 저장: subagent-runs/discuss/<topic>-<date>/
 - 각자 독립적으로 의견 제시
 - 응답 끝에 반드시 `[POSITION: 한 줄 요약]` 포함
 
+**라운드 사이: 사용자 개입 (interactive mode)**
+- 각 라운드 완료 후 결과를 표시하고 사용자에게 선택지 제공:
+```
+> **continue** — 다음 라운드 진행
+> **stop** — 여기서 종료, 합의안 생성
+> **guide "지시"** — "이 관점도 고려해줘" 등 추가 지시를 다음 라운드에 반영
+> **modify** — 참가자/모델 변경
+```
+- `guide` 지시는 다음 라운드 프롬프트에 `## User Guidance` 섹션으로 주입
+
 **Round 2+: 교차 검증 (3 AI 병렬)**
 - 각 AI에게 **Moderator가 요약한 이전 라운드 요약** 전달 (원문이 아닌 요약 — 토큰 절감)
+- 사용자 guide가 있으면 `## User Guidance` 섹션 포함
 - 응답에 반드시 `[AGREE]`, `[PARTIAL]`, `[DISAGREE]` 라벨 포함
 - Moderator가 라벨 기반으로 수렴 판정
 
@@ -249,6 +260,7 @@ subagent-runs/discuss/
   - `discussion-runner.ts` — 라운드 루프 + 수렴 판정
   - `discussion-spec.ts` — spec 파싱 (별도 포맷)
 - 1라운드 토론 (3개 AI 병렬 의견 수집 + Moderator 합의안)
+- **사용자 개입 (interactive mode)**: 라운드 사이에 continue/stop/guide/modify 선택
 - Evidence 저장 (`subagent-runs/discuss/`)
 - WKI 맥락 스냅샷 주입
 - spawn.ts 재사용 (엔진 호출)
@@ -260,7 +272,6 @@ subagent-runs/discuss/
 - 라운드별 evidence 저장
 
 ### Phase 3: 고도화
-- 사용자 중간 개입 (interactive mode): 라운드 사이에 방향 수정 가능
 - 토론 이력 WKI 인덱싱 (과거 토론 결과 검색)
 - AI 모델/역할 커스터마이징
 - 토론 결과 기반 자동 작업 생성 (`/discuss` → 결론에서 `/sub` 자동 발행)
