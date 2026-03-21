@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "trading-value"
+version = "0.1.0"
+description = "Automated trading system for ETHUSDT and BTCUSDT perpetual futures"
+requires-python = ">= 3.12"
+dependencies = [
+    "pydantic>=2.0",
+    "pandas",
+    "pandas-ta",
+    "ccxt",
+    "numpy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "hypothesis",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/trading_value"]
