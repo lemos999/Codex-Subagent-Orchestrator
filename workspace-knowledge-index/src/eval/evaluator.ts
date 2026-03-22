@@ -74,9 +74,22 @@ export async function evaluate(
     });
 
     // Map search results to relevance scores (retrieved order)
-    const retrievedRelevance = searchResults.map(
-      (sr) => findRelevance(sr, goldQuery.relevantChunks),
-    );
+    // Fix: each gold chunk can only be matched once (dedupe to prevent nDCG > 1)
+    const usedGoldIndices = new Set<number>();
+    const retrievedRelevance = searchResults.map((sr) => {
+      let bestRelevance = 0;
+      let bestIndex = -1;
+      for (let gi = 0; gi < goldQuery.relevantChunks.length; gi++) {
+        if (usedGoldIndices.has(gi)) continue;
+        const gold = goldQuery.relevantChunks[gi]!;
+        if (matchesGoldChunk(sr, gold) && gold.relevance > bestRelevance) {
+          bestRelevance = gold.relevance;
+          bestIndex = gi;
+        }
+      }
+      if (bestIndex >= 0) usedGoldIndices.add(bestIndex);
+      return bestRelevance;
+    });
 
     const matchedCount = retrievedRelevance.filter((r) => r > 0).length;
 

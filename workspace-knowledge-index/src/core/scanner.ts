@@ -21,6 +21,14 @@ const DEFAULT_EXCLUDES = [
   '**/subagent-runs/**',
   '**/subagent-records/**',
   '**/tests/artifacts/**',
+  // Discussion artifacts (keep only .md summaries, exclude raw logs)
+  '**/*.prompt.txt',
+  '**/*.stdout.log',
+  '**/*.stderr.log',
+  '**/*.last.txt',
+  '**/wki-context-snapshot.md',
+  '**/personas.json',
+  '**/auto-personas.md',
   // Security: secrets and credentials
   '**/.env',
   '**/.env.*',

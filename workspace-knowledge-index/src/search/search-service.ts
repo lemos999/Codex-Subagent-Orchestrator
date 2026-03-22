@@ -99,12 +99,29 @@ export class SearchService {
       vectorResults = await this.vectorStore.search(embedding, candidateLimit, options.filter);
 
       // For Korean queries: also search with English-expanded query and merge results.
-      // The multilingual model may find different relevant docs for each variant.
-      // Apply a score discount to expanded results so original-query results are preferred.
       if (hasKorean && ftsQuery !== normalizedQuery) {
         const expandedEmbedding = await this.embeddingProvider.embed(ftsQuery);
         const expandedResults = await this.vectorStore.search(expandedEmbedding, candidateLimit, options.filter);
         vectorResults = mergeVectorResults(vectorResults, expandedResults, candidateLimit);
+      }
+
+      // Multi-vector search: decompose query and search from multiple angles
+      // For natural language queries with 3+ words, also search with key phrases
+      // Fail-soft: if auxiliary embed fails, keep original results
+      const queryTokens = normalizedQuery.split(/\s+/).filter(t => t.length >= 3);
+      if (queryTokens.length >= 3 && !hasKorean) {
+        const STOP_WORDS = new Set(['the', 'a', 'an', 'and', 'or', 'is', 'are', 'in', 'of', 'for', 'to', 'how', 'does', 'what', 'where', 'why']);
+        const contentWords = queryTokens.filter(t => !STOP_WORDS.has(t.toLowerCase()));
+        if (contentWords.length >= 2 && contentWords.length < queryTokens.length) {
+          try {
+            const keyPhraseQuery = contentWords.join(' ');
+            const keyPhraseEmbedding = await this.embeddingProvider.embed(keyPhraseQuery);
+            const keyPhraseResults = await this.vectorStore.search(keyPhraseEmbedding, candidateLimit, options.filter);
+            vectorResults = mergeVectorResults(vectorResults, keyPhraseResults, candidateLimit);
+          } catch {
+            // Fail-soft: auxiliary search failed, keep original results
+          }
+        }
       }
     }
 
@@ -138,35 +155,56 @@ export class SearchService {
   }
 
   /**
-   * Lightweight re-ranking: boost results where query keywords appear in chunk content.
-   * No additional model needed — uses keyword overlap scoring.
+   * Enhanced re-ranking with 3 signals:
+   * 1. Keyword overlap (content match)
+   * 2. Heading/filePath relevance (structural match)
+   * 3. Noise penalty (demote irrelevant project files)
    */
   private rerank(results: SearchResult[], query: string, expandedQuery: string): SearchResult[] {
     if (results.length <= 1) return results;
 
-    // Extract keywords from both original and expanded query
+    const RERANK_STOP_WORDS = new Set([
+      'the', 'a', 'an', 'and', 'or', 'is', 'are', 'in', 'of', 'for', 'to',
+      'how', 'does', 'what', 'where', 'why', 'do', 'it', 'be', 'at', 'by',
+      'md', 'ts', 'js', 'json', 'tsx', 'jsx', // file extensions
+    ]);
+
     const keywords = new Set(
       `${query} ${expandedQuery}`.toLowerCase()
         .split(/[\s,.;:!?()\[\]{}"'`]+/)
-        .filter(w => w.length >= 2),
+        .filter(w => w.length >= 2 && !RERANK_STOP_WORDS.has(w)),
     );
 
     if (keywords.size === 0) return results;
 
-    // Score each result by keyword overlap
     const scored = results.map(r => {
       const content = (r.chunk.content + ' ' + r.chunk.filePath + ' ' + (r.chunk.heading ?? '')).toLowerCase();
+      const filePath = r.chunk.filePath.toLowerCase();
+      const heading = (r.chunk.heading ?? '').toLowerCase();
+
+      // Signal 1: keyword overlap in content
       let matchCount = 0;
       for (const kw of keywords) {
         if (content.includes(kw)) matchCount++;
       }
       const overlapRatio = matchCount / keywords.size;
-      // Blend: 70% original score + 30% keyword overlap
-      const rerankScore = r.score * 0.7 + overlapRatio * r.score * 0.3;
+
+      // Signal 2: heading/filePath keyword match (structural relevance boost)
+      let structuralBoost = 0;
+      for (const kw of keywords) {
+        if (heading.includes(kw)) structuralBoost += 0.15;
+        if (filePath.includes(kw)) structuralBoost += 0.1;
+      }
+      structuralBoost = Math.min(structuralBoost, 0.3); // cap
+
+      // Signal 3: noise penalty — demote files from unrelated projects
+      const noisePenalty = isNoisePath(filePath) ? 0.3 : 0;
+
+      // Blend: 60% original + 25% keyword overlap + 15% structural - noise
+      const rerankScore = r.score * (0.60 + overlapRatio * 0.25 + structuralBoost * 0.15 - noisePenalty);
       return { ...r, score: rerankScore };
     });
 
-    // Sort by reranked score descending
     scored.sort((a, b) => b.score - a.score);
     return scored;
   }
@@ -510,6 +548,23 @@ function mergeVectorResults(
   return Array.from(best.values())
     .sort((x, y) => y.score - x.score)
     .slice(0, limit);
+}
+
+/** Noise path detection — demote results from unrelated subprojects */
+const NOISE_PATH_PATTERNS = [
+  'game-design-director/',
+  'projects/trading',
+  'trading-quest/',
+  'shortlive-shop-helper/',
+  'claude-sub-specs/',
+  'subagent-records/',
+  '.npm-cache/',
+  'package-lock.json',
+];
+
+function isNoisePath(filePath: string): boolean {
+  const lower = filePath.toLowerCase();
+  return NOISE_PATH_PATTERNS.some((p) => lower.includes(p));
 }
 
 function clamp01(value: number): number {
