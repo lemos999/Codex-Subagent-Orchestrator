@@ -25,6 +25,7 @@ import { writeSummary } from './evidence/summary-writer.js';
 import { writeArchive } from './evidence/archive-writer.js';
 import { buildManifest, type SharedDirectiveInfo } from './evidence/manifest-builder.js';
 import { UsageMonitor } from './workers/usage-monitor.js';
+import { TrustRegistry } from './workers/trust-registry.js';
 import type { ResolvedWorkerSpec } from './workers/spawn.js';
 
 // ============================================================
@@ -310,13 +311,16 @@ export async function orchestrate(
   const usageMonitor = initUsageMonitor(spec, resolvedPaths.outputDir);
 
   // Phase 6: Execute
+  const trustRegistry = new TrustRegistry(resolvedPaths.outputDir);
   const executionMode = spec.execution_mode ?? 'sequential';
   const results = await runStages(
     stagePlan,
     workers,
     executionMode,
     usageMonitor,
+    trustRegistry,
   );
+  console.error(`[trust] ${trustRegistry.summary()}`);
 
   // Phase 6.5: Stop usage monitor
   if (usageMonitor) {

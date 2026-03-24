@@ -261,6 +261,48 @@
         }
       ],
       "expectedQueryType": "natural"
+    },
+    {
+      "query": "design director phase contracts validation ladder",
+      "relevantChunks": [
+        {
+          "filePath": "skills/design-director/core/phase-contracts.md",
+          "relevance": 3
+        },
+        {
+          "filePath": "skills/design-director/core/validation-ladder.md",
+          "relevance": 3
+        },
+        {
+          "filePath": "skills/design-director/SKILL.md",
+          "relevance": 1
+        }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "trust-registry.ts",
+      "relevantChunks": [
+        {
+          "filePath": "packages/launcher/src/workers/trust-registry.ts",
+          "relevance": 3
+        }
+      ],
+      "expectedQueryType": "path"
+    },
+    {
+      "query": "DTR 품질 체크 overthinking 감지",
+      "relevantChunks": [
+        {
+          "filePath": "packages/launcher/src/workers/output-quality.ts",
+          "relevance": 3
+        },
+        {
+          "filePath": "deep-thinking-tokens-guide.md",
+          "relevance": 2
+        }
+      ],
+      "expectedQueryType": "natural"
     }
   ]
 }
