@@ -521,8 +521,9 @@ export async function runDiscussion(
 
     const moderatorSummary = moderatorResult.response;
 
-    // Detect convergence (Round 2+)
-    const convergence = isFirstRound ? undefined : detectConvergence(responses, failedEngines);
+    // Detect convergence — including Round 1 for early exit when all participants agree
+    // (Intelligent Delegation: adaptive coordination — skip unnecessary rounds)
+    const convergence = detectConvergence(responses, failedEngines);
 
     const roundResult: RoundResult = {
       round: roundNum,

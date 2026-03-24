@@ -68,6 +68,21 @@ function hasNonAscii(text: string): boolean {
   return /[^\x00-\x7F]/.test(text);
 }
 
+/**
+ * Build privilege attenuation notice for external engines.
+ * Intelligent Delegation: sub-tasks should receive minimum required permissions.
+ */
+function buildPermissionNotice(spec: ResolvedWorkerSpec): string {
+  if (spec.isReadOnly) {
+    return 'PERMISSION: READ-ONLY. Do NOT create, modify, or delete any files.\n';
+  }
+  if (spec.requiredPaths.length > 0) {
+    const scope = spec.requiredPaths.join(', ');
+    return `PERMISSION: You may only modify files within: ${scope}\nDo NOT modify files outside this scope.\n`;
+  }
+  return '';
+}
+
 // ============================================================
 // Engine command builders
 // ============================================================
@@ -86,10 +101,11 @@ function buildCodexCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   // Note: codex exec does not support --reasoning-effort flag.
   args.push(...spec.extraArgs);
 
-  // Encoding safety: warn about Korean content (Codex may show mojibake)
-  const prompt = hasNonAscii(spec.prompt)
-    ? `Note: This prompt contains non-ASCII characters (Korean/CJK). If file content appears garbled, the file is UTF-8 encoded Korean text.\n\n${spec.prompt}`
-    : spec.prompt;
+  // Privilege attenuation + encoding safety
+  let prompt = buildPermissionNotice(spec) + spec.prompt;
+  if (hasNonAscii(prompt)) {
+    prompt = `Note: This prompt contains non-ASCII characters (Korean/CJK). If file content appears garbled, the file is UTF-8 encoded Korean text.\n\n${prompt}`;
+  }
 
   return { cmd: winCmd('codex'), args, stdin: prompt };
 }
@@ -114,10 +130,8 @@ function buildGeminiCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   }
   args.push(...spec.extraArgs);
 
-  // For read-only tasks, prepend safety instruction to prompt
-  const safePrompt = spec.isReadOnly
-    ? `IMPORTANT: This is a READ-ONLY analysis task. Do NOT modify, create, or delete any files. Only read files and provide analysis.\n\n${spec.prompt}`
-    : spec.prompt;
+  // Privilege attenuation for Gemini
+  const safePrompt = buildPermissionNotice(spec) + spec.prompt;
 
   return { cmd: winCmd('npx'), args, stdin: safePrompt };
 }

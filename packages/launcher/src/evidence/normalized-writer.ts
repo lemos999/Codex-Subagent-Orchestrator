@@ -436,6 +436,19 @@ function buildManifestMarkdown(
   lines.push(`- **Fix cycles**: ${fixCycles}`);
   lines.push(`- **Final reviewer**: ${finalReviewerLabel(results)}`);
   lines.push('');
+  lines.push('### Settlement Record');
+  lines.push('');
+  lines.push('| Worker | Engine | Status | Contribution |');
+  lines.push('|---|---|---|---|');
+  for (const result of results) {
+    const status = result.succeeded ? 'OK' : 'FAILED';
+    const contrib = result.worker_kind === 'reviewer' ? 'review'
+      : result.worker_kind === 'fixer' ? 'fix'
+      : result.worker_kind === 'watchdog' ? 'watchdog'
+      : 'deliverable';
+    lines.push(`| ${result.name} | ${result.engine} | ${status} | ${contrib} |`);
+  }
+  lines.push('');
   lines.push('## Metrics');
   lines.push('');
   lines.push(`- **Agents used**: ${results.length}`);
