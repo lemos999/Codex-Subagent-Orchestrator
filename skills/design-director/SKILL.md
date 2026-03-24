@@ -294,12 +294,12 @@ value_test_override: false        # true면 heuristics.md의 가치 평가를 VC
 6. `_confirmed/shared-parameter-registry.md` — 공유 파라미터
 7. `sections/[섹션명].md` — 섹션별 기획서
 8. `dependency-map.md` — 의존 관계도
-9. `DEVELOPMENT-BIBLE.md` — 개발 제작 바이블 (복사 또는 참조 링크)
+9. `DEVELOPMENT-BIBLE.md` — 개발 제작 바이블 (`Projects/DEVELOPMENT-BIBLE.md`에서 복사 또는 참조)
 
 **구현 기준 연결:** Phase 5에서 생성하는 `CLAUDE.md`에 아래 지침을 포함한다:
 ```
 ## 개발 기준
-이 프로젝트의 구현은 DEVELOPMENT-BIBLE.md의 원칙을 따릅니다.
+이 프로젝트의 구현은 Projects/DEVELOPMENT-BIBLE.md의 원칙을 따릅니다.
 특히 아래 섹션을 필수 참조:
 - §6 입력값 검증, §7 보안 체크리스트, §8 금전/결제 (해당 시)
 - §21 권한 모델 (RBAC), §28 런칭 전 체크리스트

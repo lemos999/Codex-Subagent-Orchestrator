@@ -33,7 +33,7 @@ Phase 4에서 "실행 착수 가능"이 선언되었을 것.
 6. **_confirmed/shared-parameter-registry.md** — 공유 파라미터 레지스트리
 7. **sections/[섹션명].md** — 섹션별 기획서
 8. **dependency-map.md** — 컴포넌트 간 의존 관계도
-9. **DEVELOPMENT-BIBLE.md** — 개발 제작 바이블 (복사 또는 참조 링크)
+9. **DEVELOPMENT-BIBLE.md** — 개발 제작 바이블 (`Projects/DEVELOPMENT-BIBLE.md`에서 복사)
 
 ### Step 1.5: 개발 기준 연결
 
@@ -41,8 +41,8 @@ Phase 4에서 "실행 착수 가능"이 선언되었을 것.
 
 ```markdown
 ## 개발 기준
-이 프로젝트의 구현은 DEVELOPMENT-BIBLE.md의 원칙을 따릅니다.
-해당 문서가 프로젝트 루트에 없으면 Projects/DEVELOPMENT-BIBLE.md에서 복사합니다.
+이 프로젝트의 구현은 Projects/DEVELOPMENT-BIBLE.md의 원칙을 따릅니다.
+프로젝트 루트에 복사하거나 상대 경로로 참조합니다.
 
 필수 참조 섹션:
 - §6 입력값 검증 — 모든 사용자 입력에 적용
