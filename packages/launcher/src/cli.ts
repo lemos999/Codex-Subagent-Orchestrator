@@ -12,23 +12,26 @@ import { orchestrate } from './orchestrator.js';
 // Argument parsing
 // ============================================================
 
-function parseArgs(argv: string[]): { specPath: string } {
+function parseArgs(argv: string[]): { specPath: string; jsonOutput: boolean } {
   const args = argv.slice(2); // skip node and script path
   let specPath: string | null = null;
+  let jsonOutput = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--spec' && i + 1 < args.length) {
       specPath = args[i + 1];
       i++;
+    } else if (args[i] === '--json') {
+      jsonOutput = true;
     }
   }
 
   if (!specPath) {
-    console.error('Usage: subagent-launch --spec <path>');
+    console.error('Usage: subagent-launch --spec <path> [--json]');
     process.exit(1);
   }
 
-  return { specPath };
+  return { specPath, jsonOutput };
 }
 
 // ============================================================
@@ -94,28 +97,48 @@ function printSummaryTable(result: Awaited<ReturnType<typeof orchestrate>>): voi
 // ============================================================
 
 async function main(): Promise<void> {
-  const { specPath } = parseArgs(process.argv);
+  const { specPath, jsonOutput } = parseArgs(process.argv);
   const absoluteSpecPath = path.resolve(process.cwd(), specPath);
   const invocationCwd = process.cwd();
 
   try {
     const result = await orchestrate(absoluteSpecPath, invocationCwd);
-    printSummaryTable(result);
+
+    if (jsonOutput) {
+      // JSON output mode for queue runner integration
+      const jsonResult = {
+        manifest: result.manifestPath,
+        summary: result.summaryPath ?? null,
+        success: result.success,
+        workers: result.results.length,
+        succeeded: result.results.filter((r) => r.succeeded).length,
+        failed: result.results.filter((r) => !r.succeeded).length,
+      };
+      console.log(JSON.stringify(jsonResult));
+    } else {
+      printSummaryTable(result);
+    }
 
     if (!result.success) {
-      const failedNames = result.results
-        .filter((r) => !r.succeeded)
-        .map((r) => r.name);
-      console.error(`ERROR: Workers failed: ${failedNames.join(', ')}`);
+      if (!jsonOutput) {
+        const failedNames = result.results
+          .filter((r) => !r.succeeded)
+          .map((r) => r.name);
+        console.error(`ERROR: Workers failed: ${failedNames.join(', ')}`);
+      }
       process.exit(1);
     }
 
     process.exit(0);
   } catch (err) {
-    console.error(
-      'FATAL:',
-      err instanceof Error ? err.message : String(err),
-    );
+    if (jsonOutput) {
+      console.log(JSON.stringify({ manifest: null, summary: null, success: false, error: err instanceof Error ? err.message : String(err) }));
+    } else {
+      console.error(
+        'FATAL:',
+        err instanceof Error ? err.message : String(err),
+      );
+    }
     process.exit(1);
   }
 }

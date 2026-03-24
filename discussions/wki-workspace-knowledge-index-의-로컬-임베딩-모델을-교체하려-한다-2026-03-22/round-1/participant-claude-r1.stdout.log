@@ -1,0 +1,31 @@
+## 1. Position
+
+**BGE-M3**가 WKI에 최적이다. 코드+문서 혼합, 한-영 크로스링구얼, ONNX 지원을 모두 충족하는 유일한 실용적 선택.
+
+## 2. Reasoning
+
+| 모델 | 코드+문서 | 한-영 크로스링구얼 | ONNX | 로컬 속도 |
+|------|-----------|------------------|------|-----------|
+| paraphrase-multilingual-MiniLM (현재) | △ | ○ | ○ | ★★★ |
+| **BGE-M3** | ○ | ★★★ (100+ lang) | ○ | ★★ |
+| multilingual-E5-large | ○ | ★★ | ○ | ★ (1024d, 무거움) |
+| Jina v2 (code) | ★★★ | △ (코드 언어 위주) | ○ | ★★ |
+| CodeBERT | ★★★ | ✗ (한국어 없음) | △ | ★★ |
+| nomic-embed-text | △ | ✗ (영어 위주) | ○ | ★★ |
+
+BGE-M3의 핵심 강점:
+- **Dense + Sparse + ColBERT 하이브리드** → 코드 토큰 정밀 매칭 + 의미 검색 동시
+- BAAI 공식 ONNX export 지원
+- 한국어 MTEB 벤치마크 최상위권
+
+## 3. Concerns
+
+- 현재 384d → BGE-M3 1024d: **전체 인덱스 rebuild 필수**, 메모리 2.5배 증가
+- 초기 로딩 시간 증가 (~2GB 모델)
+- WKI의 증분 인덱싱 파이프라인에서 배치 크기 조정 필요
+
+## 4. Recommendation
+
+BGE-M3(`BAAI/bge-m3`) 채택, Sparse retrieval은 비활성화하고 Dense만 사용해 속도 확보. 인덱스 rebuild는 메모리 파일 `project_wki_status.md`에 기록된 rebuild 미완료 상태를 이번에 함께 해결하는 방향으로 진행.
+
+[POSITION: BGE-M3 채택 — 한-영 크로스링구얼 + 코드+문서 혼합 + ONNX 세 조건을 동시 충족하는 유일한 실용적 선택]

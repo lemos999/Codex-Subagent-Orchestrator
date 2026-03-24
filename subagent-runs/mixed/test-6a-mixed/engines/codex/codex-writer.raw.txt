@@ -1,0 +1,1 @@
+[tests/artifacts/mixed-hello.txt](/C:/Users/haj/projects/subagent-orchestrator/tests/artifacts/mixed-hello.txt) already contained the exact requested content, verified byte-for-byte as `Hello from Codex engine` with no trailing newline, so no edit was necessary.

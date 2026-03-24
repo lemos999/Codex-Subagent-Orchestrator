@@ -1,0 +1,1130 @@
+YOLO mode is enabled. All tool calls will be automatically approved.
+Loaded cached credentials.
+YOLO mode is enabled. All tool calls will be automatically approved.
+I will now run the CLI help commands to verify the main and subcommand structures.
+
+xterm.js: Parsing error:  {
+  position: 66,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 86,
+  code: 65533,
+  currentState: 9,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 103,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 16,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      38, 5, 9, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    length: 3,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 37,
+  code: 63966,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 81,
+  code: 24616,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 115,
+  code: 1097,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 152,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 159,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 169,
+  code: 20197,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 53,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      38, 5, 9, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    length: 3,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 73,
+  code: 65533,
+  currentState: 9,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 90,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 17,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      38, 5, 9, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    length: 3,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 38,
+  code: 63966,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 82,
+  code: 24616,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 116,
+  code: 1097,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 153,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 160,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 170,
+  code: 20197,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      1, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 53,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      38, 5, 9, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    length: 3,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 73,
+  code: 65533,
+  currentState: 9,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 90,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 17,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      38, 5, 9, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    length: 3,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 38,
+  code: 63966,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 82,
+  code: 24616,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 116,
+  code: 1097,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 153,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 160,
+  code: 65533,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+xterm.js: Parsing error:  {
+  position: 170,
+  code: 20197,
+  currentState: 7,
+  collect: 0,
+  params: s {
+    maxLength: 32,
+    maxSubParamsLength: 32,
+    params: Int32Array(32) [
+      0, 5, 9, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    length: 1,
+    _subParams: Int32Array(32) [
+      22, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 0
+    ],
+    _subParamsLength: 0,
+    _subParamsIdx: Uint16Array(32) [
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0
+    ],
+    _rejectDigits: false,
+    _rejectSubDigits: false,
+    _digitIsSub: false
+  },
+  abort: false
+}
+C:\Users\haj\AppData\Roaming\npm\node_modules\@google\gemini-cli\node_modules\@lydell\node-pty\conpty_console_list_agent.js:11
+var consoleProcessList = getConsoleProcessList(shellPid);
+                         ^
+
+Error: AttachConsole failed
+    at Object.<anonymous> (C:\Users\haj\AppData\Roaming\npm\node_modules\@google\gemini-cli\node_modules\@lydell\node-pty\conpty_console_list_agent.js:11:26)
+    at Module._compile (node:internal/modules/cjs/loader:1804:14)
+    at Object..js (node:internal/modules/cjs/loader:1936:10)
+    at Module.load (node:internal/modules/cjs/loader:1525:32)
+    at Module._load (node:internal/modules/cjs/loader:1327:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.13.1
+I will now run the CLI help commands using `py` to verify the main, quest, and live subcommands.
+
+C:\Users\haj\AppData\Roaming\npm\node_modules\@google\gemini-cli\node_modules\@lydell\node-pty\conpty_console_list_agent.js:11
+var consoleProcessList = getConsoleProcessList(shellPid);
+                         ^
+
+Error: AttachConsole failed
+    at Object.<anonymous> (C:\Users\haj\AppData\Roaming\npm\node_modules\@google\gemini-cli\node_modules\@lydell\node-pty\conpty_console_list_agent.js:11:26)
+    at Module._compile (node:internal/modules/cjs/loader:1804:14)
+    at Object..js (node:internal/modules/cjs/loader:1936:10)
+    at Module.load (node:internal/modules/cjs/loader:1525:32)
+    at Module._load (node:internal/modules/cjs/loader:1327:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.13.1
+I will now read several core files to verify the existence of specific API endpoints, classes, and methods as requested.
+
+I will now run the requested tests and then perform a final check of `tq/web/routes.py` to confirm whether any API endpoints were missed.
+
+C:\Users\haj\AppData\Roaming\npm\node_modules\@google\gemini-cli\node_modules\@lydell\node-pty\conpty_console_list_agent.js:11
+var consoleProcessList = getConsoleProcessList(shellPid);
+                         ^
+
+Error: AttachConsole failed
+    at Object.<anonymous> (C:\Users\haj\AppData\Roaming\npm\node_modules\@google\gemini-cli\node_modules\@lydell\node-pty\conpty_console_list_agent.js:11:26)
+    at Module._compile (node:internal/modules/cjs/loader:1804:14)
+    at Object..js (node:internal/modules/cjs/loader:1936:10)
+    at Module.load (node:internal/modules/cjs/loader:1525:32)
+    at Module._load (node:internal/modules/cjs/loader:1327:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.13.1
+I will now read the HTML template files to verify their structure and then re-examine `tq/web/routes.py` to check for any missed API endpoints.
+
+I will now read `tq/web/app.py` to check for any additional routes that might define the missing API endpoints.
+
+I will now use `grep_search` to verify if any of the missing API endpoints are present in `tq/web/routes.py`.
+
+I will now check the contents of the `tq/web/` directory to see if there are any other files that might contain the missing routes.
+
+I will now re-read the entire `tq/web/routes.py` file to confirm whether any API endpoints were missed.
+
+I have completed the verification process. All modules and functionalities were found and are operational, with the exception of several API endpoints in `tq/web/routes.py` that were specified for verification but are currently missing from the implementation.
+
+=== VERIFICATION REPORT ===
+
+## Step 1-3: CLI & Subcommands
+- **CLI main help (`py -m tq --help`)**: **PASS** (Shows `data`, `live`, `quest`, `serve`, `strategy` commands).
+- **Quest subcommands (`py -m tq quest --help`)**: **PASS** (Shows `backtest`, `compare`, `evolve`, `optimize`, `run`, `run-full`, `start`, `status`).
+- **Live subcommands (`py -m tq live --help`)**: **PASS** (Shows `binance`, `paper`).
+
+## Step 4: Web API Endpoints (`tq/web/routes.py`)
+- **Found**: `/api/strategies`, `/api/quest/<quest_id>`, `/api/quest`, `/api/quest/<quest_id>/run`.
+- **Missing**: `/api/quests`, `/api/quest/<id>/trades`, `/api/data/<symbol>`, `/api/data/<symbol>/indicators`, `/api/compare`.
+- **Result**: **FAIL** (Several requested endpoints are missing from `tq/web/routes.py`).
+
+## Step 5: Web Templates (`tq/web/templates/`)
+- **index.html**: **PASS** (Exists, has proper navbar and structure).
+- **quest.html**: **PASS** (Exists, has quest start form).
+- **leaderboard.html**: **PASS** (Exists, has table structure).
+
+## Step 6-7: Alert Module
+- **tq/alert/telegram.py**: **PASS** (`TelegramAlert` class with `send_trade_alert` and `send_daily_summary` methods exists).
+- **tq/alert/manager.py**: **PASS** (`AlertManager` class exists).
+
+## Step 8-10: Live Module
+- **tq/live/broker_base.py**: **PASS** (`LiveBroker` ABC exists with required methods).
+- **tq/live/paper_broker.py**: **PASS** (`PaperBroker` class exists and implements `LiveBroker`).
+- **tq/live/runner.py**: **PASS** (`LiveRunner` class exists with `run_once` and `start_loop`).
+
+## Step 11: Agent Module
+- **tq/agent/interface.py**: **PASS** (`AgentInterface` with `step()` method exists).
+
+## Step 12: Automated Tests
+- **`py -m pytest tests/test_alert.py tests/test_live.py`**: **PASS** (30 tests passed).
+
+## Summary
+- **Critical Issues**: None.
+- **Medium Issues**: 
+  - `tq/web/routes.py` is missing several API endpoints specified in the verification list: `/api/quests`, `/api/quest/<id>/trades`, `/api/data/<symbol>`, `/api/data/<symbol>/indicators`, and `/api/compare`.
+- **Minor Issues**: None.
+
+=== END REPORT ===

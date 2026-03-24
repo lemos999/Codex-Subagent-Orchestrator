@@ -1,0 +1,185 @@
+{
+    "created_at_utc": "2026-03-19T13:26:53.254Z",
+    "launcher_version": "ts-phase1-v1",
+    "launcher_script": "subagent-launch",
+    "spec_path": "C:\\Users\\haj\\projects\\subagent-orchestrator\\tests\\test-6d-default-engine.json",
+    "spec_directory": "C:\\Users\\haj\\projects\\subagent-orchestrator\\tests",
+    "spec_sha256": "9c5967232c81752f66b2743435b6e1b8f97c0830b528ea32b1a7fd344d446215",
+    "codex_executable": "codex",
+    "claude_executable": "claude",
+    "gemini_executable": "npx.cmd",
+    "invocation_cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "cwd_requested": ".",
+    "cwd_resolution_mode": "invocation",
+    "cwd_resolution_base": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "workspace_root": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "output_dir": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\test-6d-default",
+    "debug_log": null,
+    "summary_file": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\test-6d-default\\orchestration-summary.md",
+    "live_usage": {
+        "enabled": false,
+        "display_mode": "none",
+        "poll_interval_ms": 500,
+        "status_file": null,
+        "json_output_forced": false
+    },
+    "archive": {
+        "enabled": false,
+        "root": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-records",
+        "run_label": "test-6d-default",
+        "run_directory": null,
+        "launcher_directory": null,
+        "deliverables_directory": null,
+        "workers_directory": null,
+        "supervisor_directory": null
+    },
+    "execution_mode": "sequential",
+    "skip_git_repo_check": true,
+    "shared_directive": {
+        "source": null,
+        "requested_mode": "disabled",
+        "effective_mode": "disabled",
+        "sha256": null,
+        "char_count": 0,
+        "original_char_count": 0,
+        "effective_char_count": 0
+    },
+    "workflow": {
+        "enabled": false,
+        "source": null,
+        "prompt_mode": "disabled",
+        "strict_render": true,
+        "auto_detected": false,
+        "front_matter_text": null,
+        "prompt_template_sha256": null,
+        "prompt_template_chars": 0,
+        "context": {}
+    },
+    "hooks": {
+        "after_create": {
+            "enabled": false,
+            "ran": false,
+            "trigger": null,
+            "exit_code": null,
+            "missing_sentinel_paths": [],
+            "workspace_was_empty": false,
+            "stdout": null,
+            "stderr": null
+        }
+    },
+    "policy": {
+        "execution_mode": "sequential",
+        "supervisor_only": false,
+        "require_final_read_only_review": false,
+        "material_issue_strategy": "none",
+        "requested_deliverables": [],
+        "writable_worker_names": [
+            "writer"
+        ],
+        "read_only_reviewer_names": [],
+        "final_read_only_reviewer_names": [],
+        "final_read_only_review_present": false,
+        "last_writable_stage": 1
+    },
+    "efficiency_signals": {
+        "measurement_mode": "structure_first",
+        "note": "Use reruns, parent burden, repair-loop shape, and worker-to-deliverable ratios as primary efficiency signals. Treat absolute token totals as secondary.",
+        "execution_mode": "sequential",
+        "total_workers": 1,
+        "succeeded_workers": 1,
+        "failed_workers": 0,
+        "requested_deliverable_count": 0,
+        "workers_per_deliverable": null,
+        "writable_workers_per_deliverable": null,
+        "writable_workers": 1,
+        "read_only_workers": 0,
+        "implementer_workers": 1,
+        "reviewer_workers": 0,
+        "validator_workers": 0,
+        "fixer_workers": 0,
+        "full_auto_writable_workers": 1,
+        "full_auto_read_only_workers": 0,
+        "stage_count": 1,
+        "parallel_stage_count": 0,
+        "max_parallel_workers_in_stage": 1,
+        "uses_parallel_execution": false,
+        "uses_supervisor_only_policy": false,
+        "uses_bounded_repair_policy": false,
+        "final_read_only_review_present": false,
+        "total_prompt_chars": 811,
+        "total_footer_tokens": 0
+    },
+    "stage_plan": [
+        {
+            "stage": 1,
+            "worker_count": 1,
+            "worker_names": [
+                "writer"
+            ],
+            "worker_kinds": [
+                "implementer"
+            ],
+            "read_only_workers": [],
+            "writable_workers": [
+                "writer"
+            ]
+        }
+    ],
+    "defaults": {
+        "model": "gpt-5.4",
+        "sandbox": "workspace-write",
+        "reasoning_effort": "low",
+        "prompt_profile": "compact",
+        "response_style": "compact",
+        "max_response_lines": 3
+    },
+    "results": [
+        {
+            "name": "writer",
+            "engine": "codex",
+            "mode": "exec",
+            "stage": 1,
+            "worker_kind": "implementer",
+            "is_read_only": false,
+            "cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+            "exit_code": 0,
+            "succeeded": true,
+            "required_paths": [],
+            "required_non_empty_paths": [],
+            "missing_required_paths": [],
+            "empty_required_paths": [],
+            "validation_failures": [],
+            "requested_model": "gpt-5.4",
+            "requested_full_auto": true,
+            "requested_json_output": false,
+            "actual_model": "gpt-5.4",
+            "requested_sandbox": "workspace-write",
+            "actual_sandbox": null,
+            "requested_reasoning_effort": "low",
+            "actual_reasoning_effort": "low",
+            "prompt_profile": "compact",
+            "response_style": "compact",
+            "max_response_lines": 3,
+            "actual_approval": null,
+            "actual_workdir": null,
+            "output_mode": "text",
+            "session_id": null,
+            "footer_tokens_used": null,
+            "turn_failed": false,
+            "failure_message": null,
+            "stdout": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\test-6d-default\\writer.stdout.log",
+            "stderr": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\test-6d-default\\writer.stderr.log",
+            "last": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\test-6d-default\\writer.last.txt",
+            "prompt": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\test-6d-default\\writer.prompt.txt",
+            "prompt_sha256": "d5d844e4e6ab84be5e7f2ff7aa9a1d7b4ca8aff423156388647e4c7b442860df",
+            "prompt_chars": 811,
+            "workflow_prompt_mode": "disabled",
+            "workflow_prompt_chars": 0,
+            "command": "codex.cmd exec --full-auto -m gpt-5.4",
+            "last_exists": true,
+            "last_message_preview": "[tests/artifacts/default-engine.txt](C:/Users/haj/projects/subagent-orchestrator/tests/artifacts/default-engine.txt) already contained exactly `Hello from default engine` with no trailing newline, so ...",
+            "stderr_preview": "Reading prompt from stdin...\nOpenAI Codex v0.114.0 (research preview)\n--------",
+            "stdout_preview": "[tests/artifacts/default-engine.txt](C:/Users/haj/projects/subagent-orchestrator/tests/artifacts/default-engine.txt) already contained exactly `Hello from default engine` with no trailing newline, so ..."
+        }
+    ]
+}

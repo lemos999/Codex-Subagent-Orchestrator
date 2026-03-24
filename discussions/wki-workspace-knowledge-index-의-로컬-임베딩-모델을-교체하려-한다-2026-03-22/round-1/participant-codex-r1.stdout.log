@@ -1,0 +1,16 @@
+1. **Position**: 후보군 기준 WKI 최적은 `intfloat/multilingual-e5-large`다. 성능 최적화 관점에서 핵심 병목은 “코드 검색”보다 “한글 질의와 영어 코드/문서의 의미 연결”이고, 이 요구를 공식적으로 가장 잘 만족하는 후보가 E5다.
+2. **Reasoning**:
+- WKI는 이미 FTS와 path search가 exact token, identifier, file path를 잘 잡는다. 임베딩 모델은 남는 문제인 cross-lingual semantic recall에 집중해야 ROI가 크다.
+- `multilingual-e5-large`는 94언어/ONNX 지원, 1024d, Mr.TyDi에서 한국어 MRR@10 61.6을 제시한다. 한영 교차검색 요구에 가장 직접적으로 맞는다.
+- `jina-embeddings-v2-base-code`는 ONNX/Transformers.js, 8k, code+docs 혼합엔 강하지만 공식 카드 기준 English + 30개 프로그래밍 언어 중심이라 한국어 교차검색은 불안하다.
+- `nomic-embed-text-v1.5`는 ONNX/Transformers.js, 8k, Matryoshka가 강점이지만 English-only라 핵심 요구를 놓친다.
+- `bge-small-en-v1.5`는 빠르고 단순하지만 English-only다. `CodeBERT`는 2020년 code-search encoder라 현대 retrieval embedding 대비 범용 검색과 cross-lingual에서 불리하다.
+3. **Concerns**:
+- E5-large는 0.6B/1024d라 현재 384d 대비 메모리, 인덱스 크기, CPU latency가 뛴다. 벡터 저장량만 봐도 약 2.7배다.
+- 더 큰 문제는 WKI 현재 구현이 문서와 질의를 같은 `embedBatch()` 경로로 처리하고 약 256토큰에서 자른다는 점이다. E5는 `query:`/`passage:` 분리가 성능에 중요하므로 그대로 교체하면 잠재력을 못 쓴다.
+4. **Recommendation**:
+- 1순위로 `multilingual-e5-large`를 채택하되, 먼저 provider를 query/document 비대칭 프롬프트를 처리하도록 바꿔라. 그 다음 `gold-set-v2.json`으로 NDCG 회귀를 보라.
+- 운영 성능이 부담되면 다른 후보군으로 새지 말고 `multilingual-e5-base`로 한 단계 내리는 게 맞다. Jina/Nomic/BGE-small/CodeBERT는 WKI의 가장 어려운 요구인 한영 교차검색을 구조적으로 덜 해결한다.
+Sources: [E5](https://huggingface.co/intfloat/multilingual-e5-large), [Jina v2 code](https://huggingface.co/jinaai/jina-embeddings-v2-base-code), [Nomic](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5), [BGE-small](https://huggingface.co/BAAI/bge-small-en-v1.5), [CodeBERT](https://huggingface.co/microsoft/codebert-base)
+WKI refs: [local-provider.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts), [embedding.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/interfaces/embedding.ts), [indexer.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/indexer.ts), [search-service.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/search/search-service.ts)
+[POSITION: WKI에는 `multilingual-e5-large`가 후보군 중 최적이며, 도입 전 query/document 분리부터 고쳐야 한다]

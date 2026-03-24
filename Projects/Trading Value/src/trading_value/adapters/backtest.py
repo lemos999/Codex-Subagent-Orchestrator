@@ -18,7 +18,7 @@ from ..core.events import (
     Event,
     EventType,
 )
-from ..core.indicators import build_timeframe_snapshot
+from ..core.indicators import build_timeframe_snapshot, compute_fib_extensions, detect_swings
 from ..core.models import (
     EngineState,
     GlobalState,
@@ -45,8 +45,14 @@ from ..core.position import (
 )
 from ..core.regime import RegimeSnapshot, classify_regime
 from ..core.setup import (
+    InvalidationInput,
     SetupContext,
+    StopTarget,
+    TriggerInput,
     check_zone_touch,
+    compute_stop_target_pullback_long,
+    compute_stop_target_rebound_short,
+    compute_stop_target_trend_long,
     evaluate_setup_transition,
     select_watch_zones,
 )
@@ -103,6 +109,19 @@ class BacktestConfig:
     # Zone width overrides (used by indicators.compute_zone_width)
     zone_width_pct: float = 0.0015
     zone_width_atr_factor: float = 0.25
+    # v2: full trigger confirmation (spec v2 section 11)
+    use_full_triggers: bool = False
+    # Individual filter toggles (all default True when use_full_triggers=True)
+    filter_zone_limit: bool = True
+    filter_invalidation: bool = True
+    filter_swing_5m: bool = True
+    filter_split_entry: bool = True
+    filter_daily_loss: bool = True
+    filter_fib: bool = True
+    filter_risk_budget: bool = True
+    filter_volatility: bool = True
+    filter_volume: bool = True
+    filter_consec_loss: bool = True
 
 
 # ---------------------------------------------------------------------------
@@ -393,6 +412,15 @@ class BacktestEngine:
         self._mode_cache: dict[str, ModeResult] = {}
         # Setup version counter
         self._setup_version_counter: int = 0
+        # Swing cache per symbol: {symbol: (swing_highs, swing_lows)}
+        self._swing_cache: dict[str, tuple[list[tuple[int, float]], list[tuple[int, float]]]] = {}
+        # 5m swing cache per symbol (Item 3)
+        self._swing_cache_5m: dict[str, tuple[list[tuple[int, float]], list[tuple[int, float]]]] = {}
+        # Consecutive losses per symbol (for entry filter)
+        self._consecutive_losses: dict[str, int] = {}
+        # Daily PnL tracking (Item 5)
+        self._daily_pnl: dict[str, float] = {}
+        self._daily_r_unit: float = 0.0
 
     def run(
         self,
@@ -431,6 +459,9 @@ class BacktestEngine:
         self._regime_cache = {}
         self._mode_cache = {}
         self._setup_version_counter = 0
+        # Item 5: Daily loss limit
+        self._daily_pnl = {}
+        self._daily_r_unit = self.config.initial_balance * self.config.risk_pct
 
         # ── Phase A: Batch pre-compute ALL snapshots (O(N) per TF) ─────
         import sys
@@ -615,6 +646,30 @@ class BacktestEngine:
                     sym_state.regime = regime.htf
                     sym_state.mode = mode_result.mode
 
+            # Update swing cache on M30 bar close
+            if tf == Timeframe.M30 and sym_data is not None:
+                m30_df = sym_data.get(Timeframe.M30)
+                if m30_df is not None and "timestamp" in m30_df.columns:
+                    mask = m30_df["timestamp"] <= timestamp
+                    df_up_to_now = m30_df.loc[mask]
+                    if len(df_up_to_now) >= 5:
+                        self._swing_cache[symbol] = detect_swings(df_up_to_now)
+
+            # Item 3: Update 5m swing cache
+            if self.config.use_full_triggers and sym_data is not None:
+                should_update_5m = False
+                if self.config.primary_timeframe == Timeframe.M5 and tf == Timeframe.M5:
+                    should_update_5m = True
+                elif tf == Timeframe.M15:
+                    should_update_5m = True
+                if should_update_5m:
+                    m5_df = sym_data.get(Timeframe.M5)
+                    if m5_df is not None and "timestamp" in m5_df.columns:
+                        mask5 = m5_df["timestamp"] <= timestamp
+                        df5_up = m5_df.loc[mask5]
+                        if len(df5_up) >= 5:
+                            self._swing_cache_5m[symbol] = detect_swings(df5_up)
+
         # Use 5m bar data for order fills
         bar_high = bar_primary["high"]
         bar_low = bar_primary["low"]
@@ -625,12 +680,40 @@ class BacktestEngine:
             ctx = self.setup_contexts[symbol]
             effective_mode = mode_result or self._mode_cache.get(symbol)
             if effective_mode is not None:
+                # Item 2: Build InvalidationInput when use_full_triggers
+                inv_input = None
+                if self.config.use_full_triggers and self.config.filter_invalidation:
+                    snap_m30 = snapshots.get(Timeframe.M30)
+                    snap_m15 = snapshots.get(Timeframe.M15)
+                    snap_m5 = snapshots.get(Timeframe.M5)
+                    snap_h1 = snapshots.get(Timeframe.H1)
+                    inv_input = InvalidationInput(
+                        close_15m=bar_primary["close"],
+                        close_1h=snap_h1.close if snap_h1 else bar_primary["close"],
+                        zone=ctx.active_zone,
+                        upper_support_low=ctx.active_zone.low if ctx.active_zone else None,
+                        m30_below_cloud=(str(snap_m30.cloud_position) == "below") if snap_m30 else False,
+                        m15_below_cloud_tk_bear=(
+                            str(snap_m15.cloud_position) == "below"
+                            and str(snap_m15.tk_state) == "bearish"
+                        ) if snap_m15 else False,
+                        m5_below_cloud_tk_bear=(
+                            str(snap_m5.cloud_position) == "below"
+                            and str(snap_m5.tk_state) == "bearish"
+                        ) if snap_m5 else False,
+                        m30_above_cloud_tk_bull=(
+                            str(snap_m30.cloud_position) == "above"
+                            and str(snap_m30.tk_state) == "bullish"
+                        ) if snap_m30 else False,
+                        h1_above_poc_or_vah_2bars=False,  # simplified
+                    )
                 new_ctx = evaluate_setup_transition(
                     ctx=ctx,
                     current_price=bar_close,
                     trigger_input=None,
                     snapshots=snapshots,
                     mode_result=effective_mode,
+                    invalidation_input=inv_input,
                 )
                 self.setup_contexts[symbol] = new_ctx
                 if str(new_ctx.state) == "INVALIDATED":
@@ -726,7 +809,7 @@ class BacktestEngine:
             effective_mode = mode_result or self._mode_cache.get(symbol)
             if effective_mode is not None and effective_mode.mode != ModeState.MODE_NO_TRADE:
                 self._evaluate_new_setup(
-                    symbol, timestamp, bar_close, bar_primary, snapshots, effective_mode,
+                    symbol, timestamp, bar_close, bar_primary, snapshots, effective_mode, sym_data,
                 )
             elif symbol in self.setup_contexts:
                 # Mode changed to NO_TRADE — invalidate existing setup
@@ -743,16 +826,26 @@ class BacktestEngine:
     def _detect_bar_closes(self, timestamp: datetime) -> list[Timeframe]:
         """Determine which timeframes have a bar close at this timestamp.
 
-        Primary tick is 30m — always included.
+        Primary tick depends on config.primary_timeframe (Item 6).
+        M5 primary: M5 always, M15 when minute % 15 == 0
+        M15 primary (default): M15 always
+        30m: when minute in (0, 30)
         1h: when minute == 0
         4h: when hour % 4 == 0 and minute == 0
         """
-        closes: list[Timeframe] = [Timeframe.M30]
         minute = timestamp.minute
         hour = timestamp.hour
 
-        if False:
-            closes.append(Timeframe.M30)  # already primary
+        # Item 6: Primary tick M5 switch
+        if self.config.primary_timeframe == Timeframe.M5:
+            closes: list[Timeframe] = [Timeframe.M5]
+            if minute % 15 == 0:
+                closes.append(Timeframe.M15)
+        else:
+            closes = [Timeframe.M15]
+
+        if minute in (0, 30):
+            closes.append(Timeframe.M30)
         if minute == 0:
             closes.append(Timeframe.H1)
         if hour % 4 == 0 and minute == 0:
@@ -765,6 +858,190 @@ class BacktestEngine:
     def _next_setup_version(self) -> int:
         self._setup_version_counter += 1
         return self._setup_version_counter
+
+    def _build_trigger_input(
+        self,
+        bar_primary: dict,
+        snapshots: dict[Timeframe, TimeframeSnapshot],
+        sym_data: dict[Timeframe, pd.DataFrame] | None,
+        timestamp: datetime,
+    ) -> TriggerInput | None:
+        """Build TriggerInput from real 5m + 15m bar data."""
+        # Defaults from primary bar
+        close_5m = bar_primary["close"]
+        high_5m = bar_primary["high"]
+        low_5m = bar_primary["low"]
+        open_5m = bar_primary["open"]
+        volume_5m = bar_primary["volume"]
+        prev_5m_high = high_5m
+        prev_5m_low = low_5m
+        prev_5m_highs_3 = [high_5m]
+        avg_volume_5m_5 = volume_5m
+
+        close_15m = bar_primary["close"]
+        high_15m = bar_primary["high"]
+        low_15m = bar_primary["low"]
+        open_15m = bar_primary["open"]
+        volume_15m = bar_primary["volume"]
+        prev_volume_15m = volume_15m
+
+        if sym_data is not None:
+            # Use real 5m data if available
+            m5_df = sym_data.get(Timeframe.M5)
+            if m5_df is not None and "timestamp" in m5_df.columns:
+                mask = m5_df["timestamp"] <= timestamp
+                recent_5m = m5_df.loc[mask].tail(8)
+                if len(recent_5m) >= 1:
+                    last_5m = recent_5m.iloc[-1]
+                    close_5m = float(last_5m["close"])
+                    high_5m = float(last_5m["high"])
+                    low_5m = float(last_5m["low"])
+                    open_5m = float(last_5m["open"])
+                    volume_5m = float(last_5m["volume"])
+                if len(recent_5m) >= 2:
+                    prev_bar = recent_5m.iloc[-2]
+                    prev_5m_high = float(prev_bar["high"])
+                    prev_5m_low = float(prev_bar["low"])
+                if len(recent_5m) >= 4:
+                    prev_5m_highs_3 = [float(recent_5m.iloc[-i]["high"]) for i in range(2, min(5, len(recent_5m)))]
+                if len(recent_5m) >= 6:
+                    avg_volume_5m_5 = float(recent_5m.iloc[-6:-1]["volume"].mean())
+
+            # Use real 15m data if available
+            m15_df = sym_data.get(Timeframe.M15)
+            if m15_df is not None and "timestamp" in m15_df.columns:
+                mask = m15_df["timestamp"] <= timestamp
+                recent_15m = m15_df.loc[mask].tail(3)
+                if len(recent_15m) >= 1:
+                    last_15m = recent_15m.iloc[-1]
+                    close_15m = float(last_15m["close"])
+                    high_15m = float(last_15m["high"])
+                    low_15m = float(last_15m["low"])
+                    open_15m = float(last_15m["open"])
+                    volume_15m = float(last_15m["volume"])
+                if len(recent_15m) >= 2:
+                    prev_volume_15m = float(recent_15m.iloc[-2]["volume"])
+
+        # 30m close
+        close_30m = close_15m
+        snap_30m = snapshots.get(Timeframe.M30)
+        if snap_30m is not None:
+            close_30m = snap_30m.close
+
+        return TriggerInput(
+            close_5m=close_5m,
+            high_5m=high_5m,
+            low_5m=low_5m,
+            open_5m=open_5m,
+            volume_5m=volume_5m,
+            prev_5m_high=prev_5m_high,
+            prev_5m_low=prev_5m_low,
+            prev_5m_highs_3=prev_5m_highs_3,
+            avg_volume_5m_5=avg_volume_5m_5,
+            close_15m=close_15m,
+            high_15m=high_15m,
+            low_15m=low_15m,
+            open_15m=open_15m,
+            volume_15m=volume_15m,
+            prev_volume_15m=prev_volume_15m,
+            close_30m=close_30m,
+        )
+
+    def _compute_stop_target_full(
+        self,
+        strategy: str,
+        entry_price: float,
+        zone,
+        snapshots: dict[Timeframe, TimeframeSnapshot],
+        bar_primary: dict,
+    ) -> StopTarget | None:
+        """Compute spec-compliant stop and target prices per strategy."""
+        snap_30m = snapshots.get(Timeframe.M30)
+        snap_1h = snapshots.get(Timeframe.H1)
+        snap_4h = snapshots.get(Timeframe.H4)
+        atr_15m = snapshots[Timeframe.M15].atr if Timeframe.M15 in snapshots else (
+            snap_30m.atr if snap_30m else entry_price * 0.001)
+        atr_5m = atr_15m * 0.6  # proxy: 5m ATR ~ 60% of 15m ATR
+
+        # Get swing data from cache (Phase 3A + Item 3: prefer 5m swings)
+        sym_key = next(iter(self.state.symbols))
+        # Item 3: Use 5m swing cache when available under use_full_triggers
+        if self.config.use_full_triggers and sym_key in self._swing_cache_5m:
+            swing_highs_5m, swing_lows_5m = self._swing_cache_5m[sym_key]
+        else:
+            swing_highs_5m, swing_lows_5m = [], []
+        swing_highs, swing_lows = self._swing_cache.get(sym_key, ([], []))
+        # Prefer 5m swings, fallback to M30
+        eff_swing_lows = swing_lows_5m if swing_lows_5m else swing_lows
+        eff_swing_highs = swing_highs_5m if swing_highs_5m else swing_highs
+        recent_swing_low = eff_swing_lows[-1][1] if eff_swing_lows else entry_price - atr_15m * 1.5
+        recent_swing_high_val = eff_swing_highs[-1][1] if eff_swing_highs else entry_price + atr_15m * 3.0
+
+        if strategy == "TREND_LONG":
+            swing_low_5m = recent_swing_low
+            if snap_30m and snap_30m.val > 0 and snap_30m.val < entry_price:
+                swing_low_5m = min(swing_low_5m, snap_30m.val)
+            recent_swing_high = max(recent_swing_high_val, entry_price + atr_15m * 2.0)
+            if snap_30m and snap_30m.vah > entry_price:
+                recent_swing_high = max(recent_swing_high, snap_30m.vah)
+            # Item 7: Fib extensions
+            fib_ext = compute_fib_extensions(swing_low_5m, recent_swing_high)
+            vah_30m = snap_30m.vah if (snap_30m and snap_30m.vah > entry_price) else entry_price + atr_15m * 3.0
+            vah_1h = snap_1h.vah if (snap_1h and snap_1h.vah > entry_price) else entry_price + atr_15m * 5.0
+            st = compute_stop_target_trend_long(
+                entry_price=entry_price, zone=zone,
+                swing_low_5m=swing_low_5m, atr_5m=atr_5m, atr_15m=atr_15m,
+                recent_swing_high=recent_swing_high, vah_30m=vah_30m, vah_1h=vah_1h,
+                fib_extensions=fib_ext,
+            )
+        elif strategy == "PULLBACK_LONG":
+            if not snap_30m or not snap_1h:
+                return None
+            st = compute_stop_target_pullback_long(
+                entry_price=entry_price, zone=zone, atr_15m=atr_15m,
+                tenkan_30m=max(snap_30m.tenkan, entry_price + atr_15m),
+                kijun_30m=max(snap_30m.kijun, entry_price + atr_15m * 1.5),
+                tenkan_1h=max(snap_1h.tenkan, entry_price + atr_15m * 2.0),
+                kijun_1h=max(snap_1h.kijun, entry_price + atr_15m * 3.0),
+                poc_1h=max(snap_1h.poc, entry_price + atr_15m * 2.5),
+            )
+        elif strategy == "REBOUND_SHORT":
+            if not snap_30m:
+                return None
+            # Item 3: Use 5m swing low for REBOUND_SHORT
+            recent_low = recent_swing_low if recent_swing_low < entry_price else entry_price - atr_15m * 3.0
+            if snap_30m.val > 0 and snap_30m.val < entry_price:
+                recent_low = min(recent_low, snap_30m.val)
+            poc_30m = snap_30m.poc if (snap_30m.poc > 0 and snap_30m.poc < entry_price) else entry_price - atr_15m * 2.0
+            val_30m = snap_30m.val if (snap_30m.val > 0 and snap_30m.val < entry_price) else entry_price - atr_15m * 3.0
+            val_1h = (snap_1h.val if snap_1h and snap_1h.val > 0 and snap_1h.val < entry_price else entry_price - atr_15m * 4.0)
+            kijun_4h = (snap_4h.kijun if snap_4h and snap_4h.kijun < entry_price else entry_price - atr_15m * 5.0)
+            st = compute_stop_target_rebound_short(
+                entry_price=entry_price, zone=zone, atr_15m=atr_15m,
+                recent_low=recent_low, poc_30m=poc_30m, val_30m=val_30m,
+                val_1h=val_1h, kijun_4h=kijun_4h,
+            )
+        else:
+            return None
+
+        # Fallback: if TP1 is None, use ATR-based target
+        if st.tp1_price is None:
+            risk = abs(entry_price - st.stop_price)
+            if risk > 0:
+                if "LONG" in strategy:
+                    fallback_tp1 = entry_price + risk * self.config.min_rr
+                    fallback_tp2 = entry_price + risk * self.config.min_rr * 2.0
+                else:
+                    fallback_tp1 = entry_price - risk * self.config.min_rr
+                    fallback_tp2 = entry_price - risk * self.config.min_rr * 2.0
+                from trading_value.core.setup import _compute_rr
+                rr = _compute_rr(entry_price, st.stop_price, fallback_tp1)
+                st = StopTarget(
+                    stop_price=st.stop_price,
+                    tp1_price=fallback_tp1, tp2_price=fallback_tp2, tp3_price=None,
+                    rr_to_tp1=rr,
+                )
+        return st
 
     def _apply_lifecycle_transition(self, symbol: str, transition) -> SymbolState:
         """Apply a LifecycleTransition to the symbol state."""
@@ -786,6 +1063,7 @@ class BacktestEngine:
         bar_primary: dict,
         snapshots: dict[Timeframe, TimeframeSnapshot],
         mode_result: ModeResult,
+        sym_data: dict[Timeframe, pd.DataFrame] | None = None,
     ) -> None:
         """Evaluate whether to start tracking a new setup and potentially enter."""
         if not mode_result.allowed_setups:
@@ -809,6 +1087,16 @@ class BacktestEngine:
             if symbol in self.setup_contexts:
                 del self.setup_contexts[symbol]
             return
+
+        # Item 1: Zone merge limit — filter out zones wider than ATR*2.0
+        if self.config.use_full_triggers and self.config.filter_zone_limit and atr_ref > 0:
+            max_zone_width = atr_ref * 2.0
+            narrow_zones = [z for z in zones if (z.high - z.low) <= max_zone_width]
+            if narrow_zones:
+                zones = narrow_zones
+            elif zones:
+                # All zones too wide — pick closest to current price
+                zones = [min(zones, key=lambda z: abs(z.mid - bar_close))]
 
         existing = self.setup_contexts.get(symbol)
         if existing and existing.state == "WAIT_TRIGGER_CONFIRM":
@@ -854,20 +1142,65 @@ class BacktestEngine:
                     f"zone {touched.id} touched at {bar_close:.2f}",
                 )
 
-        # Simplified trigger + entry: if zone touched, place market entry
+        # Trigger + entry: if zone touched, check trigger and place entry
         if ctx.state == "WAIT_TRIGGER_CONFIRM" and ctx.active_zone is not None:
             zone = ctx.active_zone
             atr_15m = snapshots[Timeframe.M15].atr if Timeframe.M15 in snapshots else (snapshots[Timeframe.M30].atr if Timeframe.M30 in snapshots else bar_close * 0.001)
 
-            # Compute stop and basic targets
-            if side == Side.LONG:
-                stop_price = zone.low - 0.2 * atr_15m
-                tp1_price = bar_close + abs(bar_close - stop_price) * self.config.min_rr
-                tp2_price = bar_close + abs(bar_close - stop_price) * self.config.min_rr * 2.0
+            # Full trigger confirmation mode: validate trigger, use simplified stop/TP
+            # (Full stop/TP via spec functions deferred to Phase 3 with swing tracking)
+            if self.config.use_full_triggers:
+                # Compute simplified stop/TP first for RR check
+                if side == Side.LONG:
+                    stop_price = zone.low - 0.2 * atr_15m
+                    tp1_price = bar_close + abs(bar_close - stop_price) * self.config.min_rr
+                    tp2_price = bar_close + abs(bar_close - stop_price) * self.config.min_rr * 2.0
+                else:
+                    stop_price = zone.high + 0.2 * atr_15m
+                    tp1_price = bar_close - abs(bar_close - stop_price) * self.config.min_rr
+                    tp2_price = bar_close - abs(bar_close - stop_price) * self.config.min_rr * 2.0
+
+                risk_distance = abs(bar_close - stop_price)
+                rr = abs(tp1_price - bar_close) / risk_distance if risk_distance > 0 else 0
+
+                # Set RR on context for trigger check
+                from dataclasses import replace as _replace
+                ctx = _replace(ctx, rr_to_tp1=rr, stop_price=stop_price,
+                               tp1_price=tp1_price, tp2_price=tp2_price)
+                self.setup_contexts[symbol] = ctx
+
+                # Validate trigger conditions
+                trigger_input = self._build_trigger_input(bar_primary, snapshots, sym_data, timestamp)
+                if trigger_input is not None:
+                    new_ctx = evaluate_setup_transition(
+                        ctx=ctx,
+                        current_price=bar_close,
+                        trigger_input=trigger_input,
+                        snapshots=snapshots,
+                        mode_result=mode_result,
+                    )
+                    if str(new_ctx.state) == "INVALIDATED":
+                        self._log_decision(
+                            timestamp, symbol, "TRIGGER_REJECTED",
+                            self.state.symbols[symbol], mode_result,
+                            f"trigger failed: {new_ctx.invalidation_reason}",
+                        )
+                        del self.setup_contexts[symbol]
+                        return
+                    if str(new_ctx.state) != "ENTRY_READY":
+                        # Still waiting for trigger confirmation
+                        self.setup_contexts[symbol] = new_ctx
+                        return
             else:
-                stop_price = zone.high + 0.2 * atr_15m
-                tp1_price = bar_close - abs(bar_close - stop_price) * self.config.min_rr
-                tp2_price = bar_close - abs(bar_close - stop_price) * self.config.min_rr * 2.0
+                # Simplified mode (backward compatible)
+                if side == Side.LONG:
+                    stop_price = zone.low - 0.2 * atr_15m
+                    tp1_price = bar_close + abs(bar_close - stop_price) * self.config.min_rr
+                    tp2_price = bar_close + abs(bar_close - stop_price) * self.config.min_rr * 2.0
+                else:
+                    stop_price = zone.high + 0.2 * atr_15m
+                    tp1_price = bar_close - abs(bar_close - stop_price) * self.config.min_rr
+                    tp2_price = bar_close - abs(bar_close - stop_price) * self.config.min_rr * 2.0
 
             risk_distance = abs(bar_close - stop_price)
             if risk_distance == 0:
@@ -882,6 +1215,51 @@ class BacktestEngine:
                 )
                 del self.setup_contexts[symbol]
                 return
+
+            # --- Entry filters (Phase 3C) — each gated by individual config flag ---
+            if self.config.use_full_triggers:
+                snap_ref = snapshots.get(Timeframe.M15) or snapshots.get(Timeframe.M30)
+                if snap_ref:
+                    # 1. Abnormal volatility
+                    if self.config.filter_volatility:
+                        bar_range = bar_primary["high"] - bar_primary["low"]
+                        if snap_ref.atr > 0 and bar_range > 2.5 * snap_ref.atr:
+                            self._log_decision(timestamp, symbol, "FILTER_BLOCKED",
+                                self.state.symbols[symbol], mode_result,
+                                f"abnormal_volatility: range={bar_range:.1f} > 2.5*ATR={snap_ref.atr*2.5:.1f}")
+                            del self.setup_contexts[symbol]
+                            return
+
+                    # 2. Minimum volume
+                    if self.config.filter_volume:
+                        if snap_ref.volume_sma_20 > 0 and bar_primary["volume"] < 0.6 * snap_ref.volume_sma_20:
+                            self._log_decision(timestamp, symbol, "FILTER_BLOCKED",
+                                self.state.symbols[symbol], mode_result,
+                                f"low_volume: {bar_primary['volume']:.0f} < 0.6*SMA20={snap_ref.volume_sma_20*0.6:.0f}")
+                            del self.setup_contexts[symbol]
+                            return
+
+                # 3. Consecutive loss gate
+                if self.config.filter_consec_loss:
+                    consec = self._consecutive_losses.get(symbol, 0)
+                    if consec >= 3 and rr < 2.0:
+                        self._log_decision(timestamp, symbol, "FILTER_BLOCKED",
+                            self.state.symbols[symbol], mode_result,
+                            f"consec_loss_gate: {consec} losses, RR={rr:.2f} < 2.0")
+                        del self.setup_contexts[symbol]
+                        return
+
+            # Item 5: Daily loss limit
+            if self.config.use_full_triggers and self.config.filter_daily_loss:
+                today = timestamp.strftime("%Y-%m-%d")
+                daily = self._daily_pnl.get(today, 0.0)
+                if daily <= -3.0 * self._daily_r_unit:
+                    self._log_decision(timestamp, symbol, "FILTER_BLOCKED",
+                        self.state.symbols[symbol], mode_result,
+                        f"daily_loss_limit: daily_pnl={daily:.2f} <= -3R={-3.0 * self._daily_r_unit:.2f}")
+                    if symbol in self.setup_contexts:
+                        del self.setup_contexts[symbol]
+                    return
 
             # Determine risk pct based on strategy
             risk_pct = self.config.risk_pct
@@ -898,21 +1276,87 @@ class BacktestEngine:
             if qty <= 0:
                 return
 
-            # Place market entry order
-            order_id = str(uuid.uuid4())[:8]
-            entry_order = VirtualOrder(
-                order_id=f"entry_{order_id}",
-                symbol=symbol,
-                side=side,
-                price=bar_close,
-                qty=qty,
-                order_type="market",
-                created_at=timestamp,
-                ttl_bars=2,
-            )
-            self.pending_orders.append(entry_order)
+            # Item 8: Risk budget check — block entry if total open risk > 1%
+            if self.config.use_full_triggers and self.config.filter_risk_budget:
+                current_risk_pct = 0.0
+                for _sym, info in self._open_trade_info.items():
+                    r = abs(info["entry_price"] - info["stop_price"]) * info["qty"]
+                    current_risk_pct += r / self.balance if self.balance > 0 else 0
+                candidate_risk = risk_distance * qty / self.balance if self.balance > 0 else 0
+                if current_risk_pct + candidate_risk > 0.01:  # 1.0%
+                    self._log_decision(
+                        timestamp, symbol, "FILTER_BLOCKED",
+                        self.state.symbols[symbol], mode_result,
+                        f"risk_budget: open={current_risk_pct:.4f} + new={candidate_risk:.4f} > 1%",
+                    )
+                    if symbol in self.setup_contexts:
+                        del self.setup_contexts[symbol]
+                    return
 
-            # Place stop order
+            # Place entry order(s)
+            order_id = str(uuid.uuid4())[:8]
+
+            # Item 4: Split entry 50/30/20 under use_full_triggers
+            if self.config.use_full_triggers and self.config.filter_split_entry:
+                qty1 = math.floor(qty * 0.50 / self.config.min_qty) * self.config.min_qty
+                qty2 = math.floor(qty * 0.30 / self.config.min_qty) * self.config.min_qty
+                qty3 = qty - qty1 - qty2
+                # 1st: 50% market immediate
+                entry_order_1 = VirtualOrder(
+                    order_id=f"entry_{order_id}_1",
+                    symbol=symbol,
+                    side=side,
+                    price=bar_close,
+                    qty=qty1,
+                    order_type="market",
+                    created_at=timestamp,
+                    ttl_bars=2,
+                )
+                self.pending_orders.append(entry_order_1)
+                # 2nd: 30% limit at entry price (fills on pullback)
+                if qty2 > 0:
+                    entry_order_2 = VirtualOrder(
+                        order_id=f"entry_{order_id}_2",
+                        symbol=symbol,
+                        side=side,
+                        price=bar_close,
+                        qty=qty2,
+                        order_type="limit",
+                        created_at=timestamp,
+                        ttl_bars=6,
+                    )
+                    self.pending_orders.append(entry_order_2)
+                # 3rd: 20% limit slightly beyond entry (fills on continuation)
+                if qty3 > 0:
+                    if side == Side.LONG:
+                        price3 = bar_close + risk_distance * 0.3
+                    else:
+                        price3 = bar_close - risk_distance * 0.3
+                    entry_order_3 = VirtualOrder(
+                        order_id=f"entry_{order_id}_3",
+                        symbol=symbol,
+                        side=side,
+                        price=price3,
+                        qty=qty3,
+                        order_type="limit",
+                        created_at=timestamp,
+                        ttl_bars=12,
+                    )
+                    self.pending_orders.append(entry_order_3)
+            else:
+                entry_order = VirtualOrder(
+                    order_id=f"entry_{order_id}",
+                    symbol=symbol,
+                    side=side,
+                    price=bar_close,
+                    qty=qty,
+                    order_type="market",
+                    created_at=timestamp,
+                    ttl_bars=2,
+                )
+                self.pending_orders.append(entry_order)
+
+            # Place stop order (full qty regardless of split)
             stop_order = VirtualOrder(
                 order_id=f"stop_{order_id}",
                 symbol=symbol,
@@ -1078,6 +1522,17 @@ class BacktestEngine:
         drawdown = self.peak_balance - self.balance
         if drawdown > self.max_drawdown:
             self.max_drawdown = drawdown
+
+        # Item 5: Track daily PnL
+        day_key = timestamp.strftime("%Y-%m-%d")
+        self._daily_pnl[day_key] = self._daily_pnl.get(day_key, 0.0) + pnl
+
+        # Track consecutive losses (Phase 3C)
+        if not is_partial:
+            if pnl < 0:
+                self._consecutive_losses[symbol] = self._consecutive_losses.get(symbol, 0) + 1
+            else:
+                self._consecutive_losses[symbol] = 0
 
         if is_partial:
             # Partial exit (TP1/TP2): reduce remaining qty, update stop qty, advance stage

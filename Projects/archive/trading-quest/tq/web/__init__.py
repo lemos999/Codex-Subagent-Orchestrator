@@ -1,0 +1,1 @@
+"""Web module — dashboard routes."""

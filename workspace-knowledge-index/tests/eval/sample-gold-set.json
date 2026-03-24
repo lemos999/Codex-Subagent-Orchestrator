@@ -1,0 +1,72 @@
+{
+  "name": "wki-sample-gold-set",
+  "description": "Sample gold set for WKI search quality evaluation. Customize chunk IDs after indexing your project.",
+  "queries": [
+    {
+      "query": "FtsStore",
+      "relevantChunks": [
+        { "chunkId": "src/store/fts-store.ts:0", "relevance": 3 },
+        { "chunkId": "tests/store/fts-store.test.ts:0", "relevance": 2 }
+      ],
+      "expectedQueryType": "identifier"
+    },
+    {
+      "query": "handlePayment",
+      "relevantChunks": [
+        { "chunkId": "src/services/payment.ts:0", "relevance": 3 }
+      ],
+      "expectedQueryType": "identifier"
+    },
+    {
+      "query": "결제 처리 로직",
+      "relevantChunks": [
+        { "chunkId": "src/services/payment.ts:0", "relevance": 3 },
+        { "chunkId": "docs/payment-flow.md:0", "relevance": 2 }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "how does incremental indexing work",
+      "relevantChunks": [
+        { "chunkId": "src/core/indexer.ts:0", "relevance": 3 },
+        { "chunkId": "src/core/freshness.ts:0", "relevance": 2 },
+        { "chunkId": "src/core/scanner.ts:0", "relevance": 1 }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "src/store/",
+      "relevantChunks": [
+        { "chunkId": "src/store/fts-store.ts:0", "relevance": 3 },
+        { "chunkId": "src/store/chunk-store.ts:0", "relevance": 3 },
+        { "chunkId": "src/store/vector-store.ts:0", "relevance": 3 }
+      ],
+      "expectedQueryType": "path"
+    },
+    {
+      "query": "embedding provider dimensions configuration",
+      "relevantChunks": [
+        { "chunkId": "src/embedding/base-provider.ts:0", "relevance": 3 },
+        { "chunkId": "src/embedding/openai-provider.ts:0", "relevance": 2 },
+        { "chunkId": "src/config/schema.ts:0", "relevance": 2 }
+      ],
+      "expectedQueryType": "natural"
+    },
+    {
+      "query": "import FileMap from",
+      "relevantChunks": [
+        { "chunkId": "src/core/file-map.ts:0", "relevance": 3 },
+        { "chunkId": "src/index.ts:0", "relevance": 1 }
+      ],
+      "expectedQueryType": "deps"
+    },
+    {
+      "query": "벡터 검색 필터링",
+      "relevantChunks": [
+        { "chunkId": "src/store/vector-store.ts:0", "relevance": 3 },
+        { "chunkId": "src/search/search-service.ts:0", "relevance": 2 }
+      ],
+      "expectedQueryType": "natural"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+## Round Summary
+
+### Claude's Position
+16-18 hours represents a research-backed optimal range for fat burning efficacy. New findings highlight gender differences (women >20h risk hormonal disruption) and age factors (40+ require protein timing attention). Revised stance: 14-18h optimal, adjusted by individual characteristics (sex, age, health).
+
+### Codex's Position
+12-16 hours is sufficient for most people; total caloric intake, sustainability, and eating window timing matter more than pursuing 16-18h. Emphasizes practical adherence over extended fasting approaches.
+
+### Gemini's Position
+12-16 hours is the safe, practical range; 16-18h may offer marginal metabolic gains but increases muscle loss, hormonal disruption, and adherence failure risks. New insights: circadian rhythm alignment and psychological burden are underestimated factors requiring medical oversight.
+
+---
+
+## Agreement
+- 12-16h range is effective and widely applicable
+- Individual variation (sex, age, health) requires consideration
+- Sustainability and adherence matter
+
+## Disagreement
+- **Efficacy floor**: Claude argues 14-18h is optimal; Codex/Gemini hold 12-16h as sufficient
+- **Risk tolerance**: Claude accepts 16-18h with caveats; Codex/Gemini frame this as unnecessary risk
+
+## Open Questions
+- What constitutes "sufficient" vs. "optimal" fat burning (absolute vs. practical)?
+- Should recommendations differ by gender/age/health status, and how specifically?
+- How to weight metabolic gains (15-20% difference per Claude) against adherence and safety costs?

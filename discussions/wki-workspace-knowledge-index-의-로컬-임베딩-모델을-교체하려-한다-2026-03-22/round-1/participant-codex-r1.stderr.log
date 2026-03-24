@@ -1,0 +1,270 @@
+Reading prompt from stdin...
+OpenAI Codex v0.114.0 (research preview)
+--------
+workdir: C:\Users\haj\projects\subagent-orchestrator
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\haj\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019d135c-02fd-78d0-adbc-5337d09b62e5
+--------
+user
+## Discussion Topic
+WKI(Workspace Knowledge Index)의 로컬 임베딩 모델을 교체하려 한다. 현재 paraphrase-multilingual-MiniLM-L12-v2(384d)를 사용 중이며, 코드+문서 혼합 검색, 한글-영어 크로스링구얼, 로컬 실행(API 비용 0), ONNX 호환이 필요하다. 후보: Jina embeddings v2, E5-large, CodeBERT, BGE-small, nomic-embed-text. 각 모델의 장단점과 WKI에 최적인 모델을 추천하라.
+
+## Your Persona
+You are: **성능 최적화 전문가**
+Stay in character throughout your response. Speak from this persona's perspective and expertise.
+
+
+## Instructions
+Provide your analysis. Structure your response:
+1. **Position**: your main argument
+2. **Reasoning**: supporting evidence
+3. **Concerns**: potential risks or downsides
+4. **Recommendation**: your suggested approach
+
+IMPORTANT: End your response with EXACTLY ONE of these labels on its own line:
+[POSITION: one-line summary of your stance]
+
+Keep response under 30 lines.
+mcp startup: no servers
+codex
+요청은 WKI의 로컬 임베딩 모델 교체안 평가와 최적 후보 추천이다. 먼저 워크스페이스 인덱스를 최신화하고, 현재 WKI의 임베딩 인터페이스와 제약(차원, ONNX, 검색 파이프라인)을 확인한 뒤 후보 모델 특성과 맞춰 비교하겠다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'node workspace-knowledge-index/dist/index.js index' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "paraphrase-multilingual-MiniLM-L12-v2|embedding|embeddings|onnx|sentence-transformers|transformers.js|Xenova|@xenova|hf" workspace-knowledge-index packages .knowledge -S' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg --files workspace-knowledge-index packages .knowledge' in C:\Users\haj\projects\subagent-orchestrator succeeded in 567ms:
+.knowledge\symbols.idx:263:{"name":"ChunkWithEmbedding","kind":"interface","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/types/index.ts","startLine":39,"endLine":41,"docstring":"/** A chunk with its computed embedding vector. */","exported":true}
+.knowledge\symbols.idx:279:{"name":"EmbeddingProvider","kind":"interface","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/interfaces/embedding.ts","startLine":5,"endLine":10,"docstring":"/**\r\n * Provider adapter for text embedding.\r\n * Implementations: OpenAI, Voyage, Local (ONNX).\r\n */","exported":true}
+.knowledge\symbols.idx:357:{"name":"expandKoreanQuery","kind":"function","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/search/korean-expansion.ts","startLine":80,"endLine":107,"signature":"(query: string): ExpandedQuery","docstring":"/**\r\n * Expand a Korean query for cross-lingual search.\r\n *\r\n * Returns separate queries for FTS and vector search:\r\n * - FTS query uses only English expansion terms (Korean tokens can't match English FTS content)\r\n * - Vector query uses original + English terms (multilingual embedding model handles both)\r\n *\r\n * If the query contains no Korean characters, both fields return the original query.\r\n */","exported":true}
+.knowledge\symbols.idx:375:{"name":"BatchEmbedResult","kind":"interface","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/base-provider.ts","startLine":3,"endLine":6,"exported":true}
+.knowledge\symbols.idx:376:{"name":"BaseEmbeddingProvider","kind":"class","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/base-provider.ts","startLine":12,"endLine":92,"docstring":"/**\r\n * Base class for embedding providers with automatic batching,\r\n * chunked splitting, and exponential-backoff retry.\r\n */","exported":true,"modifiers":["abstract"]}
+.knowledge\symbols.idx:377:{"name":"OpenAIEmbeddingProvider","kind":"class","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/openai-provider.ts","startLine":8,"endLine":50,"docstring":"/**\r\n * OpenAI embedding provider.\r\n * Uses text-embedding-3-large (768d) by default.\r\n */","exported":true}
+.knowledge\symbols.idx:378:{"name":"VoyageEmbeddingResponse","kind":"interface","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/voyage-provider.ts","startLine":3,"endLine":6,"exported":false}
+.knowledge\symbols.idx:379:{"name":"VoyageEmbeddingProvider","kind":"class","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/voyage-provider.ts","startLine":13,"endLine":89,"docstring":"/**\r\n * Voyage AI embedding provider.\r\n * Uses voyage-4-lite (1024d) by default.\r\n * Calls the Voyage REST API with native fetch (Node 20+).\r\n */","exported":true}
+.knowledge\symbols.idx:380:{"name":"MODEL_PRESETS","kind":"variable","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts","startLine":24,"endLine":34,"exported":false,"modifiers":["const"]}
+.knowledge\symbols.idx:381:{"name":"INSTRUCTION_MODELS","kind":"variable","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts","startLine":37,"endLine":48,"exported":false,"modifiers":["const"]}
+.knowledge\symbols.idx:382:{"name":"E5_MODELS","kind":"variable","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts","startLine":51,"endLine":56,"exported":false,"modifiers":["const"]}
+.knowledge\symbols.idx:383:{"name":"LocalEmbeddingProvider","kind":"class","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts","startLine":58,"endLine":146,"exported":true}
+.knowledge\symbols.idx:384:{"name":"createEmbeddingProvider","kind":"function","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/factory.ts","startLine":8,"endLine":36,"signature":"(config: EmbeddingConfig): Promise<EmbeddingProvider>","docstring":"/**\r\n * Create an EmbeddingProvider from config.\r\n * Uses dynamic import to avoid loading unnecessary dependencies.\r\n */","exported":true,"modifiers":["async"]}
+.knowledge\symbols.idx:436:{"name":"MockProvider","kind":"class","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/tests/embedding/base-provider.test.ts","startLine":4,"endLine":29,"exported":false}
+.knowledge\symbols.idx:437:{"name":"toMockVector","kind":"function","filePath":"C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/tests/embedding/base-provider.test.ts","startLine":91,"endLine":93,"signature":"(text: string): number[]","exported":false}
+packages\launcher\package-lock.json:558:    "node_modules/@rollup/rollup-linux-arm-gnueabihf": {
+packages\launcher\package-lock.json:560:      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm-gnueabihf/-/rollup-linux-arm-gnueabihf-4.59.0.tgz",
+packages\launcher\package-lock.json:572:    "node_modules/@rollup/rollup-linux-arm-musleabihf": {
+packages\launcher\package-lock.json:574:      "resolved": "https://registry.npmjs.org/@rollup/rollup-linux-arm-musleabihf/-/rollup-linux-arm-musleabihf-4.59.0.tgz",
+packages\launcher\package-lock.json:1139:      "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
+ succeeded in 577ms:
+.knowledge\symbols.idx
+.knowledge\subagent-orchestrator\fts.db
+packages\launcher\tsconfig.json
+.knowledge\my-project\fts.db
+.knowledge\freshness.lock
+.knowledge\file-map.json
+.knowledge\deps.graph
+packages\launcher\package.json
+packages\launcher\package-lock.json
+packages\launcher\CONTRACT.md
+packages\launcher\tests\normalized-writer.test.mjs
+packages\launcher\tests\queue-runner.test.mjs
+workspace-knowledge-index\vitest.config.ts
+packages\launcher\src\orchestrator.ts
+workspace-knowledge-index\tsconfig.test.json
+workspace-knowledge-index\tsconfig.json
+packages\launcher\src\workers\usage-monitor.ts
+packages\launcher\src\workers\spawn.ts
+packages\launcher\src\evidence\summary-writer.ts
+packages\launcher\src\evidence\normalized-writer.ts
+ succeeded in 1.30s:
+Index is up to date. No changes detected.
+[wki] git diff failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] git diff failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] git ls-files failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] Git change detection failed. Running full index as fallback.
+[wki] git diff failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] git diff failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] git ls-files failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+codex
+WKI 쪽 제약은 확인됐다. 현재 로컬 provider는 `transformers.js` + ONNX Runtime 경로를 쓰고 있고, 검색기는 한글 질의 확장을 별도로 하지만 벡터 쪽은 “멀티링구얼 임베딩이 한/영을 직접 이어준다”는 가정을 이미 코드에 두고 있다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content workspace-knowledge-index\\src\\embedding\\local-provider.ts | Select-Object -First 220" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content workspace-knowledge-index\\src\\search\\korean-expansion.ts | Select-Object -First 180" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content workspace-knowledge-index\\wki.config.json | Select-Object -First 120" in C:\Users\haj\projects\subagent-orchestrator succeeded in 582ms:
+import { BaseEmbeddingProvider } from './base-provider.js';
+
+/**
+ * Local embedding provider using @huggingface/transformers (ONNX Runtime).
+ *
+ * Runs entirely offline after the first model download.
+ * Default model: Xenova/bge-small-en-v1.5 (384d, ~33MB, MTEB avg 62.2)
+ *
+ * Supported models (all auto-downloaded from HuggingFace Hub):
+ *   - Xenova/bge-small-en-v1.5   (384d,  ~33MB)  ??fast, good quality
+ *   - Xenova/bge-base-en-v1.5    (768d,  ~110MB) ??balanced
+ *   - Xenova/bge-m3              (1024d, ~570MB) ??multilingual, best quality
+ *   - Xenova/all-MiniLM-L6-v2   (384d,  ~23MB)  ??fastest, decent quality
+ *   - Xenova/multilingual-e5-base (768d, ~280MB) ??multilingual, good quality
+ *
+ * Quality reference (MTEB Retrieval avg):
+ *   - text-embedding-3-large (OpenAI): ~64.6
+ *   - bge-base-en-v1.5:                ~63.5
+ *   - bge-small-en-v1.5:               ~62.2
+ *   - all-MiniLM-L6-v2:                ~58.8
+ succeeded in 594ms:
+/**
+ * Korean-to-English query expansion for cross-lingual search.
+ * Appends English keywords when Korean terms are detected in the query.
+ *
+ * This mirrors the expansion logic in packages/launcher/src/supervisor/wki-context.ts
+ * but lives in the search layer so that all callers (including the eval CLI) benefit.
+ */
+
+const HANGUL_RE = /[\uAC00-\uD7AF]/;
+
+const KO_EN_KEYWORDS: Record<string, string[]> = {
+  '利앷굅': ['evidence'],
+  '湲곕줉': ['recording', 'log', 'manifest'],
+  '洹쒖튃': ['rules', 'policy'],
+  '?뚯빱': ['worker', 'agent'],
+  '?ㅽ뻾': ['execution', 'run', 'launch'],
+  '寃利?: ['validation', 'review', 'verify'],
+  '?ㅼ??ㅽ듃?덉씠??: ['orchestration', 'orchestrator'],
+  '?뚯씪': ['file', 'path'],
+  '?붾젆?곕━': ['directory', 'folder'],
+ succeeded in 628ms:
+{
+  "projects": [
+    {
+      "name": "my-project",
+      "root": ".",
+      "exclude": ["node_modules", "dist", ".next", "dev.db"]
+    }
+  ],
+
+  "storage": {
+    "index_root": ".knowledge",
+    "vector_backend": "lancedb",
+    "lancedb": {
+      "path": ".knowledge/{project}/vectors.lance"
+    },
+    "qdrant": {
+      "url": "http://localhost:6333",
+      "api_key": null
+    }
+  },
+🌐 Searching the web...
+🌐 Searched: site:huggingface.co jina embeddings v2 model card multilingual code huggingface
+🌐 Searching the web...
+🌐 Searched: site:huggingface.co jinaai jina-embeddings-v2-base-en model card
+🌐 Searching the web...
+🌐 Searched: site:huggingface.co nomic-ai nomic-embed-text-v1.5 huggingface model card
+🌐 Searching the web...
+🌐 Searched: site:huggingface.co microsoft codebert-base model card code search natural language
+🌐 Searching the web...
+🌐 Searched: https://huggingface.co/intfloat/multilingual-e5-large
+🌐 Searching the web...
+🌐 Searched: 'prefix' in https://huggingface.co/intfloat/multilingual-e5-large-instruct
+🌐 Searching the web...
+🌐 Searched: https://huggingface.co/nomic-ai/nomic-embed-text-v1.5
+🌐 Searching the web...
+🌐 Searched: 'bge-small-en-v1.5' in https://huggingface.co/BAAI/bge-small-en-v1.5
+🌐 Searching the web...
+🌐 Searched: '8192 sequence length' in https://huggingface.co/jinaai/jina-embeddings-v2-base-code
+🌐 Searching the web...
+🌐 Searched: https://arxiv.org/abs/2002.08155
+🌐 Searching the web...
+🌐 Searched: 'MTEB' in https://huggingface.co/jinaai/jina-embeddings-v2-base-code
+codex
+후보 성능 자체보다 더 중요한 병목이 보인다. WKI는 지금 `embedBatch(texts)` 단일 경로로 인덱싱 문서와 질의를 같은 방식으로 임베딩하고, 로컬 provider는 최대 약 256토큰으로 잘라버린다. 그래서 query/document 프롬프트를 요구하는 E5·Nomic 계열은 현재 코드 그대로 넣으면 성능이 덜 나온다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content workspace-knowledge-index\\src\\interfaces\\embedding.ts | Select-Object -First 120" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content workspace-knowledge-index\\src\\core\\indexer.ts | Select-Object -First 560" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content workspace-knowledge-index\\src\\search\\search-service.ts | Select-Object -First 180" in C:\Users\haj\projects\subagent-orchestrator succeeded in 596ms:
+/**
+ * Provider adapter for text embedding.
+ * Implementations: OpenAI, Voyage, Local (ONNX).
+ */
+export interface EmbeddingProvider {
+  embed(text: string): Promise<number[]>;
+  batchEmbed(texts: string[]): Promise<number[][]>;
+  readonly dimensions: number;
+  readonly modelName: string;
+}
+ succeeded in 576ms:
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import type { RawChunk, Chunk, ChunkWithEmbedding, SymbolInfo, ImportInfo } from '../types/index.js';
+import type { TsParserResult } from '../interfaces/parser.js';
+import type { EmbeddingProvider } from '../interfaces/embedding.js';
+import type { VectorBackend } from '../interfaces/vector-backend.js';
+import { Scanner } from './scanner.js';
+import { TsParser } from '../parsers/ts-parser.js';
+import { MdParser } from '../parsers/md-parser.js';
+import { LineParser } from '../parsers/line-parser.js';
+import { FtsStore, CHUNK_META_UPSERT_SQL, toChunkMetaParams } from '../store/fts-store.js';
+import { DepsGraphImpl } from './deps-graph.js';
+import { normalizePath, toRelativePosix } from '../utils/path.js';
+import type { ChangedFiles } from './freshness.js';
+import type { ChunkingConfig, IndexingConfig } from '../config/schema.js';
+
+export interface IndexerConfig {
+  chunking: ChunkingConfig;
+  indexing: IndexingConfig;
+ succeeded in 584ms:
+import type Database from 'better-sqlite3';
+import type { SearchConfig } from '../config/schema.js';
+import type { EmbeddingProvider } from '../interfaces/embedding.js';
+import type { FtsSearchResult } from '../interfaces/fts-backend.js';
+import { FtsStore } from '../store/fts-store.js';
+import { ChunkStore } from '../store/chunk-store.js';
+import { LanceVectorStore } from '../store/vector-store.js';
+import type { Chunk, SearchFilter, SearchResult, VectorSearchResult } from '../types/index.js';
+import { QueryRouter, type RouteDecision, type SearchMode } from './query-router.js';
+import { expandKoreanQuery } from './korean-expansion.js';
+
+const CHUNK_ID_BATCH_SIZE = 300;
+const FTS_NORMALIZATION_WINDOW = 50;
+const RRF_K = 60;
+
+interface WeightedCandidate {
+  chunkId: string;
+  score: number;
+  ftsScore: number;
+  vectorScore: number;
+🌐 Searching the web...
+🌐 Searched: https://huggingface.co/jinaai/jina-embeddings-v2-base-code
+🌐 Searching the web...
+🌐 Searched: '100 languages' in https://huggingface.co/intfloat/multilingual-e5-large
+🌐 Searching the web...
+🌐 Searched: 'multilingual-e5-large 70.5' in https://huggingface.co/intfloat/multilingual-e5-large
+🌐 Searching the web...
+🌐 Searched: '8192' in https://huggingface.co/nomic-ai/nomic-embed-text-v1.5
+🌐 Searching the web...
+🌐 Searched: 'Programming and Natural Languages' in https://huggingface.co/microsoft/codebert-base
+🌐 Searching the web...
+🌐 Searched: 'bge-small-en-v1.5  384'
+🌐 Searching the web...
+🌐 Searched: https://huggingface.co/BAAI/bge-small-en-v1.5
+codex
+1. **Position**: 후보군 기준 WKI 최적은 `intfloat/multilingual-e5-large`다. 성능 최적화 관점에서 핵심 병목은 “코드 검색”보다 “한글 질의와 영어 코드/문서의 의미 연결”이고, 이 요구를 공식적으로 가장 잘 만족하는 후보가 E5다.
+2. **Reasoning**:
+- WKI는 이미 FTS와 path search가 exact token, identifier, file path를 잘 잡는다. 임베딩 모델은 남는 문제인 cross-lingual semantic recall에 집중해야 ROI가 크다.
+- `multilingual-e5-large`는 94언어/ONNX 지원, 1024d, Mr.TyDi에서 한국어 MRR@10 61.6을 제시한다. 한영 교차검색 요구에 가장 직접적으로 맞는다.
+- `jina-embeddings-v2-base-code`는 ONNX/Transformers.js, 8k, code+docs 혼합엔 강하지만 공식 카드 기준 English + 30개 프로그래밍 언어 중심이라 한국어 교차검색은 불안하다.
+- `nomic-embed-text-v1.5`는 ONNX/Transformers.js, 8k, Matryoshka가 강점이지만 English-only라 핵심 요구를 놓친다.
+- `bge-small-en-v1.5`는 빠르고 단순하지만 English-only다. `CodeBERT`는 2020년 code-search encoder라 현대 retrieval embedding 대비 범용 검색과 cross-lingual에서 불리하다.
+3. **Concerns**:
+- E5-large는 0.6B/1024d라 현재 384d 대비 메모리, 인덱스 크기, CPU latency가 뛴다. 벡터 저장량만 봐도 약 2.7배다.
+- 더 큰 문제는 WKI 현재 구현이 문서와 질의를 같은 `embedBatch()` 경로로 처리하고 약 256토큰에서 자른다는 점이다. E5는 `query:`/`passage:` 분리가 성능에 중요하므로 그대로 교체하면 잠재력을 못 쓴다.
+4. **Recommendation**:
+- 1순위로 `multilingual-e5-large`를 채택하되, 먼저 provider를 query/document 비대칭 프롬프트를 처리하도록 바꿔라. 그 다음 `gold-set-v2.json`으로 NDCG 회귀를 보라.
+- 운영 성능이 부담되면 다른 후보군으로 새지 말고 `multilingual-e5-base`로 한 단계 내리는 게 맞다. Jina/Nomic/BGE-small/CodeBERT는 WKI의 가장 어려운 요구인 한영 교차검색을 구조적으로 덜 해결한다.
+Sources: [E5](https://huggingface.co/intfloat/multilingual-e5-large), [Jina v2 code](https://huggingface.co/jinaai/jina-embeddings-v2-base-code), [Nomic](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5), [BGE-small](https://huggingface.co/BAAI/bge-small-en-v1.5), [CodeBERT](https://huggingface.co/microsoft/codebert-base)
+WKI refs: [local-provider.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts), [embedding.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/interfaces/embedding.ts), [indexer.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/indexer.ts), [search-service.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/search/search-service.ts)
+[POSITION: WKI에는 `multilingual-e5-large`가 후보군 중 최적이며, 도입 전 query/document 분리부터 고쳐야 한다]
+tokens used
+116,672

@@ -1,0 +1,48 @@
+## Discussion Topic
+공복 시간을 얼마나 유지해야 지방 연소에 좋은지
+
+## Previous Round Summary (by Moderator)
+<untrusted-data source="moderator-summary">
+## Round Summary
+
+### Claude's Position
+16-18 hours represents a research-backed optimal range for fat burning efficacy. New findings highlight gender differences (women >20h risk hormonal disruption) and age factors (40+ require protein timing attention). Revised stance: 14-18h optimal, adjusted by individual characteristics (sex, age, health).
+
+### Codex's Position
+12-16 hours is sufficient for most people; total caloric intake, sustainability, and eating window timing matter more than pursuing 16-18h. Emphasizes practical adherence over extended fasting approaches.
+
+### Gemini's Position
+12-16 hours is the safe, practical range; 16-18h may offer marginal metabolic gains but increases muscle loss, hormonal disruption, and adherence failure risks. New insights: circadian rhythm alignment and psychological burden are underestimated factors requiring medical oversight.
+
+---
+
+## Agreement
+- 12-16h range is effective and widely applicable
+- Individual variation (sex, age, health) requires consideration
+- Sustainability and adherence matter
+
+## Disagreement
+- **Efficacy floor**: Claude argues 14-18h is optimal; Codex/Gemini hold 12-16h as sufficient
+- **Risk tolerance**: Claude accepts 16-18h with caveats; Codex/Gemini frame this as unnecessary risk
+
+## Open Questions
+- What constitutes "sufficient" vs. "optimal" fat burning (absolute vs. practical)?
+- Should recommendations differ by gender/age/health status, and how specifically?
+- How to weight metabolic gains (15-20% difference per Claude) against adherence and safety costs?
+</untrusted-data>
+
+## Instructions
+Review the other participants' arguments. Respond with:
+
+IMPORTANT: Start your response with EXACTLY ONE of these labels on its own line:
+[AGREE] — if you agree with the overall direction
+[PARTIAL] — if you partially agree
+[DISAGREE] — if you disagree
+
+Then provide:
+1. **Reasoning**: why you chose that label
+2. **New insight**: anything missed by others
+3. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under 30 lines.

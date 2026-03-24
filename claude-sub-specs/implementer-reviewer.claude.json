@@ -1,0 +1,136 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "B-implement-review",
+    "version": "2.0",
+    "purpose": "Default delivery pattern — one implementer writes, one reviewer validates. Most common /sub shape.",
+    "model_strategy": {
+      "quality": "sonnet for implementation (balanced reasoning + speed), haiku for review (fast, cost-effective for read-only checks)",
+      "optimization": "Reviewer uses lower reasoning_effort since it only reads and compares",
+      "token_saving": "compact shared directive, bounded response lines, explicit stop conditions prevent scope creep"
+    },
+    "improvements": [
+      "Tiered model allocation: sonnet(impl) + haiku(review)",
+      "Differentiated reasoning_effort per role",
+      "Archive enabled with run label",
+      "Live usage monitoring",
+      "Explicit success_criteria for pass/fail separation",
+      "Reviewer return_contract structured for machine parsing",
+      "Timeout safeguard",
+      "Optional watchdog hook support (goal-alignment auditor)"
+    ]
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "claude-sub-runs/implementer-reviewer",
+  "manifest_file": "claude-sub-runs/implementer-reviewer/orchestration-manifest.json",
+  "summary_file": "claude-sub-runs/implementer-reviewer/orchestration-summary.md",
+  "debug_log_file": "claude-sub-runs/implementer-reviewer/launcher-debug.log",
+  "archive_root": "claude-sub-records",
+  "write_run_archive": true,
+  "archive_run_label": "implementer-reviewer",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 180,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "requested_deliverables": [
+    "sample-note.txt"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "shared_directive_mode": "compact",
+  "watchdog": {
+    "enabled": false,
+    "stages_to_watch": ["implementer"],
+    "model": "gpt-5.4",
+    "reasoning_effort": "medium",
+    "verdict_format": "PASS | SHORTFALL",
+    "on_shortfall": "3-choice: Accept (fix) | Reject (log + proceed) | Escalate (ask user)",
+    "max_cycles_per_stage": 1
+  },
+  "live_usage": {
+    "enabled": true,
+    "display_mode": "both",
+    "status_file": "claude-sub-runs/implementer-reviewer/orchestration-usage.json",
+    "poll_interval_ms": 500
+  },
+  "defaults": {
+    "prompt_profile": "compact",
+    "response_style": "compact"
+  },
+  "agents": [
+    {
+      "name": "sample-implementer",
+      "kind": "implementer",
+      "stage": 1,
+      "model": "gpt-5.4",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 6,
+      "role": "implementer",
+      "mission": "Create the deliverable file cleanly and validate it before handing off to review.",
+      "task": "Create or replace sample-note.txt in the working directory containing exactly two lines:\nLine 1: READY\nLine 2: REVIEW\nNo trailing newline, no extra whitespace.",
+      "read_first": [
+        "AGENTS.md"
+      ],
+      "writable_scope": [
+        "sample-note.txt"
+      ],
+      "required_paths": [
+        "sample-note.txt"
+      ],
+      "required_non_empty_paths": [
+        "sample-note.txt"
+      ],
+      "success_criteria": [
+        "sample-note.txt exists",
+        "File contains exactly 2 lines: READY and REVIEW"
+      ],
+      "validation": [
+        "Read the file back and confirm line count is exactly 2.",
+        "Confirm line 1 is READY and line 2 is REVIEW.",
+        "Confirm no extra whitespace or trailing newline."
+      ],
+      "return_contract": [
+        "State: file path, line count, content hash or exact content.",
+        "State: PASS or FAIL per validation check."
+      ],
+      "stop_when": [
+        "File created and all validation checks pass. Do not read other files or explore beyond writable scope."
+      ]
+    },
+    {
+      "name": "sample-reviewer",
+      "kind": "reviewer",
+      "stage": 2,
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "low",
+      "max_response_lines": 8,
+      "role": "reviewer",
+      "mission": "Independently verify the deliverable matches the spec without modifying anything.",
+      "task": "Review sample-note.txt for correctness against the original spec: exactly two lines, READY then REVIEW, no extra content.",
+      "read_first": [
+        "AGENTS.md",
+        "sample-note.txt"
+      ],
+      "validation": [
+        "File exists and is non-empty.",
+        "Exactly 2 lines present.",
+        "Line 1 is exactly READY.",
+        "Line 2 is exactly REVIEW.",
+        "No trailing whitespace or extra lines."
+      ],
+      "return_contract": [
+        "Verdict: ACCEPTED | MINOR_ISSUES | MATERIAL_ISSUES",
+        "If issues: [check_name — expected — actual] per finding.",
+        "Rereview required: YES | NO"
+      ],
+      "stop_when": [
+        "Review verdict delivered. Do not modify files. Do not suggest improvements beyond spec."
+      ]
+    }
+  ]
+}

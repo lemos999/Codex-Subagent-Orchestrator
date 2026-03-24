@@ -94,7 +94,8 @@ def main() -> None:
         from stable_baselines3 import PPO
         from stable_baselines3.common.vec_env import DummyVecEnv
 
-        print("\nTraining PPO agent (10K timesteps)...")
+        total_steps = int(sys.argv[1]) if len(sys.argv) > 1 else 100_000
+        print(f"\nTraining PPO agent ({total_steps:,} timesteps)...")
         vec_env = DummyVecEnv([lambda: TradingEnv(
             data=train_data, symbol="ETHUSDT",
             initial_balance=10000.0, commission_rate=0.0002,
@@ -104,13 +105,14 @@ def main() -> None:
         model = PPO(
             "MlpPolicy", vec_env,
             learning_rate=3e-4,
-            n_steps=256,
-            batch_size=64,
+            n_steps=2048,
+            batch_size=256,
             n_epochs=10,
             gamma=0.99,
+            ent_coef=0.01,
             verbose=1,
         )
-        model.learn(total_timesteps=10_000)
+        model.learn(total_timesteps=total_steps)
 
         # Evaluate on test data
         print("\nEvaluating on test data...")

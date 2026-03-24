@@ -1,0 +1,45 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/test-3way-game-design",
+  "skip_git_repo_check": true,
+  "execution_mode": "parallel",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "shared_directive_mode": "compact",
+  "shared_directive_text": "You are a game design expert. Follow the task exactly. Output ONLY what is asked — no questions, no meta-commentary, no requests for clarification. Start your response immediately with the requested content.",
+  "defaults": {
+    "sandbox": "workspace-write",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 10
+  },
+  "agents": [
+    {
+      "name": "gemini-mechanics",
+      "kind": "planner",
+      "stage": 1,
+      "engine": "gemini",
+      "model": "gemini-2.5-pro",
+      "task": "List exactly 3 core mechanics for a roguelike card game. Format: numbered list (1. 2. 3.). Each item: mechanic name — one sentence description. Nothing else."
+    },
+    {
+      "name": "codex-content",
+      "kind": "implementer",
+      "stage": 1,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "task": "List exactly 3 card types for a roguelike card game. Format: numbered list (1. 2. 3.). Each item: card type name — one sentence description. Nothing else."
+    },
+    {
+      "name": "claude-synthesis",
+      "kind": "reviewer",
+      "stage": 2,
+      "engine": "claude",
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "task": "Read the files gemini-mechanics.last.txt and codex-content.last.txt in subagent-runs/mixed/test-3way-game-design/. Synthesize both outputs into a single coherent game concept paragraph (3-5 sentences in Korean). Start with the game title. End with verdict: ACCEPTED if both inputs were usable, MATERIAL_ISSUES if either was empty or off-topic."
+    }
+  ]
+}

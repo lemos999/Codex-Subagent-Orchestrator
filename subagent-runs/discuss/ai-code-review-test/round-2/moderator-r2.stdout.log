@@ -1,0 +1,26 @@
+## Participant Positions
+
+**Claude:** Hybrid AI+human reviews necessary; pure AI replacement risky. Identifies communication friction in sequential models. Proposes parallel independent review with merged findings to avoid redundant commentary.
+
+**Codex:** AI should front-load checks and narrow scope; humans retain final authority on correctness, risk, and design. Hybrid model with AI as efficiency filter.
+
+**Gemini:** AI should augment human reviews with continuous learning loop—AI improves by processing human feedback, adapting to team patterns over time. Hybrid with AI adaptation.
+
+---
+
+## Consensus & Gaps
+
+**Agreement:**
+- Pure AI replacement rejected; hybrid is necessary
+- Humans must retain authority on design, risk, correctness
+- AI's value is efficiency and routine pattern detection
+
+**Disagreement:**
+- **Review order**: Claude proposes parallel (independent then merge), Codex implies sequential (AI first, then human narrowed scope)
+- **AI role in iteration**: Gemini emphasizes feedback-driven AI improvement; Claude emphasizes tooling for clarity; Codex silent on adaptation
+
+**Open Questions:**
+- How should parallel vs. sequential models trade off speed vs. coherence?
+- What tooling prevents redundant AI-human commentary?
+- How can "continuous learning" be implemented without drift or privacy concerns?
+- What metrics define success in hybrid reviews?

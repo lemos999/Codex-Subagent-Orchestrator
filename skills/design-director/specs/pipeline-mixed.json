@@ -1,0 +1,185 @@
+{
+  "_meta": {
+    "origin": "mixed",
+    "pattern": "Design-Director-Pipeline-Mixed",
+    "version": "1.0",
+    "purpose": "Phase 3.5 → Phase 4 → Phase 5 멀티엔진 자동화 파이프라인. Claude + Codex(GPT) + Gemini 교차 검증으로 품질 극대화.",
+    "model_strategy": {
+      "quality": "Claude sonnet: 핵심 검증/문서 생성. Gemini pro: 대규모 교차 검증/문서 리뷰. Codex gpt-5.4: 독립 검증 watchdog.",
+      "optimization": "각 에이전트는 이전 에이전트 산출물만 참조. 외부 엔진은 Bash tool로 호출.",
+      "cross_validation": "서로 다른 엔진이 동일 산출물을 독립 검증하여 편향 제거."
+    }
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/design-pipeline",
+  "manifest_file": "subagent-runs/mixed/design-pipeline/orchestration-manifest.json",
+  "summary_file": "subagent-runs/mixed/design-pipeline/orchestration-summary.md",
+  "debug_log_file": "subagent-runs/mixed/design-pipeline/launcher-debug.log",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 600,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "shared_directive_mode": "compact",
+  "agents": [
+    {
+      "name": "cross-impact-validator",
+      "kind": "reviewer",
+      "stage": 1,
+      "engine": "claude",
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 30,
+      "role": "Phase 3.5 교차 영향 검증기",
+      "mission": "모든 Core 필수 확정 항목 간 공유 파라미터, 연쇄 효과, 트레이드오프, 수치 동일성, 타이밍 충돌을 검증한다.",
+      "task": "Phase 3 산출물과 의존성 맵을 읽고 cross-impact-matrix.md 형식으로 교차 검증 수행. 미해결 모순 건수 보고.",
+      "read_first": [
+        "skills/design-director/SKILL.md",
+        "skills/design-director/agents/phase35-integrate.agent.md",
+        "skills/design-director/templates/cross-impact-matrix.md"
+      ],
+      "return_contract": [
+        "공유 파라미터 레지스트리 (테이블)",
+        "연쇄 효과 검증 결과",
+        "트레이드오프 판정 결과",
+        "타이밍 검증 결과",
+        "미해결 모순 총계: N건"
+      ],
+      "stop_when": ["교차 검증 보고서 완료. 파일 수정하지 않는다."]
+    },
+    {
+      "name": "cross-impact-watchdog-gemini",
+      "kind": "reviewer",
+      "stage": 2,
+      "engine": "gemini",
+      "model": "gemini-2.5-pro",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 20,
+      "role": "교차 영향 검증 watchdog (Gemini)",
+      "mission": "cross-impact-validator(Claude)의 결과를 독립적으로 감사. 긴 컨텍스트를 활용하여 전체 확정 항목을 한번에 검토.",
+      "task": "cross-impact-validator 결과 + Phase 3 전체 확정 항목을 검토. (1) 누락된 공유 파라미터가 있는가 (2) 모순으로 분류해야 할 트레이드오프가 있는가 (3) 미해결 모순 건수가 정확한가 (4) Claude가 놓친 연쇄 효과가 있는가",
+      "read_first": [
+        "skills/design-director/agents/phase35-integrate.agent.md"
+      ],
+      "return_contract": [
+        "Verdict: PASS | SHORTFALL",
+        "Claude 검증 결과와의 차이점",
+        "추가 발견 모순 (있을 경우)",
+        "점수 조정 권고 (있을 경우)"
+      ],
+      "stop_when": ["감사 완료. 파일 수정하지 않는다."]
+    },
+    {
+      "name": "recursive-verifier",
+      "kind": "reviewer",
+      "stage": 3,
+      "engine": "claude",
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 30,
+      "role": "Phase 4 재귀적 검증기",
+      "mission": "검증 4단계 + 오버엔지니어링 3문항 + 실행자 셀프체크로 '실행 착수 가능'을 판정한다.",
+      "task": "Phase 3 확정 항목 + Phase 3.5 교차 검증 결과를 읽고, 검증 4단계(오류→모순→맥락→실행) + 오버엔지니어링 3문항 + 실행자 관점 (a)~(e) 수행. 6조건 게이트 판정.",
+      "read_first": [
+        "skills/design-director/SKILL.md",
+        "skills/design-director/core/validation-ladder.md",
+        "skills/design-director/agents/phase4-verify.agent.md"
+      ],
+      "return_contract": [
+        "검증 4단계 결과 테이블",
+        "오버엔지니어링 체크 결과",
+        "실행자 셀프체크 결과",
+        "게이트 6조건 PASS/FAIL",
+        "최종 선언: 실행 착수 가능 / 미통과"
+      ],
+      "stop_when": ["검증 보고서 완료. 파일 수정하지 않는다."]
+    },
+    {
+      "name": "verify-watchdog-codex",
+      "kind": "reviewer",
+      "stage": 4,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 20,
+      "role": "검증 watchdog (Codex/GPT)",
+      "mission": "recursive-verifier(Claude)의 검증 결과를 GPT 관점에서 독립 감사. 특히 실행 가능성(4단계)과 악용 경로를 재검토.",
+      "task": "recursive-verifier 결과를 검토. (1) 검증 4단계 판정이 정확한가 (2) 놓친 모호 표현이 있는가 (3) 실행자 셀프체크에서 빠진 예외 케이스가 있는가 (4) 6조건 게이트 판정에 동의하는가",
+      "return_contract": [
+        "Verdict: AGREE | DISAGREE",
+        "동의하지 않는 항목 (있을 경우)",
+        "추가 발견 이슈",
+        "최종 의견"
+      ],
+      "stop_when": ["감사 완료. 파일 수정하지 않는다."]
+    },
+    {
+      "name": "document-generator",
+      "kind": "implementer",
+      "stage": 5,
+      "engine": "claude",
+      "model": "sonnet",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 12,
+      "role": "Phase 5 문서 생성기",
+      "mission": "Phase 0~4 확정 데이터를 프로젝트 문서(_confirmed/, sections/, CLAUDE.md)로 구조화한다.",
+      "task": "readiness-report.md 형식에 따라 프로젝트 문서 생성. 단일 진실 소스 원칙 준수. 태그 감사 수행.",
+      "read_first": [
+        "skills/design-director/agents/phase5-package.agent.md",
+        "skills/design-director/templates/readiness-report.md",
+        "skills/design-director/core/state-model.md"
+      ],
+      "success_criteria": [
+        "_confirmed/ 파일 생성 완료",
+        "중복 수치 0건 (참조 전환 완료)",
+        "태그 감사 통과"
+      ],
+      "stop_when": ["문서 생성 + 검증 완료."]
+    },
+    {
+      "name": "document-watchdog-gemini",
+      "kind": "reviewer",
+      "stage": 6,
+      "engine": "gemini",
+      "model": "gemini-2.5-pro",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 20,
+      "role": "문서 품질 검증 (Gemini)",
+      "mission": "생성된 전체 문서를 긴 컨텍스트로 일괄 검토. 완전성, 중복, 태그 정합성, 단일 진실 소스 준수 확인.",
+      "task": "document-generator가 생성한 파일 전체를 검토. (1) _confirmed/ 완전성 (2) 중복 수치 여부 (3) 태그 감사 (4) 입출력 계약 누락 (5) 컴포넌트 간 참조 정합성",
+      "return_contract": [
+        "Verdict: ACCEPTED | MINOR_ISSUES | MATERIAL_ISSUES",
+        "발견 사항 목록",
+        "재생성 필요 여부"
+      ],
+      "stop_when": ["검토 완료. 파일 수정하지 않는다."]
+    },
+    {
+      "name": "document-watchdog-codex",
+      "kind": "reviewer",
+      "stage": 7,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "low",
+      "max_response_lines": 15,
+      "role": "문서 품질 검증 (Codex/GPT)",
+      "mission": "Gemini watchdog와 독립적으로 문서 품질 감사. 실행자 관점에서 '이 문서만으로 구현 가능한가'를 판단.",
+      "task": "생성된 _confirmed/ 문서를 실행자(개발자/기획자) 관점에서 검토. (1) Step-by-Step이 구현 가능한가 (2) 모호한 표현이 남아있는가 (3) 예외 케이스가 충분한가",
+      "return_contract": [
+        "Verdict: ACCEPTED | MINOR_ISSUES | MATERIAL_ISSUES",
+        "실행자 관점 이슈 목록"
+      ],
+      "stop_when": ["검토 완료. 파일 수정하지 않는다."]
+    }
+  ]
+}

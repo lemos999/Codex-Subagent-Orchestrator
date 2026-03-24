@@ -1,0 +1,11 @@
+[PARTIAL]
+
+1. **Reasoning**: Claude/Codex 방향은 절반만 맞습니다. 핵심 전제가 틀렸습니다. `multilingual-e5-large`는 현재 768d가 아니라 1024d이고, WKI에는 query/document 비대칭 인코딩 API가 없습니다. 지금 구현은 E5 입력마다 `query:`를 붙이고, 같은 `batchEmbed()` 경로로 문서 인덱싱과 질의 임베딩을 모두 처리합니다 ([local-provider.ts#L119](/C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts#L119), [indexer.ts#L240](/C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/indexer.ts#L240), [search-service.ts#L98](/C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/search/search-service.ts#L98)). 그래서 E5-large는 좋은 모델이어도 현행 WKI의 drop-in 최적은 아닙니다.
+
+2. **New insight**: 진짜 병목은 모델 카드보다 실행 경로입니다. WKI는 텍스트를 약 256 토큰으로 절단하고([local-provider.ts#L62](/C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts#L62)), 모든 모델에 `mean` pooling을 강제하며([local-provider.ts#L125](/C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts#L125)), 검색은 이미 FTS 0.4 + vector 0.6 융합입니다([wki.config.json#L63](/C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/wki.config.json#L63)). 즉 코드 식별자는 FTS가 커버하므로, 임베딩은 한영 의미 매핑을 최적화해야 합니다. 이 기준이면 Jina v2 code, CodeBERT, BGE-small, nomic은 각각 한영성능 부족 또는 비대칭 prefix/custom-code 부담으로 밀리고, 실전 후보는 BGE-M3 vs E5-large로 좁혀집니다.
+
+3. **Updated position**: 바뀌었습니다. 현행 WKI 기준 최적은 **BGE-M3**입니다. 이유는 100+ 언어 지원, query instruction 불필요, 그리고 현재는 ONNX/Transformers.js 경로도 존재하기 때문입니다. E5-large는 provider 인터페이스를 query/document 분리로 먼저 고친 뒤 재평가해야 하며, 제 추론으로는 그 시점에도 비용 대비로는 `multilingual-e5-base`가 더 합리적일 가능성이 큽니다.
+
+Sources: [E5-large](https://huggingface.co/intfloat/multilingual-e5-large), [BGE-M3](https://huggingface.co/BAAI/bge-m3), [Xenova BGE-M3](https://huggingface.co/Xenova/bge-m3), [Jina v2 code](https://huggingface.co/jinaai/jina-embeddings-v2-base-code), [nomic-embed-text-v1.5](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5)
+
+[POSITION: 현행 WKI에는 BGE-M3가 최적이고, E5-large는 query/document 분리 없이는 성능 잠재력을 못 쓴다.]

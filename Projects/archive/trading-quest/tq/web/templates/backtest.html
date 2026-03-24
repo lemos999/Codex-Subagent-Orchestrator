@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트레이딩 퀘스트 - 임무</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --bg-dark: #0f1117;
+            --bg-card: #1a1d29;
+            --bg-input: #252836;
+            --text-primary: #e1e4ea;
+            --text-secondary: #8a8f9e;
+            --border-dark: #2a2d3a;
+            --accent: #2563eb;
+            --accent-hover: #3b82f6;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --orange: #f97316;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background: #141620;
+            border-bottom: 1px solid var(--border-dark);
+            padding: 0.75rem 2rem;
+        }
+
+        .navbar .brand { color: var(--accent); }
+        .nav-links a { color: var(--text-secondary); }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
+
+        .bt-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+
+        .bt-header {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .bt-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .bt-card-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Controls */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.6rem;
+            align-items: end;
+        }
+
+        .ctrl-group { display: flex; flex-direction: column; gap: 0.2rem; }
+        .ctrl-group label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ctrl-group input, .ctrl-group select {
+            background: var(--bg-input);
+            border: 1px solid var(--border-dark);
+            color: var(--text-primary);
+            padding: 0.45rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+
+        .ctrl-group input:focus, .ctrl-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn-row { display: flex; gap: 0.5rem; align-items: end; margin-top: 0.5rem; }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+
+        .btn-start { background: var(--green); color: #000; }
+        .btn-start:hover { background: #16a34a; }
+        .btn-start:disabled { background: #4a5568; color: #718096; cursor: not-allowed; }
+
+        .btn-secondary { background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-dark); }
+        .btn-secondary:hover { background: var(--border-dark); }
+
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        /* Multi-select UI */
+        .multi-select-section {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+        .multi-select-box {
+            background: var(--bg-input);
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            padding: 0.6rem 0.8rem;
+            min-width: 160px;
+            max-width: 320px;
+            flex: 1;
+        }
+        .multi-select-box .ms-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border-dark);
+        }
+        .multi-select-box .ms-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .multi-select-box .ms-toggle-all {
+            font-size: 0.68rem;
+            background: transparent;
+            border: 1px solid var(--border-dark);
+            color: var(--text-secondary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .multi-select-box .ms-toggle-all:hover {
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+        .ms-items {
+            max-height: 160px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 0.15rem;
+        }
+        .ms-items label {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.78rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 0.1rem 0.2rem;
+            border-radius: 3px;
+        }
+        .ms-items label:hover {
+            background: var(--border-dark);
+        }
+        .ms-items input[type="checkbox"] {
+            accent-color: var(--accent);
+            width: 14px;
+            height: 14px;
+        }
+        .ms-count {
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
+
+        /* Symbol autocomplete */
+        .symbol-input-wrapper {
+            position: relative;
+        }
+        .symbol-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-bottom: 0.3rem;
+            min-height: 24px;
+        }
+        .symbol-tag {
+            background: var(--accent);
+            color: #fff;
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .symbol-tag .remove-tag {
+            cursor: pointer;
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+        .symbol-tag .remove-tag:hover { opacity: 1; }
+        .symbol-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        .symbol-dropdown.active { display: block; }
+        .symbol-dropdown-item {
+            padding: 0.35rem 0.6rem;
+            cursor: pointer;
+            font-size: 0.82rem;
+        }
+        .symbol-dropdown-item:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Small charts row */
+        .small-charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .small-chart-box {
+            height: 180px;
+            position: relative;
+        }
+
+        .small-chart-box canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Bar chart */
+        .bar-chart-container {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 3px; }
+
+        /* Status message */
+        .status-msg {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .small-charts-row { grid-template-columns: 1fr; }
+            .controls-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">트레이딩 퀘스트</a>
+        <div class="nav-links">
+            <a href="/">대시보드</a>
+            <a href="/quest">퀘스트</a>
+            <a href="/leaderboard">리더보드</a>
+            <a href="/backtest" class="active">임무</a>
+            <a href="/data">백데이터</a>
+        </div>
+    </nav>
+
+    <div class="bt-container">
+        <div class="bt-header">AI 임무 수행</div>
+
+        <!-- ============================================ -->
+        <!-- 임무 수행 -->
+        <!-- ============================================ -->
+        <div class="bt-card" style="border-color:var(--green);">
+            <div class="bt-card-title" style="color:var(--green);">임무 수행</div>
+
+            <div class="controls-grid">
+                <!-- Row 1: Objectives -->
+                <div class="ctrl-group">
+                    <label>목표 승률 (%)</label>
+                    <input type="number" id="ms-win-rate" value="60" min="0" max="100">
+                </div>
+                <div class="ctrl-group">
+                    <label>목표 수익률 (%)</label>
+                    <input type="number" id="ms-return" value="4" step="0.1">
+                </div>
+                <div class="ctrl-group">
+                    <label>목표 점수</label>
+                    <input type="number" id="ms-score" value="10" step="0.1">
+                </div>
+
+                <!-- Row 2: Test params -->
+                <div class="ctrl-group">
+                    <label>거래 유형</label>
+                    <select id="ms-interval" onchange="onIntervalChange()">
+                        <option value="1d">일봉 (스윙)</option>
+                        <option value="4h">4시간봉</option>
+                        <option value="1h" selected>1시간봉</option>
+                        <option value="30m">30분봉</option>
+                        <option value="15m">15분봉</option>
+                        <option value="5m">5분봉 (단타)</option>
+                        <option value="1m">1분봉 (초단타)</option>
+                    </select>
+                </div>
+                <div class="ctrl-group">
+                    <label>시작일</label>
+                    <input type="date" id="ms-start-date" value="2024-01-02">
+                </div>
+                <div class="ctrl-group">
+                    <label>테스트 기간 (일)</label>
+                    <select id="ms-days">
+                        <option value="5">5일</option>
+                        <option value="10">10일</option>
+                        <option value="30">30일</option>
+                        <option value="60">60일</option>
+                        <option value="120">120일</option>
+                        <option value="252" selected>1년</option>
+                    </select>
+                </div>
+                <div class="ctrl-group">
+                    <label>시장</label>
+                    <select id="ms-market" onchange="onMissionMarketChange()">
+                        <option value="US">미국 주식</option>
+                        <option value="KRX">한국 주식</option>
+                        <option value="CRYPTO">코인 선물</option>
+                    </select>
+                </div>
+                <div class="ctrl-group" style="grid-column: span 2;">
+                    <label>종목</label>
+                    <div class="symbol-input-wrapper">
+                        <div class="symbol-tags" id="ms-symbol-tags"></div>
+                        <input type="text" id="ms-symbols-input" placeholder="종목 검색..." autocomplete="off"
+                               oninput="onSymbolInput()" onfocus="onSymbolInput()" style="width:100%;">
+                        <div class="symbol-dropdown" id="ms-symbol-dropdown"></div>
+                        <input type="hidden" id="ms-symbols" value="AAPL,TSLA,META">
+                    </div>
+                </div>
+
+                <!-- Row 3: Additional -->
+                <div class="ctrl-group">
+                    <label>시작 금액</label>
+                    <input type="number" id="ms-capital" value="100000">
+                </div>
+                <div class="ctrl-group">
+                    <label>롱/숏</label>
+                    <select id="ms-short">
+                        <option value="false">롱만</option>
+                        <option value="true">롱+숏</option>
+                    </select>
+                </div>
+                <div class="ctrl-group">
+                    <label>최대 반복</label>
+                    <input type="number" id="ms-max-iter" value="0" min="0" max="99999" title="0=무한">
+                </div>
+                <div class="ctrl-group">
+                    <button class="btn btn-start" id="ms-start"
+                            onclick="startMission()">임무 시작</button>
+                    <button class="btn" id="ms-stop" style="background:var(--red); color:#fff; display:none;"
+                            onclick="stopMission()">중단</button>
+                </div>
+            </div>
+
+            <!-- Memory Status -->
+            <div id="ms-memory-status" style="margin-top:0.8rem; padding:0.7rem; background:var(--bg-input); border-radius:6px; font-size:0.82rem; display:none;">
+                <div style="color:var(--green); font-weight:600; margin-bottom:0.3rem;">AI 학습 메모리</div>
+                <div id="ms-memory-info" style="color:var(--text-secondary);"></div>
+            </div>
+
+            <!-- Mission Status -->
+            <div id="ms-status" style="display:none; margin-top:1rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <span id="ms-status-text" style="font-weight:600;"></span>
+                    <span id="ms-iter-count" style="color:var(--text-secondary);"></span>
+                </div>
+
+                <!-- Objective Progress Bars -->
+                <div id="ms-objectives" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; margin-bottom:0.8rem;">
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-secondary);">승률</div>
+                        <div class="progress-bar"><div id="ms-wr-bar" class="progress-fill" style="width:0%"></div></div>
+                        <div style="font-size:0.75rem;"><span id="ms-wr-val">0</span>% / <span id="ms-wr-target">60</span>%</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-secondary);">수익률</div>
+                        <div class="progress-bar"><div id="ms-ret-bar" class="progress-fill" style="width:0%"></div></div>
+                        <div style="font-size:0.75rem;"><span id="ms-ret-val">0</span>% / <span id="ms-ret-target">4</span>%</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-secondary);">점수</div>
+                        <div class="progress-bar"><div id="ms-sc-bar" class="progress-fill" style="width:0%"></div></div>
+                        <div style="font-size:0.75rem;"><span id="ms-sc-val">0</span> / <span id="ms-sc-target">10</span></div>
+                    </div>
+                </div>
+
+                <!-- Best So Far -->
+                <div id="ms-best" style="font-size:0.82rem; padding:0.5rem; background:var(--bg-input); border-radius:4px; margin-bottom:0.8rem;"></div>
+
+                <!-- Mission Charts -->
+                <div class="small-charts-row" style="margin-bottom:0.8rem;">
+                    <div class="bt-card" style="margin-bottom:0; padding:0.6rem;">
+                        <div class="bt-card-title">점수 추이</div>
+                        <div class="small-chart-box" id="ms-score-chart-box">
+                            <canvas id="ms-score-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="bt-card" style="margin-bottom:0; padding:0.6rem;">
+                        <div class="bt-card-title">최고 점수 추적</div>
+                        <div class="small-chart-box" id="ms-best-chart-box">
+                            <canvas id="ms-best-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strategy Bar Chart -->
+                <div class="bt-card" style="margin-bottom:0.8rem; padding:0.6rem;">
+                    <div class="bt-card-title">전략별 점수 비교</div>
+                    <div class="bar-chart-container" id="ms-strategy-bars"></div>
+                </div>
+
+                <!-- Live Iteration Log (scrollable) -->
+                <div id="ms-log" style="max-height:300px; overflow-y:auto; font-size:0.78rem; font-family:monospace;"></div>
+            </div>
+
+            <!-- Final Result -->
+            <div id="ms-final" style="display:none; margin-top:1rem;"></div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- 멀티 전략 벤치마크 (실시간 비주얼) -->
+        <!-- ============================================ -->
+        <div class="bt-card" style="margin-top:1.5rem; border-color:var(--accent);">
+            <div class="bt-card-title" style="color:var(--accent);">멀티 전략 벤치마크</div>
+            <div class="multi-select-section" style="margin-bottom:0.8rem;">
+                <div class="multi-select-box" style="flex:2; max-width:480px;">
+                    <div class="ms-header">
+                        <span class="ms-title">벤치마크 종목</span>
+                        <button class="ms-toggle-all" onclick="toggleAllInBox(this, 'bm-symbol-items')">전체선택</button>
+                    </div>
+                    <div class="ms-items" id="bm-symbol-items">
+                        <label><input type="checkbox" value="AAPL" checked> AAPL</label>
+                        <label><input type="checkbox" value="MSFT" checked> MSFT</label>
+                        <label><input type="checkbox" value="TSLA" checked> TSLA</label>
+                    </div>
+                    <div class="ms-count" id="bm-symbol-count">3개 선택됨</div>
+                </div>
+                <div class="multi-select-box" style="flex:2; max-width:480px;">
+                    <div class="ms-header">
+                        <span class="ms-title">벤치마크 전략</span>
+                        <button class="ms-toggle-all" onclick="toggleAllInBox(this, 'bm-strategy-items')">전체선택</button>
+                    </div>
+                    <div class="ms-items" id="bm-strategy-items">
+                        <label><input type="checkbox" value="macd" checked> MACD</label>
+                        <label><input type="checkbox" value="bollinger" checked> Bollinger</label>
+                    </div>
+                    <div class="ms-count" id="bm-strategy-count">2개 선택됨</div>
+                </div>
+            </div>
+            <div class="controls-grid" style="margin-bottom:0.8rem;">
+                <div class="ctrl-group">
+                    <label>기간</label>
+                    <select id="bm-period">
+                        <option value="30">30일</option>
+                        <option value="60">60일</option>
+                        <option value="120">120일</option>
+                        <option value="180">180일</option>
+                        <option value="252" selected>1년</option>
+                    </select>
+                </div>
+                <div class="ctrl-group">
+                    <button class="btn btn-start" id="bm-start" onclick="startBenchmark()">벤치마크 시작</button>
+                </div>
+            </div>
+            <!-- Hidden inputs for backward compat -->
+            <input type="hidden" id="bm-strategies" value="macd,bollinger">
+            <input type="hidden" id="bm-symbols" value="AAPL,MSFT,TSLA">
+
+            <!-- 실시간 진행 바 -->
+            <div id="bm-progress-wrap" style="display:none; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-secondary); margin-bottom:0.3rem;">
+                    <span id="bm-progress-label">준비 중...</span>
+                    <span id="bm-progress-pct">0%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="bm-progress-fill" style="width:0%"></div></div>
+            </div>
+
+            <!-- 실시간 레이스 차트 (전략별 점수 막대) -->
+            <div id="bm-race" style="display:none;"></div>
+
+            <!-- 결과 테이블 -->
+            <div id="bm-results" style="display:none; margin-top:1rem;">
+                <table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
+                    <thead>
+                        <tr style="border-bottom:1px solid var(--border-dark);">
+                            <th style="text-align:left; padding:0.5rem;">순위</th>
+                            <th style="text-align:left; padding:0.5rem;">전략</th>
+                            <th style="text-align:left; padding:0.5rem;">종목</th>
+                            <th style="text-align:right; padding:0.5rem;">거래</th>
+                            <th style="text-align:right; padding:0.5rem;">승률</th>
+                            <th style="text-align:right; padding:0.5rem;">실현수익</th>
+                            <th style="text-align:right; padding:0.5rem;">미실현</th>
+                            <th style="text-align:right; padding:0.5rem;">점수</th>
+                            <th style="text-align:right; padding:0.5rem;">보유</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bm-results-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============================================
+    // 공통 유틸리티
+    // ============================================
+    function drawLineChart(canvasId, data, color, label, formatFn) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        var box = canvas.parentElement;
+        canvas.width = box.clientWidth;
+        canvas.height = box.clientHeight;
+        var ctx = canvas.getContext("2d");
+        var w = canvas.width;
+        var h = canvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        if (data.length < 2) {
+            ctx.fillStyle = "#8a8f9e";
+            ctx.font = "12px sans-serif";
+            ctx.fillText("데이터 대기 중...", w / 2 - 50, h / 2);
+            return;
+        }
+
+        var values = data.map(function(d) { return d.value; });
+        var minV = Math.min.apply(null, values);
+        var maxV = Math.max.apply(null, values);
+        var range = maxV - minV || 1;
+        var padY = 20;
+        var padX = 10;
+        var chartW = w - padX * 2;
+        var chartH = h - padY * 2;
+
+        // Grid lines
+        ctx.strokeStyle = "#2a2d3a";
+        ctx.lineWidth = 0.5;
+        for (var g = 0; g < 4; g++) {
+            var gy = padY + (chartH / 3) * g;
+            ctx.beginPath();
+            ctx.moveTo(padX, gy);
+            ctx.lineTo(w - padX, gy);
+            ctx.stroke();
+        }
+
+        // Line
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (var i = 0; i < data.length; i++) {
+            var x = padX + (i / (data.length - 1)) * chartW;
+            var y = padY + chartH - ((data[i].value - minV) / range) * chartH;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Fill area
+        ctx.lineTo(padX + chartW, padY + chartH);
+        ctx.lineTo(padX, padY + chartH);
+        ctx.closePath();
+        ctx.fillStyle = color.replace(")", ",0.1)").replace("rgb", "rgba");
+        ctx.fill();
+
+        // Labels
+        ctx.fillStyle = "#8a8f9e";
+        ctx.font = "10px sans-serif";
+        ctx.fillText(formatFn ? formatFn(maxV) : maxV.toFixed(0), padX + 2, padY - 4);
+        ctx.fillText(formatFn ? formatFn(minV) : minV.toFixed(0), padX + 2, h - 4);
+
+        // Current value
+        var lastVal = values[values.length - 1];
+        ctx.fillStyle = color;
+        ctx.font = "bold 11px sans-serif";
+        ctx.fillText(formatFn ? formatFn(lastVal) : lastVal.toFixed(0), w - padX - 60, padY - 4);
+    }
+
+    // ============================================
+    // 종목 자동완성
+    // ============================================
+    var _allSymbolsByMarket = {};
+    var _selectedSymbols = ["AAPL", "TSLA", "META"];
+    var _debounceTimer = null;
+
+    function loadSymbolsData() {
+        fetch("/api/symbols").then(function(r) { return r.json(); }).then(function(data) {
+            if (data.markets) {
+                _allSymbolsByMarket = data.markets;
+                // Populate benchmark symbol lists
+                var allSymbols = [];
+                for (var mkt in data.markets) {
+                    allSymbols = allSymbols.concat(data.markets[mkt]);
+                }
+                var bmDefaults = ["AAPL", "MSFT", "TSLA"];
+                populateChecklist("bm-symbol-items", allSymbols, bmDefaults);
+                updateCount("bm-symbol-items", "bm-symbol-count");
+            }
+            // Set initial symbols based on current market selection
+            onMissionMarketChange();
+        }).catch(function() {});
+    }
+
+    // Default top symbols per market
+    var _defaultSymbols = {
+        "US": ["AAPL", "MSFT", "TSLA"],
+        "KRX": ["005930", "000660", "035420"],  // Samsung, SK Hynix, NAVER
+        "CRYPTO": ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+    };
+
+    function onMissionMarketChange() {
+        var market = document.getElementById("ms-market").value;
+        var dropdown = document.getElementById("ms-symbol-dropdown");
+        dropdown.classList.remove("active");
+
+        // Auto-select top 3 symbols for this market
+        var symbols = _allSymbolsByMarket[market] || [];
+        var defaults = _defaultSymbols[market] || [];
+
+        // Use defaults if available in data, otherwise take first 3 from data
+        var selected = [];
+        for (var i = 0; i < defaults.length && selected.length < 3; i++) {
+            if (symbols.length === 0 || symbols.indexOf(defaults[i]) >= 0) {
+                selected.push(defaults[i]);
+            }
+        }
+        if (selected.length < 3) {
+            for (var j = 0; j < symbols.length && selected.length < 3; j++) {
+                if (selected.indexOf(symbols[j]) < 0) {
+                    selected.push(symbols[j]);
+                }
+            }
+        }
+        if (selected.length === 0) selected = defaults;
+
+        _selectedSymbols = selected;
+        updateSymbolsHidden();
+        renderSymbolTags();
+    }
+
+    function getFilteredSymbols(query) {
+        var market = document.getElementById("ms-market").value;
+        var symbols = _allSymbolsByMarket[market] || [];
+        if (!query) return symbols.slice(0, 20);
+        query = query.toUpperCase();
+        return symbols.filter(function(s) {
+            return s.toUpperCase().indexOf(query) >= 0;
+        }).slice(0, 20);
+    }
+
+    function onSymbolInput() {
+        clearTimeout(_debounceTimer);
+        _debounceTimer = setTimeout(function() {
+            var input = document.getElementById("ms-symbols-input");
+            var dropdown = document.getElementById("ms-symbol-dropdown");
+            var query = input.value.trim();
+            var filtered = getFilteredSymbols(query);
+
+            if (filtered.length === 0) {
+                dropdown.classList.remove("active");
+                return;
+            }
+
+            var html = "";
+            for (var i = 0; i < filtered.length; i++) {
+                var s = filtered[i];
+                var already = _selectedSymbols.indexOf(s) >= 0;
+                html += '<div class="symbol-dropdown-item" style="' +
+                    (already ? 'opacity:0.4;' : '') +
+                    '" onclick="selectSymbol(\'' + s + '\')">' + s +
+                    (already ? ' (선택됨)' : '') + '</div>';
+            }
+            dropdown.innerHTML = html;
+            dropdown.classList.add("active");
+        }, 150);
+    }
+
+    function selectSymbol(symbol) {
+        if (_selectedSymbols.indexOf(symbol) >= 0) return;
+        _selectedSymbols.push(symbol);
+        updateSymbolsHidden();
+        renderSymbolTags();
+        document.getElementById("ms-symbols-input").value = "";
+        document.getElementById("ms-symbol-dropdown").classList.remove("active");
+    }
+
+    function removeSymbol(symbol) {
+        _selectedSymbols = _selectedSymbols.filter(function(s) { return s !== symbol; });
+        updateSymbolsHidden();
+        renderSymbolTags();
+    }
+
+    function updateSymbolsHidden() {
+        document.getElementById("ms-symbols").value = _selectedSymbols.join(",");
+    }
+
+    function renderSymbolTags() {
+        var container = document.getElementById("ms-symbol-tags");
+        var html = "";
+        for (var i = 0; i < _selectedSymbols.length; i++) {
+            var s = _selectedSymbols[i];
+            html += '<span class="symbol-tag">' + s +
+                '<span class="remove-tag" onclick="removeSymbol(\'' + s + '\')">x</span></span>';
+        }
+        container.innerHTML = html;
+    }
+
+    // Close dropdown on click outside
+    document.addEventListener("click", function(e) {
+        var wrapper = document.querySelector(".symbol-input-wrapper");
+        if (wrapper && !wrapper.contains(e.target)) {
+            document.getElementById("ms-symbol-dropdown").classList.remove("active");
+        }
+    });
+
+    // ============================================
+    // 거래 유형 변경 시 기본값 조정
+    // ============================================
+    function onIntervalChange() {
+        var interval = document.getElementById("ms-interval").value;
+        var daysSelect = document.getElementById("ms-days");
+        var presets = {
+            "1d":  { days: "252", score: "10", ret: "4",  start: "2024-01-02" },
+            "4h":  { days: "60",  score: "5",  ret: "2",  start: "2025-01-01" },
+            "1h":  { days: "30",  score: "5",  ret: "2",  start: "2025-01-01" },
+            "30m": { days: "14",  score: "3",  ret: "1",  start: "2025-06-01" },
+            "15m": { days: "10",  score: "3",  ret: "1",  start: "2026-03-01" },
+            "5m":  { days: "5",   score: "2",  ret: "0.5",start: "2026-03-01" },
+            "1m":  { days: "5",   score: "2",  ret: "0.5",start: "2026-03-01" },
+        };
+        var p = presets[interval] || presets["1h"];
+        daysSelect.value = p.days;
+        document.getElementById("ms-score").value = p.score;
+        document.getElementById("ms-return").value = p.ret;
+        document.getElementById("ms-start-date").value = p.start;
+    }
+
+    // ============================================
+    // 임무 수행
+    // ============================================
+    var msState = {
+        running: false,
+        scoreHistory: [],
+        bestScoreHistory: [],
+        strategyScores: {}  // strategy -> best score
+    };
+
+    // Load memory status on page load
+    function loadMemoryStatus() {
+        fetch("/api/memory-status").then(function(resp) {
+            return resp.json();
+        }).then(function(data) {
+            if (data.sessions_count > 0) {
+                var statusDiv = document.getElementById("ms-memory-status");
+                var infoDiv = document.getElementById("ms-memory-info");
+                var lines = [];
+                lines.push("학습 세션: " + data.sessions_count + "회 | 시도한 조합: " + data.total_tried + "개");
+                if (data.first_score !== undefined && data.best_score !== undefined) {
+                    var improv = data.best_score - data.first_score;
+                    var improvPct = data.first_score !== 0 ? ((improv / Math.abs(data.first_score)) * 100).toFixed(0) : "N/A";
+                    lines.push("최초 점수: " + data.first_score.toFixed(1) + " -> 현재 최고: " + data.best_score.toFixed(1) + " (개선 +" + improvPct + "%)");
+                }
+                lines.push("학습한 실수: " + data.mistakes_count + "건 | 발견한 인사이트: " + data.insights_count + "건");
+                infoDiv.innerHTML = lines.join("<br>");
+                statusDiv.style.display = "block";
+            }
+        }).catch(function() {});
+    }
+
+    function startMission() {
+        if (msState.running) return;
+        msState.running = true;
+        msState.scoreHistory = [];
+        msState.bestScoreHistory = [];
+        msState.strategyScores = {};
+
+        var targetWinRate = parseFloat(document.getElementById("ms-win-rate").value) / 100;
+        var targetReturn = parseFloat(document.getElementById("ms-return").value);
+        var targetScore = parseFloat(document.getElementById("ms-score").value);
+        var days = parseInt(document.getElementById("ms-days").value);
+        var market = document.getElementById("ms-market").value;
+        var symbols = document.getElementById("ms-symbols").value;
+        var capital = parseInt(document.getElementById("ms-capital").value);
+        var msInterval = document.getElementById("ms-interval").value;
+        var startDate = document.getElementById("ms-start-date").value;
+        var allowShort = document.getElementById("ms-short").value;
+        var maxIter = parseInt(document.getElementById("ms-max-iter").value);
+
+        // Update target displays
+        document.getElementById("ms-wr-target").textContent = (targetWinRate * 100).toFixed(0);
+        document.getElementById("ms-ret-target").textContent = targetReturn;
+        document.getElementById("ms-sc-target").textContent = targetScore;
+
+        document.getElementById("ms-start").disabled = true;
+        document.getElementById("ms-start").textContent = "임무 수행 중...";
+        document.getElementById("ms-status").style.display = "block";
+        document.getElementById("ms-final").style.display = "none";
+        document.getElementById("ms-log").innerHTML = "";
+        document.getElementById("ms-best").innerHTML = "";
+        document.getElementById("ms-strategy-bars").innerHTML = "";
+        document.getElementById("ms-wr-bar").style.width = "0%";
+        document.getElementById("ms-ret-bar").style.width = "0%";
+        document.getElementById("ms-sc-bar").style.width = "0%";
+        document.getElementById("ms-wr-val").textContent = "0";
+        document.getElementById("ms-ret-val").textContent = "0";
+        document.getElementById("ms-sc-val").textContent = "0";
+
+        fetch("/api/mission", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                target_win_rate: targetWinRate,
+                target_return_pct: targetReturn,
+                target_score: targetScore,
+                days: days,
+                market: market,
+                symbols: symbols,
+                capital: capital,
+                allow_short: allowShort,
+                max_iterations: maxIter,
+                interval: msInterval,
+                start_date: startDate
+            })
+        }).then(function(resp) {
+            if (!resp.ok) {
+                document.getElementById("ms-log").innerHTML +=
+                    '<div style="color:var(--red);">서버 오류: HTTP ' + resp.status + '</div>';
+                finishMission();
+                return;
+            }
+            var reader = resp.body.getReader();
+            msState.reader = reader;
+            document.getElementById("ms-stop").style.display = "inline-block";
+            var decoder = new TextDecoder();
+            var buffer = "";
+
+            function read() {
+                reader.read().then(function(result) {
+                    if (result.done) {
+                        finishMission();
+                        return;
+                    }
+                    buffer += decoder.decode(result.value, {stream: true});
+                    var lines = buffer.split("\n");
+                    buffer = lines.pop();
+
+                    for (var i = 0; i < lines.length; i++) {
+                        var line = lines[i].trim();
+                        if (line.startsWith("data: ")) {
+                            try {
+                                var evt = JSON.parse(line.substring(6));
+                                processMissionEvent(evt);
+                            } catch(e) {}
+                        }
+                    }
+                    read();
+                }).catch(function(err) {
+                    finishMission();
+                });
+            }
+            read();
+        }).catch(function(err) {
+            finishMission();
+        });
+    }
+
+    function processMissionEvent(evt) {
+        if (evt.error) {
+            document.getElementById("ms-log").innerHTML +=
+                '<div style="color:var(--red);">오류: ' + evt.error + '</div>';
+            finishMission();
+            return;
+        }
+
+        if (evt.done) {
+            var finalDiv = document.getElementById("ms-final");
+            var best = evt.best || {};
+            var bestWr = ((best.win_rate || 0) * 100).toFixed(1);
+            var scoreColor = (best.score || 0) >= 0 ? 'var(--green)' : 'var(--red)';
+            var missionLabel = evt.mission_complete ? '임무 완수!' : '임무 미완료';
+            var missionColor = evt.mission_complete ? 'var(--green)' : 'var(--yellow)';
+
+            var paramsStr = '';
+            if (best.params) {
+                var keys = Object.keys(best.params);
+                for (var k = 0; k < keys.length; k++) {
+                    if (k > 0) paramsStr += ', ';
+                    paramsStr += keys[k] + '=' + best.params[keys[k]];
+                }
+            }
+
+            var cumulativeHtml = '';
+            if (evt.cumulative) {
+                var c = evt.cumulative;
+                cumulativeHtml =
+                    '<div style="margin-top:0.8rem; padding:0.6rem; background:var(--bg-input); border-radius:6px; font-size:0.8rem;">' +
+                    '<div style="color:var(--green); font-weight:600; margin-bottom:0.3rem;">누적 학습 현황</div>' +
+                    '<div style="color:var(--text-secondary);">' +
+                    '학습 세션: ' + c.sessions + '회 | 시도한 조합: ' + c.total_tried + '개<br>' +
+                    '학습한 실수: ' + c.mistakes_learned + '건 | 발견한 인사이트: ' + c.insights_found + '건' +
+                    '</div></div>';
+            }
+
+            finalDiv.innerHTML =
+                '<div class="bt-card" style="border-color:' + missionColor + '; padding:1rem;">' +
+                '<div style="font-size:1rem; font-weight:700; color:' + missionColor + '; margin-bottom:0.5rem;">' + missionLabel + '</div>' +
+                '<div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.5rem; font-size:0.85rem; margin-bottom:0.8rem;">' +
+                '<div><span style="color:var(--text-secondary);">최고 전략:</span> <span style="font-weight:700;">' + (best.strategy || '-') + '</span></div>' +
+                '<div><span style="color:var(--text-secondary);">최고 점수:</span> <span style="color:' + scoreColor + '; font-weight:700;">' + (best.score || 0).toFixed(1) + '</span></div>' +
+                '<div><span style="color:var(--text-secondary);">최고 승률:</span> <span style="font-weight:700;">' + bestWr + '%</span></div>' +
+                '<div><span style="color:var(--text-secondary);">수익률:</span> <span style="font-weight:700;">' + (best.return_pct || 0).toFixed(2) + '%</span></div>' +
+                '</div>' +
+                '<div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.3rem;">반복: ' + (evt.iterations_used || 0) + '회 | 전략: ' + (evt.strategies_tried || 0) + '개 | 파라미터 조합: ' + (evt.params_tried || 0) + '개</div>' +
+                '<div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.5rem;">최적 파라미터: <span style="color:var(--text-primary);">' + paramsStr + '</span></div>' +
+                cumulativeHtml +
+                '</div>';
+            finalDiv.style.display = "block";
+
+            // Update status text
+            document.getElementById("ms-status-text").textContent = evt.mission_complete ? "임무 완수!" : "임무 종료";
+            document.getElementById("ms-status-text").style.color = missionColor;
+            loadMemoryStatus();
+            finishMission();
+            return;
+        }
+
+        // Iteration event
+        var iter = evt.iteration;
+        var maxIter = evt.max_iterations;
+        var obj = evt.objectives_met || {};
+        var wrMet = obj.win_rate;
+        var retMet = obj.return_pct;
+        var scMet = obj.score;
+
+        // Update status
+        document.getElementById("ms-status-text").textContent = evt.status;
+        document.getElementById("ms-status-text").style.color = "var(--text-primary)";
+        document.getElementById("ms-iter-count").textContent = iter + " / " + maxIter;
+
+        // Update progress bars (use best_so_far values)
+        var bestSoFar = evt.best_so_far || {};
+        var targetWr = parseFloat(document.getElementById("ms-wr-target").textContent);
+        var targetRet = parseFloat(document.getElementById("ms-ret-target").textContent);
+        var targetSc = parseFloat(document.getElementById("ms-sc-target").textContent);
+
+        var curWr = (bestSoFar.win_rate || 0) * 100;
+        var curRet = bestSoFar.return_pct || 0;
+        var curSc = bestSoFar.score || 0;
+
+        document.getElementById("ms-wr-val").textContent = curWr.toFixed(1);
+        document.getElementById("ms-ret-val").textContent = curRet.toFixed(2);
+        document.getElementById("ms-sc-val").textContent = curSc.toFixed(1);
+
+        var wrPct = targetWr > 0 ? Math.min(100, (curWr / targetWr) * 100) : 0;
+        var retPct = targetRet > 0 ? Math.min(100, (Math.max(0, curRet) / targetRet) * 100) : 0;
+        var scPct = targetSc > 0 ? Math.min(100, (Math.max(0, curSc) / targetSc) * 100) : 0;
+
+        document.getElementById("ms-wr-bar").style.width = wrPct + "%";
+        document.getElementById("ms-wr-bar").style.background = wrMet ? "var(--green)" : "var(--accent)";
+        document.getElementById("ms-ret-bar").style.width = retPct + "%";
+        document.getElementById("ms-ret-bar").style.background = retMet ? "var(--green)" : "var(--accent)";
+        document.getElementById("ms-sc-bar").style.width = scPct + "%";
+        document.getElementById("ms-sc-bar").style.background = scMet ? "var(--green)" : "var(--accent)";
+
+        // Update best so far
+        document.getElementById("ms-best").innerHTML =
+            '<span style="color:var(--text-secondary);">현재 최고:</span> ' +
+            '<span style="font-weight:600;">' + (bestSoFar.strategy || '-') + '</span>' +
+            ' | 점수 <span style="color:' + ((bestSoFar.score || 0) >= 0 ? 'var(--green)' : 'var(--red)') + '; font-weight:600;">' + (bestSoFar.score || 0).toFixed(1) + '</span>' +
+            ' | 승률 ' + ((bestSoFar.win_rate || 0) * 100).toFixed(1) + '%' +
+            ' | 수익률 ' + (bestSoFar.return_pct || 0).toFixed(2) + '%';
+
+        // --- Chart data accumulation (sliding window: max 200 points) ---
+        var CHART_MAX = 200;
+        msState.scoreHistory.push({ iter: iter, value: evt.score });
+        if (msState.scoreHistory.length > CHART_MAX) {
+            msState.scoreHistory = msState.scoreHistory.slice(-CHART_MAX);
+        }
+
+        var prevBest = msState.bestScoreHistory.length > 0 ?
+            msState.bestScoreHistory[msState.bestScoreHistory.length - 1].value : -Infinity;
+        msState.bestScoreHistory.push({
+            iter: iter,
+            value: Math.max(prevBest, evt.score)
+        });
+        if (msState.bestScoreHistory.length > CHART_MAX) {
+            msState.bestScoreHistory = msState.bestScoreHistory.slice(-CHART_MAX);
+        }
+
+        // Track strategy best scores for bar chart
+        var strat = evt.strategy;
+        if (!msState.strategyScores[strat] || evt.score > msState.strategyScores[strat]) {
+            msState.strategyScores[strat] = evt.score;
+        }
+
+        // Update charts (throttle: every 3 iterations for performance)
+        if (iter % 3 === 0 || iter <= 10) {
+            drawLineChart("ms-score-canvas", msState.scoreHistory, "rgb(245,158,11)", "Score",
+                function(v) { return v.toFixed(1) + " pts"; });
+            drawLineChart("ms-best-canvas", msState.bestScoreHistory, "rgb(34,197,94)", "Best",
+                function(v) { return v.toFixed(1) + " pts"; });
+            updateStrategyBarChart();
+        }
+
+        // Add log line
+        var wrDisplay = (evt.win_rate * 100).toFixed(0);
+        var marks = "";
+        marks += wrMet ? '<span style="color:var(--green);">V</span>' : '<span style="color:var(--red);">X</span>';
+        marks += retMet ? '<span style="color:var(--green);">V</span>' : '<span style="color:var(--red);">X</span>';
+        marks += scMet ? '<span style="color:var(--green);">V</span>' : '<span style="color:var(--red);">X</span>';
+
+        var stratLabel = evt.strategy;
+        if (evt.params_summary) {
+            stratLabel += "(" + evt.params_summary + ")";
+        }
+        while (stratLabel.length < 20) stratLabel += " ";
+        stratLabel = stratLabel.substring(0, 25);
+
+        var allMet = wrMet && retMet && scMet;
+        var statusLabel = allMet ? '<span style="color:var(--green); font-weight:700;">임무 완수!</span>' : evt.status;
+
+        // Buy/sell or long/short counts + risk/reward ratio
+        var tradeDetail = (evt.buys !== undefined) ?
+            '<span style="color:var(--green);">L' + evt.buys + '</span>/<span style="color:var(--red);">S' + evt.sells + '</span> ' :
+            '';
+        var rrDisplay = evt.rr_ratio ? 'RR:' + evt.rr_ratio.toFixed(1) + ' ' : '';
+
+        var logLine = '<div style="padding:2px 0; border-bottom:1px solid var(--border-dark);">' +
+            '<span style="color:var(--text-secondary);">[' + iter + '/' + maxIter + ']</span> ' +
+            '<span style="color:var(--accent);">' + stratLabel + '</span>' +
+            ' ' + evt.trades + '거래 ' + tradeDetail + evt.wins + '승' + evt.losses + '패 ' + rrDisplay +
+            '<span style="color:' + (evt.win_rate >= 0.5 ? 'var(--green)' : 'var(--red)') + ';">' + wrDisplay + '%</span> ' +
+            '<span style="color:' + (evt.score >= 0 ? 'var(--green)' : 'var(--red)') + ';">' + (evt.score >= 0 ? '+' : '') + evt.score.toFixed(1) + 'pts</span> ' +
+            marks + ' ' + statusLabel +
+            '</div>';
+        var logDiv = document.getElementById("ms-log");
+        logDiv.innerHTML += logLine;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function updateStrategyBarChart() {
+        var entries = [];
+        for (var key in msState.strategyScores) {
+            entries.push({ name: key, score: msState.strategyScores[key] });
+        }
+        entries.sort(function(a, b) { return b.score - a.score; });
+
+        var maxAbs = 1;
+        entries.forEach(function(e) { if (Math.abs(e.score) > maxAbs) maxAbs = Math.abs(e.score); });
+
+        var html = '';
+        entries.forEach(function(e, i) {
+            var pct = Math.abs(e.score) / maxAbs * 100;
+            var color = e.score >= 0 ? 'var(--green)' : 'var(--red)';
+            html += '<div style="display:flex; align-items:center; margin-bottom:0.3rem; font-size:0.78rem;">'
+                + '<span style="width:18px; color:var(--yellow); font-weight:700;">' + (i + 1) + '</span>'
+                + '<span style="width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + e.name + '</span>'
+                + '<div style="flex:1; height:18px; background:var(--bg-input); border-radius:3px; margin:0 6px; position:relative;">'
+                + '<div style="height:100%; width:' + pct + '%; background:' + color + '; border-radius:3px; transition:width 0.3s;"></div>'
+                + '</div>'
+                + '<span style="width:55px; text-align:right; font-weight:600; color:' + color + ';">' + e.score.toFixed(1) + '</span>'
+                + '</div>';
+        });
+        document.getElementById("ms-strategy-bars").innerHTML = html;
+    }
+
+    function stopMission() {
+        if (msState.reader) {
+            msState.reader.cancel();
+            msState.reader = null;
+        }
+        finishMission();
+    }
+
+    function finishMission() {
+        msState.running = false;
+        msState.reader = null;
+        document.getElementById("ms-start").disabled = false;
+        document.getElementById("ms-start").textContent = "임무 시작";
+        document.getElementById("ms-stop").style.display = "none";
+    }
+    </script>
+
+    <script>
+    // ============================================
+    // 벤치마크 실시간 비주얼
+    // ============================================
+    var bmState = { running: false, results: [], total: 0, done: 0 };
+
+    function startBenchmark() {
+        if (bmState.running) return;
+        bmState.running = true;
+        bmState.results = [];
+        bmState.done = 0;
+
+        var strategies = getCheckedValues("bm-strategy-items");
+        var symbols = getCheckedValues("bm-symbol-items");
+        document.getElementById("bm-strategies").value = strategies.join(",");
+        document.getElementById("bm-symbols").value = symbols.join(",");
+        var days = parseInt(document.getElementById("bm-period").value);
+
+        var combos = [];
+        strategies.forEach(function(st) {
+            symbols.forEach(function(sym) {
+                combos.push({strategy: st, symbol: sym});
+            });
+        });
+        bmState.total = combos.length;
+
+        document.getElementById("bm-start").disabled = true;
+        document.getElementById("bm-start").textContent = "실행 중...";
+        document.getElementById("bm-progress-wrap").style.display = "block";
+        document.getElementById("bm-race").style.display = "block";
+        document.getElementById("bm-results").style.display = "none";
+
+        var idx = 0;
+        function runNext() {
+            if (idx >= combos.length) {
+                finishBenchmark();
+                return;
+            }
+            var combo = combos[idx];
+            document.getElementById("bm-progress-label").textContent =
+                "[" + (idx+1) + "/" + combos.length + "] " + combo.strategy + " @ " + combo.symbol;
+
+            fetch("/api/backtest/stream", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    market: "US", symbols: combo.symbol,
+                    strategy: combo.strategy, start_date: "2024-01-02",
+                    days: days, capital: 100000
+                })
+            }).then(function(resp) { return resp.text(); }).then(function(text) {
+                var lines = text.trim().split("\n");
+                var lastData = null;
+                var completedTrades = [];
+                for (var i = lines.length - 1; i >= 0; i--) {
+                    if (lines[i].startsWith("data: ")) {
+                        try {
+                            var d = JSON.parse(lines[i].substring(6));
+                            if (d.done) {
+                                lastData = d;
+                            } else if (!lastData) {
+                                lastData = d;
+                            }
+                            if (d.completed_trades && d.completed_trades.length > 0) {
+                                completedTrades = completedTrades.concat(d.completed_trades);
+                            }
+                        } catch(e) {}
+                    }
+                }
+
+                var score = 0, wins = 0, losses = 0, realizedPnl = 0;
+                completedTrades.forEach(function(ct) {
+                    var pnlPct = (ct.pnl || 0) / (ct.entry_price * ct.qty || 1);
+                    realizedPnl += (ct.pnl || 0);
+                    if (ct.pnl > 0) {
+                        wins++;
+                        score += 0.1 + Math.abs(pnlPct) * 10;
+                    } else {
+                        losses++;
+                        score += -0.2 - Math.abs(pnlPct) * 10;
+                    }
+                });
+
+                var totalTrades = wins + losses;
+                var unrealizedPnl = lastData ? (lastData.portfolio_value || 100000) - 100000 - realizedPnl : 0;
+                var openPos = lastData && lastData.positions ? Object.keys(lastData.positions).length : 0;
+
+                bmState.results.push({
+                    strategy: combo.strategy,
+                    symbol: combo.symbol,
+                    trades: totalTrades,
+                    wins: wins, losses: losses,
+                    winRate: totalTrades > 0 ? wins / totalTrades : 0,
+                    score: score,
+                    realizedPct: realizedPnl / 1000,
+                    unrealizedPct: unrealizedPnl / 1000,
+                    openPos: openPos
+                });
+
+                bmState.done++;
+                var pct = Math.round(bmState.done / bmState.total * 100);
+                document.getElementById("bm-progress-pct").textContent = pct + "%";
+                document.getElementById("bm-progress-fill").style.width = pct + "%";
+                updateRaceChart();
+
+                idx++;
+                runNext();
+            }).catch(function(err) {
+                bmState.results.push({
+                    strategy: combo.strategy, symbol: combo.symbol,
+                    trades: 0, wins: 0, losses: 0, winRate: 0, score: 0,
+                    realizedPct: 0, unrealizedPct: 0, openPos: 0, error: true
+                });
+                bmState.done++;
+                idx++;
+                runNext();
+            });
+        }
+        runNext();
+    }
+
+    function updateRaceChart() {
+        var scoreMap = {};
+        bmState.results.forEach(function(r) {
+            if (!scoreMap[r.strategy]) scoreMap[r.strategy] = 0;
+            scoreMap[r.strategy] += r.score;
+        });
+        var entries = Object.keys(scoreMap).map(function(k){return {name:k, score:scoreMap[k]};});
+        entries.sort(function(a,b){return b.score - a.score;});
+
+        var maxAbs = 1;
+        entries.forEach(function(e){ if(Math.abs(e.score) > maxAbs) maxAbs = Math.abs(e.score); });
+
+        var html = '';
+        entries.forEach(function(e, i) {
+            var pct = Math.abs(e.score) / maxAbs * 100;
+            var color = e.score >= 0 ? 'var(--green)' : 'var(--red)';
+            var rank = i + 1;
+            html += '<div style="display:flex; align-items:center; margin-bottom:0.4rem; font-size:0.8rem;">'
+                + '<span style="width:20px; color:var(--yellow); font-weight:700;">' + rank + '</span>'
+                + '<span style="width:120px; overflow:hidden; text-overflow:ellipsis;">' + e.name + '</span>'
+                + '<div style="flex:1; height:20px; background:var(--bg-input); border-radius:3px; margin:0 8px; position:relative;">'
+                + '<div style="height:100%; width:' + pct + '%; background:' + color + '; border-radius:3px; transition:width 0.3s;"></div>'
+                + '</div>'
+                + '<span style="width:60px; text-align:right; font-weight:600; color:' + color + ';">' + e.score.toFixed(1) + '</span>'
+                + '</div>';
+        });
+        document.getElementById("bm-race").innerHTML = html;
+    }
+
+    function finishBenchmark() {
+        bmState.running = false;
+        document.getElementById("bm-start").disabled = false;
+        document.getElementById("bm-start").textContent = "벤치마크 시작";
+        document.getElementById("bm-progress-label").textContent = "완료!";
+
+        bmState.results.sort(function(a,b){return b.score - a.score;});
+        var tbody = document.getElementById("bm-results-body");
+        var html = '';
+        bmState.results.forEach(function(r, i) {
+            var wrStr = r.trades > 0 ? (r.winRate * 100).toFixed(0) + '%' : '-';
+            var realStr = r.realizedPct >= 0 ? '+' + r.realizedPct.toFixed(2) + '%' : r.realizedPct.toFixed(2) + '%';
+            var unrealStr = r.unrealizedPct >= 0 ? '+' + r.unrealizedPct.toFixed(2) + '%' : r.unrealizedPct.toFixed(2) + '%';
+            var scoreColor = r.score >= 0 ? 'var(--green)' : 'var(--red)';
+            var posStr = r.openPos > 0 ? r.openPos : '-';
+            html += '<tr style="border-bottom:1px solid var(--border-dark);">'
+                + '<td style="padding:0.4rem 0.5rem; color:var(--yellow); font-weight:700;">' + (i+1) + '</td>'
+                + '<td style="padding:0.4rem 0.5rem;">' + r.strategy + '</td>'
+                + '<td style="padding:0.4rem 0.5rem;">' + r.symbol + '</td>'
+                + '<td style="padding:0.4rem 0.5rem; text-align:right;">' + r.trades + '</td>'
+                + '<td style="padding:0.4rem 0.5rem; text-align:right;">' + wrStr + '</td>'
+                + '<td style="padding:0.4rem 0.5rem; text-align:right; color:' + (r.realizedPct >= 0 ? 'var(--green)' : 'var(--red)') + ';">' + realStr + '</td>'
+                + '<td style="padding:0.4rem 0.5rem; text-align:right; color:var(--text-secondary);">' + unrealStr + '</td>'
+                + '<td style="padding:0.4rem 0.5rem; text-align:right; font-weight:700; color:' + scoreColor + ';">' + r.score.toFixed(1) + '</td>'
+                + '<td style="padding:0.4rem 0.5rem; text-align:right;">' + posStr + '</td>'
+                + '</tr>';
+        });
+        tbody.innerHTML = html;
+        document.getElementById("bm-results").style.display = "block";
+    }
+    </script>
+
+    <script>
+    // ============================================
+    // 멀티 셀렉트 공통 헬퍼 함수
+    // ============================================
+    function getCheckedValues(containerId) {
+        var items = document.querySelectorAll('#' + containerId + ' input[type="checkbox"]:checked');
+        var vals = [];
+        for (var i = 0; i < items.length; i++) vals.push(items[i].value);
+        return vals;
+    }
+
+    function updateCount(itemsId, countId) {
+        var checked = document.querySelectorAll('#' + itemsId + ' input:checked').length;
+        var el = document.getElementById(countId);
+        if (el) el.textContent = checked + '개 선택됨';
+    }
+
+    function toggleAllInBox(btn, itemsId) {
+        var checkboxes = document.querySelectorAll('#' + itemsId + ' input[type="checkbox"]');
+        var anyUnchecked = false;
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (!checkboxes[i].checked) { anyUnchecked = true; break; }
+        }
+        for (var j = 0; j < checkboxes.length; j++) checkboxes[j].checked = anyUnchecked;
+        var countId = itemsId.replace('-items', '-count');
+        updateCount(itemsId, countId);
+    }
+
+    function populateChecklist(containerId, items, defaults) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var html = "";
+        for (var i = 0; i < items.length; i++) {
+            var s = items[i];
+            var checked = defaults.indexOf(s) >= 0 ? " checked" : "";
+            html += '<label><input type="checkbox" value="' + s + '"' + checked +
+                    ' onchange="updateCount(\'' + containerId + '\', \'' + containerId.replace('-items', '-count') + '\')">' +
+                    ' ' + s + '</label>';
+        }
+        container.innerHTML = html;
+    }
+
+    // ---- Load strategies from API ----
+    function loadStrategies() {
+        fetch("/api/strategies").then(function(r) { return r.json(); }).then(function(data) {
+            if (!data.strategies || data.strategies.length === 0) return;
+            var bmDefaults = ["macd", "bollinger", "stochastic", "momentum"];
+            populateChecklist("bm-strategy-items", data.strategies, bmDefaults);
+            updateCount("bm-strategy-items", "bm-strategy-count");
+        }).catch(function() {});
+    }
+
+    // ---- Init ----
+    loadStrategies();
+    loadSymbolsData();
+    loadMemoryStatus();
+    renderSymbolTags();
+
+    // Redraw charts on resize
+    window.addEventListener("resize", function() {
+        if (msState.scoreHistory.length > 1) {
+            drawLineChart("ms-score-canvas", msState.scoreHistory, "rgb(245,158,11)", "Score",
+                function(v) { return v.toFixed(1) + " pts"; });
+        }
+        if (msState.bestScoreHistory.length > 1) {
+            drawLineChart("ms-best-canvas", msState.bestScoreHistory, "rgb(34,197,94)", "Best",
+                function(v) { return v.toFixed(1) + " pts"; });
+        }
+    });
+    </script>
+</body>
+</html>

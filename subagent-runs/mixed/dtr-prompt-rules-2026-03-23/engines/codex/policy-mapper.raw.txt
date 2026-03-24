@@ -1,0 +1,73 @@
+1. Core principles to inject
+
+- Hard policy: Optimize for decision quality, not answer length.
+- Hard policy: Require workers to identify the real decision points first and spend depth there, while keeping obvious or settled points brief.
+- Hard policy: Do not reward repetition, hedge-listing, or re-opening settled conclusions.
+- Hard policy: Return conclusions in a clear `choice + reason` form when the task requires judgment.
+- Soft guidance: Use uneven depth. Short treatment for straightforward parts is normal; longer analysis is for uncertainty, tradeoffs, and failure-prone branches.
+- Soft guidance: For complex planning/review work, include one strong counterargument or alternative and resolve it, rather than enumerating many possibilities.
+- Soft guidance: Prefer early convergence once the answer is supported; do not continue reasoning for coverage theater.
+
+2. Best files/sections to change
+
+- `skills/claude-subagent-orchestrator/references/agent-contract.md`
+  Add shared “reasoning discipline” rules once, near `Contract Rules`, so all worker types inherit the same behavior.
+- `skills/claude-subagent-orchestrator/references/sub-command-protocol.md`
+  Add policy-level guidance under `Complexity Assessment`, `Model Allocation`, or a new `Reasoning Effort` section. This is the right place to define when deep reasoning is required vs wasteful.
+- `skills/claude-subagent-orchestrator/references/orchestration-workflow.md`
+  Add orchestration behavior in `Stage 4: BUILD CONTRACTS` and `Stage 5: SELECT SETTINGS`: planners/reviewers on complex work should get explicit deep-reasoning instructions; simple implementers should not.
+- `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-d-plan-implement-review.md`
+  Add minimal role-specific wording for planner and reviewer only if needed after shared-contract changes.
+- `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-e-full-loop.md`
+  Add minimal wording for reviewer/final watchdog only if needed after shared-contract changes.
+- Leave `pattern-b` and `pattern-c` mostly unchanged unless you need one short line reminding implementers to keep settled points brief. They should inherit from the shared contract instead of duplicating guidance.
+
+3. Concrete wording suggestions
+
+- For `agent-contract.md` under `Contract Rules`:
+  `### Rule 5: Depth Where It Matters`
+  `Identify the few decision points that actually require reasoning. Spend detail there, and keep obvious, mechanical, or already-settled points brief.`
+
+- For `agent-contract.md` under `Contract Rules`:
+  `### Rule 6: Do Not Simulate Depth`
+  `Do not pad with repeated restatements, hedge lists, or generic possibility enumeration. Once a point is verified, treat it as settled unless new evidence appears.`
+
+- For `agent-contract.md` under `Minimal Return` or a new rule:
+  `When the task requires judgment, state the conclusion as choice + reason, not as an open-ended survey of options.`
+
+- For `sub-command-protocol.md` as hard policy:
+  `Deep reasoning is for architecture, ambiguous root-cause analysis, tradeoff-heavy planning, and high-risk review. It is not a default requirement for routine implementation, boilerplate, or mechanical edits.`
+
+- For `sub-command-protocol.md` as soft guidance:
+  `Reasoning effort should be calibrated to uncertainty and consequence. Prefer the cheapest adequate model and the narrowest adequate reasoning depth.`
+
+- For `orchestration-workflow.md` Stage 4:
+  `When building contracts, include explicit reasoning guidance only for roles that benefit from it. Prefer a shared contract clause over repeating the same prose in each pattern template.`
+
+- For `orchestration-workflow.md` Stage 5:
+  `Select stronger models or planning stages when the task has genuine ambiguity or consequential tradeoffs, not merely because the task is large.`
+
+- For planner templates in `pattern-d`:
+  `Compress the task to 2-3 key decisions first. Analyze those deeply. Do not produce a broad survey of every plausible approach.`
+
+- For reviewer/watchdog templates in `pattern-d` and `pattern-e`:
+  `Focus on the most material 1-3 issues or goal gaps. Do not dilute the review with exhaustive low-value commentary.`
+
+4. Risks of over-applying the guide
+
+- Treating “be brief” as “skip necessary reasoning” will undercut planner, reviewer, and watchdog quality.
+- Applying deep-reasoning instructions uniformly to all implementers can slow simple tasks and create performative analysis.
+- Forcing `choice + reason` everywhere can be wrong for exploratory or evidence-gathering stages where uncertainty should remain explicit.
+- Encouraging “early convergence” too aggressively can lock in the first plausible answer and reduce correction of wrong framing.
+- Template-level duplication will drift. If the same reasoning doctrine appears in many pattern files, it will diverge from the shared contract.
+
+5. File list referenced
+
+- `deep-thinking-tokens-guide.md`
+- `skills/claude-subagent-orchestrator/references/agent-contract.md`
+- `skills/claude-subagent-orchestrator/references/sub-command-protocol.md`
+- `skills/claude-subagent-orchestrator/references/orchestration-workflow.md`
+- `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md`
+- `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-c-parallel-review.md`
+- `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-d-plan-implement-review.md`
+- `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-e-full-loop.md`

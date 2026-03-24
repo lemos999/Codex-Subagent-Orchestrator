@@ -1,0 +1,354 @@
+{
+  "quest_id": "ml-test",
+  "market": "US",
+  "symbols": [
+    "AAPL"
+  ],
+  "initial_capital": 100000,
+  "current_capital": 97111.80215425108,
+  "start_date": "2025-02-10",
+  "current_date": "2026-03-10",
+  "current_day": 20,
+  "phase": 3,
+  "strategy_name": "lstm",
+  "total_score": 1044.7491550374461,
+  "trade_log": [
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 273.8168326721191,
+      "commission": 0.27381683267211915,
+      "timestamp": "2026-02-10"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 261.8608759918213,
+      "commission": 0.2618608759918213,
+      "timestamp": "2026-02-12"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 255.90788877868653,
+      "commission": 0.25590788877868653,
+      "timestamp": "2026-02-13"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 255.90788877868653,
+      "commission": 0.25590788877868653,
+      "timestamp": "2026-02-16"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 264.0119448852539,
+      "commission": 0.2640119448852539,
+      "timestamp": "2026-02-17"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "SELL",
+      "qty": 1,
+      "price": 264.4476965789795,
+      "commission": 0.2644476965789795,
+      "timestamp": "2026-02-20"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 272.27608465576174,
+      "commission": 0.27227608465576175,
+      "timestamp": "2026-02-24"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 264.3120826721191,
+      "commission": 0.26431208267211914,
+      "timestamp": "2026-02-27"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 263.881875,
+      "commission": 0.263881875,
+      "timestamp": "2026-03-03"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 262.6512490081787,
+      "commission": 0.2626512490081787,
+      "timestamp": "2026-03-04"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 260.4201535491943,
+      "commission": 0.2604201535491943,
+      "timestamp": "2026-03-05"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 257.5887214508057,
+      "commission": 0.2575887214508057,
+      "timestamp": "2026-03-06"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 260.0099448852539,
+      "commission": 0.2600099448852539,
+      "timestamp": "2026-03-09"
+    }
+  ],
+  "daily_results": [
+    {
+      "date": "2026-02-10",
+      "day_idx": 0,
+      "return_pct": 0.0,
+      "trades": 1,
+      "score": 10.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000.0,
+      "target_passed": false
+    },
+    {
+      "date": "2026-02-11",
+      "day_idx": 1,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000.0,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-12",
+      "day_idx": 2,
+      "return_pct": -0.011955956680307281,
+      "trades": 1,
+      "score": -1.9559566803072812,
+      "win_rate": 0.0,
+      "max_drawdown": 0.00011955956680307282,
+      "portfolio_value": 99988.04404331969,
+      "target_passed": false
+    },
+    {
+      "date": "2026-02-13",
+      "day_idx": 3,
+      "return_pct": -0.011907398069632636,
+      "trades": 1,
+      "score": -1.9073980696326363,
+      "win_rate": 0.0,
+      "max_drawdown": 0.00023861931106584962,
+      "portfolio_value": 99976.13806889342,
+      "target_passed": false
+    },
+    {
+      "date": "2026-02-16",
+      "day_idx": 4,
+      "return_pct": 0.0,
+      "trades": 1,
+      "score": 10.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.00023861931106584962,
+      "portfolio_value": 99976.13806889342,
+      "target_passed": false
+    },
+    {
+      "date": "2026-02-17",
+      "day_idx": 5,
+      "return_pct": 0.0324239614096179,
+      "trades": 1,
+      "score": 112.02126433116779,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100008.5542933197,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-18",
+      "day_idx": 6,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 65.3055698942173,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100008.5542933197,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-19",
+      "day_idx": 7,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 61.690374093981916,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100008.5542933197,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-20",
+      "day_idx": 8,
+      "return_pct": 0.002178572107176208,
+      "trades": 1,
+      "score": 85.6889594436411,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100010.73305178832,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-23",
+      "day_idx": 9,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 70.13875366124728,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100010.73305178832,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-24",
+      "day_idx": 10,
+      "return_pct": 0.03131019176802758,
+      "trades": 1,
+      "score": 241.31019176802758,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100042.04660409545,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-25",
+      "day_idx": 11,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 197.85079334126178,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100042.04660409545,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-26",
+      "day_idx": 12,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 190.2570164628964,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100042.04660409545,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-27",
+      "day_idx": 13,
+      "return_pct": -0.03980327399318112,
+      "trades": 1,
+      "score": -22.455960974677883,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0003980327399318112,
+      "portfolio_value": 100002.22659417723,
+      "target_passed": false
+    },
+    {
+      "date": "2026-03-02",
+      "day_idx": 14,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 7.116334029411798,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0003980327399318112,
+      "portfolio_value": 100002.22659417723,
+      "target_passed": true
+    },
+    {
+      "date": "2026-03-03",
+      "day_idx": 15,
+      "return_pct": -0.0025811885601200787,
+      "trades": 1,
+      "score": 7.418811439879921,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0004238343515574633,
+      "portfolio_value": 99999.64534814452,
+      "target_passed": false
+    },
+    {
+      "date": "2026-03-04",
+      "day_idx": 16,
+      "return_pct": -0.008614412493926265,
+      "trades": 1,
+      "score": 1.385587506073735,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0005099419656573918,
+      "portfolio_value": 99991.03096620177,
+      "target_passed": false
+    },
+    {
+      "date": "2026-03-05",
+      "day_idx": 17,
+      "return_pct": -0.017850364677104706,
+      "trades": 1,
+      "score": -7.850364677104707,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0006883545859279274,
+      "portfolio_value": 99973.1822025299,
+      "target_passed": false
+    },
+    {
+      "date": "2026-03-06",
+      "day_idx": 18,
+      "return_pct": -0.025489724668249,
+      "trades": 1,
+      "score": -15.489724668249,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0009430763729217232,
+      "portfolio_value": 99947.69931364439,
+      "target_passed": false
+    },
+    {
+      "date": "2026-03-09",
+      "day_idx": 19,
+      "return_pct": 0.02422490413561084,
+      "trades": 1,
+      "score": 34.22490413561084,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0007010557909128806,
+      "portfolio_value": 99971.91154798887,
+      "target_passed": true
+    }
+  ],
+  "positions": {
+    "AAPL": {
+      "symbol": "AAPL",
+      "qty": 11,
+      "avg_price": 262.75858691877886,
+      "current_price": 260.0099448852539,
+      "market_value": 2860.1093937377927,
+      "unrealized_pnl": -30.235062368774834
+    }
+  },
+  "metadata": {}
+}

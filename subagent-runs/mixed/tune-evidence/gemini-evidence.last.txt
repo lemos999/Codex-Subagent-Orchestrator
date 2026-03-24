@@ -1,0 +1,19 @@
+I will read the file `skills/claude-subagent-orchestrator/references/evidence-format.md` to understand the rules for recording evidence after a worker run.
+Here are the rules for recording evidence after a worker run in this project:
+
+1.  **Purpose**: Evidence serves for auditability, debugging, and learning from past runs.
+2.  **Storage Location**: All evidence is stored under the `subagent-runs/` directory.
+    *   **Single Engine Runs**: `subagent-runs/<engine>/<run-name>/` (e.g., `subagent-runs/claude/auth-middleware-2026-03-11/`).
+    *   **Mixed Engine Runs**: `subagent-runs/mixed/<run-name>/`. Within this, raw evidence for each engine is separated into `engines/claude/`, `engines/codex/`, `engines/gemini/` subdirectories.
+3.  **Run Naming Convention**: `<task-slug>-<YYYY-MM-DD>`. If a collision occurs, a sequence number is appended (e.g., `-2`).
+4.  **Core Evidence Files**:
+    *   `run-manifest.md`: The authoritative, structured record of the run, detailing the request, team, individual agents (engine, model, status, contract, result summaries), deliverables, review verdict, watchdog information (if enabled), metrics, timeline, and any errors or notes.
+    *   `run-summary.md`: A compact, quick-scan summary table of agents, their roles, engines, models, stages, statuses, and results, along with the overall verdict and deliverables.
+    *   `prompts/<agent-role>.prompt.md`: Contains the exact prompt text sent to each worker agent.
+    *   `results/<agent-role>.result.md`: Contains the full text response returned by each worker agent.
+5.  **Evidence Level Based on Scenario**:
+    *   **Full Evidence (manifest + summary + prompts + results)**: Required for `/sub` requests involving both implementation and review, for `/sub` runs with watchdog enabled, and for all failed/aborted runs.
+    *   **Standard Evidence (manifest + summary + prompts)**: For `/sub` requests with a solo implementer.
+    *   **Light Evidence (summary only)**: For `/sub` requests with a solo reviewer.
+    *   **No Evidence**: For trivial tasks where the parent handles, or for research/exploration.
+6.  **Error Evidence**: Even failed or aborted runs generate full evidence. The `run-manifest.md` explicitly documents what failed, why, and notes that any partial deliverables may exist but are not considered reviewed or accepted.

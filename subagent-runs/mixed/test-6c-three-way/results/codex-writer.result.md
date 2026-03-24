@@ -1,0 +1,3 @@
+- A balanced set of 7 distinct tetromino shapes (I, O, T, J, L, S, Z).
+- A scoring system that rewards clearing multiple lines at once (e.g., a "Tetris" for clearing 4 lines).
+- A progression of levels with increasing fall speed and evolving visual themes.

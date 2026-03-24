@@ -33,9 +33,24 @@ For this workspace, prefer local skills over globally installed skills when both
 - For `/submix` work, the orchestrator (Claude) dispatches external engine workers via Bash tool: `codex exec --full-auto` (GPT), `echo | npx @google/gemini-cli --yolo` (Gemini).
 - Mixed-engine run evidence is stored in `subagent-runs/mixed/<run-name>/`.
 
+### Project Status (모든 엔진 공통 맥락)
+
+- **세션 시작 시 반드시 `project-status/current.md`를 읽는다.** 이 파일에 프로젝트 현황, 핵심 구성 요소, 다음 작업, 주요 명령어, 운영 규칙이 정리되어 있다.
+- 작업 완료 후 프로젝트 상태가 변경되면 `project-status/current.md`를 갱신한다.
+- 완료된 작업은 분기별 아카이브(`project-status/2026-Q1.md` 등)로 이동한다.
+- 이 규칙은 Claude, Codex/GPT, Gemini 모든 엔진에 동일하게 적용된다.
+
 ### WKI (Workspace Knowledge Index)
 
 - `.knowledge/` 디렉터리에 코드/문서 인덱스가 저장된다.
 - **세션 시작 시**: 첫 작업 전에 `node workspace-knowledge-index/dist/index.js index`를 1회 실행하여 인덱스를 최신으로 갱신한다. 다른 AI/세션의 변경사항도 반영됨. 변경 없으면 즉시 반환.
 - `/sub`, `/submix` 실행 시 TS 런처가 자동으로 증분 인덱싱 + 맥락 주입을 수행한다.
 - 검색 품질 측정: `node workspace-knowledge-index/dist/index.js eval workspace-knowledge-index/eval/gold-set-v2.json`
+
+### Persistent User Preferences
+
+- Default to starting work immediately without asking for confirmation first.
+- Make reasonable assumptions and proceed unless a hard platform or permission boundary requires interruption.
+- Destructive changes are allowed without advance confirmation when they are necessary and rollback is feasible.
+- Never permanently delete files with `rm`, `del`, or equivalent direct removal; move files to the system recycle bin / trash instead.
+- Keep progress updates brief and report changes after execution rather than blocking beforehand.

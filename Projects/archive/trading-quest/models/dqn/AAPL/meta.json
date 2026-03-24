@@ -1,0 +1,1 @@
+{"state_size": 20, "action_size": 3, "hidden_size": 64, "lr": 0.001, "gamma": 0.99, "epsilon": 0.01, "epsilon_min": 0.01, "epsilon_decay": 0.995}

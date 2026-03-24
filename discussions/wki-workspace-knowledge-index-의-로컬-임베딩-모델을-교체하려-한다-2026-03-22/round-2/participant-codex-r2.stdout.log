@@ -1,0 +1,11 @@
+[PARTIAL]
+
+1. **Reasoning**: 다국어·크로스링구얼 모델로 가야 한다는 방향에는 동의한다. 다만 BGE-M3를 "지금 바로 최적"으로 보는 데는 일부 반대한다. 현재 WKI는 쿼리와 문서를 같은 인터페이스로 임베딩하고([embedding.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/interfaces/embedding.ts#L5), [indexer.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/indexer.ts#L240), [search-service.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/search/search-service.ts#L98)), 로컬 provider는 E5/BGE식 프리픽스를 모든 텍스트에 붙인다([local-provider.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts#L119)). 이 구조에선 E5/BGE/nomic의 비대칭 retrieval 장점이 손실된다. Jina v2는 코드+문서 혼합엔 좋지만 한국어 의미검색 요구가 약하고, CodeBERT/BGE-small/nomic은 각각 오래된 retrieval 목적함수, 한-영 미지원, 영어 편향 때문에 후순위다.
+
+2. **New insight**: 병목은 모델 카드보다 런타임 적합도다. WKI는 청킹은 1000토큰인데 실제 로컬 임베딩은 약 256토큰에서 자른다([wki.config.json](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/wki.config.json#L44), [local-provider.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/embedding/local-provider.ts#L62)). 그래서 Jina/BGE-M3/nomic의 8k 장문 강점이 당장 거의 사라진다. 또 LanceDB는 float32 고정 벡터를 그대로 저장하므로([vector-store.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/store/vector-store.ts#L164)), 1024d는 384d 대비 메모리·거리계산 비용이 약 2.7배다.
+
+3. **Updated position**: 입장은 좁혀졌다. "단순 모델 교체" 기준으로는 추천을 보류한다. WKI API를 query/document 분리로 먼저 고친다면 후보군 중 1순위는 `multilingual-e5-large`다. 그 변경 없이 꽂아 넣는다면 Jina v2가 통합은 가장 쉬우나 한국어 요구 때문에 최종 선택으로는 부족하다. 원후보 밖까지 허용하면 장기 최종형은 BGE-M3지만, 지금 당장 성능 최적화 관점의 실전 해법은 `multilingual-e5-large + API fix`다.
+
+Sources: [E5](https://huggingface.co/intfloat/multilingual-e5-large), [Jina](https://huggingface.co/jinaai/jina-embeddings-v2-base-code), [Nomic](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5), [BGE-small](https://huggingface.co/BAAI/bge-small-en-v1.5), [BGE-M3](https://huggingface.co/BAAI/bge-m3), [CodeBERT](https://huggingface.co/microsoft/codebert-base)
+
+[POSITION: 현재 WKI의 최적 선택은 `multilingual-e5-large` 자체가 아니라, `multilingual-e5-large`를 살릴 수 있는 query/document 분리까지 포함한 교체다.]

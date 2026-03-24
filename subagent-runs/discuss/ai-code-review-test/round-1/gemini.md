@@ -1,0 +1,9 @@
+**Position**: AI code reviews should augment, not fully replace, human code reviews.
+
+**Reasoning**: AI efficiently handles routine checks like style, common errors, and basic security, speeding up reviews. Humans provide critical context, architectural insight, and nuanced problem-solving, fostering knowledge transfer and innovative solutions.
+
+**Concerns**: Full replacement risks overlooking subtle bugs, hindering complex architectural improvements, and reducing valuable developer mentorship and learning opportunities. AI might also perpetuate biases or introduce new ones.
+
+**Recommendation**: Implement AI for an initial, automated pass to catch surface-level issues, enabling human reviewers to concentrate on higher-level design, logic, and strategic feedback. This hybrid approach leverages strengths of both.
+
+[POSITION: AI should augment human code reviews]

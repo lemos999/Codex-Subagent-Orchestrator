@@ -1,8 +1,8 @@
 {
   "cwd": ".",
   "cwd_resolution": "invocation",
-  "output_dir": "subagent-runs/parallel-two-files",
-  "manifest_file": "subagent-runs/parallel-two-files/orchestration-manifest.json",
+  "output_dir": "subagent-runs/codex/parallel-two-files",
+  "manifest_file": "subagent-runs/codex/parallel-two-files/orchestration-manifest.json",
   "skip_git_repo_check": true,
   "execution_mode": "parallel",
   "write_prompt_files": true,

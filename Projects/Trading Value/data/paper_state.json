@@ -1,0 +1,69 @@
+{
+  "balance": 9867.020881135764,
+  "position": 0,
+  "entry_price": 0.0,
+  "stop_price": 0.0,
+  "position_qty": 0.0,
+  "bars_held": 0,
+  "entry_time": "2026-03-22T01:30:51.580658+00:00",
+  "total_trades": 3,
+  "wins": 1,
+  "losses": 2,
+  "peak_balance": 10149.75457325918,
+  "max_drawdown": 282.7336921234164,
+  "trades": [
+    {
+      "entry_time": "2026-03-21T17:22:53.653525+00:00",
+      "exit_time": "2026-03-21T18:30:30.180419+00:00",
+      "side": "SHORT",
+      "entry_price": 2145.61,
+      "exit_price": 2150.2,
+      "qty": 16.3123773658773,
+      "pnl": -88.9,
+      "pnl_pct": -0.89,
+      "exit_reason": "agent_close",
+      "bars_held": 0
+    },
+    {
+      "entry_time": "2026-03-21T22:30:26.171812+00:00",
+      "exit_time": "2026-03-21T23:47:36.278132+00:00",
+      "side": "SHORT",
+      "entry_price": 2149.4,
+      "exit_price": 2132.01,
+      "qty": 16.11604951813541,
+      "pnl": 266.51,
+      "pnl_pct": 2.67,
+      "exit_reason": "circuit_breaker",
+      "bars_held": 0
+    },
+    {
+      "entry_time": "2026-03-22T01:30:51.580658+00:00",
+      "exit_time": "2026-03-22T02:29:04.783267+00:00",
+      "side": "SHORT",
+      "entry_price": 2089.14,
+      "exit_price": 2104.09,
+      "qty": 17.00419359468831,
+      "pnl": -268.52,
+      "pnl_pct": -2.69,
+      "exit_reason": "circuit_breaker",
+      "bars_held": 0
+    }
+  ],
+  "track_a": {
+    "regime": "HTF_NEUTRAL",
+    "h1": "H1_NEUTRAL",
+    "m30": "M30_BEARISH",
+    "mode": "MODE_NO_TRADE",
+    "setup": "IDLE",
+    "signal": "NO_TRADE",
+    "balance": 10000.0,
+    "position": 0,
+    "entry_price": 0.0,
+    "stop_price": 0.0,
+    "qty": 0.0,
+    "pnl": 0.0,
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0
+  }
+}

@@ -1,0 +1,48 @@
+**Stage 9**
+
+Stage 9 is `EVIDENCE + RECOVER or ACCEPT`. It is a blocking checkpoint: the orchestrator cannot report results to the user until evidence has been written. The parent/orchestrator writes the evidence itself; it is mandatory, non-delegatable, and must be written after the final verdict is known and before user reporting. If the reviewer returns `MATERIAL_ISSUES`, Stage 9 runs the bounded recovery loop instead: launch a scoped fixer, re-run review, allow at most 2 fix-review cycles, then stop, write evidence, and escalate if it still fails. See [orchestration-workflow.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md):228 and [codex-subagent-orchestrator.md](C:/Users/haj/projects/subagent-orchestrator/.claude/agents/codex-subagent-orchestrator.md):47.
+
+**Directory Structure**
+
+Run names are `<task-slug>-<YYYY-MM-DD>`, with `-2`, `-3`, etc. on collisions. Single-engine runs go under `subagent-runs/<engine>/<run-name>/`. Mixed-engine runs go under `subagent-runs/mixed/<run-name>/`. The normalized evidence layout is:
+
+```text
+subagent-runs/
+  claude/<run-name>/
+  codex/<run-name>/
+  gemini/<run-name>/
+  mixed/<run-name>/
+    run-manifest.md
+    run-summary.md
+    prompts/
+    results/
+    engines/
+      claude/
+      codex/
+      gemini/
+```
+
+For single-engine runs, the same `run-manifest.md`, `run-summary.md`, `prompts/`, and `results/` layout applies under `subagent-runs/<engine>/<run-name>/`. Mixed runs additionally keep per-engine raw evidence under `engines/<engine>/`. See [evidence-format.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md):7 and [submix SKILL.md](C:/Users/haj/projects/subagent-orchestrator/.claude/skills/submix/SKILL.md):182.
+
+**Files Written**
+
+The current Claude-native evidence files are:
+
+- `run-manifest.md`: authoritative structured record of request, team, agents, deliverables, review verdict, timeline, and errors.
+- `run-summary.md`: compact one-line-per-agent summary table.
+- `prompts/<role>.prompt.md`: exact prompt sent to each worker.
+- `results/<role>.result.md`: full returned text from each worker.
+- `prompts/watchdog-<stage>.prompt.md` and `results/watchdog-<stage>.result.md`: only when watchdog is enabled.
+- `engines/<engine>/<agent>.raw.txt`: for mixed-engine runs, raw stdout from external engines like Codex or Gemini.
+
+Evidence level varies by run shape:
+- Full: implementation + review, Pattern B+, watchdog runs, failed/aborted runs.
+- Standard: solo implementer.
+- Light: solo reviewer.
+- None: trivial parent-handled work or research-only work.
+
+See [evidence-format.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md):54 and [evidence-format.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md):167.
+
+**Legacy Launcher Note**
+
+There is also an older launcher-oriented convention in the repo. The Codex/Gemini launcher writes `orchestration-manifest.json` and `orchestration-summary.md` in the run `output_dir`, plus prompt files and worker outputs. The newer supervisor docs then require the parent to verify or backfill the normalized `run-manifest.md`, `run-summary.md`, `prompts/`, and `results/` evidence before reporting. See [gemini sub-command-protocol.md](C:/Users/haj/projects/subagent-orchestrator/skills/gemini-subagent-orchestrator/references/sub-command-protocol.md):22, [gemini orchestration-workflow.md](C:/Users/haj/projects/subagent-orchestrator/skills/gemini-subagent-orchestrator/references/orchestration-workflow.md):46, and [codex SKILL.md](C:/Users/haj/projects/subagent-orchestrator/skills/codex-subagent-orchestrator/SKILL.md):56.

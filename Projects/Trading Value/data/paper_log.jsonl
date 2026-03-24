@@ -1,0 +1,20 @@
+{"time": "2026-03-21T18:30:30.180954+00:00", "event": "CLOSE", "reason": "agent_close", "price": 2150.2, "pnl": -88.9, "balance": 9897.1, "bars_held": 0, "win_rate": "0/1"}
+{"time": "2026-03-21T18:30:30.186325+00:00", "event": "CYCLE", "action": "CLOSE", "price": 2150.2, "position": 0, "balance": 9897.1}
+{"time": "2026-03-21T19:30:19.906786+00:00", "event": "CYCLE", "action": "REVERSE", "price": 2151.35, "position": 0, "balance": 9897.1}
+{"time": "2026-03-21T20:00:21.024157+00:00", "event": "CYCLE", "action": "REVERSE", "price": 2151.19, "position": 0, "balance": 9897.1}
+{"time": "2026-03-21T20:30:22.014906+00:00", "event": "CYCLE", "action": "REVERSE", "price": 2152.91, "position": 0, "balance": 9897.1}
+{"time": "2026-03-21T21:00:23.122263+00:00", "event": "CYCLE", "action": "REVERSE", "price": 2154.57, "position": 0, "balance": 9897.1}
+{"time": "2026-03-21T21:30:24.145797+00:00", "event": "CYCLE", "action": "REVERSE", "price": 2153.17, "position": 0, "balance": 9897.1}
+{"time": "2026-03-21T22:30:26.172288+00:00", "event": "OPEN", "side": "SHORT", "price": 2149.4, "stop": 2170.89, "qty": 16.116, "commission": 13.86, "balance": 9883.24}
+{"time": "2026-03-21T22:30:26.177334+00:00", "event": "CYCLE", "action": "SHORT", "price": 2149.4, "position": -1, "balance": 9883.24}
+{"time": "2026-03-21T23:00:30.083990+00:00", "event": "CYCLE", "action": "SHORT", "price": 2148.77, "position": -1, "balance": 9883.24}
+{"time": "2026-03-21T23:30:34.112809+00:00", "event": "CYCLE", "action": "SHORT", "price": 2143.35, "position": -1, "balance": 9883.24}
+{"time": "2026-03-21T23:47:36.275120+00:00", "event": "CIRCUIT_BREAKER", "last_5m_range": 14.4, "avg_range": 1.88, "ratio": 7.7, "price": 2132.01}
+{"time": "2026-03-21T23:47:36.278332+00:00", "event": "CLOSE", "reason": "circuit_breaker", "price": 2132.01, "pnl": 266.51, "balance": 10149.75, "bars_held": 0, "win_rate": "1/2"}
+{"time": "2026-03-22T00:00:37.357598+00:00", "event": "CYCLE", "action": "REVERSE", "price": 2083.37, "position": 0, "balance": 10149.75}
+{"time": "2026-03-22T00:30:38.368342+00:00", "event": "CYCLE", "action": "REVERSE", "price": 2084.59, "position": 0, "balance": 10149.75}
+{"time": "2026-03-22T01:30:51.581298+00:00", "event": "OPEN", "side": "SHORT", "price": 2089.14, "stop": 2110.03, "qty": 17.0042, "commission": 14.21, "balance": 10135.54}
+{"time": "2026-03-22T01:30:51.587745+00:00", "event": "CYCLE", "action": "SHORT", "price": 2089.14, "position": -1, "balance": 10135.54}
+{"time": "2026-03-22T01:37:58.916916+00:00", "event": "CYCLE", "action": "SHORT", "price": 2089.14, "position": -1, "balance": 10135.54}
+{"time": "2026-03-22T02:29:04.780526+00:00", "event": "CIRCUIT_BREAKER", "last_5m_range": 14.18, "avg_range": 4.64, "ratio": 3.1, "price": 2104.09}
+{"time": "2026-03-22T02:29:04.783493+00:00", "event": "CLOSE", "reason": "circuit_breaker", "price": 2104.09, "pnl": -268.52, "balance": 9867.02, "bars_held": 0, "win_rate": "1/3"}

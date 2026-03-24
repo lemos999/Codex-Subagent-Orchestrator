@@ -1,0 +1,448 @@
+Reading prompt from stdin...
+OpenAI Codex v0.114.0 (research preview)
+--------
+workdir: C:\Users\haj\projects\subagent-orchestrator
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\haj\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019d015e-4e89-7461-a002-ed011a9e38cd
+--------
+user
+## Relevant Context (auto-injected)
+
+### subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md (lines 22-28)
+**Agent 1: file-writer (sub-implementer)** — markdown-section
+> ### Agent 1: file-writer (sub-implementer)
+> 
+> - **Contract summary**: Create tests/artifacts/evidence-test.txt with exact content
+> - **Result summary**: File created, all 3 validation checks passed
+> - **Prompt file**: prompts/file-writer.prompt.md
+
+### subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md (lines 1-2)
+**Run Manifest — evidence-test-2026-03-16** — markdown-section
+> # Run Manifest — evidence-test-2026-03-16
+
+### subagent-runs/codex/wki-context-test/orchestration-summary.md (lines 25-29)
+**Workers** — markdown-section
+> ## Workers
+> 
+> - `analyst`: ok; engine=codex; stage=1; kind=reviewer; read_only=True; full_auto=False; model=gpt-5.4; sandbox=; reasoning=; prompt_chars=1525; footer_tokens=n/a; workflow_mode=disabled
+>   preview: In short, Stage 9 is the acceptance/recovery checkpoint plus mandatory evidence persistence. The run is not considered reportable until that evidence package has been written.
+
+### skills/claude-subagent-orchestrator/references/evidence-format.md (lines 179-193)
+**Error Evidence** — markdown-section
+> ## Error Evidence
+> 
+> When a run fails partially:
+> 
+> ```markdown
+
+### subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md (lines 23-29)
+**Agent 1: file-writer (sub-implementer, Claude)** — markdown-section
+> ### Agent 1: file-writer (sub-implementer, Claude)
+> 
+> - **Contract summary**: Create tests/artifacts/submix-test.txt with exact content
+> - **Result summary**: File created, all 3 validation checks passed
+> - **Prompt file**: prompts/file-writer.prompt.md
+
+이 프로젝트에서 워커 실행 후 증거(evidence)를 기록하는 규칙을 설명해주세요.
+mcp startup: no servers
+codex
+요청하신 내용은 이 저장소에서 워커 실행 뒤 어떤 evidence를 어떤 형식과 시점에 남겨야 하는지 정리하는 일입니다. 먼저 관련 스킬 문서와 오케스트레이션/manifest 생성 규칙을 찾아서 실제 저장소 기준으로 설명하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"skills\\claude-subagent-orchestrator\\references\\evidence-format.md\" -TotalCount 320" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "evidence|run-manifest|orchestration-summary|Workers|Error Evidence|evidence persistence|Stage 9|prompt file|Contract summary|Result summary" skills .claude subagent-runs -g "*.md"' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"skills\\claude-subagent-orchestrator\\SKILL.md\" -TotalCount 260" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \".claude\\skills\\submix\\SKILL.md\" -TotalCount 260" in C:\Users\haj\projects\subagent-orchestrator succeeded in 501ms:
+.claude\skills\submix\SKILL.md:124:모든 `/submix` 실행 후 **결과 보고 전에** evidence를 기록해야 한다:
+.claude\skills\submix\SKILL.md:125:1. `subagent-runs/mixed/<run-name>/run-manifest.md`
+.claude\skills\submix\SKILL.md:131:실패/중단 run도 기록한다. 상세 형식은 `evidence-format.md` 참조.
+.claude\skills\submix\SKILL.md:140:| 응답 파싱 실패 | raw stdout을 evidence에 저장, Claude가 재해석 시도 |
+.claude\skills\submix\SKILL.md:186:├── run-manifest.md
+skills\gemini-subagent-orchestrator\SKILL.md:17:- Read `references/sub-command-protocol.md` for `/sub` routing and evidence rules.
+skills\gemini-subagent-orchestrator\SKILL.md:26:5.  **Evidence & Traceability (필수, 생략 불가):** Single-engine Gemini runs write evidence to `subagent-runs/gemini/<run-name>/`. Mixed-engine runs write evidence to `subagent-runs/mixed/<run-name>/`. 사용자에게 결과를 보고하기 전에 반드시 evidence를 기록해야 한다. 실패/중단 run도 기록한다.
+.claude\skills\sub\SKILL.md:34:모든 `/sub` 실행 후 **결과 보고 전에** evidence를 기록해야 한다:
+.claude\skills\sub\SKILL.md:35:1. `subagent-runs/claude/<run-name>/run-manifest.md`
+.claude\skills\sub\SKILL.md:40:실패/중단 run도 기록한다. 상세 형식은 `evidence-format.md` 참조.
+subagent-runs\gemini\wki-korean-test\orchestration-summary.md:25:## Workers
+subagent-runs\gemini\wki-korean-test\orchestration-summary.md:28:  preview: I need to explain the rules for recording evidence after a worker execution, including file creation and directory structure. I will start by examining the `subagent-runs` directory for a `README.md` ...
+subagent-runs\codex\wki-context-test\orchestration-summary.md:25:## Workers
+subagent-runs\codex\wki-context-test\orchestration-summary.md:28:  preview: In short, Stage 9 is the acceptance/recovery checkpoint plus mandatory evidence persistence. The run is not considered reportable until that evidence package has been written.
+.claude\agents\sub-reviewer.md:15:4. **Verify scope with evidence.** Use `git diff` or `git status` to confirm only authorized paths changed.
+subagent-runs\mixed\test-6c-three-way\orchestration-summary.md:25:## Workers
+subagent-runs\codex\wki-ab-test\orchestration-summary.md:25:## Workers
+subagent-runs\codex\wki-ab-test\orchestration-summary.md:28:  preview: There is also an older launcher-oriented convention in the repo. The Codex/Gemini launcher writes `orchestration-manifest.json` and `orchestration-summary.md` in the run `output_dir`, plus prompt file...
+subagent-runs\gemini\evidence-verify-2026-03-17\orchestration-summary.md:23:- manifest: `C:\Users\haj\projects\subagent-orchestrator\subagent-runs\gemini\evidence-verify-2026-03-17\orchestration-manifest.json`
+subagent-runs\gemini\evidence-verify-2026-03-17\orchestration-summary.md:25:## Workers
+ succeeded in 548ms:
+# Evidence Format
+
+## Purpose
+
+Evidence enables auditability, debugging, and learning from past runs.
+
+## Directory Structure
+
+```
+subagent-runs/
+?쒋?? claude/          # engine=claude, Task tool ?ㅼ씠?곕툕 ?ㅽ뻾
+?쒋?? codex/           # engine=codex, codex exec ?ㅽ뻾
+?쒋?? gemini/          # engine=gemini, gemini-cli ?ㅽ뻾
+?붴?? mixed/           # ?쇳빀 ?붿쭊 ?ㅽ뻾
+    ?붴?? <run-name>/
+        ?쒋?? run-manifest.md
+        ?쒋?? run-summary.md
+        ?쒋?? prompts/
+        ?쒋?? results/
+        ?붴?? engines/         # ?붿쭊蹂?raw 利앷굅
+ succeeded in 529ms:
+# Claude Subagent Orchestrator
+
+Supervise one or more Claude Code subagents for delegated implementation, review, analysis, or generation work ??using Claude Code's native Task tool and built-in agent types.
+
+## Trigger
+
+Activate when the user message starts with `/sub`, or asks for subagents, delegated execution, or supervised multi-agent workflows.
+
+## Execution Engine
+
+This orchestrator uses **Claude Code's native Task tool** with these parameters:
+
+| Parameter | Values | Purpose |
+|---|---|---|
+| `subagent_type` | `sub-implementer`, `sub-reviewer`, `sub-fixer` | Worker role |
+| `model` | `haiku`, `sonnet`, `opus` | Match capability to task complexity |
+| `isolation` | `"worktree"` | Isolated git worktree for parallel writers |
+| `run_in_background` | `true` / `false` | Non-blocking for independent long tasks |
+| `resume` | agent ID string | Continue a previous agent's work |
+| `prompt` | contract text | Worker's complete bounded contract |
+ succeeded in 575ms:
+---
+name: submix
+description: 3媛?AI ?붿쭊(Claude + Codex/GPT + Gemini)???쇳빀 ?쒖슜?섎뒗 硫?곗뿏吏??쒕툕?먯씠?꾪듃 ?ㅼ??ㅽ듃?덉씠?? 媛?AI 紐⑤뜽???뱀꽦??留욎떠 ?먮룞 遺꾨떞.
+---
+
+# /submix
+
+3媛?AI ?붿쭊??**?먮룞 遺꾨떞**?섏뿬 硫?곗뿏吏??쒕툕?먯씠?꾪듃 ?ㅽ뻾.
+
+## `/sub` vs `/submix` 李⑥씠
+
+| ??ぉ | `/sub` | `/submix` |
+|------|--------|-----------|
+| ?붿쭊 | Claude ?⑤룆 (湲곕낯) | Claude + Codex(GPT) + Gemini ?쇳빀 |
+| ?붿쭊 ?좏깮 | ?ъ슜??吏???먮뒗 湲곕낯 Claude | **Orchestrator媛 ?먮룞 遺꾨떞** |
+| ?붿쭊 吏??| ?ъ슜?먭? 紐낆떆?곸쑝濡?吏?뺥빐????| Orchestrator媛 ?먮룞 遺꾨떞 (?ъ슜???섎룞 吏?뺣룄 媛?? |
+| 利앷굅 ???| `subagent-runs/claude/` | `subagent-runs/mixed/` |
+
+## Entry Protocol
+
+codex
+관련 규칙이 Claude 전용 `/sub`, 혼합 `/submix`, 레거시 Codex 런처로 나뉘어 있습니다. 지금은 공통 규칙과 엔진별 차이를 분리해서 확인하고 있습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'.claude\\skills\\sub\\SKILL.md'; "'$c=Get-Content $p; $c[30..45]' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'skills\\claude-subagent-orchestrator\\references\\orchestration-workflow.md'; "'$c=Get-Content $p; $c[226..289]' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'skills\\codex-subagent-orchestrator\\SKILL.md'; "'$c=Get-Content $p; $c[52..63]' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'.claude\\agents\\codex-subagent-orchestrator.md'; "'$c=Get-Content $p; $c[44..74]' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'skills\\codex-subagent-orchestrator\\references\\sub-command-protocol.md'; "'$c=Get-Content $p; $c[48..60]' in C:\Users\haj\projects\subagent-orchestrator succeeded in 551ms:
+
+## Evidence Reminder
+
+紐⑤뱺 `/sub` ?ㅽ뻾 ??**寃곌낵 蹂닿퀬 ?꾩뿉** evidence瑜?湲곕줉?댁빞 ?쒕떎:
+1. `subagent-runs/claude/<run-name>/run-manifest.md`
+2. `subagent-runs/claude/<run-name>/run-summary.md`
+3. `subagent-runs/claude/<run-name>/prompts/*.prompt.md`
+4. `subagent-runs/claude/<run-name>/results/*.result.md`
+
+?ㅽ뙣/以묐떒 run??湲곕줉?쒕떎. ?곸꽭 ?뺤떇? `evidence-format.md` 李몄“.
+ succeeded in 595ms:
+
+### Stage 9: EVIDENCE + RECOVER or ACCEPT
+
+> ?좑툘 **BLOCKING STAGE**: ???④퀎瑜??꾨즺?섏? ?딆쑝硫??ъ슜?먯뿉寃?寃곌낵瑜?蹂닿퀬?????녿떎. Evidence ?묒꽦? 寃곌낵 蹂닿퀬??**?꾩젣 議곌굔**?대떎.
+
+**If ACCEPTED or MINOR_ISSUES:**
+
+**Critical rule**: Evidence writing is mandatory and non-delegatable. The orchestrator writes it using the Write tool directly ??never a worker, never skipped.
+
+**Evidence directory selection**:
+- 紐⑤뱺 ?뚯빱媛 ?숈씪 ?붿쭊: `subagent-runs/<engine>/<run-name>/`
+- 蹂듭닔 ?붿쭊 ?ъ슜: `subagent-runs/mixed/<run-name>/`
+
+1. Name the run: `<task-slug>-<YYYY-MM-DD>` (append `-2`, `-3` on collision)
+2. Create the run directory: `subagent-runs/<engine>/<run-name>/` (single engine) or `subagent-runs/mixed/<run-name>/` (multiple engines)
+3. Write `subagent-runs/<engine>/<run-name>/run-manifest.md` ??authoritative structured record
+4. Write `subagent-runs/<engine>/<run-name>/run-summary.md` ??compact one-liner-per-agent table
+5. Write `subagent-runs/<engine>/<run-name>/prompts/<role>.prompt.md` for each worker ??exact prompt text sent
+6. Write `subagent-runs/<engine>/<run-name>/results/<role>.result.md` for each worker ??full return text
+7. Report to user, including the run directory path
+ succeeded in 575ms:
+- Do not create large teams by default. Expand the team only when the decomposition really earns it.
+- Treat skills as routing hints for workers, not as an excuse to bloat every worker prompt.
+- Pass `-m` explicitly when model choice matters.
+- Keep `last.txt`, prompt files, and the launcher manifest unless the user explicitly wants cleanup.
+- Prefer the generated orchestration summary over raw stdout when bringing worker results back into parent context.
+- Validate files and summaries before accepting a worker result.
+- **Evidence???꾩닔?대ŉ ?앸왂 遺덇?.** ?곗쿂媛 `output_dir`??evidence瑜??앹꽦?덈뒗吏 ?뺤씤. `orchestration-summary.md`, `orchestration-manifest.json`, prompt ?뚯씪???놁쑝硫?吏곸젒 ?묒꽦. ?ъ슜?먯뿉寃?寃곌낵 蹂닿퀬 ?꾩뿉 evidence 議댁옱瑜??뺤씤?댁빞 ?쒕떎.
+- Evaluate efficiency structure-first: fewer parent interventions, fewer full reruns, bounded fixer loops, and clean reviewer coverage matter more than raw token totals alone.
+- Default reviewers and validators to `read-only`. If they need write access, the parent should justify that deviation explicitly.
+- If a reviewer or validator finds a material issue, launch a bounded fixer worker and then re-run review or validation on the repaired artifact before acceptance.
+- When the launcher is used for deliverable work, prefer top-level policy fields `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"` so unsafe team shapes fail before execution.
+
+ succeeded in 619ms:
+
+肄붾뱶, ?뚯씪 寃쎈줈, 湲곗닠 ?⑹뼱???먮Ц 洹몃?濡??좎??섎릺, ?ㅻ챸怨??덈궡 臾멸뎄??諛섎뱶???쒓?濡??묒꽦?섏꽭??
+
+## MANDATORY: Evidence Checkpoint (Stage 9)
+
+**?ъ슜?먯뿉寃?寃곌낵瑜?蹂닿퀬?섍린 ?꾩뿉** 諛섎뱶???꾨옒 泥댄겕由ъ뒪?몃? ?섑뻾?댁빞 ?쒕떎. ???④퀎瑜?嫄대꼫?곕뒗 寃껋? 湲덉??쒕떎.
+
+1. Run ?대쫫 寃곗젙: `<task-slug>-<YYYY-MM-DD>` (異⑸룎 ??`-2`, `-3` 異붽?)
+2. ?붾젆?곕━ ?앹꽦: `subagent-runs/<engine>/<run-name>/` (?⑥씪 ?붿쭊) ?먮뒗 `subagent-runs/mixed/<run-name>/` (蹂듭닔 ?붿쭊)
+3. `run-manifest.md` ?묒꽦 ???붿껌, ?, ?먯씠?꾪듃, ?곗텧臾? ?먯젙, ??꾨씪??4. `run-summary.md` ?묒꽦 ???먯씠?꾪듃蹂???以??뚯씠釉?5. `prompts/<role>.prompt.md` ??媛??뚯빱??蹂대궦 ?뺥솗???꾨＼?꾪듃
+6. `results/<role>.result.md` ??媛??뚯빱???꾩껜 諛섑솚 ?띿뒪??7. ?ъ슜??蹂닿퀬??evidence ?붾젆?곕━ 寃쎈줈 ?ы븿
+
+**?ㅽ뙣/以묐떒??run??evidence瑜?湲곕줉?쒕떎.** ?대뼡 ?먯씠?꾪듃媛 ?꾨즺/?ㅽ뙣?덈뒗吏 臾몄꽌??
+
+> ?좑툘 Evidence ?묒꽦 ?놁씠 ?ъ슜?먯뿉寃?寃곌낵瑜?蹂닿퀬?섎㈃ ???쒕떎. 寃곌낵 蹂닿퀬 = evidence ?묒꽦 ?꾨즺 ??
+
+## Do NOT
+
+- Edit deliverable files directly
+- Skip review for persistent deliverables
+ succeeded in 640ms:
+3. decide whether the request should run in `team mode` or `queue mode`
+4. if `team mode`, decide whether the task needs one worker or a team
+5. choose worker roles autonomously
+6. choose model, sandbox, and reasoning per worker
+7. launch and supervise the workers or the queue runner
+8. validate outputs before reporting back
+9. preserve enough evidence for later review: manifest, prompt files, worker summaries, queue state, and per-run archives
+10. if the parent recovers from a wrong delivery path or wrong workspace root, run the reviewer or verifier again against the final successful artifact before accepting it
+11. if a reviewer finds a material issue, launch a bounded fixer worker instead of patching the deliverable directly in the parent
+12. when building a launcher spec for deliverable work, include `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"` so unsafe team shapes fail fast
+13. when building a queue config, prefer one workspace per issue, `hooks.after_create`, and auto-detected `AGENTS.md`/`WORKFLOW.md`
+
+## Team Sizing Rule
+codex
+핵심은 “워커가 끝난 뒤 evidence를 남기기 전에는 결과 보고가 금지”라는 점입니다. 지금은 그 규칙의 근거 줄 번호와 실제 예시 manifest까지 맞춰서 정리하고 있습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "Stage 9: EVIDENCE|BLOCKING STAGE|Evidence writing is mandatory|Evidence directory selection|run-manifest.md|run-summary.md|prompts/<role>|results/<role>|Failed/aborted runs|Timing" skills/claude-subagent-orchestrator/references/orchestration-workflow.md' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "Directory Structure|Run Manifest|Contract summary|Result summary|Per-Worker Prompt File|Per-Worker Result File|When to Create Evidence|Error Evidence|Failed runs still get full evidence|run-manifest.md|run-summary.md|prompts/|results/|mixed/|light: summary only|Full: manifest|Standard: manifest" skills/claude-subagent-orchestrator/references/evidence-format.md' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"Evidence Reminder|subagent-runs/claude|run-summary.md|prompts/\\*|results/\\*|실패|중단\" .claude/skills/sub/SKILL.md" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "Evidence Reminder|subagent-runs/mixed|engines/<engine>|raw stdout|실패|중단" .claude/skills/submix/SKILL.md' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "Evidence Checkpoint|run-manifest.md|run-summary.md|prompts/<role>|results/<role>|실패/중단|Report results to user before writing evidence" .claude/agents/codex-subagent-orchestrator.md' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "Evidence는 필수|output_dir|orchestration-summary.md|orchestration-manifest.json|prompt 파일|결과 보고 전에" skills/codex-subagent-orchestrator/SKILL.md' in C:\Users\haj\projects\subagent-orchestrator succeeded in 580ms:
+228:### Stage 9: EVIDENCE + RECOVER or ACCEPT
+230:> ⚠️ **BLOCKING STAGE**: 이 단계를 완료하지 않으면 사용자에게 결과를 보고할 수 없다. Evidence 작성은 결과 보고의 **전제 조건**이다.
+234:**Critical rule**: Evidence writing is mandatory and non-delegatable. The orchestrator writes it using the Write tool directly — never a worker, never skipped.
+236:**Evidence directory selection**:
+242:3. Write `subagent-runs/<engine>/<run-name>/run-manifest.md` — authoritative structured record
+243:4. Write `subagent-runs/<engine>/<run-name>/run-summary.md` — compact one-liner-per-agent table
+244:5. Write `subagent-runs/<engine>/<run-name>/prompts/<role>.prompt.md` for each worker — exact prompt text sent
+245:6. Write `subagent-runs/<engine>/<run-name>/results/<role>.result.md` for each worker — full return text
+284:- **Failed/aborted runs** get full evidence. Document exactly which agents completed, which failed, and why.
+286:- **Timing**: write evidence after the final verdict is known, before reporting to the user.
+ succeeded in 571ms:
+7:## Directory Structure
+14:└── mixed/           # 혼합 엔진 실행
+16:        ├── run-manifest.md
+17:        ├── run-summary.md
+18:        ├── prompts/
+19:        ├── results/
+29:- **혼합 엔진 실행**: `subagent-runs/mixed/<run-name>/` -- `engines/` 하위에 엔진별 raw 증거 분리
+36:    ├── run-manifest.md          # Structured run record (authoritative)
+37:    ├── run-summary.md           # Compact one-liner-per-agent summary
+38:    ├── prompts/                 # Per-worker prompt preservation
+41:    └── results/                 # Per-worker return preservation
+54:## Run Manifest
+59:# Run Manifest: <run-name>
+80:- **Contract summary**: [one-line task description]
+81:- **Result summary**: [one-line outcome]
+82:- **Prompt file**: prompts/<role>.prompt.md
+83:- **Result file**: results/<role>.result.md
+122:## Per-Worker Prompt File
+124:Preserved in `prompts/<role>.prompt.md`. Contains the **exact text** sent as the `prompt` parameter to the Task tool.
+131:## Per-Worker Result File
+ succeeded in 595ms:
+22:- Evidence: `subagent-runs/claude/<run-name>/`
+29:- **Evidence는 필수이며 생략 불가** — 사용자 보고 전에 반드시 `subagent-runs/claude/<run-name>/`에 기록
+32:## Evidence Reminder
+35:1. `subagent-runs/claude/<run-name>/run-manifest.md`
+36:2. `subagent-runs/claude/<run-name>/run-summary.md`
+37:3. `subagent-runs/claude/<run-name>/prompts/*.prompt.md`
+38:4. `subagent-runs/claude/<run-name>/results/*.result.md`
+40:실패/중단 run도 기록한다. 상세 형식은 `evidence-format.md` 참조.
+ succeeded in 565ms:
+17:| 증거 저장 | `subagent-runs/claude/` | `subagent-runs/mixed/` |
+117:- **Evidence는 필수이며 생략 불가** — 사용자 보고 전에 반드시 `subagent-runs/mixed/<run-name>/`에 기록
+122:## Evidence Reminder
+125:1. `subagent-runs/mixed/<run-name>/run-manifest.md`
+126:2. `subagent-runs/mixed/<run-name>/run-summary.md`
+127:3. `subagent-runs/mixed/<run-name>/prompts/*.prompt.md`
+128:4. `subagent-runs/mixed/<run-name>/results/*.result.md`
+129:5. `subagent-runs/mixed/<run-name>/engines/<engine>/*.raw.txt` (외부 엔진 raw stdout)
+131:실패/중단 run도 기록한다. 상세 형식은 `evidence-format.md` 참조.
+135:| 실패 유형 | 대응 |
+137:| 외부 엔진 exit code != 0 | 1회 재시도. 재실패 시 Claude 폴백 |
+140:| 응답 파싱 실패 | raw stdout을 evidence에 저장, Claude가 재해석 시도 |
+142:> 외부 엔진 실패 시 기본 폴백: **동일 작업을 Claude(sonnet)로 재실행**.
+182:혼합 엔진 실행 증거는 `subagent-runs/mixed/<run-name>/`에 저장:
+185:subagent-runs/mixed/<run-name>/
+195:    ├── codex/              # Codex 워커 raw stdout
+197:    └── gemini/             # Gemini 워커 raw stdout
+ succeeded in 621ms:
+48:## MANDATORY: Evidence Checkpoint (Stage 9)
+54:3. `run-manifest.md` 작성 — 요청, 팀, 에이전트, 산출물, 판정, 타임라인
+55:4. `run-summary.md` 작성 — 에이전트별 한 줄 테이블
+56:5. `prompts/<role>.prompt.md` — 각 워커에 보낸 정확한 프롬프트
+57:6. `results/<role>.result.md` — 각 워커의 전체 반환 텍스트
+60:**실패/중단된 run도 evidence를 기록한다.** 어떤 에이전트가 완료/실패했는지 문서화.
+73:- **Report results to user before writing evidence**
+ succeeded in 614ms:
+59:- **Evidence는 필수이며 생략 불가.** 런처가 `output_dir`에 evidence를 생성했는지 확인. `orchestration-summary.md`, `orchestration-manifest.json`, prompt 파일이 없으면 직접 작성. 사용자에게 결과 보고 전에 evidence 존재를 확인해야 한다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "# Run Manifest|Contract summary|Result summary|Prompt file|Result file|Verdict|Deliverables" subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md subagent-runs/claude/evidence-test-2026-03-16/run-summary.md' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"subagent-runs\\claude\\evidence-test-2026-03-16\\run-manifest.md\" -TotalCount 80" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"subagent-runs\\mixed\\submix-test-2026-03-17\\run-manifest.md\" -TotalCount 90" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"subagent-runs\\codex\\wki-context-test\\orchestration-summary.md\" -TotalCount 60" in C:\Users\haj\projects\subagent-orchestrator succeeded in 512ms:
+subagent-runs/claude/evidence-test-2026-03-16/run-summary.md:8:- **Verdict**: ACCEPTED
+subagent-runs/claude/evidence-test-2026-03-16/run-summary.md:9:- **Deliverables**: tests/artifacts/evidence-test.txt (created)
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:1:# Run Manifest — submix-test-2026-03-17
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:25:- **Contract summary**: Create tests/artifacts/submix-test.txt with exact content
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:26:- **Result summary**: File created, all 3 validation checks passed
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:27:- **Prompt file**: prompts/file-writer.prompt.md
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:28:- **Result file**: results/file-writer.result.md
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:32:- **Contract summary**: Verify file existence, content, and scope compliance (read-only)
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:33:- **Result summary**: ACCEPTED — file exists and content matches exactly
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:34:- **Prompt file**: prompts/file-checker.prompt.md
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:35:- **Result file**: results/file-checker.result.md
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:38:## Deliverables
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:46:- **Verdict**: ACCEPTED
+subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md:54:- **Deliverables/agents**: 0.5
+subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md:1:# Run Manifest — evidence-test-2026-03-16
+subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md:24:- **Contract summary**: Create tests/artifacts/evidence-test.txt with exact content
+subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md:25:- **Result summary**: File created, all 3 validation checks passed
+subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md:26:- **Prompt file**: prompts/file-writer.prompt.md
+subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md:27:- **Result file**: results/file-writer.result.md
+subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md:31:- **Contract summary**: Verify file existence, content, and scope compliance
+ succeeded in 512ms:
+# Run Manifest ??evidence-test-2026-03-16
+
+## Request
+
+- **Original**: Create a file at tests/artifacts/evidence-test.txt containing "Evidence recording test - 2026-03-16"
+- **Classification**: create
+- **Complexity**: low
+
+## Team
+
+- **Pattern**: B (Implementer + Reviewer)
+- **Agent count**: 2
+- **Shared directive**: reference (AGENTS.md)
+
+## Agents
+
+| # | Role | Engine | Model | Stage | Status | Agent ID |
+|---|------|--------|-------|-------|--------|----------|
+| 1 | sub-implementer | claude | haiku | 1 | completed | a2eda22251f79d4e1 |
+| 2 | sub-reviewer | claude | haiku | 2 | completed | ac2b03c2db4154707 |
+ succeeded in 516ms:
+# Run Manifest ??submix-test-2026-03-17
+
+## Request
+
+- **Original**: Create a file at tests/artifacts/submix-test.txt containing "Submix mixed engine test - 2026-03-17". Use Claude for implementation and Gemini for review.
+- **Classification**: create
+- **Complexity**: low
+
+## Team
+
+- **Pattern**: B (Implement + Review)
+- **Agent count**: 2
+- **Shared directive**: reference (AGENTS.md)
+- **Engine mix**: Claude + Gemini (mixed)
+
+## Agents
+
+| # | Role | Engine | Model | Stage | Status | Agent ID |
+|---|------|--------|-------|-------|--------|----------|
+| 1 | sub-implementer | claude | haiku | 1 | completed | af286a09acfa03d02 |
+ succeeded in 500ms:
+# Orchestration Summary
+
+- workspace_root: `C:\Users\haj\projects\subagent-orchestrator`
+- execution_mode: sequential
+- workers_succeeded: 1/1
+- shared_directive_mode: disabled
+- shared_directive_chars: 0 -> 0
+- live_usage_enabled: False
+- total_prompt_chars: 1525
+- total_footer_tokens: 0
+- supervisor_only: False
+- require_final_read_only_review: False
+- material_issue_strategy: none
+- final_read_only_review_present: True
+- efficiency_measurement: structure_first
+- requested_deliverable_count: 0
+- workers_per_deliverable: n/a
+- writable_workers_per_deliverable: n/a
+- worker_shape: writable=0, read_only=1, implementer=0, reviewer=1, validator=0, fixer=0
+- full_auto_split: writable=0, read_only=0
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "orchestration-summary.md|orchestration-manifest.json|prompt file|run archive|per-worker evidence folders|preserve enough evidence" skills/codex-subagent-orchestrator/references/orchestration-workflow.md skills/codex-subagent-orchestrator/references/spec-format.md skills/codex-subagent-orchestrator/references/testing-playbook.md' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"skills\\codex-subagent-orchestrator\\references\\orchestration-workflow.md\" -TotalCount 420" in C:\Users\haj\projects\subagent-orchestrator succeeded in 484ms:
+skills/codex-subagent-orchestrator/references/testing-playbook.md:12:- one `orchestration-manifest.json`
+skills/codex-subagent-orchestrator/references/testing-playbook.md:13:- one prompt file per worker
+skills/codex-subagent-orchestrator/references/testing-playbook.md:69:- The run produces `orchestration-summary.md` unless `write_summary_file` was disabled.
+skills/codex-subagent-orchestrator/references/testing-playbook.md:82:- Prefer compact response style and consume `orchestration-summary.md` before reading raw logs.
+skills/codex-subagent-orchestrator/references/orchestration-workflow.md:22:- preserve a per-run archive with worker-specific evidence folders
+skills/codex-subagent-orchestrator/references/orchestration-workflow.md:201:- prompt file retention
+skills/codex-subagent-orchestrator/references/orchestration-workflow.md:203:- a run archive with copied launcher files, deliverables, and per-worker evidence folders
+skills/codex-subagent-orchestrator/references/orchestration-workflow.md:218:- keep the prompt file on disk
+skills/codex-subagent-orchestrator/references/orchestration-workflow.md:363:- `orchestration-summary.md`
+skills/codex-subagent-orchestrator/references/spec-format.md:16:  "manifest_file": "subagent-runs/codex/todo-app/orchestration-manifest.json",
+skills/codex-subagent-orchestrator/references/spec-format.md:18:  "summary_file": "subagent-runs/codex/todo-app/orchestration-summary.md",
+skills/codex-subagent-orchestrator/references/spec-format.md:90:| `write_run_archive` | no | When true, stores a per-run archive with copied launcher files, deliverables, and worker evidence |
+skills/codex-subagent-orchestrator/references/spec-format.md:96:| `write_summary_file` | no | When true, writes `orchestration-summary.md` for compact parent-side handoff |
+skills/codex-subagent-orchestrator/references/spec-format.md:477:- prompt hashes and prompt file paths
+skills/codex-subagent-orchestrator/references/spec-format.md:498:When `write_run_archive` is true, the launcher also creates a per-run archive under `archive_root` with this shape:
+ succeeded in 516ms:
+# Orchestration Workflow
+
+## Purpose
+
+This workflow is for a parent Codex instance that should act as a supervisor, not as the only implementer.
+
+The parent should break work into bounded worker runs and use `codex exec` as the execution engine for those workers.
+
+If the user starts with `/sub`, treat that as an explicit instruction to use this workflow.
+
+## Parent-Worker Split
+
+### Parent responsibilities
+
+- classify the task
+- decide whether to use one worker or a team
+- choose skills for the workers
+- define each worker boundary
+- choose sandbox and reasoning effort per worker
+- choose whether the team should run in parallel or sequentially
+codex
+**핵심**
+이 프로젝트에서 evidence 기록은 선택이 아니라 `Stage 9`의 차단 단계입니다. 최종 판정이 난 뒤, 사용자에게 결과를 보고하기 전에 반드시 evidence를 써야 하고, 이 작업은 워커가 아니라 오케스트레이터(parent)가 직접 합니다. 실패·중단 run도 동일하게 기록해야 합니다 ([orchestration-workflow.md#L228](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L228), [.claude/agents/codex-subagent-orchestrator.md#L48](C:/Users/haj/projects/subagent-orchestrator/.claude/agents/codex-subagent-orchestrator.md#L48)).
+
+**무엇을 어디에 남기나**
+단일 엔진 run은 `subagent-runs/<engine>/<run-name>/`, 혼합 엔진 run은 `subagent-runs/mixed/<run-name>/`에 저장하고, run 이름은 `<task-slug>-<YYYY-MM-DD>` 형식입니다. 기본 evidence는 `run-manifest.md`, `run-summary.md`, 각 워커의 정확한 프롬프트 `prompts/*.prompt.md`, 각 워커의 전체 반환문 `results/*.result.md`입니다. 혼합 엔진이면 여기에 외부 엔진 raw stdout도 `engines/<engine>/*.raw.txt`로 추가 보존합니다 ([orchestration-workflow.md#L236](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L236), [evidence-format.md#L7](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md#L7), [.claude/skills/sub/SKILL.md#L32](C:/Users/haj/projects/subagent-orchestrator/.claude/skills/sub/SKILL.md#L32), [.claude/skills/submix/SKILL.md#L122](C:/Users/haj/projects/subagent-orchestrator/.claude/skills/submix/SKILL.md#L122)).
+
+Manifest에는 워커별 `Contract summary`, `Result summary`, prompt/result 파일 경로, deliverables, review verdict, fix cycles, metrics, timeline, errors/notes가 들어갑니다. 실제 샘플도 이 구조로 기록돼 있습니다 ([evidence-format.md#L54](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md#L54), [run-manifest.md#L24](C:/Users/haj/projects/subagent-orchestrator/subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md#L24), [run-manifest.md#L25](C:/Users/haj/projects/subagent-orchestrator/subagent-runs/mixed/submix-test-2026-03-17/run-manifest.md#L25)).
+
+**운영 규칙**
+evidence 수준은 run 형태에 따라 `full / standard / light`로 나뉘지만, 구현+리뷰, watchdog, 실패·중단 run은 `full`이 기본입니다. 리뷰어가 `MATERIAL_ISSUES`를 내면 parent가 직접 고치지 않고 bounded fixer를 띄운 뒤 다시 리뷰해야 하며, 2회 안에 해결되지 않으면 그 상태 그대로 evidence를 남기고 사용자에게 escalation합니다. 또 “없는 evidence를 있다고 주장하지 말 것”이 명시 규칙입니다 ([evidence-format.md#L167](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md#L167), [evidence-format.md#L179](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md#L179), [orchestration-workflow.md#L250](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L250), [orchestration-workflow.md#L284](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L284)).
+
+레거시 Codex launcher만 예외적으로 형식이 조금 다릅니다. 이쪽은 `output_dir` 아래 `orchestration-summary.md`, `orchestration-manifest.json`, prompt 파일이 evidence의 기준이고, 런처가 안 만들었으면 parent가 직접 채워야 합니다 ([skills/codex-subagent-orchestrator/SKILL.md#L59](C:/Users/haj/projects/subagent-orchestrator/skills/codex-subagent-orchestrator/SKILL.md#L59), [orchestration-summary.md#L1](C:/Users/haj/projects/subagent-orchestrator/subagent-runs/codex/wki-context-test/orchestration-summary.md#L1)).
+tokens used
+82,218

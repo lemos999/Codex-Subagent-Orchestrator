@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트레이딩 퀘스트 - 리더보드</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">트레이딩 퀘스트</a>
+        <div class="nav-links">
+            <a href="/">대시보드</a>
+            <a href="/quest">퀘스트</a>
+            <a href="/leaderboard">리더보드</a>
+            <a href="/backtest">임무</a>
+            <a href="/data">백데이터</a>
+        </div>
+    </nav>
+    <main class="container">
+        <h1>전략 리더보드</h1>
+        <div class="card">
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>순위</th>
+                        <th>전략</th>
+                        <th>수익률 %</th>
+                        <th>승률</th>
+                        <th>최대 낙폭</th>
+                        <th>Sharpe</th>
+                        <th>점수</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr><td colspan="7">로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

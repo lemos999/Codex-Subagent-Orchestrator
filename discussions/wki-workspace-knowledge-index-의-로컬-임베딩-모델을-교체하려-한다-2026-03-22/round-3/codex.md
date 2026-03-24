@@ -1,0 +1,1 @@
+[POSITION: 현행 WKI에는 BGE-M3가 최적이고, E5-large는 query/document 분리 없이는 성능 잠재력을 못 쓴다.]

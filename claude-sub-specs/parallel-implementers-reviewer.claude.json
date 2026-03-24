@@ -1,0 +1,174 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "C-parallel-review",
+    "version": "2.0",
+    "purpose": "Parallel independent implementers followed by a single reviewer. Use when deliverables are independent and can be built concurrently.",
+    "model_strategy": {
+      "quality": "sonnet for both implementers (need write capability), haiku for reviewer (read-only verification)",
+      "optimization": "Stage-based: stage 1 runs in parallel, stage 2 waits. Coordination notes prevent cross-contamination.",
+      "token_saving": "compact directive, coordination_notes replace verbose isolation instructions, reviewer uses low reasoning"
+    },
+    "improvements": [
+      "coordination_notes prevent parallel worker collision",
+      "Per-worker model and reasoning_effort tuning",
+      "Archive enabled for audit trail",
+      "Live usage monitoring for parallel cost visibility",
+      "Reviewer validates both files in single pass (fewer workers = fewer tokens)",
+      "success_criteria for clear pass/fail",
+      "Optional parallel watchdog hooks (one per worker, disjoint scopes)"
+    ]
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "claude-sub-runs/parallel-impl-review",
+  "manifest_file": "claude-sub-runs/parallel-impl-review/orchestration-manifest.json",
+  "summary_file": "claude-sub-runs/parallel-impl-review/orchestration-summary.md",
+  "debug_log_file": "claude-sub-runs/parallel-impl-review/launcher-debug.log",
+  "archive_root": "claude-sub-records",
+  "write_run_archive": true,
+  "archive_run_label": "parallel-impl-review",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 180,
+  "execution_mode": "parallel",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "requested_deliverables": [
+    "alpha.txt",
+    "beta.txt"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "shared_directive_mode": "compact",
+  "watchdog": {
+    "enabled": false,
+    "stages_to_watch": ["alpha-implementer", "beta-implementer"],
+    "parallel_watchdogs": true,
+    "model": "gpt-5.4",
+    "reasoning_effort": "medium",
+    "verdict_format": "PASS | SHORTFALL",
+    "on_shortfall": "3-choice: Accept (fix) | Reject (log + proceed) | Escalate (ask user)",
+    "max_cycles_per_stage": 1
+  },
+  "live_usage": {
+    "enabled": true,
+    "display_mode": "both",
+    "status_file": "claude-sub-runs/parallel-impl-review/orchestration-usage.json",
+    "poll_interval_ms": 500
+  },
+  "defaults": {
+    "prompt_profile": "compact",
+    "response_style": "compact"
+  },
+  "agents": [
+    {
+      "name": "alpha-implementer",
+      "kind": "implementer",
+      "stage": 1,
+      "model": "gpt-5.4",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 5,
+      "role": "parallel implementer (alpha)",
+      "mission": "Create the alpha deliverable. Another worker handles beta — do not touch it.",
+      "coordination_notes": "You are one of two parallel workers. Your scope is ONLY alpha.txt. beta.txt belongs to a sibling worker. Never read, write, or reference beta.txt.",
+      "task": "Create or replace alpha.txt in the working directory containing exactly the text ALPHA.",
+      "read_first": [
+        "AGENTS.md"
+      ],
+      "writable_scope": [
+        "alpha.txt"
+      ],
+      "required_paths": [
+        "alpha.txt"
+      ],
+      "required_non_empty_paths": [
+        "alpha.txt"
+      ],
+      "success_criteria": [
+        "alpha.txt exists with content exactly ALPHA"
+      ],
+      "validation": [
+        "Read alpha.txt back and confirm content is exactly ALPHA.",
+        "Confirm no other files were created or modified."
+      ],
+      "return_contract": [
+        "State: file path, content, PASS or FAIL."
+      ],
+      "stop_when": [
+        "alpha.txt created and validated. Do not explore workspace or touch other files."
+      ]
+    },
+    {
+      "name": "beta-implementer",
+      "kind": "implementer",
+      "stage": 1,
+      "model": "gpt-5.4",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 5,
+      "role": "parallel implementer (beta)",
+      "mission": "Create the beta deliverable. Another worker handles alpha — do not touch it.",
+      "coordination_notes": "You are one of two parallel workers. Your scope is ONLY beta.txt. alpha.txt belongs to a sibling worker. Never read, write, or reference alpha.txt.",
+      "task": "Create or replace beta.txt in the working directory containing exactly the text BETA.",
+      "read_first": [
+        "AGENTS.md"
+      ],
+      "writable_scope": [
+        "beta.txt"
+      ],
+      "required_paths": [
+        "beta.txt"
+      ],
+      "required_non_empty_paths": [
+        "beta.txt"
+      ],
+      "success_criteria": [
+        "beta.txt exists with content exactly BETA"
+      ],
+      "validation": [
+        "Read beta.txt back and confirm content is exactly BETA.",
+        "Confirm no other files were created or modified."
+      ],
+      "return_contract": [
+        "State: file path, content, PASS or FAIL."
+      ],
+      "stop_when": [
+        "beta.txt created and validated. Do not explore workspace or touch other files."
+      ]
+    },
+    {
+      "name": "deliverable-reviewer",
+      "kind": "reviewer",
+      "stage": 2,
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "low",
+      "max_response_lines": 10,
+      "role": "cross-deliverable reviewer",
+      "mission": "Verify both parallel deliverables independently meet spec and no cross-contamination occurred.",
+      "task": "Review alpha.txt and beta.txt. Verify: (1) each file exists, (2) alpha.txt contains exactly ALPHA, (3) beta.txt contains exactly BETA, (4) no unexpected files were created.",
+      "read_first": [
+        "AGENTS.md",
+        "alpha.txt",
+        "beta.txt"
+      ],
+      "validation": [
+        "alpha.txt exists and is non-empty.",
+        "alpha.txt content is exactly ALPHA.",
+        "beta.txt exists and is non-empty.",
+        "beta.txt content is exactly BETA.",
+        "No unexpected files in workspace root."
+      ],
+      "return_contract": [
+        "Verdict: ACCEPTED | MINOR_ISSUES | MATERIAL_ISSUES",
+        "Per-file check results: [file — check — PASS/FAIL]",
+        "Rereview required: YES | NO"
+      ],
+      "stop_when": [
+        "Review verdict delivered for both files. Do not modify anything."
+      ]
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
   "cwd": ".",
   "cwd_resolution": "invocation",
-  "output_dir": "subagent-runs/minimal-write",
-  "manifest_file": "subagent-runs/minimal-write/orchestration-manifest.json",
+  "output_dir": "subagent-runs/codex/minimal-write",
+  "manifest_file": "subagent-runs/codex/minimal-write/orchestration-manifest.json",
   "skip_git_repo_check": true,
   "execution_mode": "sequential",
   "write_prompt_files": true,

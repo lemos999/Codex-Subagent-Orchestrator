@@ -1,0 +1,16 @@
+이 프로젝트의 WKI 자동 인덱싱은 “TS 런처 실행 시 1회 freshness 확인 -> 변경 파일만 증분 인덱싱 -> 그 인덱스로 워커 프롬프트용 컨텍스트 검색” 흐름입니다. 시작점은 [orchestrator.ts](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/orchestrator.ts#L297)이고, 문서 요약도 [wki-integration.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/wki-integration.md#L12)에 맞춰져 있습니다.
+
+**동작 순서**
+1. TS 런처가 오케스트레이션을 시작하면 WKI를 감지하고 `ensureIndexFresh()`를 한 번 호출합니다. 감지 조건은 `.knowledge/`와 FTS DB가 이미 있어야 한다는 점이라서, “처음부터 WKI를 생성”하는 부트스트랩까지 자동은 아닙니다. [wki-context.ts](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/supervisor/wki-context.ts#L50)
+2. `ensureIndexFresh()`는 `node workspace-knowledge-index/dist/index.js index`를 실행합니다. 변경이 없으면 즉시 끝나고, 실패하거나 `dist`가 없으면 전체 런처를 죽이지 않고 조용히 폴백합니다. [wki-context.ts](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/supervisor/wki-context.ts#L164)
+3. WKI CLI의 `index` 명령은 `.wki.lock`으로 동시 쓰기를 막고, `freshness.lock`을 읽어 이전 인덱싱 시점 상태를 가져옵니다. [index.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/index.ts#L153) [index-lock.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/index-lock.ts#L27)
+4. stale 판단은 Git 기반입니다. 이전 `head_commit` 대비 현재 `HEAD`의 committed diff, 현재 워킹트리의 unstaged diff, staged diff, untracked files를 합쳐 changed set을 만듭니다. 변경이 0이면 `"Index is up to date"`로 종료합니다. [freshness.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/freshness.ts#L53) [index.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/index.ts#L220)
+5. 변경이 있으면 `Indexer.indexIncremental()`이 삭제/rename된 파일의 기존 chunk와 vector를 지우고, added/modified/renamed 파일만 다시 파싱해서 FTS DB를 갱신합니다. 가능하면 임베딩도 다시 만들고 `symbols.idx`, `deps.graph`도 함께 갱신합니다. [indexer.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/indexer.ts#L270)
+6. 인덱싱이 끝나면 각 워커의 task 텍스트로 WKI 검색을 수행해서 `## Relevant Context (auto-injected)` 블록을 만들고 프롬프트 앞에 붙입니다. [wki-context.ts](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/supervisor/wki-context.ts#L209) [sub-hook.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/context/sub-hook.ts#L29) [context-builder.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/context/context-builder.ts#L26)
+
+**이 저장소 기준**
+- 설정은 [wki.config.json](C:/Users/haj/projects/subagent-orchestrator/wki.config.json)에 있고, `project.name`은 `my-project`, 인덱스 루트는 `.knowledge`, 검색 DB는 `.knowledge/{project}/fts.db`, 검색 fusion은 FTS 0.4 + vector 0.6입니다.
+- 임베딩은 로컬 `transformers.js` + `Xenova/paraphrase-multilingual-MiniLM-L12-v2`로 잡혀 있어서, 가능하면 hybrid search를 쓰고 실패하면 FTS-only로 폴백합니다. [wki.config.json](C:/Users/haj/projects/subagent-orchestrator/wki.config.json) [index.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/index.ts#L182)
+- 자동 연동은 TS 런처에서만 됩니다. Claude Task 직접 실행이나 `start-codex-subagent-team.ps1` 경로는 아직 수동입니다. [wki-integration.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/wki-integration.md#L21)
+
+원하면 다음 답변에서 `freshness.lock` 예시를 기준으로 “수정 파일이 생겼을 때 실제로 어떤 파일만 다시 인덱싱되는지”까지 더 풀어드리겠습니다.

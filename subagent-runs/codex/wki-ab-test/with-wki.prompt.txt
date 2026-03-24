@@ -1,0 +1,43 @@
+## Relevant Context (auto-injected)
+
+### skills/claude-subagent-orchestrator/references/orchestration-workflow.md (lines 228-261)
+**Stage 9: EVIDENCE + RECOVER or ACCEPT** — markdown-section
+> ### Stage 9: EVIDENCE + RECOVER or ACCEPT
+> 
+> > ⚠️ **BLOCKING STAGE**: 이 단계를 완료하지 않으면 사용자에게 결과를 보고할 수 없다. Evidence 작성은 결과 보고의 **전제 조건**이다.
+> 
+> **If ACCEPTED or MINOR_ISSUES:**
+
+### skills/claude-subagent-orchestrator/references/orchestration-workflow.md (lines 278-289)
+**Evidence Writing Mechanism** — markdown-section
+> ## Evidence Writing Mechanism
+> 
+> Evidence files are written by the orchestrator (parent) using the **Write** tool. This applies to every completed run — successful, failed, or aborted.
+> 
+> The file templates and field definitions are in `evidence-format.md`. Key points:
+
+### .claude/agents/codex-subagent-orchestrator.md (lines 47-62)
+**MANDATORY: Evidence Checkpoint (Stage 9)** — markdown-section
+> ## MANDATORY: Evidence Checkpoint (Stage 9)
+> 
+> **사용자에게 결과를 보고하기 전에** 반드시 아래 체크리스트를 수행해야 한다. 이 단계를 건너뛰는 것은 금지된다.
+> 
+> 1. Run 이름 결정: `<task-slug>-<YYYY-MM-DD>` (충돌 시 `-2`, `-3` 추가)
+
+### .gemini/skills/gemini-subagent-orchestrator/references/sub-command-protocol.md (lines 22-27)
+**Evidence Rules** — markdown-section
+> ## Evidence Rules
+> 
+> - Single-engine Gemini runs: `subagent-runs/gemini/<run-name>/`
+> - Mixed-engine runs: `subagent-runs/mixed/<run-name>/`
+> - The launcher is responsible for writing `orchestration-summary.md`, `orchestration-manifest.json`, prompt files, and worker outputs.
+
+### skills/gemini-subagent-orchestrator/references/sub-command-protocol.md (lines 22-27)
+**Evidence Rules** — markdown-section
+> ## Evidence Rules
+> 
+> - Single-engine Gemini runs: `subagent-runs/gemini/<run-name>/`
+> - Mixed-engine runs: `subagent-runs/mixed/<run-name>/`
+> - The launcher is responsible for writing `orchestration-summary.md`, `orchestration-manifest.json`, prompt files, and worker outputs.
+
+Explain the evidence recording rules in this subagent-orchestrator project. What is Stage 9? What files are written? Be specific about file names and directory structure.

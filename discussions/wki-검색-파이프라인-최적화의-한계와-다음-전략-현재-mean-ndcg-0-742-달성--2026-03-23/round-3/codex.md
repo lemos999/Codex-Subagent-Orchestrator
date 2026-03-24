@@ -1,0 +1,1 @@
+[POSITION: 0.742 돌파의 현실적 경로는 BM25/가중치 튜닝이 아니라 candidate recall 진단 기반의 구조 개선이며, ColBERT는 그 다음 단계에서 조건부로 도입해야 한다]

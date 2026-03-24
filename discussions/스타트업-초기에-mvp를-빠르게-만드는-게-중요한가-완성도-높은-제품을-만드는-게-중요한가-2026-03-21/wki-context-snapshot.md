@@ -1,0 +1,33 @@
+## Relevant Context (auto-injected)
+
+### Projects/Trading Value/coin_strategy_spec.md (lines 511-517)
+**18.2 검증 철학** — markdown-section
+> ### 18.2 검증 철학
+> - 수익보다 먼저 **생존**을 본다.
+> - 진입보다 먼저 **무효화**를 본다.
+> - 백테스트 수익률보다 먼저 **데이터 정합성**을 본다.
+> - 높은 승률보다 **기대값과 최대 낙폭**을 우선한다.
+
+### game-design-director/reports/opus-handoff-procedure.md (lines 9-21)
+**1. 작업 목표** — markdown-section
+> ## 1. 작업 목표
+> 
+> 당신의 임무는 `game-design-director-integrated.md`가 **자기 문서가 선언한 목표**에 더 아름답고, 더 엄밀하고, 더 실전적으로 도달하도록 만드는 것이다.
+> 
+> 핵심 원칙은 다음과 같다.
+
+### claude-sub-specs/shortlive-dev-strategy.md (lines 1-7)
+**ShortLive Shop Helper — Phase 1 MVP 개발 전략** — markdown-section
+> # ShortLive Shop Helper — Phase 1 MVP 개발 전략
+> 
+> > Claude Code에게 순차적으로 전달하여 프로젝트를 처음부터 빌드하기 위한 마스터 가이드.
+> > 각 Step의 프롬프트는 자급자족(self-contained)이며, 외부 문서 참조 없이 실행 가능하다.
+> 
+
+### workspace-knowledge-index/docs/implementation-plan-ai-assisted.md (lines 10-11)
+**1. 구축 전략 — AI 역할 분담** — markdown-section
+> ## 1. 구축 전략 — AI 역할 분담
+
+### README.md (lines 38-39)
+**Quick Start** — markdown-section
+> ## Quick Start

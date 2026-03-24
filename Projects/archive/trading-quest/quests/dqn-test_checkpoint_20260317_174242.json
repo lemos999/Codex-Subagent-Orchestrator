@@ -1,0 +1,229 @@
+{
+  "quest_id": "dqn-test",
+  "market": "US",
+  "symbols": [
+    "AAPL"
+  ],
+  "initial_capital": 100000,
+  "current_capital": 100016.67982170105,
+  "start_date": "2025-02-10",
+  "current_date": "2026-03-04",
+  "current_day": 16,
+  "phase": 2,
+  "strategy_name": "dqn",
+  "total_score": 1849.8671995101197,
+  "trade_log": [
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 255.90788877868653,
+      "commission": 0.25590788877868653,
+      "timestamp": "2026-02-13"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 255.90788877868653,
+      "commission": 0.25590788877868653,
+      "timestamp": "2026-02-16"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "SELL",
+      "qty": 1,
+      "price": 264.4476965789795,
+      "commission": 0.2644476965789795,
+      "timestamp": "2026-02-20"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "SELL",
+      "qty": 1,
+      "price": 264.0479026794434,
+      "commission": 0.2640479026794434,
+      "timestamp": "2026-02-27"
+    }
+  ],
+  "daily_results": [
+    {
+      "date": "2026-02-10",
+      "day_idx": 0,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-11",
+      "day_idx": 1,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-12",
+      "day_idx": 2,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-13",
+      "day_idx": 3,
+      "return_pct": 0.0,
+      "trades": 1,
+      "score": 10.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000.0,
+      "target_passed": false
+    },
+    {
+      "date": "2026-02-16",
+      "day_idx": 4,
+      "return_pct": 0.0,
+      "trades": 1,
+      "score": 10.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000.0,
+      "target_passed": false
+    },
+    {
+      "date": "2026-02-17",
+      "day_idx": 5,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000.0,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-18",
+      "day_idx": 6,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000.0,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-19",
+      "day_idx": 7,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000.0,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-20",
+      "day_idx": 8,
+      "return_pct": 0.017079615600581747,
+      "trades": 1,
+      "score": 427.07961560058175,
+      "win_rate": 100.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100017.07961560058,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-23",
+      "day_idx": 9,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 200.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100017.07961560058,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-24",
+      "day_idx": 10,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 200.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100017.07961560058,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-25",
+      "day_idx": 11,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 200.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100017.07961560058,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-26",
+      "day_idx": 12,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 200.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100017.07961560058,
+      "target_passed": true
+    },
+    {
+      "date": "2026-02-27",
+      "day_idx": 13,
+      "return_pct": -0.00039972562793007027,
+      "trades": 1,
+      "score": 209.60027437206992,
+      "win_rate": 0.0,
+      "max_drawdown": 3.997256279300703e-06,
+      "portfolio_value": 100016.67982170105,
+      "target_passed": false
+    },
+    {
+      "date": "2026-03-02",
+      "day_idx": 14,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 199.754434773683,
+      "win_rate": 0.0,
+      "max_drawdown": 3.997256279300703e-06,
+      "portfolio_value": 100016.67982170105,
+      "target_passed": true
+    },
+    {
+      "date": "2026-03-03",
+      "day_idx": 15,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 193.43287476378518,
+      "win_rate": 0.0,
+      "max_drawdown": 3.997256279300703e-06,
+      "portfolio_value": 100016.67982170105,
+      "target_passed": true
+    }
+  ],
+  "positions": {},
+  "metadata": {}
+}

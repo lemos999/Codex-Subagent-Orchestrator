@@ -1,0 +1,11 @@
+- Verdict: MINOR_ISSUES
+- Findings:
+  - `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-a-solo.md` — the new Solo Explorer stop condition over-corrects toward forced convergence. For exploration/research tasks, legitimate ambiguity can be the right outcome, and “converge on the strongest supported conclusion or next step” risks suppressing a small set of still-live uncertainties. Fix direction: soften this to “converge when possible; otherwise return the smallest justified set of remaining uncertainties or next-step branches.”
+- Files checked:
+  - `skills/claude-subagent-orchestrator/references/agent-contract.md`
+  - `skills/claude-subagent-orchestrator/references/sub-command-protocol.md`
+  - `skills/claude-subagent-orchestrator/references/orchestration-workflow.md`
+  - `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-a-solo.md`
+  - `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md`
+  - `skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-d-plan-implement-review.md`
+- Rereview required: YES

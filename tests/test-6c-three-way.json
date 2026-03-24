@@ -1,0 +1,44 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/test-6c-three-way",
+  "skip_git_repo_check": true,
+  "execution_mode": "parallel",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "shared_directive_mode": "disabled",
+  "defaults": {
+    "sandbox": "workspace-write",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 5
+  },
+  "agents": [
+    {
+      "name": "gemini-analyzer",
+      "kind": "planner",
+      "stage": 1,
+      "engine": "gemini",
+      "model": "gemini-2.5-pro",
+      "task": "Analyze what makes a good Tetris game. Write exactly 3 bullet points about core game mechanics. Output ONLY the 3 bullet points, nothing else."
+    },
+    {
+      "name": "codex-writer",
+      "kind": "implementer",
+      "stage": 1,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "task": "Write exactly 3 bullet points about Tetris content design (block types, scoring, levels). Output ONLY the 3 bullet points, nothing else."
+    },
+    {
+      "name": "claude-reviewer",
+      "kind": "reviewer",
+      "stage": 2,
+      "engine": "claude",
+      "model": "haiku",
+      "sandbox": "read-only",
+      "task": "You are reviewing outputs from two AI workers about Tetris game design. Read gemini-analyzer.last.txt and codex-writer.last.txt in the output directory subagent-runs/mixed/test-6c-three-way/. Verify both produced exactly 3 bullet points each. Return ACCEPTED if both have 3 bullet points, MINOR_ISSUES if format differs slightly, MATERIAL_ISSUES if content is missing or off-topic."
+    }
+  ]
+}

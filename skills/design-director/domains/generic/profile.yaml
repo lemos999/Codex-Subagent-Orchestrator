@@ -1,0 +1,13 @@
+domain: generic
+display_name: "범용 설계"
+terminology:
+  primary_outcome: "핵심 가치"
+  operating_loop: "운영 루프"
+  baseline: "기본 기대"
+  differentiation: "차별점"
+  target_audience: "대상 사용자"
+  component: "구성요소"
+  execution_ready: "실행 착수 가능"
+context_validation:
+  axes: ["도메인 관행", "제약조건", "표현 일관성"]
+value_test_override: false

@@ -1,0 +1,109 @@
+# 오케스트레이션 워크플로우 단계별 흐름
+
+오케스트레이션은 **9개 단계**로 구성됩니다:
+
+## **1️⃣ CLASSIFY (분류)**
+작업을 자세히 분석하는 단계
+
+- **작업 유형**: create, fix, refactor, review, analyze
+- **복잡도**: low (보일러플레이트) / medium (로직) / high (아키텍처)
+- **병렬성**: 독립적인 서브태스크가 있는가?
+- **리뷰 필요**: 출력이 영구적인가? (예 → 리뷰 필수)
+
+## **2️⃣ CHOOSE TEAM (팀 구성)**
+작업에 맞는 에이전트 패턴 선택
+
+| 패턴 | 형태 | 용도 |
+|------|------|------|
+| **A: Solo** | 1개 에이전트 | 단순 작업 (구현자 또는 검토자) |
+| **B: Implement + Review** | 구현자 → 검토자 | 표준 전달물 (가장 일반적) |
+| **C: Parallel + Review** | N개 구현자 ∥ → 검토자 | 독립적인 산출물들 |
+| **D: Plan + Implement + Review** | 기획자 → 구현자 → 검토자 | 복잡한 설계 필요 |
+| **E: Full Loop** | 구현자 → 검토자 → 수정자 → 검토자 | 예상되는 수정사항 있음 |
+
+## **3️⃣ INJECT SHARED DIRECTIVE (공유 계약 주입)**
+모든 워커 프롬프트에 `AGENTS.md`의 작업공간 운영 계약 추가
+
+- **Reference Mode** (기본): "AGENTS.md를 먼저 읽으세요" (토큰 절약)
+- **Inline Mode** (고위험 작업): AGENTS.md의 첫 문단을 프롬프트에 직접 포함
+
+## **4️⃣ BUILD CONTRACTS (계약 작성)**
+각 워커별 상세 계약 작성
+
+- Task, 검사 목록, 쓰기 범위, 검증, 반환 계약, 중지 조건
+- 공유 지시문 (3단계에서 선택)
+- 도구 지침
+
+## **5️⃣ SELECT SETTINGS (설정 선택)**
+워커별 실행 설정
+
+| 설정 | 결정 사항 |
+|------|---------|
+| `engine` | `claude` (기본) / `codex` / `gemini` |
+| `model` | haiku (저복잡도) / sonnet (기본) / opus (고복잡도) |
+| `isolation` | 병렬 쓰기가 겹치면 `"worktree"` 사용 |
+| `run_in_background` | 독립적인 장시간 작업만 `true` |
+
+## **6️⃣ CONFIRM (확인)**
+사용자에게 실행 계획 제시 및 승인 대기
+
+```
+## /sub 실행 계획
+
+**요청**: [요약]
+**패턴**: B: Implement + Review
+
+| # | 에이전트 | 역할 | 엔진 | 모델 | 목표 |
+|---|---------|------|------|------|------|
+| 1 | impl | implementer | claude | sonnet | 기능 구현 |
+| 2 | review | reviewer | claude | haiku | 코드 검토 |
+```
+
+사용자 응답: **yes** / **no** / **modify**
+
+## **7️⃣ LAUNCH (실행)**
+확인 후 워커 실행
+
+- **순차**: 구현자 → 결과 대기 → 검토자
+- **병렬**: 독립적인 구현자들 동시 실행
+- **엔진 선택**: Claude (Task tool) / Codex (Bash) / Gemini (Bash)
+
+## **7️⃣.5️⃣ WATCHDOG HOOK (감시견 - 선택)**
+각 워커 완료 후 목표 달성도 평가
+
+- PASS / SHORTFALL 반환
+- SHORTFALL 시 → **3선택 프로토콜**:
+  - **Accept**: 수정하고 재실행
+  - **Reject**: 로그하고 진행
+  - **Escalate**: 사용자에게 보고
+
+## **8️⃣ VALIDATE (검증)**
+워커 산출물 확인
+
+1. Glob으로 파일 존재 확인
+2. Read로 내용 검증
+3. 워커 요약 파싱
+4. 검토자 판정: ACCEPTED / MINOR_ISSUES / MATERIAL_ISSUES
+
+## **9️⃣ EVIDENCE + RECOVER (증거 작성)**
+
+**ACCEPTED/MINOR_ISSUES인 경우:**
+- `subagent-runs/<engine>/<run-name>/` 디렉토리 생성
+- `run-manifest.md` (구조화된 기록)
+- `run-summary.md` (간단한 표)
+- `prompts/<role>.prompt.md` (전달한 정확한 프롬프트)
+- `results/<role>.result.md` (워커 전체 반환 텍스트)
+
+**MATERIAL_ISSUES인 경우:**
+- 검토자의 구체적 지적 추출
+- `sub-fixer` 실행 (원본 범위만)
+- `sub-reviewer` 재검증
+- 최대 2회 수정-검토 사이클
+
+---
+
+**핵심 원칙:**
+- 감독자는 직접 편집하지 않음
+- 모든 지속적 산출물은 검토 게이트 필수
+- 각 실행은 증거 기록 필수
+- 토큰/비용 최적화: 가장 저렴한 충분한 모델 사용

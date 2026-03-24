@@ -1,0 +1,5 @@
+`packages/launcher/src/workers/output-quality.ts` 파일의 `checkOutputQuality` 함수는 작업자 출력 텍스트에서 다음과 같은 '과도한 생각(overthinking)' 신호를 감지합니다.
+
+1.  **반복 (Repetition)**: 동일한 문구(정규화되고 60자 이내의 문구)가 텍스트 내에서 3회 이상 반복되는 경우를 감지합니다.
+2.  **결정 없는 유보 (Hedging without decision)**: "could be", "might be", "it depends", "상황에 따라", "~일 수 있", "~도 고려"와 같은 가능성을 나타내는 표현이 4개 이상 발견되었지만, "choose", "select", "recommend", "결론", "conclusion", "verdict"와 같은 명확한 결정 표현이 없는 경우를 감지합니다.
+3.  **자기 참조 반복 (Self-reference loops)**: "as mentioned", "as I said", "앞서 말했듯", "다시 정리하면", "to summarize again"과 같은 자기 참조적인 표현이 3개 이상 발견되는 경우를 감지합니다.

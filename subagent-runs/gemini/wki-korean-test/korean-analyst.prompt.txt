@@ -1,0 +1,33 @@
+## Relevant Context (auto-injected)
+
+### subagent-runs/claude/gdd-tetris-pipeline/CLAUDE.md (lines 5-8)
+**역할** — markdown-section
+> ## 역할
+> 
+> 이 프로젝트는 클래식 테트리스 + 뉴 모드(중력 전환/몬스터 배틀/아이템)를 결합한 전략 액션 퍼즐 게임입니다.
+
+### subagent-runs/claude/gdd-tetris-pipeline/parts/puzzle-system.md (lines 6-9)
+**개요** — markdown-section
+> ## 개요
+> 
+> 테트리스 핵심 퍼즐 메커니즘을 담당하는 파트. 블록 낙하, 조작, 보드 관리가 핵심.
+
+### shortlive-shop-helper/plan-seller-tools.md (lines 725-728)
+**7.1 왜 필요한가** — markdown-section
+> ### 7.1 왜 필요한가
+> 
+> 방송이 끝나면 판매자는 "오늘 방송 어땠지?" 를 즉시 알고 싶습니다. 현재는 주문 목록을 하나하나 세야 하는데, **자동 요약 리포트**가 있으면 복기와 개선이 쉬워집니다.
+
+### shortlive-shop-helper/plan-seller-tools.md (lines 786-792)
+**8.1 왜 필요한가** — markdown-section
+> ### 8.1 왜 필요한가
+> 
+> 판매자가 알고 싶은 것:
+> - "어떤 상품이 잘 팔리나?" → 재고 확보, 방송 구성 결정
+> - "어떤 상품에서 취소가 많나?" → 상품 설명 개선, 가격 조정
+
+### shortlive-shop-helper/PLAN.md (lines 3-4)
+**1. 프로젝트 개요** — markdown-section
+> ## 1. 프로젝트 개요
+
+이 프로젝트에서 워커 실행 후 증거(evidence)를 기록하는 규칙을 설명해주세요. 어떤 파일이 생성되고 어떤 디렉터리 구조를 사용하나요?

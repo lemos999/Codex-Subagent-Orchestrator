@@ -1,0 +1,11 @@
+{
+    "cwd": ".",
+    "output_dir": "test-evidence-output",
+    "agents": [
+        {
+            "name": "test-agent",
+            "task": "Perform a simple task and output 'hello world' to a file named output.txt",
+            "required_paths": ["output.txt"]
+        }
+    ]
+}

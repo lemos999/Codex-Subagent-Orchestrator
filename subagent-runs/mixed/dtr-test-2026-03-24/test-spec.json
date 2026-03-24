@@ -1,0 +1,15 @@
+{
+  "cwd": "C:/Users/haj/projects/subagent-orchestrator",
+  "agents": [
+    {
+      "name": "test-analyzer",
+      "engine": "gemini",
+      "model": "gemini-2.5-flash",
+      "kind": "reviewer",
+      "stage": 1,
+      "task": "Read packages/launcher/src/workers/spawn.ts and explain the spawnWorker function in one sentence."
+    }
+  ],
+  "shared_directive_text": "Analysis only. Do NOT modify any files.",
+  "output_dir": "subagent-runs/mixed/dtr-test-2026-03-24"
+}

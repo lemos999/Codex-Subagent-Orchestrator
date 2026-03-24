@@ -1,0 +1,470 @@
+Reading prompt from stdin...
+OpenAI Codex v0.114.0 (research preview)
+--------
+workdir: C:\Users\haj\projects\subagent-orchestrator
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\haj\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019cffae-5445-7461-b340-0b75fd2e26c2
+--------
+user
+## Relevant Context (auto-injected)
+
+### skills/claude-subagent-orchestrator/references/orchestration-workflow.md (lines 228-261)
+**Stage 9: EVIDENCE + RECOVER or ACCEPT** — markdown-section
+> ### Stage 9: EVIDENCE + RECOVER or ACCEPT
+> 
+> > ⚠️ **BLOCKING STAGE**: 이 단계를 완료하지 않으면 사용자에게 결과를 보고할 수 없다. Evidence 작성은 결과 보고의 **전제 조건**이다.
+> 
+> **If ACCEPTED or MINOR_ISSUES:**
+
+### skills/claude-subagent-orchestrator/references/orchestration-workflow.md (lines 278-289)
+**Evidence Writing Mechanism** — markdown-section
+> ## Evidence Writing Mechanism
+> 
+> Evidence files are written by the orchestrator (parent) using the **Write** tool. This applies to every completed run — successful, failed, or aborted.
+> 
+> The file templates and field definitions are in `evidence-format.md`. Key points:
+
+### .claude/agents/codex-subagent-orchestrator.md (lines 47-62)
+**MANDATORY: Evidence Checkpoint (Stage 9)** — markdown-section
+> ## MANDATORY: Evidence Checkpoint (Stage 9)
+> 
+> **사용자에게 결과를 보고하기 전에** 반드시 아래 체크리스트를 수행해야 한다. 이 단계를 건너뛰는 것은 금지된다.
+> 
+> 1. Run 이름 결정: `<task-slug>-<YYYY-MM-DD>` (충돌 시 `-2`, `-3` 추가)
+
+### .gemini/skills/gemini-subagent-orchestrator/references/sub-command-protocol.md (lines 22-27)
+**Evidence Rules** — markdown-section
+> ## Evidence Rules
+> 
+> - Single-engine Gemini runs: `subagent-runs/gemini/<run-name>/`
+> - Mixed-engine runs: `subagent-runs/mixed/<run-name>/`
+> - The launcher is responsible for writing `orchestration-summary.md`, `orchestration-manifest.json`, prompt files, and worker outputs.
+
+### skills/gemini-subagent-orchestrator/references/sub-command-protocol.md (lines 22-27)
+**Evidence Rules** — markdown-section
+> ## Evidence Rules
+> 
+> - Single-engine Gemini runs: `subagent-runs/gemini/<run-name>/`
+> - Mixed-engine runs: `subagent-runs/mixed/<run-name>/`
+> - The launcher is responsible for writing `orchestration-summary.md`, `orchestration-manifest.json`, prompt files, and worker outputs.
+
+Explain the evidence recording rules in this subagent-orchestrator project. What is Stage 9? What files are written? Be specific about file names and directory structure.
+mcp startup: no servers
+codex
+Using the local `claude-subagent-orchestrator` skill context because the question is about that workflow. I’m reading the orchestration and evidence docs to extract the exact Stage 9 rules, file names, and directory layout.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\claude-subagent-orchestrator\\SKILL.md' -TotalCount 220" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\claude-subagent-orchestrator\\references\\orchestration-workflow.md' | Select-Object -Skip 220 -First 90" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\claude-subagent-orchestrator\\references\\evidence-format.md' -TotalCount 260" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\.claude\\agents\\codex-subagent-orchestrator.md' | Select-Object -Skip 40 -First 40" in C:\Users\haj\projects\subagent-orchestrator succeeded in 652ms:
+# Claude Subagent Orchestrator
+
+Supervise one or more Claude Code subagents for delegated implementation, review, analysis, or generation work ??using Claude Code's native Task tool and built-in agent types.
+
+## Trigger
+
+Activate when the user message starts with `/sub`, or asks for subagents, delegated execution, or supervised multi-agent workflows.
+
+## Execution Engine
+
+This orchestrator uses **Claude Code's native Task tool** with these parameters:
+
+| Parameter | Values | Purpose |
+|---|---|---|
+| `subagent_type` | `sub-implementer`, `sub-reviewer`, `sub-fixer` | Worker role |
+| `model` | `haiku`, `sonnet`, `opus` | Match capability to task complexity |
+| `isolation` | `"worktree"` | Isolated git worktree for parallel writers |
+| `run_in_background` | `true` / `false` | Non-blocking for independent long tasks |
+| `resume` | agent ID string | Continue a previous agent's work |
+| `prompt` | contract text | Worker's complete bounded contract |
+ succeeded in 653ms:
+# Evidence Format
+
+## Purpose
+
+Evidence enables auditability, debugging, and learning from past runs.
+
+## Directory Structure
+
+```
+subagent-runs/
+?쒋?? claude/          # engine=claude, Task tool ?ㅼ씠?곕툕 ?ㅽ뻾
+?쒋?? codex/           # engine=codex, codex exec ?ㅽ뻾
+?쒋?? gemini/          # engine=gemini, gemini-cli ?ㅽ뻾
+?붴?? mixed/           # ?쇳빀 ?붿쭊 ?ㅽ뻾
+    ?붴?? <run-name>/
+        ?쒋?? run-manifest.md
+        ?쒋?? run-summary.md
+        ?쒋?? prompts/
+        ?쒋?? results/
+        ?붴?? engines/         # ?붿쭊蹂?raw 利앷굅
+ succeeded in 711ms:
+After each worker returns:
+
+1. **Check deliverables**: Use Glob to verify output files exist
+2. **Read content**: Use Read to verify files are non-empty and reasonable
+3. **Parse worker summary**: Check what changed, validation results, uncertainties
+4. **Parse reviewer verdict**: ACCEPTED / MINOR_ISSUES / MATERIAL_ISSUES
+
+### Stage 9: EVIDENCE + RECOVER or ACCEPT
+
+> ?좑툘 **BLOCKING STAGE**: ???④퀎瑜??꾨즺?섏? ?딆쑝硫??ъ슜?먯뿉寃?寃곌낵瑜?蹂닿퀬?????녿떎. Evidence ?묒꽦? 寃곌낵 蹂닿퀬??**?꾩젣 議곌굔**?대떎.
+
+**If ACCEPTED or MINOR_ISSUES:**
+
+**Critical rule**: Evidence writing is mandatory and non-delegatable. The orchestrator writes it using the Write tool directly ??never a worker, never skipped.
+
+**Evidence directory selection**:
+- 紐⑤뱺 ?뚯빱媛 ?숈씪 ?붿쭊: `subagent-runs/<engine>/<run-name>/`
+- 蹂듭닔 ?붿쭊 ?ъ슜: `subagent-runs/mixed/<run-name>/`
+
+1. Name the run: `<task-slug>-<YYYY-MM-DD>` (append `-2`, `-3` on collision)
+ succeeded in 715ms:
+- 怨꾪쉷 ?붿빟 諛??뺤씤 ?꾨＼?꾪듃
+- ?ㅻ쪟 硫붿떆吏 諛?寃쎄퀬
+- 理쒖쥌 寃곌낵 蹂닿퀬
+
+肄붾뱶, ?뚯씪 寃쎈줈, 湲곗닠 ?⑹뼱???먮Ц 洹몃?濡??좎??섎릺, ?ㅻ챸怨??덈궡 臾멸뎄??諛섎뱶???쒓?濡??묒꽦?섏꽭??
+
+## MANDATORY: Evidence Checkpoint (Stage 9)
+
+**?ъ슜?먯뿉寃?寃곌낵瑜?蹂닿퀬?섍린 ?꾩뿉** 諛섎뱶???꾨옒 泥댄겕由ъ뒪?몃? ?섑뻾?댁빞 ?쒕떎. ???④퀎瑜?嫄대꼫?곕뒗 寃껋? 湲덉??쒕떎.
+
+1. Run ?대쫫 寃곗젙: `<task-slug>-<YYYY-MM-DD>` (異⑸룎 ??`-2`, `-3` 異붽?)
+2. ?붾젆?곕━ ?앹꽦: `subagent-runs/<engine>/<run-name>/` (?⑥씪 ?붿쭊) ?먮뒗 `subagent-runs/mixed/<run-name>/` (蹂듭닔 ?붿쭊)
+3. `run-manifest.md` ?묒꽦 ???붿껌, ?, ?먯씠?꾪듃, ?곗텧臾? ?먯젙, ??꾨씪??4. `run-summary.md` ?묒꽦 ???먯씠?꾪듃蹂???以??뚯씠釉?5. `prompts/<role>.prompt.md` ??媛??뚯빱??蹂대궦 ?뺥솗???꾨＼?꾪듃
+6. `results/<role>.result.md` ??媛??뚯빱???꾩껜 諛섑솚 ?띿뒪??7. ?ъ슜??蹂닿퀬??evidence ?붾젆?곕━ 寃쎈줈 ?ы븿
+
+**?ㅽ뙣/以묐떒??run??evidence瑜?湲곕줉?쒕떎.** ?대뼡 ?먯씠?꾪듃媛 ?꾨즺/?ㅽ뙣?덈뒗吏 臾몄꽌??
+
+> ?좑툘 Evidence ?묒꽦 ?놁씠 ?ъ슜?먯뿉寃?寃곌낵瑜?蹂닿퀬?섎㈃ ???쒕떎. 寃곌낵 蹂닿퀬 = evidence ?묒꽦 ?꾨즺 ??
+
+## Do NOT
+codex
+The core Stage 9 rule is already clear: evidence is mandatory, parent-written, and blocks any user report. I’m checking the mixed-engine references as well because the repo appears to carry more than one evidence naming convention.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"orchestration-summary|orchestration-manifest|run-manifest|run-summary|subagent-runs/mixed|Evidence Rules|Stage 9|evidence\" 'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills' 'C:\\Users\\haj\\projects\\subagent-orchestrator\\.claude' 'C:\\Users\\haj\\projects\\subagent-orchestrator\\.gemini'" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\claude-subagent-orchestrator\\references\\sub-command-protocol.md' -TotalCount 220" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\.claude\\skills\\submix\\SKILL.md' -TotalCount 260" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\gemini-subagent-orchestrator\\references\\sub-command-protocol.md' -TotalCount 120" in C:\Users\haj\projects\subagent-orchestrator succeeded in 529ms:
+C:\Users\haj\projects\subagent-orchestrator\skills\gemini-subagent-orchestrator\SKILL.md:17:- Read `references/sub-command-protocol.md` for `/sub` routing and evidence rules.
+C:\Users\haj\projects\subagent-orchestrator\skills\gemini-subagent-orchestrator\SKILL.md:26:5.  **Evidence & Traceability (필수, 생략 불가):** Single-engine Gemini runs write evidence to `subagent-runs/gemini/<run-name>/`. Mixed-engine runs write evidence to `subagent-runs/mixed/<run-name>/`. 사용자에게 결과를 보고하기 전에 반드시 evidence를 기록해야 한다. 실패/중단 run도 기록한다.
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:105:      "Bash(powershell -NoProfile -Command \"& { $bytes = [System.IO.File]::ReadAllBytes\\('C:/Users/haj/projects/Subagent-Orchestrator/subagent-runs/mixed/test-3way-final/claude-synthesis.last.txt'\\); Write-Output \\('Length: ' + $bytes.Length\\); Write-Output \\('First 80 hex: ' + [BitConverter]::ToString\\($bytes[0..\\([Math]::Min\\(79,$bytes.Length-1\\)\\)]\\)\\); Write-Output \\('Has BOM: ' + \\($bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF\\)\\) }\")",
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:114:      "Bash(cat \"C:/Users/haj/projects/Subagent-Orchestrator/subagent-runs/mixed/same-name-review/ux-reviewer-prompt.txt\" | npx @google/gemini-cli --model gemini-2.5-pro > \"C:/Users/haj/projects/Subagent-Orchestrator/subagent-runs/mixed/same-name-review/ux-reviewer.md\" 2>&1)",
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:116:      "Bash(cat \"C:/Users/haj/projects/Subagent-Orchestrator/subagent-runs/mixed/same-name-review/alt-reviewer-prompt.txt\" | \"C:\\\\Users\\\\haj\\\\AppData\\\\Roaming\\\\npm\\\\codex.cmd\" exec --model gpt-5.4 --full-auto > \"C:/Users/haj/projects/Subagent-Orchestrator/subagent-runs/mixed/same-name-review/alt-reviewer.md\" 2>&1)",
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:133:      "Bash(BASE=\"/c/Users/haj/projects/subagent-orchestrator\"\nRUN_DIR=\"$BASE/subagent-runs/mixed/trading-quest-verify-20260316\"\ncd \"$BASE/trading-quest\"\ncodex exec --full-auto \"$\\(cat \"$RUN_DIR/prompts/data-strategy-verifier.prompt.md\"\\)\" 2>&1 | tee \"$RUN_DIR/engines/codex/data-strategy-verifier.raw.txt\")",
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:134:      "Bash(BASE=\"/c/Users/haj/projects/subagent-orchestrator\"\nRUN_DIR=\"$BASE/subagent-runs/mixed/trading-quest-verify-20260316\"\ncd \"$BASE/trading-quest\"\ncat \"$RUN_DIR/prompts/web-cli-agent-verifier.prompt.md\" | npx @google/gemini-cli --yolo 2>&1 | tee \"$RUN_DIR/engines/gemini/web-cli-agent-verifier.raw.txt\")",
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:138:      "Bash(BASE=\"/c/Users/haj/projects/subagent-orchestrator\"\nRUN_DIR=\"$BASE/subagent-runs/mixed/trading-quest-restore-verify-20260317\"\n\ncat > \"$RUN_DIR/prompts/data-strategy-verifier.prompt.md\" << 'EOF'\n# Verify restored data/ + strategy/ modules\n\nWorking directory: C:\\\\Users\\\\haj\\\\projects\\\\subagent-orchestrator\\\\trading-quest\n\nRun these commands and report results:\n\n1. Data fetch US: py -m tq data fetch --market US --symbols \"TSLA,META\" \n2. Data fetch CRYPTO: py -m tq data fetch --market CRYPTO --symbols \"BTCUSDT,ETHUSDT\"\n3. Data fetch KRX: py -m tq data fetch --market KRX --symbols \"005930.KS\"\n4. Data status: py -m tq data status\n5. Data timeframe test: py -m tq data timeframe --market US --symbol AAPL --interval 15m --days 3\n6. Strategy list: py -m tq strategy list\n7. Strategy create: py -m tq strategy create test_verify_strategy\n8. Read tq/strategy/indicator.py and verify ichimoku, supertrend, stochastic, donchian_channel functions exist\n9. Read tq/strategy/builtin/ and count .py files \\(should be 13+\\)\n10. Run tests: py -m pytest tests/test_strategy.py tests/test_data.py -v --tb=short 2>&1 | tail -30\n\nFor each test, report PASS or FAIL with details.\nPrint a bug report at the end:\n=== BUG REPORT ===\n- [severity] description\n=== END REPORT ===\nEOF\n\ncd \"$BASE/trading-quest\"\ncodex exec --full-auto \"$\\(cat \"$RUN_DIR/prompts/data-strategy-verifier.prompt.md\"\\)\" 2>&1 | tee \"$RUN_DIR/engines/codex/data-strategy-verifier.raw.txt\")",
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:139:      "Bash(BASE=\"/c/Users/haj/projects/subagent-orchestrator\"\nRUN_DIR=\"$BASE/subagent-runs/mixed/trading-quest-restore-verify-20260317\"\n\ncat > \"$RUN_DIR/prompts/web-cli-alert-verifier.prompt.md\" << 'EOF'\n# Verify restored web/ + cli/ + agent/ + alert/ + live/ modules\n\nWorking directory: C:\\\\Users\\\\haj\\\\projects\\\\subagent-orchestrator\\\\trading-quest\n\nRun these verification steps:\n\n1. CLI help: py -m tq --help \\(should show data, quest, strategy, serve, live commands\\)\n2. Quest subcommands: py -m tq quest --help \\(should show start, run, status, compare, evolve, run-full, backtest, optimize\\)\n3. Live subcommands: py -m tq live --help \\(should show paper, binance\\)\n4. Read tq/web/routes.py — verify API endpoints exist: /api/quests, /api/quest/<id>, /api/quest/<id>/run, /api/quest/<id>/trades, /api/data/<symbol>, /api/data/<symbol>/indicators, /api/compare, /api/strategies\n5. Read tq/web/templates/ — verify index.html, quest.html, leaderboard.html exist and have proper HTML structure\n6. Read tq/alert/telegram.py — verify TelegramAlert class with send_trade_alert, send_daily_summary methods\n7. Read tq/alert/manager.py — verify AlertManager class\n8. Read tq/live/broker_base.py — verify LiveBroker ABC\n9. Read tq/live/paper_broker.py — verify PaperBroker class\n10. Read tq/live/runner.py — verify LiveRunner class\n11. Read tq/agent/interface.py — verify AgentInterface with step\\(\\) method\n12. Run: py -m pytest tests/test_alert.py tests/test_live.py -v --tb=short 2>&1 | tail -20\n\nReport PASS/FAIL for each step.\nPrint issues found:\n=== VERIFICATION REPORT ===\n## Critical Issues\n## Medium Issues  \n## Minor Issues\n=== END REPORT ===\nEOF\n\ncd \"$BASE/trading-quest\"\ncat \"$RUN_DIR/prompts/web-cli-alert-verifier.prompt.md\" | npx @google/gemini-cli --yolo 2>&1 | tee \"$RUN_DIR/engines/gemini/web-cli-alert-verifier.raw.txt\")",
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:140:      "Bash(BASE=\"/c/Users/haj/projects/subagent-orchestrator\"\nRUN_DIR=\"$BASE/subagent-runs/mixed/trading-quest-restore-verify-20260317\"\n\ncat > \"$RUN_DIR/prompts/integration-fixer.prompt.md\" << 'CODEX_EOF'\n# Fix Material Issues in trading-quest\n\nWorking directory: C:\\\\Users\\\\haj\\\\projects\\\\subagent-orchestrator\\\\trading-quest\n\n## Issue 1 \\(CRITICAL\\): Engine data not sliced to simulation date\nFile: tq/quest/engine.py\n\nThe engine fetches data but always passes the FULL dataset to strategy.decide\\(\\). \nStrategy always sees the latest real row \\(2026-03-16\\) regardless of simulated day.\nThis means 0 trades are generated during backtesting.\n\nFIX: In the method that passes data to strategy, slice the DataFrame so it only contains rows up to and including the current simulation date. Something like:\n```python\nhistory = data[data.index <= current_sim_date]\n```\nFind where strategy is called with history/data and add this slice.\n\n## Issue 2 \\(CRITICAL\\): process_signals\\(\\) SELL on symbols without position\nFile: tq/quest/engine.py\n\nWhen a SELL signal is generated for one symbol, the engine attempts to sell ALL symbols. \nThis produces \"No position\" errors.\n\nFIX: Only submit orders for the specific symbol that generated the signal. Check if a position exists before attempting to sell.\n\n## Issue 3 \\(MEDIUM\\): Missing Web API endpoints\nFile: tq/web/routes.py\n\nThese API endpoints are missing and must be added:\n- GET /api/quests — list all active quests\n- GET /api/quest/<quest_id>/trades — return trade_log from quest state\n- GET /api/data/<symbol> — return OHLCV data with start/end params\n- GET /api/data/<symbol>/indicators — compute and return SMA/BB indicators\n- POST /api/compare — run strategy comparison\n\nAdd these endpoints. Use the existing DataCache, QuestState, and StrategyRanker classes.\n\n## Issue 4 \\(MEDIUM\\): Phase transition min_score too high\nFile: tq/quest/phase.py\n\nPhase 1→2 requires min_score=100 but scores start at 0 and stay there when no trades occur.\n\nFIX: Either remove the min_score requirement \\(use day count instead\\) or lower it significantly. The original design used date-based transitions \\(current_date >= phase1_end_date\\), not score-based.\n\n## Validation\nAfter fixing, run:\n1. py -m pytest tests/ -q\n2. py -m tq quest start --market US --strategy macd --symbols \"AAPL,MSFT,GOOGL\"\n   Then: py -m tq quest run --quest-id <id> --days 30\n   Verify trades > 0 and score > 0\nCODEX_EOF\n\ncd \"$BASE/trading-quest\"\ncodex exec --full-auto --reasoning-effort xhigh \"$\\(cat \"$RUN_DIR/prompts/integration-fixer.prompt.md\"\\)\" 2>&1 | tee \"$RUN_DIR/engines/codex/integration-fixer.raw.txt\")",
+C:\Users\haj\projects\subagent-orchestrator\.claude\settings.local.json:141:      "Bash(BASE=\"/c/Users/haj/projects/subagent-orchestrator\"\nRUN_DIR=\"$BASE/subagent-runs/mixed/trading-quest-restore-verify-20260317\"\ncd \"$BASE/trading-quest\"\ncodex exec --full-auto \"$\\(cat \"$RUN_DIR/prompts/integration-fixer.prompt.md\"\\)\" 2>&1 | tee \"$RUN_DIR/engines/codex/integration-fixer.raw.txt\")",
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:17:| 증거 저장 | `subagent-runs/claude/` | `subagent-runs/mixed/` |
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:117:- **Evidence는 필수이며 생략 불가** — 사용자 보고 전에 반드시 `subagent-runs/mixed/<run-name>/`에 기록
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:124:모든 `/submix` 실행 후 **결과 보고 전에** evidence를 기록해야 한다:
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:125:1. `subagent-runs/mixed/<run-name>/run-manifest.md`
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:126:2. `subagent-runs/mixed/<run-name>/run-summary.md`
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:127:3. `subagent-runs/mixed/<run-name>/prompts/*.prompt.md`
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:128:4. `subagent-runs/mixed/<run-name>/results/*.result.md`
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:129:5. `subagent-runs/mixed/<run-name>/engines/<engine>/*.raw.txt` (외부 엔진 raw stdout)
+C:\Users\haj\projects\subagent-orchestrator\.claude\skills\submix\SKILL.md:131:실패/중단 run도 기록한다. 상세 형식은 `evidence-format.md` 참조.
+ succeeded in 521ms:
+# /sub Command Protocol
+
+This is the **single source of truth** for task classification, team sizing, and model allocation.
+
+## Entry
+
+1. Strip `/sub` prefix
+2. Classify the remaining text
+3. Enter supervisor mode
+4. Plan team and present execution plan to user (Stage 6: CONFIRM)
+5. Wait for user confirmation: **yes** / **no** / **modify**
+6. On **yes**: decompose, delegate, validate
+7. On **modify**: adjust plan per user feedback, re-present, and re-confirm
+8. On **no**: abort without execution
+
+## Task Classification
+
+| Category | Indicators | Default Pattern |
+|---|---|---|
+| **Create** | "make", "create", "add", "write", "generate" | B: Implement + Review |
+ succeeded in 522ms:
+---
+name: submix
+description: 3媛?AI ?붿쭊(Claude + Codex/GPT + Gemini)???쇳빀 ?쒖슜?섎뒗 硫?곗뿏吏??쒕툕?먯씠?꾪듃 ?ㅼ??ㅽ듃?덉씠?? 媛?AI 紐⑤뜽???뱀꽦??留욎떠 ?먮룞 遺꾨떞.
+---
+
+# /submix
+
+3媛?AI ?붿쭊??**?먮룞 遺꾨떞**?섏뿬 硫?곗뿏吏??쒕툕?먯씠?꾪듃 ?ㅽ뻾.
+
+## `/sub` vs `/submix` 李⑥씠
+
+| ??ぉ | `/sub` | `/submix` |
+|------|--------|-----------|
+| ?붿쭊 | Claude ?⑤룆 (湲곕낯) | Claude + Codex(GPT) + Gemini ?쇳빀 |
+| ?붿쭊 ?좏깮 | ?ъ슜??吏???먮뒗 湲곕낯 Claude | **Orchestrator媛 ?먮룞 遺꾨떞** |
+| ?붿쭊 吏??| ?ъ슜?먭? 紐낆떆?곸쑝濡?吏?뺥빐????| Orchestrator媛 ?먮룞 遺꾨떞 (?ъ슜???섎룞 吏?뺣룄 媛?? |
+| 利앷굅 ???| `subagent-runs/claude/` | `subagent-runs/mixed/` |
+
+## Entry Protocol
+
+ succeeded in 557ms:
+# `/sub` Command Protocol (Gemini)
+
+## Trigger Rule
+
+When the user message begins with `/sub`, treat it as an explicit request to enter **supervisor mode** using the external launcher.
+
+## The Parent's Responsibilities
+
+1.  **Strip the prefix:** Treat the text after `/sub` as the actual user request.
+2.  **Choose the team shape:** Decide whether the run is Gemini-only or mixed-engine.
+3.  **Generate Spec:** Write a bounded JSON spec file for the worker team.
+4.  **Execute Runner:** Run `start-codex-subagent-team.ps1` with that spec.
+5.  **No Launcher Bypass:** Do not shortcut `/sub` by directly calling `generalist` or `codebase_investigator`.
+
+## Sizing the Team
+
+-   `1` worker: narrow generation or extraction
+-   `2` workers: default `implementer + reviewer`
+-   `3` workers: `planner + implementer + reviewer` or a mixed-engine split
+-   `4+` workers: only when parallelism is genuine and output boundaries stay clear
+codex
+There is a documented split in this repo: the newer Claude-native workflow uses `run-manifest.md` / `run-summary.md`, while the legacy launcher-based paths also mention `orchestration-manifest.json` / `orchestration-summary.md`. I’m reading the launcher-side workflow to make that distinction precise.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\gemini-subagent-orchestrator\\references\\orchestration-workflow.md' -TotalCount 120" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\codex-subagent-orchestrator\\SKILL.md' -TotalCount 180" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path 'C:\\Users\\haj\\projects\\subagent-orchestrator\\.claude\\skills\\sub\\SKILL.md' -TotalCount 80" in C:\Users\haj\projects\subagent-orchestrator succeeded in 533ms:
+# Orchestration Workflow (Gemini)
+
+## Purpose
+
+This workflow defines how the Gemini Orchestrator breaks down work, writes launcher specs, runs the worker team, and evaluates the results.
+
+## Workflow Stages
+
+### 1. Classify the Request & Choose Pattern
+
+When the user requests `/sub <task>`, decide the smallest useful team:
+- **Pattern A (Solo):** one worker for a narrow artifact
+- **Pattern B (Implement-Review):** default for bounded implementation
+- **Pattern C (Parallel):** independent workers feeding a final reviewer
+- **Pattern D (Plan-Implement-Review):** architecture or ambiguous work
+- **Pattern E (Full Loop):** implementation with planned repair cycles
+
+Choose a mixed-engine team only when a role clearly benefits from `codex` or `claude`. Otherwise keep the team Gemini-only.
+
+### 2. Generate the JSON Spec
+ succeeded in 509ms:
+---
+name: subagent-orchestrator
+description: Orchestrate one or more `codex exec` subagents for delegated implementation, review, analysis, or generation work. Use when Codex should act as a supervisor that decomposes a user request, autonomously decides team size and worker roles, assigns bounded tasks to child Codex runs, adjusts model, sandbox, and reasoning effort per worker, runs workers sequentially or in parallel, resumes workers as needed, and validates outputs before reporting back. Trigger when the user explicitly starts a request with `/sub`, or asks for subagents, worker teams, parallel Codex execution, delegated task execution, supervisory workflows, or multi-agent delivery inside a local workspace.
+---
+
+# Subagent Orchestrator
+
+## Overview
+
+Use this skill when the parent Codex instance should supervise execution rather than perform the whole task directly.
+
+The parent should:
+
+- treat `/sub <request>` as an orchestration entrypoint
+- classify the task
+- decide whether `/sub` should resolve to a one-off team run or a queue run
+- decide whether subagents are justified
+- autonomously choose team size and team shape
+- choose the smallest useful skill set
+- choose team shape, sandbox, model, and reasoning per worker
+ succeeded in 524ms:
+---
+name: sub
+description: Claude ?⑤룆 ?쒕툕?먯씠?꾪듃 ?ㅼ??ㅽ듃?덉씠?? `/sub <request>`濡?Claude ?뚯빱(haiku/sonnet/opus)瑜?議고빀?섏뿬 媛먮룆 ?ㅽ뻾.
+---
+
+# /sub
+
+Claude ?⑤룆 ?쒕툕?먯씠?꾪듃 ?ㅼ??ㅽ듃?덉씠?? 紐⑤뱺 ?뚯빱媛 Claude ?붿쭊留??ъ슜.
+
+> **3媛?AI ?쇳빀 ?ъ슜**: `/submix` ?ъ슜 (Claude + Codex/GPT + Gemini ?먮룞 遺꾨떞)
+
+## Entry Protocol
+
+1. Strip the `/sub` prefix
+2. Route to `subagent-orchestrator` as the named supervisor subagent
+3. The orchestrator reads `./skills/claude-subagent-orchestrator/SKILL.md` and handles everything
+
+## Engine
+
+**Claude ?⑤룆**. 紐⑤뱺 ?뚯빱??Claude Task tool濡??ㅽ뻾.
+codex
+I have enough to answer. I’m pulling line-numbered excerpts so I can point you to the exact source locations and call out where the repo’s newer and legacy conventions differ.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'C:\\Users\\haj\\projects\\subagent-orchestrator\\.claude\\skills\\submix\\SKILL.md'; "'$i=0; Get-Content $p | ForEach-Object { $i++; if(($i -ge 117 -and $i -le 131) -or ($i -ge 182 -and $i -le 198)){ '"'{0,4}: {1}' -f "'$i, $_ } }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\gemini-subagent-orchestrator\\references\\sub-command-protocol.md'; "'$i=0; Get-Content $p | ForEach-Object { $i++; if($i -ge 22 -and $i -le 27){ '"'{0,4}: {1}' -f "'$i, $_ } }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\claude-subagent-orchestrator\\references\\evidence-format.md'; "'$i=0; Get-Content $p | ForEach-Object { $i++; if(($i -ge 7 -and $i -le 45) -or ($i -ge 47 -and $i -le 98) -or ($i -ge 118 -and $i -le 175)){ '"'{0,4}: {1}' -f "'$i, $_ } }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\claude-subagent-orchestrator\\references\\orchestration-workflow.md'; "'$i=0; Get-Content $p | ForEach-Object { $i++; if($i -ge 228 -and $i -le 289){ '"'{0,4}: {1}' -f "'$i, $_ } }' in C:\Users\haj\projects\subagent-orchestrator succeeded in 545ms:
+ 117: - **Evidence???꾩닔?대ŉ ?앸왂 遺덇?** ???ъ슜??蹂닿퀬 ?꾩뿉 諛섎뱶??`subagent-runs/mixed/<run-name>/`??湲곕줉
+ 118: - ?몃? ?붿쭊(Codex, Gemini) ?뚯빱??Bash tool濡??몄텧
+ 119: - ?몃? ?붿쭊 ?꾨＼?꾪듃???쒗겕由??먭꺽 利앸챸???ы븿?섏? ?딅뒗??
+ 120: - ?ㅽ뻾 ??諛섎뱶???ъ슜???뱀씤 ?湲?(yes / no / modify)
+ 121: 
+ 122: ## Evidence Reminder
+ 123: 
+ 124: 紐⑤뱺 `/submix` ?ㅽ뻾 ??**寃곌낵 蹂닿퀬 ?꾩뿉** evidence瑜?湲곕줉?댁빞 ?쒕떎:
+ 125: 1. `subagent-runs/mixed/<run-name>/run-manifest.md`
+ 126: 2. `subagent-runs/mixed/<run-name>/run-summary.md`
+ 127: 3. `subagent-runs/mixed/<run-name>/prompts/*.prompt.md`
+ 128: 4. `subagent-runs/mixed/<run-name>/results/*.result.md`
+ 129: 5. `subagent-runs/mixed/<run-name>/engines/<engine>/*.raw.txt` (?몃? ?붿쭊 raw stdout)
+ 130: 
+ 131: ?ㅽ뙣/以묐떒 run??湲곕줉?쒕떎. ?곸꽭 ?뺤떇? `evidence-format.md` 李몄“.
+ 182: ?쇳빀 ?붿쭊 ?ㅽ뻾 利앷굅??`subagent-runs/mixed/<run-name>/`?????
+ 183: 
+ 184: ```
+ 185: subagent-runs/mixed/<run-name>/
+ 186: ?쒋?? run-manifest.md
+ succeeded in 548ms:
+  22: ## Evidence Rules
+  23: 
+  24: - Single-engine Gemini runs: `subagent-runs/gemini/<run-name>/`
+  25: - Mixed-engine runs: `subagent-runs/mixed/<run-name>/`
+  26: - The launcher is responsible for writing `orchestration-summary.md`, `orchestration-manifest.json`, prompt files, and worker outputs.
+  27: 
+ succeeded in 524ms:
+   7: ## Directory Structure
+   8: 
+   9: ```
+  10: subagent-runs/
+  11: ?쒋?? claude/          # engine=claude, Task tool ?ㅼ씠?곕툕 ?ㅽ뻾
+  12: ?쒋?? codex/           # engine=codex, codex exec ?ㅽ뻾
+  13: ?쒋?? gemini/          # engine=gemini, gemini-cli ?ㅽ뻾
+  14: ?붴?? mixed/           # ?쇳빀 ?붿쭊 ?ㅽ뻾
+  15:     ?붴?? <run-name>/
+  16:         ?쒋?? run-manifest.md
+  17:         ?쒋?? run-summary.md
+  18:         ?쒋?? prompts/
+  19:         ?쒋?? results/
+  20:         ?붴?? engines/         # ?붿쭊蹂?raw 利앷굅
+  21:             ?쒋?? claude/
+  22:             ?쒋?? codex/
+  23:             ?붴?? gemini/
+  24: ```
+  25: 
+  26: ### ???寃쎈줈 ?뺤콉
+ succeeded in 524ms:
+ 228: ### Stage 9: EVIDENCE + RECOVER or ACCEPT
+ 229: 
+ 230: > ?좑툘 **BLOCKING STAGE**: ???④퀎瑜??꾨즺?섏? ?딆쑝硫??ъ슜?먯뿉寃?寃곌낵瑜?蹂닿퀬?????녿떎. Evidence ?묒꽦? 寃곌낵 蹂닿퀬??**?꾩젣 議곌굔**?대떎.
+ 231: 
+ 232: **If ACCEPTED or MINOR_ISSUES:**
+ 233: 
+ 234: **Critical rule**: Evidence writing is mandatory and non-delegatable. The orchestrator writes it using the Write tool directly ??never a worker, never skipped.
+ 235: 
+ 236: **Evidence directory selection**:
+ 237: - 紐⑤뱺 ?뚯빱媛 ?숈씪 ?붿쭊: `subagent-runs/<engine>/<run-name>/`
+ 238: - 蹂듭닔 ?붿쭊 ?ъ슜: `subagent-runs/mixed/<run-name>/`
+ 239: 
+ 240: 1. Name the run: `<task-slug>-<YYYY-MM-DD>` (append `-2`, `-3` on collision)
+ 241: 2. Create the run directory: `subagent-runs/<engine>/<run-name>/` (single engine) or `subagent-runs/mixed/<run-name>/` (multiple engines)
+ 242: 3. Write `subagent-runs/<engine>/<run-name>/run-manifest.md` ??authoritative structured record
+ 243: 4. Write `subagent-runs/<engine>/<run-name>/run-summary.md` ??compact one-liner-per-agent table
+ 244: 5. Write `subagent-runs/<engine>/<run-name>/prompts/<role>.prompt.md` for each worker ??exact prompt text sent
+ 245: 6. Write `subagent-runs/<engine>/<run-name>/results/<role>.result.md` for each worker ??full return text
+ 246: 7. Report to user, including the run directory path
+ 247: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\codex-subagent-orchestrator\\SKILL.md'; "'$i=0; Get-Content $p | ForEach-Object { $i++; if($i -ge 52 -and $i -le 66){ '"'{0,4}: {1}' -f "'$i, $_ } }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'C:\\Users\\haj\\projects\\subagent-orchestrator\\skills\\gemini-subagent-orchestrator\\references\\orchestration-workflow.md'; "'$i=0; Get-Content $p | ForEach-Object { $i++; if($i -ge 37 -and $i -le 55){ '"'{0,4}: {1}' -f "'$i, $_ } }' in C:\Users\haj\projects\subagent-orchestrator succeeded in 532ms:
+  52: - When parallel workers feed a final reviewer, put the parallel builders in the same stage and the reviewer in a later stage.
+  53: - Do not create large teams by default. Expand the team only when the decomposition really earns it.
+  54: - Treat skills as routing hints for workers, not as an excuse to bloat every worker prompt.
+  55: - Pass `-m` explicitly when model choice matters.
+  56: - Keep `last.txt`, prompt files, and the launcher manifest unless the user explicitly wants cleanup.
+  57: - Prefer the generated orchestration summary over raw stdout when bringing worker results back into parent context.
+  58: - Validate files and summaries before accepting a worker result.
+  59: - **Evidence???꾩닔?대ŉ ?앸왂 遺덇?.** ?곗쿂媛 `output_dir`??evidence瑜??앹꽦?덈뒗吏 ?뺤씤. `orchestration-summary.md`, `orchestration-manifest.json`, prompt ?뚯씪???놁쑝硫?吏곸젒 ?묒꽦. ?ъ슜?먯뿉寃?寃곌낵 蹂닿퀬 ?꾩뿉 evidence 議댁옱瑜??뺤씤?댁빞 ?쒕떎.
+  60: - Evaluate efficiency structure-first: fewer parent interventions, fewer full reruns, bounded fixer loops, and clean reviewer coverage matter more than raw token totals alone.
+  61: - Default reviewers and validators to `read-only`. If they need write access, the parent should justify that deviation explicitly.
+  62: - If a reviewer or validator finds a material issue, launch a bounded fixer worker and then re-run review or validation on the repaired artifact before acceptance.
+  63: - When the launcher is used for deliverable work, prefer top-level policy fields `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"` so unsafe team shapes fail before execution.
+  64: 
+  65: ## Worker Prompt Contract
+  66: 
+ succeeded in 546ms:
+  37: 
+  38: ### 3. Execute the Launcher
+  39: 
+  40: Run the launcher with the generated spec:
+  41: 
+  42: ```powershell
+  43: & ".\skills\codex-subagent-orchestrator\scripts\start-codex-subagent-team.ps1" -SpecPath ".\<task-name>.spec.json" -AsJson
+  44: ```
+  45: 
+  46: ### 4. Validate & Write Evidence & Report
+  47: 
+  48: > ?좑툘 **BLOCKING STAGE**: Evidence ?묒꽦 ?꾨즺 ?꾩뿉???ъ슜?먯뿉寃?寃곌낵瑜?蹂닿퀬?????녿떎.
+  49: 
+  50: 1. Wait for the launcher to finish.
+  51: 2. Read `orchestration-summary.md` and `orchestration-manifest.json`.
+  52: 3. Accept the run only if the reviewer outcome and required artifacts are sound.
+  53: 4. **Evidence ?뺤씤**: `subagent-runs/gemini/<run-name>/` (?먮뒗 `mixed/`) ??`run-manifest.md`, `run-summary.md`, `prompts/`, `results/` 媛 議댁옱?섎뒗吏 ?뺤씤. ?곗쿂媛 ?앹꽦?섏? ?딆븯?ㅻ㈃ 吏곸젒 ?묒꽦.
+  54: 5. Report the result to the user with the evidence path.
+  55: 
+codex
+**Stage 9**
+
+Stage 9 is `EVIDENCE + RECOVER or ACCEPT`. It is a blocking checkpoint: the orchestrator cannot report results to the user until evidence has been written. The parent/orchestrator writes the evidence itself; it is mandatory, non-delegatable, and must be written after the final verdict is known and before user reporting. If the reviewer returns `MATERIAL_ISSUES`, Stage 9 runs the bounded recovery loop instead: launch a scoped fixer, re-run review, allow at most 2 fix-review cycles, then stop, write evidence, and escalate if it still fails. See [orchestration-workflow.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md):228 and [codex-subagent-orchestrator.md](C:/Users/haj/projects/subagent-orchestrator/.claude/agents/codex-subagent-orchestrator.md):47.
+
+**Directory Structure**
+
+Run names are `<task-slug>-<YYYY-MM-DD>`, with `-2`, `-3`, etc. on collisions. Single-engine runs go under `subagent-runs/<engine>/<run-name>/`. Mixed-engine runs go under `subagent-runs/mixed/<run-name>/`. The normalized evidence layout is:
+
+```text
+subagent-runs/
+  claude/<run-name>/
+  codex/<run-name>/
+  gemini/<run-name>/
+  mixed/<run-name>/
+    run-manifest.md
+    run-summary.md
+    prompts/
+    results/
+    engines/
+      claude/
+      codex/
+      gemini/
+```
+
+For single-engine runs, the same `run-manifest.md`, `run-summary.md`, `prompts/`, and `results/` layout applies under `subagent-runs/<engine>/<run-name>/`. Mixed runs additionally keep per-engine raw evidence under `engines/<engine>/`. See [evidence-format.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md):7 and [submix SKILL.md](C:/Users/haj/projects/subagent-orchestrator/.claude/skills/submix/SKILL.md):182.
+
+**Files Written**
+
+The current Claude-native evidence files are:
+
+- `run-manifest.md`: authoritative structured record of request, team, agents, deliverables, review verdict, timeline, and errors.
+- `run-summary.md`: compact one-line-per-agent summary table.
+- `prompts/<role>.prompt.md`: exact prompt sent to each worker.
+- `results/<role>.result.md`: full returned text from each worker.
+- `prompts/watchdog-<stage>.prompt.md` and `results/watchdog-<stage>.result.md`: only when watchdog is enabled.
+- `engines/<engine>/<agent>.raw.txt`: for mixed-engine runs, raw stdout from external engines like Codex or Gemini.
+
+Evidence level varies by run shape:
+- Full: implementation + review, Pattern B+, watchdog runs, failed/aborted runs.
+- Standard: solo implementer.
+- Light: solo reviewer.
+- None: trivial parent-handled work or research-only work.
+
+See [evidence-format.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md):54 and [evidence-format.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md):167.
+
+**Legacy Launcher Note**
+
+There is also an older launcher-oriented convention in the repo. The Codex/Gemini launcher writes `orchestration-manifest.json` and `orchestration-summary.md` in the run `output_dir`, plus prompt files and worker outputs. The newer supervisor docs then require the parent to verify or backfill the normalized `run-manifest.md`, `run-summary.md`, `prompts/`, and `results/` evidence before reporting. See [gemini sub-command-protocol.md](C:/Users/haj/projects/subagent-orchestrator/skills/gemini-subagent-orchestrator/references/sub-command-protocol.md):22, [gemini orchestration-workflow.md](C:/Users/haj/projects/subagent-orchestrator/skills/gemini-subagent-orchestrator/references/orchestration-workflow.md):46, and [codex SKILL.md](C:/Users/haj/projects/subagent-orchestrator/skills/codex-subagent-orchestrator/SKILL.md):56.
+tokens used
+40,680

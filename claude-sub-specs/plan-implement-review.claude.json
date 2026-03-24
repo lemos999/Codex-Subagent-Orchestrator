@@ -1,0 +1,168 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "D-plan-implement-review",
+    "version": "2.0",
+    "purpose": "Three-stage pipeline for complex tasks: plan first, implement from plan, review against both plan and original spec. Codex templates had no equivalent — this is a Claude-origin addition.",
+    "model_strategy": {
+      "quality": "opus-level reasoning for planner (architectural decisions), sonnet for implementer (balanced write), sonnet for reviewer (plan-adherence needs deeper analysis than simple review)",
+      "optimization": "Planner output is passed as context to implementer — no redundant re-analysis. Reviewer checks plan AND spec in one pass.",
+      "token_saving": "Planner is read-only (no file writes = smaller sandbox overhead). Implementer gets plan as structured input, not raw exploration. High reasoning only where it matters."
+    },
+    "improvements": [
+      "New Pattern D: three-stage plan-first pipeline (no Codex equivalent)",
+      "Planner uses high reasoning_effort for architectural decisions",
+      "Plan output passed as structured context to implementer",
+      "Reviewer checks both plan adherence AND original task fulfillment",
+      "Archive and live_usage enabled",
+      "Timeout safeguard",
+      "Optional 2-stage watchdog hooks (plan alignment + implementation alignment)"
+    ]
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "claude-sub-runs/plan-impl-review",
+  "manifest_file": "claude-sub-runs/plan-impl-review/orchestration-manifest.json",
+  "summary_file": "claude-sub-runs/plan-impl-review/orchestration-summary.md",
+  "debug_log_file": "claude-sub-runs/plan-impl-review/launcher-debug.log",
+  "archive_root": "claude-sub-records",
+  "write_run_archive": true,
+  "archive_run_label": "plan-impl-review",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 300,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "requested_deliverables": [
+    "{{DELIVERABLE_FILE}}"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "shared_directive_mode": "compact",
+  "watchdog": {
+    "enabled": false,
+    "stages_to_watch": ["architect-planner", "plan-implementer"],
+    "model": "gpt-5.4",
+    "reasoning_effort": "medium",
+    "verdict_format": "PASS | SHORTFALL",
+    "on_shortfall": "3-choice: Accept (fix) | Reject (log + proceed) | Escalate (ask user)",
+    "max_cycles_per_stage": 1
+  },
+  "live_usage": {
+    "enabled": true,
+    "display_mode": "both",
+    "status_file": "claude-sub-runs/plan-impl-review/orchestration-usage.json",
+    "poll_interval_ms": 500
+  },
+  "defaults": {
+    "prompt_profile": "compact",
+    "response_style": "compact"
+  },
+  "agents": [
+    {
+      "name": "architect-planner",
+      "kind": "planner",
+      "stage": 1,
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "high",
+      "max_response_lines": 30,
+      "role": "architect / planner",
+      "mission": "Analyze the task, inspect existing code, and produce a concrete implementation plan. Do not write any files.",
+      "task": "Design the implementation approach for: {{TASK_DESCRIPTION}}\n\nProduce a plan containing:\n1. Files to create or modify (exact paths)\n2. Key design decisions with rationale\n3. Interface definitions (signatures, types)\n4. Edge cases to handle\n5. Validation criteria for the implementer\n6. Estimated complexity (low/medium/high)",
+      "read_first": [
+        "AGENTS.md",
+        "{{CONTEXT_FILE_1}}",
+        "{{CONTEXT_FILE_2}}"
+      ],
+      "validation": [
+        "Plan contains concrete file paths, not vague references.",
+        "Plan includes validation criteria the implementer can follow.",
+        "Plan stays within the requested scope — no feature creep."
+      ],
+      "return_contract": [
+        "Structured markdown plan with numbered sections.",
+        "File list with create/modify annotation.",
+        "Complexity assessment: low | medium | high."
+      ],
+      "stop_when": [
+        "Plan delivered. Do not create files, write code, or begin implementation."
+      ]
+    },
+    {
+      "name": "plan-implementer",
+      "kind": "implementer",
+      "stage": 2,
+      "model": "gpt-5.4",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 10,
+      "role": "plan-driven implementer",
+      "mission": "Execute the planner's output as a spec. Follow the plan — do not redesign.",
+      "task": "Implement the plan from the previous stage. Follow file paths, interfaces, and validation criteria exactly as specified in the plan.",
+      "read_first": [
+        "AGENTS.md"
+      ],
+      "writable_scope": [
+        "{{DELIVERABLE_FILE}}"
+      ],
+      "required_paths": [
+        "{{DELIVERABLE_FILE}}"
+      ],
+      "required_non_empty_paths": [
+        "{{DELIVERABLE_FILE}}"
+      ],
+      "success_criteria": [
+        "All files from the plan exist and are non-empty.",
+        "Interfaces match the plan's definitions.",
+        "Edge cases from the plan are handled."
+      ],
+      "validation": [
+        "Each planned file exists.",
+        "Implementation matches planned interfaces.",
+        "No files outside writable scope modified.",
+        "Plan's validation criteria pass."
+      ],
+      "return_contract": [
+        "Files created/modified with key decisions.",
+        "PASS or FAIL per plan validation criterion.",
+        "Deviations from plan (if any) with justification."
+      ],
+      "stop_when": [
+        "Plan fully implemented and validated. Do not redesign or add unplanned features."
+      ]
+    },
+    {
+      "name": "plan-adherence-reviewer",
+      "kind": "reviewer",
+      "stage": 3,
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 12,
+      "role": "plan-adherence reviewer",
+      "mission": "Review implementation against BOTH the plan and the original task spec. Catch plan errors too.",
+      "task": "Review deliverables for:\n1. Scope compliance — only planned files modified\n2. Plan adherence — implementation matches planned interfaces and design\n3. Correctness — logic sound, edge cases handled\n4. Original task fulfillment — output satisfies the user's original request\n5. Plan quality — flag if the plan itself was flawed",
+      "read_first": [
+        "AGENTS.md",
+        "{{DELIVERABLE_FILE}}"
+      ],
+      "validation": [
+        "Deliverable files exist and are non-empty.",
+        "Implementation matches planned interfaces.",
+        "Edge cases from plan are covered.",
+        "No scope violations."
+      ],
+      "return_contract": [
+        "Verdict: ACCEPTED | MINOR_ISSUES | MATERIAL_ISSUES",
+        "Per-criterion results: [criterion — PASS/FAIL — detail]",
+        "Plan quality note: SOUND | FLAWED (with explanation if flawed)",
+        "Rereview required: YES | NO"
+      ],
+      "stop_when": [
+        "Review verdict delivered. Do not edit files or suggest out-of-scope improvements."
+      ]
+    }
+  ]
+}

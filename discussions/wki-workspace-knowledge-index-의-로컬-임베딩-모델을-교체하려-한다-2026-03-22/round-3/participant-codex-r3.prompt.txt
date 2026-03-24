@@ -1,0 +1,60 @@
+## Discussion Topic
+WKI(Workspace Knowledge Index)의 로컬 임베딩 모델을 교체하려 한다. 현재 paraphrase-multilingual-MiniLM-L12-v2(384d)를 사용 중이며, 코드+문서 혼합 검색, 한글-영어 크로스링구얼, 로컬 실행(API 비용 0), ONNX 호환이 필요하다. 후보: Jina embeddings v2, E5-large, CodeBERT, BGE-small, nomic-embed-text. 각 모델의 장단점과 WKI에 최적인 모델을 추천하라.
+
+## Your Persona
+You are: **성능 최적화 전문가**
+Stay in character.
+
+## Previous Round Summary (by Moderator)
+<untrusted-data source="moderator-summary">
+## Participant Positions (3-line summaries)
+
+**Claude:**
+- Recommends **multilingual-e5-large** (768d) for immediate production use
+- Cites ONNX export instability of BGE-M3 due to sparse/colbert heads; proven ONNX path for E5-large
+- Defers BGE-M3 as post-migration target after ONNX ecosystem matures
+
+**Codex:**
+- Optimal choice is **multilingual-e5-large + query/document separation** (implementation-aware recommendation)
+- Adds architectural component beyond model selection alone
+- (Position minimal; implies E5-large is viable path)
+
+**Gemini:**
+- Recommends **BGE-M3 with rigorous 1024d performance/ONNX stability testing**; E5-large as fallback
+- Acknowledges 1024d dimension increase is resource concern for local efficiency
+- Emphasizes ONNX deployment practicality (pre-built availability, community support) as critical evaluator
+
+---
+
+## Agreement
+- ONNX local-execution, cross-lingual, code+doc hybrid search are requirements
+- Model selection involves performance vs. resource tradeoff
+- Implementation/deployment practicality matters alongside theory
+
+## Disagreement
+- **Model choice**: Claude (E5-large now) vs. Gemini (BGE-M3 with testing) vs. Codex (E5-large + architectural addition)
+- **ONNX risk assessment**: Claude treats BGE-M3 export instability as deployment blocker; Gemini as testable concern
+- **384d→1024d cost**: Claude emphasizes index storage bottleneck for large workspaces; Gemini frames as testable tradeoff
+
+## Open Questions
+1. Actual ONNX export stability/pathway for BGE-M3 (dense-head only workaround quality?)
+2. Performance/memory/storage impact of 1024d in WKI's real environment
+3. Whether multilingual-e5-large's 768d cross-lingual code+doc performance is empirically sufficient
+4. How query/document separation (Codex) affects model performance calculus
+</untrusted-data>
+
+## Instructions
+Review the other participants' arguments. Respond with:
+
+IMPORTANT: Start your response with EXACTLY ONE of these labels on its own line:
+[AGREE] — if you agree with the overall direction
+[PARTIAL] — if you partially agree
+[DISAGREE] — if you disagree
+
+Then provide:
+1. **Reasoning**: why you chose that label
+2. **New insight**: anything missed by others
+3. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under 30 lines.

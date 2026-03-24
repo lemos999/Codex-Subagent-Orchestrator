@@ -19,25 +19,45 @@
 | 멀티엔진 오케스트레이터 (/submix) | 완료 | `.claude/skills/submix/` |
 | Gemini 오케스트레이터 | 완료 | `skills/gemini-subagent-orchestrator/` |
 | Codex 오케스트레이터 | 완료 | `skills/codex-subagent-orchestrator/` |
-| **토론 시스템 (/discuss)** | **Phase 1 완료** | `packages/launcher/src/discussion/` |
+| **토론 시스템 (/discuss)** | **Phase 1~3 완료** | `packages/launcher/src/discussion/` |
+| **큐 러너 TS** | **Phase 1~2 완료** | `packages/launcher/src/queue/` |
 
 ## 다음 작업 (우선순위 순)
 
-1. **토론 시스템 Phase 2** — 다중 라운드 실전 테스트 + 수렴 판정 검증
-2. 토론 시스템 Phase 3 — 고도화 (이력 WKI 인덱싱, 커스터마이징)
-3. **WKI 검색 알고리즘 개선** — 8건의 개선 후보 (re-ranking, query expansion 강화 등)
-4. **큐 러너 TS 전환** — PS 큐 러너를 TS로 이관
+1. **WKI 도메인 특화 임베딩** — 현재 범용 모델의 한계 (evidence/workflow 쿼리 약함, Mean nDCG 0.686)
 
-## 최근 완료 (2026-03-17~19)
+## 최근 완료 (2026-03-17~22)
 
 - TS 런처 Phase 0~4 (PS 런처 대체)
 - WKI 로컬 임베딩 (paraphrase-multilingual-MiniLM-L12-v2)
 - WKI 맥락 자동 주입 (모든 엔진 동일 적용)
 - WKI 한글 Query Expansion
-- WKI Eval 시스템 (nDCG 0.244 → 1.156)
+- WKI Eval 시스템 (Mean nDCG 0.686, Median 0.714 — 평가기 dedupe 수정 후 정상화)
 - WKI 자동 증분 인덱싱
+- WKI 토론 이력 인덱싱 (노이즈 파일 제외)
 - Evidence 기록 강화
 - 골든 테스트 4/4 PASS
+- 토론 시스템 Phase 1~3 완료:
+  - 3자 토론 (Claude + Codex/GPT + Gemini) 교차 검증
+  - 실시간 상태 표시 (엔진별 응답 시간)
+  - 페르소나 시스템 (토픽 기반 자동 생성 + 수동 지정 + 기본 프리셋)
+  - 역할(role) 커스터마이징
+  - 실전 테스트 3회 완료
+- 큐 러너 TS 전환 Phase 1 완료:
+  - PS 큐 러너(1,700줄) → TS(1,514줄, 10개 모듈)
+  - local-json, local-files, mock-json(별칭) 트래커
+  - PS 설정 호환 계층 (queue-compat)
+  - 핑거프린트/blocked_by/백오프 PS 동작 일치
+  - TS CLI --json 모드 추가
+  - /submix 검증(3엔진) + GPT 5.4 watchdog 리뷰 2회
+  - PS 호환성 수정 4건 (priority, blocked_by, isEligibleNow, hooks)
+  - 골든 테스트 36/36 PASS
+  - Phase 2: Linear GraphQL 트래커 (/submix 검증 완료)
+- WKI 검색 개선 추가:
+  - Negative sampling (노이즈 경로 패널티)
+  - Multi-vector search (fail-soft)
+  - Re-ranking 강화 (heading/filePath + stop word 필터링)
+  - 평가기 dedupe 수정 (nDCG > 1 방지)
 
 ## 주요 명령어
 
@@ -56,6 +76,14 @@ node workspace-knowledge-index/dist/index.js status
 
 # WKI 검색 품질 평가
 node workspace-knowledge-index/dist/index.js eval workspace-knowledge-index/eval/gold-set-v2.json
+
+# 큐 러너 실행
+node packages/launcher/dist/queue/queue-cli.js --config <queue.json>
+node packages/launcher/dist/queue/queue-cli.js --config <queue.json> --max-polls 10
+
+# 토론 실행
+node packages/launcher/dist/discussion/discuss-cli.js "주제"
+node packages/launcher/dist/discussion/discuss-cli.js --auto "주제"
 
 # WKI lock 문제 시
 rm .knowledge/.wki.lock

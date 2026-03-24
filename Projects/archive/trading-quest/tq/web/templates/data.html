@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트레이딩 퀘스트 - 백데이터</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --bg-dark: #0f1117;
+            --bg-card: #1a1d29;
+            --bg-input: #252836;
+            --text-primary: #e1e4ea;
+            --text-secondary: #8a8f9e;
+            --border-dark: #2a2d3a;
+            --accent: #2563eb;
+            --accent-hover: #3b82f6;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background: #141620;
+            border-bottom: 1px solid var(--border-dark);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .navbar .brand {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        /* Meta row */
+        .meta-row {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .meta-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .meta-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        td {
+            padding: 0.55rem 0.75rem;
+            border-bottom: 1px solid rgba(42, 45, 58, 0.6);
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(37, 40, 54, 0.5);
+        }
+
+        .td-num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .td-symbol {
+            font-weight: 600;
+            color: var(--accent-hover);
+            font-family: monospace;
+        }
+
+        .td-price {
+            color: var(--yellow);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Market group */
+        .market-section {
+            margin-bottom: 1.25rem;
+        }
+
+        .market-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            margin-bottom: 0;
+            user-select: none;
+        }
+
+        .market-toggle:hover {
+            background: #2e3144;
+        }
+
+        .market-toggle .toggle-arrow {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+        }
+
+        .market-toggle.open .toggle-arrow {
+            transform: rotate(90deg);
+        }
+
+        .market-badge {
+            background: var(--accent);
+            color: white;
+            border-radius: 4px;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .market-toggle-title {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .market-toggle-stats {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .market-detail-table {
+            display: none;
+            border: 1px solid var(--border-dark);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            overflow: hidden;
+        }
+
+        .market-detail-table.open {
+            display: block;
+        }
+
+        .loading-msg {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 1rem 0;
+        }
+
+        .error-msg {
+            color: var(--red);
+            font-size: 0.9rem;
+            padding: 1rem 0;
+        }
+
+        .empty-msg {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .meta-row { gap: 1rem; }
+            .meta-value { font-size: 1rem; }
+            th, td { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">트레이딩 퀘스트</a>
+        <div class="nav-links">
+            <a href="/">대시보드</a>
+            <a href="/quest">퀘스트</a>
+            <a href="/leaderboard">리더보드</a>
+            <a href="/backtest">임무</a>
+            <a href="/data" class="active">백데이터</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>보유 백데이터</h1>
+        <p class="subtitle">로컬 SQLite 캐시에 저장된 시장별 OHLCV 데이터 현황</p>
+
+        <div id="inv-meta" class="meta-row" style="display:none;">
+            <div class="meta-item">
+                <span class="meta-label">시장 수</span>
+                <span class="meta-value" id="meta-markets">-</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">총 종목</span>
+                <span class="meta-value" id="meta-symbols">-</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">총 캔들</span>
+                <span class="meta-value" id="meta-candles">-</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">DB 크기</span>
+                <span class="meta-value" id="meta-dbsize">-</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>시장별 요약</h2>
+            <div id="summary-area"><span class="loading-msg">로딩 중...</span></div>
+        </div>
+
+        <div class="card">
+            <h2>종목별 상세</h2>
+            <div id="detail-area"><span class="loading-msg">로딩 중...</span></div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        function formatNum(n) {
+            if (n == null) return '-';
+            return Number(n).toLocaleString('ko-KR');
+        }
+
+        function formatPrice(n) {
+            if (n == null) return '-';
+            const v = Number(n);
+            if (v >= 1000) return v.toLocaleString('ko-KR', { maximumFractionDigits: 0 });
+            if (v >= 1) return v.toFixed(2);
+            return v.toFixed(4);
+        }
+
+        function formatBytes(b) {
+            if (!b) return '-';
+            if (b >= 1024 * 1024) return (b / (1024 * 1024)).toFixed(1) + ' MB';
+            if (b >= 1024) return (b / 1024).toFixed(1) + ' KB';
+            return b + ' B';
+        }
+
+        function periodStr(minDate, maxDate) {
+            if (!minDate || !maxDate) return '-';
+            return minDate + ' ~ ' + maxDate;
+        }
+
+        function buildSummaryTable(markets) {
+            if (!markets || markets.length === 0) {
+                return '<span class="empty-msg">데이터 없음</span>';
+            }
+            let html = '<table><thead><tr>'
+                + '<th>시장</th>'
+                + '<th class="td-num">종목수</th>'
+                + '<th class="td-num">총 캔들</th>'
+                + '<th>기간</th>'
+                + '</tr></thead><tbody>';
+            for (const m of markets) {
+                html += '<tr>'
+                    + '<td><span class="market-badge">' + m.market + '</span></td>'
+                    + '<td class="td-num">' + formatNum(m.symbol_count) + '</td>'
+                    + '<td class="td-num">' + formatNum(m.total_candles) + '</td>'
+                    + '<td>' + periodStr(m.min_date, m.max_date) + '</td>'
+                    + '</tr>';
+            }
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function buildDetailSections(markets, symbols) {
+            if (!symbols || symbols.length === 0) {
+                return '<span class="empty-msg">데이터 없음</span>';
+            }
+
+            // Group by market
+            const byMarket = {};
+            for (const s of symbols) {
+                if (!byMarket[s.market]) byMarket[s.market] = [];
+                byMarket[s.market].push(s);
+            }
+
+            let html = '';
+            const marketNames = Object.keys(byMarket).sort();
+
+            for (const market of marketNames) {
+                const rows = byMarket[market];
+                const sectionId = 'market-section-' + market.replace(/[^a-zA-Z0-9]/g, '_');
+                const tableId = 'market-table-' + market.replace(/[^a-zA-Z0-9]/g, '_');
+                const totalCandles = rows.reduce((acc, r) => acc + (r.candle_count || 0), 0);
+
+                html += '<div class="market-section">';
+                html += '<div class="market-toggle" id="' + sectionId + '" onclick="toggleMarket(\'' + sectionId + '\', \'' + tableId + '\')">'
+                    + '<span class="toggle-arrow">&#9658;</span>'
+                    + '<span class="market-badge">' + market + '</span>'
+                    + '<span class="market-toggle-title">' + market + ' 시장</span>'
+                    + '<span class="market-toggle-stats">'
+                    + formatNum(rows.length) + '종목 &nbsp;|&nbsp; '
+                    + formatNum(totalCandles) + '캔들'
+                    + '</span>'
+                    + '</div>';
+
+                html += '<div class="market-detail-table" id="' + tableId + '">';
+                html += '<table><thead><tr>'
+                    + '<th>종목</th>'
+                    + '<th class="td-num">일수</th>'
+                    + '<th>시작</th>'
+                    + '<th>종료</th>'
+                    + '<th class="td-num">현재가 (수정주가)</th>'
+                    + '<th class="td-num">전체 최고가</th>'
+                    + '<th class="td-num">전체 최저가</th>'
+                    + '</tr></thead><tbody>';
+
+                for (const r of rows) {
+                    html += '<tr>'
+                        + '<td class="td-symbol">' + r.symbol + '</td>'
+                        + '<td class="td-num">' + formatNum(r.candle_count) + '</td>'
+                        + '<td>' + (r.min_date || '-') + '</td>'
+                        + '<td>' + (r.max_date || '-') + '</td>'
+                        + '<td class="td-price">' + formatPrice(r.latest_close) + '</td>'
+                        + '<td class="td-num">' + formatPrice(r.all_time_high) + '</td>'
+                        + '<td class="td-num">' + formatPrice(r.all_time_low) + '</td>'
+                        + '</tr>';
+                }
+
+                html += '</tbody></table></div></div>';
+            }
+
+            return html;
+        }
+
+        window.toggleMarket = function (sectionId, tableId) {
+            const toggle = document.getElementById(sectionId);
+            const table = document.getElementById(tableId);
+            const isOpen = toggle.classList.contains('open');
+            if (isOpen) {
+                toggle.classList.remove('open');
+                table.classList.remove('open');
+            } else {
+                toggle.classList.add('open');
+                table.classList.add('open');
+            }
+        };
+
+        function loadInventory() {
+            fetch('/api/data/inventory')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.error) {
+                        document.getElementById('summary-area').innerHTML =
+                            '<span class="error-msg">오류: ' + data.error + '</span>';
+                        document.getElementById('detail-area').innerHTML = '';
+                        return;
+                    }
+
+                    // Meta
+                    const totalSymbols = data.markets.reduce(function (a, m) { return a + m.symbol_count; }, 0);
+                    const totalCandles = data.markets.reduce(function (a, m) { return a + m.total_candles; }, 0);
+                    document.getElementById('meta-markets').textContent = formatNum(data.markets.length);
+                    document.getElementById('meta-symbols').textContent = formatNum(totalSymbols);
+                    document.getElementById('meta-candles').textContent = formatNum(totalCandles);
+                    document.getElementById('meta-dbsize').textContent = formatBytes(data.db_size_bytes);
+                    document.getElementById('inv-meta').style.display = 'flex';
+
+                    document.getElementById('summary-area').innerHTML = buildSummaryTable(data.markets);
+                    document.getElementById('detail-area').innerHTML = buildDetailSections(data.markets, data.symbols);
+                })
+                .catch(function (err) {
+                    document.getElementById('summary-area').innerHTML =
+                        '<span class="error-msg">데이터를 불러오지 못했습니다: ' + err + '</span>';
+                    document.getElementById('detail-area').innerHTML = '';
+                });
+        }
+
+        loadInventory();
+    })();
+    </script>
+</body>
+</html>

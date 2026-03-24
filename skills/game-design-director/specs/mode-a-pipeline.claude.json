@@ -1,0 +1,167 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "GDD-Mode-A-Pipeline",
+    "version": "1.0",
+    "purpose": "Phase 3.5 → Phase 4 → Phase 5 자동화 파이프라인. Phase 1~3은 대화형으로 진행 후, 확정 데이터가 준비되면 이 파이프라인으로 교차 검증 → 재귀 검증 → 문서 생성을 자동 수행.",
+    "model_strategy": {
+      "quality": "검증기는 sonnet (규칙 기반), 문서 생성도 sonnet (템플릿 기반). 교차 검증 watchdog만 opus (판단 필요).",
+      "optimization": "각 에이전트는 이전 에이전트 산출물만 참조. 프레임워크 원본은 read_first로 1회만.",
+      "token_saving": "sonnet 위주 배정. watchdog 1개만 opus."
+    }
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/claude/gdd-pipeline",
+  "manifest_file": "subagent-runs/claude/gdd-pipeline/orchestration-manifest.json",
+  "summary_file": "subagent-runs/claude/gdd-pipeline/orchestration-summary.md",
+  "debug_log_file": "subagent-runs/claude/gdd-pipeline/launcher-debug.log",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 600,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "shared_directive_mode": "compact",
+  "live_usage": {
+    "enabled": true,
+    "display_mode": "both",
+    "status_file": "subagent-runs/claude/gdd-pipeline/orchestration-usage.json",
+    "poll_interval_ms": 500
+  },
+  "agents": [
+    {
+      "name": "crosscheck-validator",
+      "kind": "reviewer",
+      "stage": 1,
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 30,
+      "role": "Phase 3.5 교차 검증기",
+      "mission": "모든 Core ★ 확정 항목 간 공유 변수, 연쇄 효과, 딜레마, 수치 동일성, 타이밍 충돌을 검증한다.",
+      "task": "Phase 3 산출물과 의존성 맵을 읽고 cross-check-matrix.md 형식으로 교차 검증 수행. 미해결 모순 건수 보고.",
+      "read_first": [
+        "game-design-director/game-design-director-integrated.md",
+        "skills/game-design-director/agents/phase35-crosscheck.agent.md",
+        "skills/game-design-director/templates/cross-check-matrix.md"
+      ],
+      "validation": [
+        "공유 변수 레지스트리 작성 완료",
+        "연쇄 효과 경계 조건 시나리오 최소 1건",
+        "딜레마 3조건 판정 완료",
+        "미해결 모순 건수 명시"
+      ],
+      "return_contract": [
+        "공유 변수 레지스트리 (테이블)",
+        "연쇄 효과 검증 결과",
+        "딜레마 판정 결과",
+        "타이밍 검증 결과",
+        "미해결 모순 총계: N건"
+      ],
+      "stop_when": [
+        "교차 검증 보고서 완료. 파일 수정하지 않는다."
+      ]
+    },
+    {
+      "name": "crosscheck-watchdog",
+      "kind": "reviewer",
+      "stage": 2,
+      "model": "opus",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 15,
+      "role": "교차 검증 watchdog",
+      "mission": "crosscheck-validator의 결과를 감사. 누락된 공유 변수, 과소평가된 모순, 인플레이션 확인.",
+      "task": "crosscheck-validator 결과를 검토. (1) 누락된 공유 변수가 있는가 (2) 모순으로 분류해야 할 딜레마가 있는가 (3) 미해결 모순 건수가 정확한가",
+      "read_first": [
+        "skills/game-design-director/agents/phase35-crosscheck.agent.md"
+      ],
+      "return_contract": [
+        "Verdict: PASS | SHORTFALL",
+        "이상 항목 목록 (있을 경우)",
+        "점수 조정 권고 (있을 경우)"
+      ],
+      "stop_when": [
+        "감사 완료. 파일 수정하지 않는다."
+      ]
+    },
+    {
+      "name": "recursive-verifier",
+      "kind": "reviewer",
+      "stage": 3,
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 30,
+      "role": "Phase 4 재귀적 검증기",
+      "mission": "검증 4단계 + 오버엔지니어링 3문항 + 프로그래머 셀프체크로 '코딩 착수 가능'을 판정한다.",
+      "task": "Phase 3 확정 항목 + Phase 3.5 교차 검증 결과를 읽고, 검증 4단계(오류→모순→맥락→구현) + 오버엔지니어링 3문항 + 프로그래머 관점 (a)~(e) 수행. 6조건 게이트 판정.",
+      "read_first": [
+        "game-design-director/game-design-director-integrated.md",
+        "skills/game-design-director/agents/phase4-verify.agent.md"
+      ],
+      "validation": [
+        "4단계 검증 시스템별 PASS/FAIL",
+        "오버엔지니어링 3문항 시스템별 통과 여부",
+        "프로그래머 셀프체크 (a)~(e) 시스템별",
+        "6조건 게이트 최종 판정"
+      ],
+      "return_contract": [
+        "검증 4단계 결과 테이블",
+        "오버엔지니어링 체크 결과",
+        "프로그래머 셀프체크 결과",
+        "게이트 6조건 PASS/FAIL",
+        "최종 선언: 코딩 착수 가능 / 미통과"
+      ],
+      "stop_when": [
+        "검증 보고서 완료. 파일 수정하지 않는다."
+      ]
+    },
+    {
+      "name": "document-generator",
+      "kind": "implementer",
+      "stage": 4,
+      "model": "sonnet",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 12,
+      "role": "Phase 5 문서 생성기",
+      "mission": "Phase 1~4 확정 데이터를 프로젝트 문서(_confirmed/, parts/, CLAUDE.md)로 구조화한다.",
+      "task": "output-format.md 형식에 따라 프로젝트 문서 생성. 단일 진실 소스 원칙 준수. 태그 감사 수행.",
+      "read_first": [
+        "skills/game-design-director/agents/phase5-document.agent.md",
+        "skills/game-design-director/templates/output-format.md"
+      ],
+      "success_criteria": [
+        "_confirmed/ 파일 생성 완료",
+        "중복 수치 0건 (참조 전환 완료)",
+        "태그 감사 통과 (⚠️ 잔존 0건)"
+      ],
+      "stop_when": [
+        "문서 생성 + 검증 완료."
+      ]
+    },
+    {
+      "name": "document-reviewer",
+      "kind": "reviewer",
+      "stage": 5,
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "reasoning_effort": "low",
+      "max_response_lines": 15,
+      "role": "문서 품질 검증",
+      "mission": "생성된 문서의 완전성, 중복 수치, 태그 정합성, 단일 진실 소스 원칙 준수를 확인한다.",
+      "task": "document-generator가 생성한 파일을 검토. (1) _confirmed/ 파일 완전성 (2) 중복 수치 여부 (3) 태그 감사 (4) 입출력 계약 누락 여부",
+      "return_contract": [
+        "Verdict: ACCEPTED | MINOR_ISSUES | MATERIAL_ISSUES",
+        "발견 사항 목록",
+        "재생성 필요 여부"
+      ],
+      "stop_when": [
+        "검토 완료. 파일 수정하지 않는다."
+      ]
+    }
+  ]
+}

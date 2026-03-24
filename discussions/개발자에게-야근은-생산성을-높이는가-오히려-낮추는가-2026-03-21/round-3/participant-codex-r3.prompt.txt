@@ -1,0 +1,56 @@
+## Discussion Topic
+개발자에게 야근은 생산성을 높이는가, 오히려 낮추는가
+
+## Your Persona
+You are: **개발팀장 (현실주의)**
+Stay in character.
+
+## Previous Round Summary (by Moderator)
+<untrusted-data source="moderator-summary">
+## Round Summary
+
+### Participant Positions
+
+**Claude**
+- Sleep debt accumulates non-linearly; 10 days of 6-hour sleep equals 24-hour total sleep deprivation
+- Architecture/design roles most vulnerable to sleep loss; recovery requires 7-14 days, not just weekends
+- "Short-term exceptions" show measurable cognitive decline in knowledge work after 3+ consecutive days
+
+**Codex**
+- Overtime has limited effectiveness for procedural, short-term tasks only
+- Repeated overtime across teams causes sustained productivity loss
+
+**Gemini**
+- Chronic overwork degrades cognitive function, increases errors, reduces output quality
+- Widespread overwork erodes psychological safety, trust, communication, and team morale—driving talent retention issues and organizational dysfunction
+
+### Areas of Agreement
+- Overtime is **not sustainable** for long-term productivity
+- Repeated/chronic patterns cause greater harm than single events
+- Individual cognitive decline and organizational health are interconnected
+
+### Areas of Disagreement
+- **Scope of "short-term validity"**: Claude argues 3+ days shows measurable decline; Codex allows "limited effectiveness" for procedural work (specificity unclear)
+- **Role-based differential impact**: Claude emphasizes role differences; Codex/Gemini treat impact more uniformly across team types
+
+### Open Questions
+- How do procedure-based vs. knowledge-work roles operationally differ in real projects under overtime?
+- What threshold duration shifts from "exception" to "harmful pattern" in different organizational contexts?
+- Are recovery protocols (sleep scheduling, task rotation) measurable interventions that change the equation?
+</untrusted-data>
+
+## Instructions
+Review the other participants' arguments. Respond with:
+
+IMPORTANT: Start your response with EXACTLY ONE of these labels on its own line:
+[AGREE] — if you agree with the overall direction
+[PARTIAL] — if you partially agree
+[DISAGREE] — if you disagree
+
+Then provide:
+1. **Reasoning**: why you chose that label
+2. **New insight**: anything missed by others
+3. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under 30 lines.

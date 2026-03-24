@@ -1,0 +1,185 @@
+{
+    "created_at_utc": "2026-03-18T06:53:57.774Z",
+    "launcher_version": "ts-phase1-v1",
+    "launcher_script": "subagent-launch",
+    "spec_path": "C:\\Users\\haj\\AppData\\Local\\Temp\\wki-korean-test.json",
+    "spec_directory": "C:\\Users\\haj\\AppData\\Local\\Temp",
+    "spec_sha256": "d7e90b89b8d7747ee84aaabbdcc94a08082f715c168d9321fec5c976d1d9a4d1",
+    "codex_executable": "codex",
+    "claude_executable": "claude",
+    "gemini_executable": "npx.cmd",
+    "invocation_cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "cwd_requested": ".",
+    "cwd_resolution_mode": "invocation",
+    "cwd_resolution_base": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "workspace_root": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "output_dir": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\gemini\\wki-korean-test",
+    "debug_log": null,
+    "summary_file": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\gemini\\wki-korean-test\\orchestration-summary.md",
+    "live_usage": {
+        "enabled": false,
+        "display_mode": "none",
+        "poll_interval_ms": 500,
+        "status_file": null,
+        "json_output_forced": false
+    },
+    "archive": {
+        "enabled": false,
+        "root": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-records",
+        "run_label": "wki-korean-test",
+        "run_directory": null,
+        "launcher_directory": null,
+        "deliverables_directory": null,
+        "workers_directory": null,
+        "supervisor_directory": null
+    },
+    "execution_mode": "sequential",
+    "skip_git_repo_check": true,
+    "shared_directive": {
+        "source": null,
+        "requested_mode": "disabled",
+        "effective_mode": "disabled",
+        "sha256": null,
+        "char_count": 0,
+        "original_char_count": 0,
+        "effective_char_count": 0
+    },
+    "workflow": {
+        "enabled": false,
+        "source": null,
+        "prompt_mode": "disabled",
+        "strict_render": true,
+        "auto_detected": false,
+        "front_matter_text": null,
+        "prompt_template_sha256": null,
+        "prompt_template_chars": 0,
+        "context": {}
+    },
+    "hooks": {
+        "after_create": {
+            "enabled": false,
+            "ran": false,
+            "trigger": null,
+            "exit_code": null,
+            "missing_sentinel_paths": [],
+            "workspace_was_empty": false,
+            "stdout": null,
+            "stderr": null
+        }
+    },
+    "policy": {
+        "execution_mode": "sequential",
+        "supervisor_only": false,
+        "require_final_read_only_review": false,
+        "material_issue_strategy": "none",
+        "requested_deliverables": [],
+        "writable_worker_names": [],
+        "read_only_reviewer_names": [
+            "korean-analyst"
+        ],
+        "final_read_only_reviewer_names": [
+            "korean-analyst"
+        ],
+        "final_read_only_review_present": true,
+        "last_writable_stage": 0
+    },
+    "efficiency_signals": {
+        "measurement_mode": "structure_first",
+        "note": "Use reruns, parent burden, repair-loop shape, and worker-to-deliverable ratios as primary efficiency signals. Treat absolute token totals as secondary.",
+        "execution_mode": "sequential",
+        "total_workers": 1,
+        "succeeded_workers": 1,
+        "failed_workers": 0,
+        "requested_deliverable_count": 0,
+        "workers_per_deliverable": null,
+        "writable_workers_per_deliverable": null,
+        "writable_workers": 0,
+        "read_only_workers": 1,
+        "implementer_workers": 0,
+        "reviewer_workers": 1,
+        "validator_workers": 0,
+        "fixer_workers": 0,
+        "full_auto_writable_workers": 0,
+        "full_auto_read_only_workers": 0,
+        "stage_count": 1,
+        "parallel_stage_count": 0,
+        "max_parallel_workers_in_stage": 1,
+        "uses_parallel_execution": false,
+        "uses_supervisor_only_policy": false,
+        "uses_bounded_repair_policy": false,
+        "final_read_only_review_present": true,
+        "total_prompt_chars": 984,
+        "total_footer_tokens": 0
+    },
+    "stage_plan": [
+        {
+            "stage": 1,
+            "worker_count": 1,
+            "worker_names": [
+                "korean-analyst"
+            ],
+            "worker_kinds": [
+                "reviewer"
+            ],
+            "read_only_workers": [
+                "korean-analyst"
+            ],
+            "writable_workers": []
+        }
+    ],
+    "defaults": {
+        "engine": "gemini",
+        "model": "gemini-2.5-flash",
+        "sandbox": "read-only",
+        "max_response_lines": 20
+    },
+    "results": [
+        {
+            "name": "korean-analyst",
+            "engine": "gemini",
+            "mode": "exec",
+            "stage": 1,
+            "worker_kind": "reviewer",
+            "is_read_only": true,
+            "cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+            "exit_code": 0,
+            "succeeded": true,
+            "required_paths": [],
+            "required_non_empty_paths": [],
+            "missing_required_paths": [],
+            "empty_required_paths": [],
+            "validation_failures": [],
+            "requested_model": "gemini-2.5-flash",
+            "requested_full_auto": false,
+            "requested_json_output": false,
+            "actual_model": "gemini-2.5-flash",
+            "requested_sandbox": "read-only",
+            "actual_sandbox": null,
+            "requested_reasoning_effort": null,
+            "actual_reasoning_effort": null,
+            "prompt_profile": "full",
+            "response_style": "standard",
+            "max_response_lines": 20,
+            "actual_approval": null,
+            "actual_workdir": null,
+            "output_mode": "text",
+            "session_id": null,
+            "footer_tokens_used": null,
+            "turn_failed": false,
+            "failure_message": null,
+            "stdout": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\gemini\\wki-korean-test\\korean-analyst.stdout.log",
+            "stderr": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\gemini\\wki-korean-test\\korean-analyst.stderr.log",
+            "last": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\gemini\\wki-korean-test\\korean-analyst.last.txt",
+            "prompt": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\gemini\\wki-korean-test\\korean-analyst.prompt.txt",
+            "prompt_sha256": "af2351618565ad35ca736aa167449532a1cf1c8a790c98da7515b8d3d4288873",
+            "prompt_chars": 984,
+            "workflow_prompt_mode": "disabled",
+            "workflow_prompt_chars": 0,
+            "command": "npx.cmd @google/gemini-cli --yolo --model gemini-2.5-flash",
+            "last_exists": true,
+            "last_message_preview": "I need to explain the rules for recording evidence after a worker execution, including file creation and directory structure. I will start by examining the `subagent-runs` directory for a `README.md` ...",
+            "stderr_preview": "YOLO mode is enabled. All tool calls will be automatically approved.\nLoaded cached credentials.\nYOLO mode is enabled. All tool calls will be automatically approved.",
+            "stdout_preview": "I need to explain the rules for recording evidence after a worker execution, including file creation and directory structure. I will start by examining the `subagent-runs` directory for a `README.md` ..."
+        }
+    ]
+}

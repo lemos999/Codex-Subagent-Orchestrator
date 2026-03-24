@@ -103,12 +103,20 @@ export async function writeArchive(
     resolvedPaths.manifestFile,
     path.join(launcherDir, 'orchestration-manifest.json'),
   );
+  await copyIfExists(
+    path.join(resolvedPaths.outputDir, 'run-manifest.md'),
+    path.join(launcherDir, 'run-manifest.md'),
+  );
   if (resolvedPaths.summaryFile) {
     await copyIfExists(
       resolvedPaths.summaryFile,
       path.join(launcherDir, 'orchestration-summary.md'),
     );
   }
+  await copyIfExists(
+    path.join(resolvedPaths.outputDir, 'run-summary.md'),
+    path.join(launcherDir, 'run-summary.md'),
+  );
   if (resolvedPaths.debugLogFile) {
     await copyIfExists(
       resolvedPaths.debugLogFile,

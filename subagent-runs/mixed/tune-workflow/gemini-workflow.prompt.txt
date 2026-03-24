@@ -1,0 +1,31 @@
+## Relevant Context (auto-injected)
+
+### C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/orchestrator.ts (lines 264-268)
+**other** — other
+```typescript
+// ============================================================
+// Main orchestration entry point
+// ============================================================
+```
+
+### skills/claude-subagent-orchestrator/references/orchestration-workflow.md (lines 1-2)
+**Orchestration Workflow** — markdown-section
+> # Orchestration Workflow
+
+### skills/codex-subagent-orchestrator/references/orchestration-workflow.md (lines 1-2)
+**Orchestration Workflow** — markdown-section
+> # Orchestration Workflow
+
+### skills/codex-subagent-orchestrator/SKILL.md (lines 6-7)
+**Subagent Orchestrator** — markdown-section
+> # Subagent Orchestrator
+
+### .claude/skills/submix/SKILL.md (lines 201-207)
+**참조** — markdown-section
+> ## 참조
+> 
+> 상세 워크플로우, Anti-Patterns, Known Limitations는 핵심 orchestrator 문서 참조:
+> - `skills/claude-subagent-orchestrator/SKILL.md`
+> - `skills/claude-subagent-orchestrator/references/orchestration-workflow.md`
+
+오케스트레이션 워크플로우의 단계별 흐름을 설명해줘

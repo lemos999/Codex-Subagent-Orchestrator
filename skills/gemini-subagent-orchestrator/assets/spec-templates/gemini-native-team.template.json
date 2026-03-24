@@ -1,0 +1,48 @@
+{
+  "cwd": ".",
+  "output_dir": "subagent-runs/gemini/run-example",
+  "write_run_archive": true,
+  "execution_mode": "sequential",
+  "requested_deliverables": [
+    "src/new_feature.js"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "defaults": {
+    "engine": "gemini",
+    "model": "gemini-2.5-pro",
+    "sandbox": "workspace-write",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 10
+  },
+  "agents": [
+    {
+      "name": "feature-implementer",
+      "kind": "implementer",
+      "stage": 1,
+      "task": "Implement the new feature according to the request.",
+      "writable_scope": [
+        "src/new_feature.js"
+      ],
+      "validation": [
+        "Ensure src/new_feature.js is created and functionally complete."
+      ]
+    },
+    {
+      "name": "code-reviewer",
+      "kind": "reviewer",
+      "sandbox": "read-only",
+      "stage": 2,
+      "task": "Review src/new_feature.js for correctness, security, and edge cases.",
+      "read_first": [
+        "src/new_feature.js"
+      ],
+      "validation": [
+        "Check that the file exists.",
+        "Verify no sensitive credentials are hardcoded."
+      ]
+    }
+  ]
+}

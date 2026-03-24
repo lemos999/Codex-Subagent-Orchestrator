@@ -1,0 +1,76 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/three-way-mixed",
+  "manifest_file": "subagent-runs/mixed/three-way-mixed/orchestration-manifest.json",
+  "summary_file": "subagent-runs/mixed/three-way-mixed/orchestration-summary.md",
+  "skip_git_repo_check": true,
+  "execution_mode": "parallel",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "requested_deliverables": [
+    "analysis.md",
+    "output.txt"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "shared_directive_mode": "reference",
+  "defaults": {
+    "engine": "codex",
+    "model": "gpt-5.4",
+    "sandbox": "workspace-write",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 4
+  },
+  "agents": [
+    {
+      "name": "analyzer",
+      "kind": "planner",
+      "stage": 1,
+      "engine": "gemini",
+      "model": "gemini-2.5-pro",
+      "task": "{{ANALYZER_TASK}}",
+      "writable_scope": [
+        "analysis.md"
+      ],
+      "validation": [
+        "Ensure analysis.md exists.",
+        "Ensure analysis.md is non-empty."
+      ]
+    },
+    {
+      "name": "implementer",
+      "kind": "implementer",
+      "stage": 2,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "task": "{{IMPLEMENTER_TASK}}",
+      "read_first": [
+        "analysis.md"
+      ],
+      "writable_scope": [
+        "output.txt"
+      ],
+      "validation": [
+        "Ensure output.txt exists.",
+        "Ensure output.txt is non-empty."
+      ]
+    },
+    {
+      "name": "reviewer",
+      "kind": "reviewer",
+      "stage": 3,
+      "engine": "claude",
+      "model": "haiku",
+      "sandbox": "read-only",
+      "task": "Review analysis.md and output.txt for correctness and scope compliance.",
+      "read_first": [
+        "analysis.md",
+        "output.txt"
+      ]
+    }
+  ]
+}

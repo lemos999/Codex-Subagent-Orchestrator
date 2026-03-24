@@ -1,0 +1,2925 @@
+{
+  "quest_id": "cmp-dqn",
+  "market": "US",
+  "symbols": [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "TSLA",
+    "META"
+  ],
+  "initial_capital": 100000,
+  "current_capital": 91529.28747656687,
+  "start_date": "2021-03-17",
+  "current_date": "2022-09-03",
+  "current_day": 121,
+  "phase": 3,
+  "strategy_name": "dqn",
+  "total_score": 7668.162948478543,
+  "trade_log": [
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 290.7740069732666,
+      "commission": 0.2907740069732666,
+      "timestamp": "2022-03-18"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 289.54478549194334,
+      "commission": 0.28954478549194335,
+      "timestamp": "2022-03-21"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 294.2872983856201,
+      "commission": 0.2942872983856201,
+      "timestamp": "2022-03-22"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 26.48903555202484,
+      "commission": 0.026489035552024844,
+      "timestamp": "2022-03-22"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 331.49232348632813,
+      "commission": 0.3314923234863281,
+      "timestamp": "2022-03-22"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 215.07057053375243,
+      "commission": 0.21507057053375245,
+      "timestamp": "2022-03-22"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 166.85250382232667,
+      "commission": 0.16685250382232666,
+      "timestamp": "2022-03-23"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 289.5744701690674,
+      "commission": 0.2895744701690674,
+      "timestamp": "2022-03-23"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 333.2032004699707,
+      "commission": 0.3332032004699707,
+      "timestamp": "2022-03-23"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 211.90382682037352,
+      "commission": 0.21190382682037354,
+      "timestamp": "2022-03-23"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "SELL",
+      "qty": 1,
+      "price": 171.10236378479004,
+      "commission": 0.17110236378479005,
+      "timestamp": "2022-03-25"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 27.627858923912047,
+      "commission": 0.02762785892391205,
+      "timestamp": "2022-03-25"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 336.7115648803711,
+      "commission": 0.33671156488037113,
+      "timestamp": "2022-03-25"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 219.98281855773925,
+      "commission": 0.21998281855773927,
+      "timestamp": "2022-03-25"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 221.7381202774048,
+      "commission": 0.2217381202774048,
+      "timestamp": "2022-03-28"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 305.2725245819092,
+      "commission": 0.3052725245819092,
+      "timestamp": "2022-03-29"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 28.61822385120392,
+      "commission": 0.028618223851203918,
+      "timestamp": "2022-03-29"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 228.18427132415772,
+      "commission": 0.22818427132415772,
+      "timestamp": "2022-03-29"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 303.4687646636963,
+      "commission": 0.30346876466369627,
+      "timestamp": "2022-03-30"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 364.48099841308596,
+      "commission": 0.36448099841308595,
+      "timestamp": "2022-03-30"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 299.47504110717773,
+      "commission": 0.29947504110717776,
+      "timestamp": "2022-04-01"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 26.65012232875824,
+      "commission": 0.02665012232875824,
+      "timestamp": "2022-04-01"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 304.8466220397949,
+      "commission": 0.3048466220397949,
+      "timestamp": "2022-04-04"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 231.9527979812622,
+      "commission": 0.2319527979812622,
+      "timestamp": "2022-04-04"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 25.896814922332762,
+      "commission": 0.025896814922332763,
+      "timestamp": "2022-04-05"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 230.1498227005005,
+      "commission": 0.2301498227005005,
+      "timestamp": "2022-04-05"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 221.4505291595459,
+      "commission": 0.2214505291595459,
+      "timestamp": "2022-04-06"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 287.42519595336915,
+      "commission": 0.2874251959533692,
+      "timestamp": "2022-04-08"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 342.00090156555177,
+      "commission": 0.3420009015655518,
+      "timestamp": "2022-04-08"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 276.0915595550537,
+      "commission": 0.2760915595550537,
+      "timestamp": "2022-04-11"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 21.888107239723205,
+      "commission": 0.021888107239723203,
+      "timestamp": "2022-04-11"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 272.99436964416503,
+      "commission": 0.272994369644165,
+      "timestamp": "2022-04-12"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 21.475652503967286,
+      "commission": 0.021475652503967286,
+      "timestamp": "2022-04-12"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 340.6196135406494,
+      "commission": 0.34061961354064946,
+      "timestamp": "2022-04-13"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 271.50390921020505,
+      "commission": 0.27150390921020506,
+      "timestamp": "2022-04-18"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 21.754285632133485,
+      "commission": 0.021754285632133486,
+      "timestamp": "2022-04-18"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 334.9307178497314,
+      "commission": 0.33493071784973144,
+      "timestamp": "2022-04-18"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 22.16873836040497,
+      "commission": 0.02216873836040497,
+      "timestamp": "2022-04-19"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 325.5704707336426,
+      "commission": 0.3255704707336426,
+      "timestamp": "2022-04-20"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 19.875760474205016,
+      "commission": 0.019875760474205018,
+      "timestamp": "2022-04-25"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 332.83967651367186,
+      "commission": 0.33283967651367186,
+      "timestamp": "2022-04-25"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 185.62680937957765,
+      "commission": 0.18562680937957765,
+      "timestamp": "2022-04-25"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 261.27356422424316,
+      "commission": 0.26127356422424314,
+      "timestamp": "2022-04-26"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 18.763235495567322,
+      "commission": 0.018763235495567323,
+      "timestamp": "2022-04-26"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 291.9939446411133,
+      "commission": 0.2919939446411133,
+      "timestamp": "2022-04-26"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 179.63084719848632,
+      "commission": 0.17963084719848632,
+      "timestamp": "2022-04-26"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 204.02604873657228,
+      "commission": 0.2040260487365723,
+      "timestamp": "2022-04-28"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 301.1305009918213,
+      "commission": 0.3011305009918213,
+      "timestamp": "2022-05-02"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 19.576158920288087,
+      "commission": 0.01957615892028809,
+      "timestamp": "2022-05-03"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 303.2348851776123,
+      "commission": 0.30323488517761227,
+      "timestamp": "2022-05-03"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 210.48424836730956,
+      "commission": 0.21048424836730956,
+      "timestamp": "2022-05-03"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 280.3793324890137,
+      "commission": 0.2803793324890137,
+      "timestamp": "2022-05-04"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 317.3812385406494,
+      "commission": 0.3173812385406494,
+      "timestamp": "2022-05-04"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 221.55962070465088,
+      "commission": 0.22155962070465088,
+      "timestamp": "2022-05-04"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 16.927656681060792,
+      "commission": 0.016927656681060794,
+      "timestamp": "2022-05-09"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 262.5011801147461,
+      "commission": 0.2625011801147461,
+      "timestamp": "2022-05-09"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 17.554243008613586,
+      "commission": 0.017554243008613586,
+      "timestamp": "2022-05-10"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 266.81333267211915,
+      "commission": 0.26681333267211915,
+      "timestamp": "2022-05-10"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 244.5443384170532,
+      "commission": 0.24454433841705323,
+      "timestamp": "2022-05-11"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 187.17676580047606,
+      "commission": 0.18717676580047607,
+      "timestamp": "2022-05-11"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 242.54533841705322,
+      "commission": 0.24254533841705322,
+      "timestamp": "2022-05-12"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 256.4017337799072,
+      "commission": 0.2564017337799072,
+      "timestamp": "2022-05-13"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 253.09518857574463,
+      "commission": 0.25309518857574465,
+      "timestamp": "2022-05-16"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 17.241242274284364,
+      "commission": 0.017241242274284363,
+      "timestamp": "2022-05-16"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 241.57739337158202,
+      "commission": 0.24157739337158202,
+      "timestamp": "2022-05-16"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 18.15303865814209,
+      "commission": 0.018153038658142093,
+      "timestamp": "2022-05-17"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 253.9969301147461,
+      "commission": 0.2539969301147461,
+      "timestamp": "2022-05-17"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 236.4850308532715,
+      "commission": 0.2364850308532715,
+      "timestamp": "2022-05-18"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 221.18935305023194,
+      "commission": 0.22118935305023193,
+      "timestamp": "2022-05-20"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 252.86011626434328,
+      "commission": 0.2528601162643433,
+      "timestamp": "2022-05-23"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 194.79942317962647,
+      "commission": 0.19479942317962648,
+      "timestamp": "2022-05-23"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 16.132705647468566,
+      "commission": 0.016132705647468566,
+      "timestamp": "2022-05-24"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 209.49136631011962,
+      "commission": 0.2094913663101196,
+      "timestamp": "2022-05-24"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 179.95838820648194,
+      "commission": 0.17995838820648194,
+      "timestamp": "2022-05-24"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 219.49020610046387,
+      "commission": 0.21949020610046388,
+      "timestamp": "2022-05-25"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 264.808844039917,
+      "commission": 0.264808844039917,
+      "timestamp": "2022-05-27"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 18.767425100326538,
+      "commission": 0.01876742510032654,
+      "timestamp": "2022-05-27"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 264.808844039917,
+      "commission": 0.264808844039917,
+      "timestamp": "2022-05-30"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 18.767425100326538,
+      "commission": 0.01876742510032654,
+      "timestamp": "2022-05-30"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 263.7447520294189,
+      "commission": 0.26374475202941894,
+      "timestamp": "2022-05-31"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 18.647388187408446,
+      "commission": 0.018647388187408447,
+      "timestamp": "2022-05-31"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 252.87970307922365,
+      "commission": 0.25287970307922364,
+      "timestamp": "2022-05-31"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 18.295850277900694,
+      "commission": 0.018295850277900694,
+      "timestamp": "2022-06-01"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 246.91338828277588,
+      "commission": 0.2469133882827759,
+      "timestamp": "2022-06-01"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 187.07758750915528,
+      "commission": 0.1870775875091553,
+      "timestamp": "2022-06-01"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 19.566174682617188,
+      "commission": 0.019566174682617187,
+      "timestamp": "2022-06-02"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 261.95003187561036,
+      "commission": 0.2619500318756104,
+      "timestamp": "2022-06-03"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 18.676638759613038,
+      "commission": 0.018676638759613038,
+      "timestamp": "2022-06-03"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 234.3994042663574,
+      "commission": 0.23439940426635741,
+      "timestamp": "2022-06-03"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 260.45741366577147,
+      "commission": 0.26045741366577146,
+      "timestamp": "2022-06-06"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 18.742483735084534,
+      "commission": 0.018742483735084536,
+      "timestamp": "2022-06-06"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 18.901051179885865,
+      "commission": 0.018901051179885865,
+      "timestamp": "2022-06-07"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 241.7457353668213,
+      "commission": 0.24174573536682128,
+      "timestamp": "2022-06-08"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 195.01134752655028,
+      "commission": 0.19501134752655028,
+      "timestamp": "2022-06-08"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 245.42903441619873,
+      "commission": 0.24542903441619873,
+      "timestamp": "2022-06-10"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 129.46854103088378,
+      "commission": 0.1294685410308838,
+      "timestamp": "2022-06-13"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 235.01970332336427,
+      "commission": 0.23501970332336428,
+      "timestamp": "2022-06-13"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 15.629677159309388,
+      "commission": 0.015629677159309387,
+      "timestamp": "2022-06-13"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 215.84453215026855,
+      "commission": 0.21584453215026855,
+      "timestamp": "2022-06-13"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 163.062493309021,
+      "commission": 0.163062493309021,
+      "timestamp": "2022-06-13"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 237.18307695007323,
+      "commission": 0.23718307695007323,
+      "timestamp": "2022-06-14"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 15.81846836900711,
+      "commission": 0.015818468369007112,
+      "timestamp": "2022-06-14"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 221.00044438934327,
+      "commission": 0.22100044438934327,
+      "timestamp": "2022-06-14"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 162.53635146331789,
+      "commission": 0.16253635146331788,
+      "timestamp": "2022-06-14"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 232.8835,
+      "commission": 0.2328835,
+      "timestamp": "2022-06-15"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 167.94734113311767,
+      "commission": 0.16794734113311768,
+      "timestamp": "2022-06-15"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 216.65161450958252,
+      "commission": 0.2166516145095825,
+      "timestamp": "2022-06-17"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 246.15660138702393,
+      "commission": 0.24615660138702394,
+      "timestamp": "2022-06-21"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 16.547660259246825,
+      "commission": 0.016547660259246824,
+      "timestamp": "2022-06-21"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 237.15518520355224,
+      "commission": 0.23715518520355225,
+      "timestamp": "2022-06-21"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 155.90509254455566,
+      "commission": 0.15590509254455567,
+      "timestamp": "2022-06-21"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 235.96862658691407,
+      "commission": 0.2359686265869141,
+      "timestamp": "2022-06-22"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "SELL",
+      "qty": 1,
+      "price": 138.93071351623536,
+      "commission": 0.13893071351623537,
+      "timestamp": "2022-06-24"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 259.6993648681641,
+      "commission": 0.2596993648681641,
+      "timestamp": "2022-06-24"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 168.75063496398926,
+      "commission": 0.16875063496398926,
+      "timestamp": "2022-06-24"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 256.97339318847656,
+      "commission": 0.25697339318847656,
+      "timestamp": "2022-06-27"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 16.833482734680175,
+      "commission": 0.016833482734680175,
+      "timestamp": "2022-06-27"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 15.964305602073669,
+      "commission": 0.01596430560207367,
+      "timestamp": "2022-06-28"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 232.77966174316407,
+      "commission": 0.23277966174316408,
+      "timestamp": "2022-06-28"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 159.50859322357178,
+      "commission": 0.15950859322357178,
+      "timestamp": "2022-06-28"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 228.3757604904175,
+      "commission": 0.2283757604904175,
+      "timestamp": "2022-06-29"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 162.58216617584227,
+      "commission": 0.16258216617584229,
+      "timestamp": "2022-06-29"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 14.947430459976196,
+      "commission": 0.014947430459976197,
+      "timestamp": "2022-07-05"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 257.995845993042,
+      "commission": 0.257995845993042,
+      "timestamp": "2022-07-06"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 231.8492040710449,
+      "commission": 0.23184920407104492,
+      "timestamp": "2022-07-06"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 168.3638960571289,
+      "commission": 0.1683638960571289,
+      "timestamp": "2022-07-06"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 250.6379545135498,
+      "commission": 0.2506379545135498,
+      "timestamp": "2022-07-08"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 256.6047702484131,
+      "commission": 0.2566047702484131,
+      "timestamp": "2022-07-11"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 15.135224581718445,
+      "commission": 0.015135224581718445,
+      "timestamp": "2022-07-11"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 246.08869635772706,
+      "commission": 0.24608869635772707,
+      "timestamp": "2022-07-12"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 15.065300568580627,
+      "commission": 0.015065300568580627,
+      "timestamp": "2022-07-12"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 233.18654232788086,
+      "commission": 0.23318654232788086,
+      "timestamp": "2022-07-12"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 236.92147328948974,
+      "commission": 0.23692147328948973,
+      "timestamp": "2022-07-13"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 249.0475419845581,
+      "commission": 0.2490475419845581,
+      "timestamp": "2022-07-15"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 15.728812644004822,
+      "commission": 0.015728812644004823,
+      "timestamp": "2022-07-15"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 246.65137074279784,
+      "commission": 0.24665137074279783,
+      "timestamp": "2022-07-18"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 16.067100522994995,
+      "commission": 0.016067100522994995,
+      "timestamp": "2022-07-18"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 251.77352893066407,
+      "commission": 0.25177352893066407,
+      "timestamp": "2022-07-19"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 16.973190682411193,
+      "commission": 0.016973190682411193,
+      "timestamp": "2022-07-19"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 245.65276377868653,
+      "commission": 0.24565276377868653,
+      "timestamp": "2022-07-19"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 150.2416329574585,
+      "commission": 0.15024163295745852,
+      "timestamp": "2022-07-20"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 254.17733689117432,
+      "commission": 0.25417733689117433,
+      "timestamp": "2022-07-20"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 247.37625,
+      "commission": 0.24737625,
+      "timestamp": "2022-07-20"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 181.75518459320068,
+      "commission": 0.1817551845932007,
+      "timestamp": "2022-07-20"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "SELL",
+      "qty": 1,
+      "price": 151.12122470855712,
+      "commission": 0.15112122470855713,
+      "timestamp": "2022-07-22"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 252.57874090576172,
+      "commission": 0.2525787409057617,
+      "timestamp": "2022-07-22"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 17.282534067153932,
+      "commission": 0.017282534067153934,
+      "timestamp": "2022-07-22"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 251.09450917053223,
+      "commission": 0.2510945091705322,
+      "timestamp": "2022-07-25"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 16.988159996032714,
+      "commission": 0.016988159996032714,
+      "timestamp": "2022-07-25"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 244.37157540893554,
+      "commission": 0.24437157540893556,
+      "timestamp": "2022-07-26"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 16.51469815349579,
+      "commission": 0.01651469815349579,
+      "timestamp": "2022-07-26"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 258.9894153442383,
+      "commission": 0.2589894153442383,
+      "timestamp": "2022-07-26"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 157.98973725128172,
+      "commission": 0.15798973725128174,
+      "timestamp": "2022-07-26"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 260.44771392822264,
+      "commission": 0.26044771392822264,
+      "timestamp": "2022-07-27"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 274.6825973205566,
+      "commission": 0.2746825973205566,
+      "timestamp": "2022-07-27"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 168.17548323059083,
+      "commission": 0.16817548323059084,
+      "timestamp": "2022-07-27"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 159.38884786224367,
+      "commission": 0.15938884786224367,
+      "timestamp": "2022-07-28"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 272.3496382598877,
+      "commission": 0.27234963825988767,
+      "timestamp": "2022-07-29"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 18.124756483078002,
+      "commission": 0.018124756483078003,
+      "timestamp": "2022-07-29"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 269.701189453125,
+      "commission": 0.269701189453125,
+      "timestamp": "2022-08-01"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 18.402171264648437,
+      "commission": 0.018402171264648437,
+      "timestamp": "2022-08-01"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 266.60665589904784,
+      "commission": 0.26660665589904786,
+      "timestamp": "2022-08-02"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 18.505484919548035,
+      "commission": 0.018505484919548034,
+      "timestamp": "2022-08-02"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 300.73696325683596,
+      "commission": 0.30073696325683597,
+      "timestamp": "2022-08-02"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 159.02217459869385,
+      "commission": 0.15902217459869386,
+      "timestamp": "2022-08-02"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 274.0279977722168,
+      "commission": 0.2740279977722168,
+      "timestamp": "2022-08-03"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 18.872085059165954,
+      "commission": 0.018872085059165954,
+      "timestamp": "2022-08-03"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 307.2429691467285,
+      "commission": 0.3072429691467285,
+      "timestamp": "2022-08-03"
+    },
+    {
+      "symbol": "META",
+      "side": "SELL",
+      "qty": 1,
+      "price": 167.4019291610718,
+      "commission": 0.1674019291610718,
+      "timestamp": "2022-08-03"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 271.94217755126954,
+      "commission": 0.27194217755126954,
+      "timestamp": "2022-08-08"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 273.86305938720704,
+      "commission": 0.27386305938720706,
+      "timestamp": "2022-08-09"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 17.067081064224244,
+      "commission": 0.017067081064224245,
+      "timestamp": "2022-08-09"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 280.2377102203369,
+      "commission": 0.2802377102203369,
+      "timestamp": "2022-08-10"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 283.1858336791992,
+      "commission": 0.28318583367919925,
+      "timestamp": "2022-08-12"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 18.669606068611145,
+      "commission": 0.018669606068611146,
+      "timestamp": "2022-08-12"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 284.6992548065186,
+      "commission": 0.2846992548065186,
+      "timestamp": "2022-08-15"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 18.991927889823913,
+      "commission": 0.018991927889823915,
+      "timestamp": "2022-08-15"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 18.8580972032547,
+      "commission": 0.018858097203254702,
+      "timestamp": "2022-08-16"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 306.7166056365967,
+      "commission": 0.3067166056365967,
+      "timestamp": "2022-08-16"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "SELL",
+      "qty": 1,
+      "price": 282.93027195739745,
+      "commission": 0.28293027195739745,
+      "timestamp": "2022-08-17"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "SELL",
+      "qty": 1,
+      "price": 303.84467524719236,
+      "commission": 0.3038446752471924,
+      "timestamp": "2022-08-17"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 278.18718081665037,
+      "commission": 0.2781871808166504,
+      "timestamp": "2022-08-19"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 270.020959854126,
+      "commission": 0.270020959854126,
+      "timestamp": "2022-08-22"
+    },
+    {
+      "symbol": "AAPL",
+      "side": "BUY",
+      "qty": 1,
+      "price": 160.85128999328614,
+      "commission": 0.16085128999328616,
+      "timestamp": "2022-08-26"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 257.84938027954104,
+      "commission": 0.257849380279541,
+      "timestamp": "2022-08-29"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 15.783507316589356,
+      "commission": 0.015783507316589358,
+      "timestamp": "2022-08-29"
+    },
+    {
+      "symbol": "TSLA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 284.96241732788087,
+      "commission": 0.28496241732788086,
+      "timestamp": "2022-08-29"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 158.00959886169434,
+      "commission": 0.15800959886169436,
+      "timestamp": "2022-08-29"
+    },
+    {
+      "symbol": "MSFT",
+      "side": "BUY",
+      "qty": 1,
+      "price": 255.652267868042,
+      "commission": 0.255652267868042,
+      "timestamp": "2022-08-30"
+    },
+    {
+      "symbol": "NVDA",
+      "side": "BUY",
+      "qty": 1,
+      "price": 15.450876866340638,
+      "commission": 0.015450876866340639,
+      "timestamp": "2022-08-30"
+    },
+    {
+      "symbol": "META",
+      "side": "BUY",
+      "qty": 1,
+      "price": 156.0142627029419,
+      "commission": 0.15601426270294189,
+      "timestamp": "2022-08-30"
+    }
+  ],
+  "daily_results": [
+    {
+      "date": "2022-03-17",
+      "day_idx": 0,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000,
+      "target_passed": true
+    },
+    {
+      "date": "2022-03-18",
+      "day_idx": 1,
+      "return_pct": 0.0,
+      "trades": 1,
+      "score": 10.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100000.0,
+      "target_passed": false
+    },
+    {
+      "date": "2022-03-21",
+      "day_idx": 2,
+      "return_pct": -0.0012292214813351165,
+      "trades": 1,
+      "score": 8.770778518664883,
+      "win_rate": 0.0,
+      "max_drawdown": 1.2292214813351166e-05,
+      "portfolio_value": 99998.77077851866,
+      "target_passed": false
+    },
+    {
+      "date": "2022-03-22",
+      "day_idx": 3,
+      "return_pct": 0.009485142380784477,
+      "trades": 4,
+      "score": 249.48514238078448,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100008.25580430604,
+      "target_passed": true
+    },
+    {
+      "date": "2022-03-23",
+      "day_idx": 4,
+      "return_pct": -0.015593064046536993,
+      "trades": 4,
+      "score": 24.406935953463005,
+      "win_rate": 0.0,
+      "max_drawdown": 0.00015593064046536993,
+      "portfolio_value": 99992.66145292665,
+      "target_passed": false
+    },
+    {
+      "date": "2022-03-24",
+      "day_idx": 5,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.00015593064046536993,
+      "portfolio_value": 99992.66145292665,
+      "target_passed": true
+    },
+    {
+      "date": "2022-03-25",
+      "day_idx": 6,
+      "return_pct": 0.0285654919219412,
+      "trades": 4,
+      "score": 447.46234821573,
+      "win_rate": 100.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100021.22484855652,
+      "target_passed": true
+    },
+    {
+      "date": "2022-03-28",
+      "day_idx": 7,
+      "return_pct": 0.0017549292385746706,
+      "trades": 1,
+      "score": 194.68897696617213,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100022.98015027617,
+      "target_passed": true
+    },
+    {
+      "date": "2022-03-29",
+      "day_idx": 8,
+      "return_pct": 0.03138889561030976,
+      "trades": 3,
+      "score": 261.38889561030976,
+      "win_rate": 0.0,
+      "max_drawdown": 1.4544006741577257e-16,
+      "portfolio_value": 100054.37625910186,
+      "target_passed": true
+    },
+    {
+      "date": "2022-03-30",
+      "day_idx": 9,
+      "return_pct": 0.022346002857671875,
+      "trades": 2,
+      "score": 242.34600285767186,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100076.73441287995,
+      "target_passed": true
+    },
+    {
+      "date": "2022-03-31",
+      "day_idx": 10,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 200.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100076.73441287995,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-01",
+      "day_idx": 11,
+      "return_pct": -0.009947915161172953,
+      "trades": 2,
+      "score": 210.05208483882706,
+      "win_rate": 0.0,
+      "max_drawdown": 9.947915161172953e-05,
+      "portfolio_value": 100066.77886424448,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-04",
+      "day_idx": 12,
+      "return_pct": 0.019870000494279182,
+      "trades": 2,
+      "score": 339.87000049427917,
+      "win_rate": 50.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100086.66213369941,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-05",
+      "day_idx": 13,
+      "return_pct": 0.0,
+      "trades": 2,
+      "score": 220.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100086.66213369941,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-06",
+      "day_idx": 14,
+      "return_pct": -0.008691761075361336,
+      "trades": 1,
+      "score": 201.30823892463866,
+      "win_rate": 0.0,
+      "max_drawdown": 8.691761075361337e-05,
+      "portfolio_value": 100077.96284015845,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-07",
+      "day_idx": 15,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 200.0,
+      "win_rate": 0.0,
+      "max_drawdown": 8.691761075361337e-05,
+      "portfolio_value": 100077.96284015845,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-08",
+      "day_idx": 16,
+      "return_pct": -0.06963141771480541,
+      "trades": 2,
+      "score": -32.321373640656965,
+      "win_rate": 0.0,
+      "max_drawdown": 0.000783171265937056,
+      "portfolio_value": 100008.27713581275,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-11",
+      "day_idx": 17,
+      "return_pct": -0.06067186778128869,
+      "trades": 2,
+      "score": -40.67186778128869,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0013894147791149725,
+      "portfolio_value": 99947.60024613857,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-12",
+      "day_idx": 18,
+      "return_pct": -0.01941822403843566,
+      "trades": 2,
+      "score": 0.5817759615643396,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0015833272198246973,
+      "portfolio_value": 99928.19219720173,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-13",
+      "day_idx": 19,
+      "return_pct": -0.001382280610237178,
+      "trades": 1,
+      "score": 8.617719389762822,
+      "win_rate": 0.0,
+      "max_drawdown": 0.001597128139901913,
+      "portfolio_value": 99926.81090917683,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-14",
+      "day_idx": 20,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.001597128139901913,
+      "portfolio_value": 99926.81090917683,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-15",
+      "day_idx": 21,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.001597128139901913,
+      "portfolio_value": 99926.81090917683,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-18",
+      "day_idx": 22,
+      "return_pct": -0.00960435299186417,
+      "trades": 3,
+      "score": 20.395647008135832,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0016930182759962661,
+      "portfolio_value": 99917.2135855236,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-19",
+      "day_idx": 23,
+      "return_pct": 0.0016591844924441147,
+      "trades": 1,
+      "score": 11.659184492444115,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0016764545213685145,
+      "portfolio_value": 99918.87139643669,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-20",
+      "day_idx": 24,
+      "return_pct": -0.0093678471196369,
+      "trades": 1,
+      "score": 0.6321528803631011,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0017699759448682915,
+      "portfolio_value": 99909.5111493206,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-21",
+      "day_idx": 25,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0017699759448682915,
+      "portfolio_value": 99909.5111493206,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-22",
+      "day_idx": 26,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0017699759448682915,
+      "portfolio_value": 99909.5111493206,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-25",
+      "day_idx": 27,
+      "return_pct": -0.011475273273906364,
+      "trades": 3,
+      "score": 18.524726726093636,
+      "win_rate": 0.0,
+      "max_drawdown": 0.001884525568030799,
+      "portfolio_value": 99898.0462598896,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-26",
+      "day_idx": 28,
+      "return_pct": -0.13549774883585444,
+      "trades": 4,
+      "score": -95.49774883585445,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0032369495666684255,
+      "portfolio_value": 99762.68665607645,
+      "target_passed": false
+    },
+    {
+      "date": "2022-04-27",
+      "day_idx": 29,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0032369495666684255,
+      "portfolio_value": 99762.68665607645,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-28",
+      "day_idx": 30,
+      "return_pct": 0.048906464642809705,
+      "trades": 1,
+      "score": 258.9064646428097,
+      "win_rate": 100.0,
+      "max_drawdown": 0.0027494679978356568,
+      "portfolio_value": 99811.47705915262,
+      "target_passed": true
+    },
+    {
+      "date": "2022-04-29",
+      "day_idx": 31,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0027494679978356568,
+      "portfolio_value": 99811.47705915262,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-02",
+      "day_idx": 32,
+      "return_pct": 0.0,
+      "trades": 1,
+      "score": 10.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0027494679978356568,
+      "portfolio_value": 99811.47705915262,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-03",
+      "day_idx": 33,
+      "return_pct": 0.014279968806709923,
+      "trades": 3,
+      "score": 44.279968806709924,
+      "win_rate": 0.0,
+      "max_drawdown": 0.002607060932940999,
+      "portfolio_value": 99825.73010694218,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-04",
+      "day_idx": 34,
+      "return_pct": 0.18450536655913918,
+      "trades": 3,
+      "score": 353.05874476876517,
+      "win_rate": 66.66666666666666,
+      "max_drawdown": 0.0007668174346803502,
+      "portfolio_value": 100009.91393619633,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-05",
+      "day_idx": 35,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 5.149132592894853,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0007668174346803502,
+      "portfolio_value": 100009.91393619633,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-06",
+      "day_idx": 36,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 5.081030784064548,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0007668174346803502,
+      "portfolio_value": 100009.91393619633,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-09",
+      "day_idx": 37,
+      "return_pct": -0.07606053574674042,
+      "trades": 2,
+      "score": -56.06053574674041,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0015268395466987372,
+      "portfolio_value": 99933.8458598566,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-10",
+      "day_idx": 38,
+      "return_pct": 0.014273024259204027,
+      "trades": 2,
+      "score": 134.27302425920402,
+      "win_rate": 50.0,
+      "max_drawdown": 0.0013843272302855962,
+      "portfolio_value": 99948.10944191934,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-11",
+      "day_idx": 39,
+      "return_pct": -0.10124237290168442,
+      "trades": 2,
+      "score": -81.24237290168442,
+      "win_rate": 0.0,
+      "max_drawdown": 0.002395349433565775,
+      "portfolio_value": 99846.91960424997,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-12",
+      "day_idx": 40,
+      "return_pct": -0.004004129537334413,
+      "trades": 1,
+      "score": 5.995870462665588,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0024352948160449276,
+      "portfolio_value": 99842.92160424998,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-13",
+      "day_idx": 41,
+      "return_pct": 0.013878195008926333,
+      "trades": 1,
+      "score": 23.878195008926333,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0022968508409192774,
+      "portfolio_value": 99856.77799961282,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-16",
+      "day_idx": 42,
+      "return_pct": -0.16644725844736982,
+      "trades": 3,
+      "score": -136.44725844736982,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003957500380137639,
+      "portfolio_value": 99690.56913025859,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-17",
+      "day_idx": 43,
+      "return_pct": 0.020689724592621944,
+      "trades": 2,
+      "score": 40.68972459262194,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003751421930140823,
+      "portfolio_value": 99711.19483445646,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-18",
+      "day_idx": 44,
+      "return_pct": -0.03512524203634297,
+      "trades": 1,
+      "score": -25.125242036342968,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004101356654471486,
+      "portfolio_value": 99676.17103593353,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-19",
+      "day_idx": 45,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004101356654471486,
+      "portfolio_value": 99676.17103593353,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-20",
+      "day_idx": 46,
+      "return_pct": -0.015345370557558032,
+      "trades": 1,
+      "score": -5.345370557558031,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004254180991670551,
+      "portfolio_value": 99660.87535813048,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-23",
+      "day_idx": 47,
+      "return_pct": -0.0016511054853829599,
+      "trades": 2,
+      "score": 18.34889451461704,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004270621805508669,
+      "portfolio_value": 99659.22985195066,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-24",
+      "day_idx": 48,
+      "return_pct": -0.03516419415635672,
+      "trades": 3,
+      "score": -5.1641941563567215,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004620762017328863,
+      "portfolio_value": 99624.18548687079,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-25",
+      "day_idx": 49,
+      "return_pct": 0.010036558634317246,
+      "trades": 1,
+      "score": 220.03655863431726,
+      "win_rate": 100.0,
+      "max_drawdown": 0.004520860196474912,
+      "portfolio_value": 99634.18432666114,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-26",
+      "day_idx": 50,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004520860196474912,
+      "portfolio_value": 99634.18432666114,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-27",
+      "day_idx": 51,
+      "return_pct": 0.12502911227496802,
+      "trades": 2,
+      "score": 345.02911227496804,
+      "win_rate": 100.0,
+      "max_drawdown": 0.003276221465096077,
+      "portfolio_value": 99758.75606284717,
+      "target_passed": true
+    },
+    {
+      "date": "2022-05-30",
+      "day_idx": 52,
+      "return_pct": 0.0,
+      "trades": 2,
+      "score": 20.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003276221465096077,
+      "portfolio_value": 99758.75606284717,
+      "target_passed": false
+    },
+    {
+      "date": "2022-05-31",
+      "day_idx": 53,
+      "return_pct": -0.007482936409661457,
+      "trades": 3,
+      "score": 22.517063590338545,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0033508056716238187,
+      "portfolio_value": 99751.29117856792,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-01",
+      "day_idx": 54,
+      "return_pct": 0.004768564554517311,
+      "trades": 3,
+      "score": 101.43523122118397,
+      "win_rate": 33.33333333333333,
+      "max_drawdown": 0.0033032798114101935,
+      "portfolio_value": 99756.04788328173,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-02",
+      "day_idx": 55,
+      "return_pct": 0.014007740631642621,
+      "trades": 1,
+      "score": 24.00774063164262,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003163665119962087,
+      "portfolio_value": 99770.0214517336,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-03",
+      "day_idx": 56,
+      "return_pct": -0.04837669620918089,
+      "trades": 3,
+      "score": -18.376696209180892,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003645901605389736,
+      "portfolio_value": 99721.75601154806,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-06",
+      "day_idx": 57,
+      "return_pct": -0.01124794768677317,
+      "trades": 2,
+      "score": 8.752052313226828,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0037579709931521823,
+      "portfolio_value": 99710.53936059955,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-07",
+      "day_idx": 58,
+      "return_pct": 0.0015902776759405797,
+      "trades": 1,
+      "score": 11.59027767594058,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003742127978566549,
+      "portfolio_value": 99712.12503504756,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-08",
+      "day_idx": 59,
+      "return_pct": 0.015324205669549678,
+      "trades": 2,
+      "score": 35.32420566954968,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0035894593732589053,
+      "portfolio_value": 99727.40512616541,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-09",
+      "day_idx": 60,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0035894593732589053,
+      "portfolio_value": 99727.40512616541,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-10",
+      "day_idx": 61,
+      "return_pct": -0.1054862047337073,
+      "trades": 1,
+      "score": -95.4862047337073,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004640535036132669,
+      "portfolio_value": 99622.20647141841,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-13",
+      "day_idx": 62,
+      "return_pct": -0.1197120272609392,
+      "trades": 5,
+      "score": -69.7120272609392,
+      "win_rate": 0.0,
+      "max_drawdown": 0.005832100030174553,
+      "portfolio_value": 99502.9467084494,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-14",
+      "day_idx": 63,
+      "return_pct": 0.02649733341805468,
+      "trades": 4,
+      "score": 66.49733341805468,
+      "win_rate": 0.0,
+      "max_drawdown": 0.005568672046984275,
+      "portfolio_value": 99529.31233599952,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-15",
+      "day_idx": 64,
+      "return_pct": 0.03475166234861836,
+      "trades": 2,
+      "score": 254.75166234861837,
+      "win_rate": 100.0,
+      "max_drawdown": 0.005223090629605162,
+      "portfolio_value": 99563.90042656043,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-16",
+      "day_idx": 65,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.005223090629605162,
+      "portfolio_value": 99563.90042656043,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-17",
+      "day_idx": 66,
+      "return_pct": -0.016302982728566912,
+      "trades": 1,
+      "score": -6.3029827285669136,
+      "win_rate": 0.0,
+      "max_drawdown": 0.005385268937327589,
+      "portfolio_value": 99547.66854107,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-20",
+      "day_idx": 67,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.005385268937327589,
+      "portfolio_value": 99547.66854107,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-21",
+      "day_idx": 68,
+      "return_pct": 0.0875685906376556,
+      "trades": 4,
+      "score": 127.5685906376556,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004514298835061498,
+      "portfolio_value": 99634.84103142406,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-22",
+      "day_idx": 69,
+      "return_pct": -0.001190907321530646,
+      "trades": 1,
+      "score": 8.809092678469353,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004526154147161462,
+      "portfolio_value": 99633.65447280742,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-23",
+      "day_idx": 70,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004526154147161462,
+      "portfolio_value": 99633.65447280742,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-24",
+      "day_idx": 71,
+      "return_pct": 0.1848006645856887,
+      "trades": 3,
+      "score": 348.133997919022,
+      "win_rate": 66.66666666666666,
+      "max_drawdown": 0.0026865118642487025,
+      "portfolio_value": 99817.77812842418,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-27",
+      "day_idx": 72,
+      "return_pct": -0.028762557170156963,
+      "trades": 2,
+      "score": 91.23744282984303,
+      "win_rate": 50.0,
+      "max_drawdown": 0.0029733647264394343,
+      "portfolio_value": 99789.06798292401,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-28",
+      "day_idx": 73,
+      "return_pct": -0.020584764322887493,
+      "trades": 3,
+      "score": 9.415235677112506,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0031786003095469117,
+      "portfolio_value": 99768.52663845972,
+      "target_passed": false
+    },
+    {
+      "date": "2022-06-29",
+      "day_idx": 74,
+      "return_pct": 0.0017472891607485516,
+      "trades": 2,
+      "score": 121.74728916074855,
+      "win_rate": 50.0,
+      "max_drawdown": 0.0031611829572780986,
+      "portfolio_value": 99770.26988311151,
+      "target_passed": true
+    },
+    {
+      "date": "2022-06-30",
+      "day_idx": 75,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0031611829572780986,
+      "portfolio_value": 99770.26988311151,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-01",
+      "day_idx": 76,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0031611829572780986,
+      "portfolio_value": 99770.26988311151,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-05",
+      "day_idx": 77,
+      "return_pct": -0.014269032253840576,
+      "trades": 1,
+      "score": -4.269032253840576,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0033034222096007273,
+      "portfolio_value": 99756.03363112215,
+      "target_passed": false
+    },
+    {
+      "date": "2022-07-06",
+      "day_idx": 78,
+      "return_pct": 0.01912026335286186,
+      "trades": 3,
+      "score": 115.78693001952851,
+      "win_rate": 33.33333333333333,
+      "max_drawdown": 0.003112851199098241,
+      "portfolio_value": 99775.10724746279,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-07",
+      "day_idx": 79,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003112851199098241,
+      "portfolio_value": 99775.10724746279,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-08",
+      "day_idx": 80,
+      "return_pct": 0.018831100222138786,
+      "trades": 1,
+      "score": 228.8311002221388,
+      "win_rate": 100.0,
+      "max_drawdown": 0.002925126381005922,
+      "portfolio_value": 99793.8959979053,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-11",
+      "day_idx": 81,
+      "return_pct": -0.013904655160188567,
+      "trades": 2,
+      "score": 6.095344839811432,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003063766203871529,
+      "portfolio_value": 99780.02000079588,
+      "target_passed": false
+    },
+    {
+      "date": "2022-07-12",
+      "day_idx": 82,
+      "return_pct": -0.13813160669641283,
+      "trades": 3,
+      "score": -108.13160669641283,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004440850241352828,
+      "portfolio_value": 99642.19225600678,
+      "target_passed": false
+    },
+    {
+      "date": "2022-07-13",
+      "day_idx": 83,
+      "return_pct": 0.0037483428225014233,
+      "trades": 1,
+      "score": 213.74834282250143,
+      "win_rate": 100.0,
+      "max_drawdown": 0.004403533271419093,
+      "portfolio_value": 99645.92718696839,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-14",
+      "day_idx": 84,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004403533271419093,
+      "portfolio_value": 99645.92718696839,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-15",
+      "day_idx": 85,
+      "return_pct": 0.052890816058099754,
+      "trades": 2,
+      "score": 172.89081605809974,
+      "win_rate": 50.0,
+      "max_drawdown": 0.003876954175520739,
+      "portfolio_value": 99698.63073102623,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-18",
+      "day_idx": 86,
+      "return_pct": -0.030622248609340316,
+      "trades": 2,
+      "score": -10.622248609340314,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004181989451068045,
+      "portfolio_value": 99668.10076846367,
+      "target_passed": false
+    },
+    {
+      "date": "2022-07-19",
+      "day_idx": 87,
+      "return_pct": 0.09586405546049903,
+      "trades": 3,
+      "score": 125.86405546049903,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0032273579211497777,
+      "portfolio_value": 99763.64665186078,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-20",
+      "day_idx": 88,
+      "return_pct": 0.04268911871133862,
+      "trades": 4,
+      "score": 182.6891187113386,
+      "win_rate": 50.0,
+      "max_drawdown": 0.002801844464690591,
+      "portfolio_value": 99806.23487341075,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-21",
+      "day_idx": 89,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.002801844464690591,
+      "portfolio_value": 99806.23487341075,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-22",
+      "day_idx": 90,
+      "return_pct": -0.019786789757839037,
+      "trades": 3,
+      "score": 143.54654357549427,
+      "win_rate": 66.66666666666666,
+      "max_drawdown": 0.0029991579671954116,
+      "portfolio_value": 99786.48642355113,
+      "target_passed": false
+    },
+    {
+      "date": "2022-07-25",
+      "day_idx": 91,
+      "return_pct": -0.029710987557862105,
+      "trades": 2,
+      "score": -9.710987557862104,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0032953767633235585,
+      "portfolio_value": 99756.8388729854,
+      "target_passed": false
+    },
+    {
+      "date": "2022-07-26",
+      "day_idx": 92,
+      "return_pct": -0.15177578054467145,
+      "trades": 4,
+      "score": -111.77578054467145,
+      "win_rate": 0.0,
+      "max_drawdown": 0.004808132984965851,
+      "portfolio_value": 99605.43215213924,
+      "target_passed": false
+    },
+    {
+      "date": "2022-07-27",
+      "day_idx": 93,
+      "return_pct": 0.3428641374496025,
+      "trades": 3,
+      "score": 572.8641374496025,
+      "win_rate": 100.0,
+      "max_drawdown": 0.001395976974156159,
+      "portfolio_value": 99946.94345794062,
+      "target_passed": true
+    },
+    {
+      "date": "2022-07-28",
+      "day_idx": 94,
+      "return_pct": -0.008791299727987126,
+      "trades": 1,
+      "score": 1.208700272012873,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0014837672469160982,
+      "portfolio_value": 99938.15682257227,
+      "target_passed": false
+    },
+    {
+      "date": "2022-07-29",
+      "day_idx": 95,
+      "return_pct": 0.2385330293182678,
+      "trades": 2,
+      "score": 380.2870179776567,
+      "win_rate": 50.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100176.542335486,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-01",
+      "day_idx": 96,
+      "return_pct": -0.0463548843909956,
+      "trades": 2,
+      "score": -10.37218550385887,
+      "win_rate": 0.0,
+      "max_drawdown": 0.000463548843909956,
+      "portfolio_value": 100130.10561509948,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-02",
+      "day_idx": 97,
+      "return_pct": -0.06046892010739079,
+      "trades": 4,
+      "score": -11.8764764423167,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0010679577420037811,
+      "portfolio_value": 100069.55802153164,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-03",
+      "day_idx": 98,
+      "return_pct": 0.1757440976262053,
+      "trades": 4,
+      "score": 344.27531243729646,
+      "win_rate": 50.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100245.42436327512,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-04",
+      "day_idx": 99,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 28.389463360347584,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100245.42436327512,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-05",
+      "day_idx": 100,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 28.249803670230715,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100245.42436327512,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-08",
+      "day_idx": 101,
+      "return_pct": -0.04577570014025034,
+      "trades": 1,
+      "score": -12.918348814070988,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0004577570014025034,
+      "portfolio_value": 100199.53631841426,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-09",
+      "day_idx": 102,
+      "return_pct": 0.017071159139986757,
+      "trades": 2,
+      "score": 61.73759287416375,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0002871235544288197,
+      "portfolio_value": 100216.64154071671,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-10",
+      "day_idx": 103,
+      "return_pct": 0.15266089308426162,
+      "trades": 1,
+      "score": 403.39040996450143,
+      "win_rate": 100.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100369.63316071182,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-11",
+      "day_idx": 104,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 40.53646356750493,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100369.63316071182,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-12",
+      "day_idx": 105,
+      "return_pct": 0.09310309969391149,
+      "trades": 2,
+      "score": 263.16545957915207,
+      "win_rate": 50.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100463.08040033585,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-15",
+      "day_idx": 106,
+      "return_pct": 0.0409672231926993,
+      "trades": 2,
+      "score": 115.12086225932599,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0,
+      "portfolio_value": 100504.23733470972,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-16",
+      "day_idx": 107,
+      "return_pct": -0.0018642294709632378,
+      "trades": 2,
+      "score": 71.8394111228033,
+      "win_rate": 0.0,
+      "max_drawdown": 1.8642294709632378e-05,
+      "portfolio_value": 100502.36370509776,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-17",
+      "day_idx": 108,
+      "return_pct": -0.0468610885169078,
+      "trades": 2,
+      "score": 21.499053137812965,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0004872444438964849,
+      "portfolio_value": 100455.26720348033,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-18",
+      "day_idx": 109,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 48.14102716634398,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0004872444438964849,
+      "portfolio_value": 100455.26720348033,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-19",
+      "day_idx": 110,
+      "return_pct": -0.11331828638447375,
+      "trades": 1,
+      "score": -67.75438381910536,
+      "win_rate": 0.0,
+      "max_drawdown": 0.0016198751706868954,
+      "portfolio_value": 100341.4330161024,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-22",
+      "day_idx": 111,
+      "return_pct": -0.20346084157513594,
+      "trades": 1,
+      "score": -179.57634041485233,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003651187774783509,
+      "portfolio_value": 100137.27749203928,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-23",
+      "day_idx": 112,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 13.823460915054376,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003651187774783509,
+      "portfolio_value": 100137.27749203928,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-24",
+      "day_idx": 113,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 13.763218624529758,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003651187774783509,
+      "portfolio_value": 100137.27749203928,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-25",
+      "day_idx": 114,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 13.70375705507576,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003651187774783509,
+      "portfolio_value": 100137.27749203928,
+      "target_passed": true
+    },
+    {
+      "date": "2022-08-26",
+      "day_idx": 115,
+      "return_pct": 0.0,
+      "trades": 1,
+      "score": 23.64505948962224,
+      "win_rate": 0.0,
+      "max_drawdown": 0.003651187774783509,
+      "portfolio_value": 100137.27749203928,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-29",
+      "day_idx": 116,
+      "return_pct": -0.3620828589712854,
+      "trades": 4,
+      "score": -322.0828589712854,
+      "win_rate": 0.0,
+      "max_drawdown": 0.007258796039415016,
+      "portfolio_value": 99774.6975748001,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-30",
+      "day_idx": 117,
+      "return_pct": -0.06678993782292339,
+      "trades": 3,
+      "score": -36.78993782292339,
+      "win_rate": 0.0,
+      "max_drawdown": 0.007921847272282833,
+      "portfolio_value": 99708.05811632688,
+      "target_passed": false
+    },
+    {
+      "date": "2022-08-31",
+      "day_idx": 118,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.007921847272282833,
+      "portfolio_value": 99708.05811632688,
+      "target_passed": true
+    },
+    {
+      "date": "2022-09-01",
+      "day_idx": 119,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.007921847272282833,
+      "portfolio_value": 99708.05811632688,
+      "target_passed": true
+    },
+    {
+      "date": "2022-09-02",
+      "day_idx": 120,
+      "return_pct": 0.0,
+      "trades": 0,
+      "score": 0.0,
+      "win_rate": 0.0,
+      "max_drawdown": 0.007921847272282833,
+      "portfolio_value": 99708.05811632688,
+      "target_passed": true
+    }
+  ],
+  "positions": {
+    "MSFT": {
+      "symbol": "MSFT",
+      "qty": 28,
+      "avg_price": 262.93641753790786,
+      "current_price": 255.652267868042,
+      "market_value": 7158.263500305176,
+      "unrealized_pnl": -203.9561907562438
+    },
+    "NVDA": {
+      "symbol": "NVDA",
+      "qty": 17,
+      "avg_price": 17.671732460416845,
+      "current_price": 15.450876866340638,
+      "market_value": 262.6649067277908,
+      "unrealized_pnl": -37.75454509929551
+    },
+    "AAPL": {
+      "symbol": "AAPL",
+      "qty": 1,
+      "avg_price": 160.85128999328614,
+      "current_price": 160.85128999328614,
+      "market_value": 160.85128999328614,
+      "unrealized_pnl": 0.0
+    },
+    "TSLA": {
+      "symbol": "TSLA",
+      "qty": 1,
+      "avg_price": 284.96241732788087,
+      "current_price": 284.96241732788087,
+      "market_value": 284.96241732788087,
+      "unrealized_pnl": 0.0
+    },
+    "META": {
+      "symbol": "META",
+      "qty": 2,
+      "avg_price": 157.01193078231813,
+      "current_price": 156.0142627029419,
+      "market_value": 312.0285254058838,
+      "unrealized_pnl": -1.9953361587524796
+    }
+  },
+  "metadata": {}
+}

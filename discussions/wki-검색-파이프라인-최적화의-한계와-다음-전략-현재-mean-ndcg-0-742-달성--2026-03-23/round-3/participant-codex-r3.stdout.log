@@ -1,0 +1,21 @@
+[PARTIAL]
+
+1. **Reasoning**  
+Claude와 Gemini가 각각 절반씩 맞습니다. 현재 상태는 "튜닝 한계"가 맞지만, 그 사실만으로 곧바로 ColBERT로 점프하는 건 성급합니다. #3, #5 같은 실패는 단순 scoring 문제가 아니라 candidate recall과 AND-조건 표현 실패가 섞여 있을 가능성이 높아서, 먼저 "정답 문서가 top-k에 들어오느냐"를 분해해서 봐야 합니다. 그 전에는 BM25든 ColBERT든 효과 판별이 흐려집니다.
+
+2. **New insight**  
+빠진 핵심은 `ranking failure`와 `candidate-generation failure`를 분리하는 진단입니다.  
+각 약한 쿼리에 대해:
+- gold가 top-10/20/50 candidate에 없으면: reranker/ColBERT보다 retrieval 구조 수정이 우선
+- gold는 top-50에 있는데 낮게 랭크되면: late interaction이나 query decomposition이 유효  
+즉 다음 단계는 새 모델 도입이 아니라 `oracle recall audit`입니다.  
+BM25 앙상블도 같은 기준으로 봐야 합니다. top-k recall을 올리면 가치가 있고, 못 올리면 현재처럼 score noise만 추가할 가능성이 큽니다.
+
+3. **Updated position**  
+약간 바뀌었습니다. 이전엔 facet/file-aware candidate generation 재설계를 우선으로 봤는데, 지금은 그 입장을 유지하되 `late interaction을 phase 2 후보로 미리 검증`해야 한다고 봅니다.  
+실행 순서는:
+- 1단계: query decomposition + field/facet-aware retrieval + oracle recall audit
+- 2단계: 개선 후에도 top-k 내 재정렬 실패가 남으면 ColBERT/late interaction 소규모 도입
+- BM25 앙상블은 보조 실험일 뿐, 주전략은 아님
+
+[POSITION: 0.742 돌파의 현실적 경로는 BM25/가중치 튜닝이 아니라 candidate recall 진단 기반의 구조 개선이며, ColBERT는 그 다음 단계에서 조건부로 도입해야 한다]

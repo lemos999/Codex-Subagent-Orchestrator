@@ -1,0 +1,44 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/test-3way-v2",
+  "skip_git_repo_check": true,
+  "execution_mode": "parallel",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "inject_shared_directive": false,
+  "defaults": {
+    "sandbox": "workspace-write",
+    "reasoning_effort": "medium",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 10
+  },
+  "agents": [
+    {
+      "name": "gemini-mechanics",
+      "kind": "planner",
+      "stage": 1,
+      "engine": "gemini",
+      "model": "gemini-2.5-pro",
+      "prompt": "You are a game design expert. List exactly 3 core mechanics for a roguelike card game.\n\nFormat:\n1. [Mechanic Name] — [One sentence description]\n2. [Mechanic Name] — [One sentence description]\n3. [Mechanic Name] — [One sentence description]\n\nOutput ONLY the 3 items above. No intro, no outro, no explanation."
+    },
+    {
+      "name": "codex-content",
+      "kind": "implementer",
+      "stage": 1,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "prompt": "You are a game design expert. List exactly 3 card types for a roguelike card game.\n\nFormat:\n1. [Card Type] — [One sentence description]\n2. [Card Type] — [One sentence description]\n3. [Card Type] — [One sentence description]\n\nOutput ONLY the 3 items above. No intro, no outro, no explanation."
+    },
+    {
+      "name": "claude-synthesis",
+      "kind": "reviewer",
+      "stage": 2,
+      "engine": "claude",
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "prompt": "You are a game design director reviewing two AI workers' outputs.\n\nStep 1: Read these files:\n- subagent-runs/mixed/test-3way-v2/gemini-mechanics.last.txt\n- subagent-runs/mixed/test-3way-v2/codex-content.last.txt\n\nStep 2: Synthesize both into a single game concept paragraph in Korean (3-5 sentences). Include a game title.\n\nStep 3: End with verdict:\n- ACCEPTED if both inputs contained usable game design content\n- MATERIAL_ISSUES if either was empty, generic, or off-topic"
+    }
+  ]
+}

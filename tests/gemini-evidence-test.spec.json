@@ -1,0 +1,28 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/gemini/evidence-verify-2026-03-17",
+  "skip_git_repo_check": true,
+  "execution_mode": "sequential",
+  "timeout_seconds": 120,
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "defaults": {
+    "engine": "gemini",
+    "model": "gemini-2.5-flash",
+    "sandbox": "workspace-write"
+  },
+  "agents": [
+    {
+      "name": "file-writer",
+      "stage": 1,
+      "task": "Create a file at tests/artifacts/gemini-evidence-test.txt containing exactly: Gemini evidence verification - 2026-03-17"
+    },
+    {
+      "name": "file-checker",
+      "stage": 2,
+      "sandbox": "read-only",
+      "task": "Verify that tests/artifacts/gemini-evidence-test.txt exists and contains exactly: Gemini evidence verification - 2026-03-17. Report ACCEPTED or REJECTED with reason."
+    }
+  ]
+}

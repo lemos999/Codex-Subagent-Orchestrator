@@ -162,6 +162,10 @@ ${'='.repeat(60)}
   if (rl) rl.close();
 
   // Display final result
+  const personaDisplay = [...result.personas.entries()]
+    .map(([engine, persona]) => `    ${engine}: ${persona}`)
+    .join('\n');
+
   console.log(`
 ${'='.repeat(60)}
   토론 완료
@@ -170,6 +174,8 @@ ${'='.repeat(60)}
   Topic:      ${result.topic}
   Rounds:     ${result.totalRounds}
   Converged:  ${result.converged ? '합의 도출' : '쟁점 남음'}
+  Personas:
+${personaDisplay}
   Evidence:   ${spec.output_dir}
 
   결론 미리보기:

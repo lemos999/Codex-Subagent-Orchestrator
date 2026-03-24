@@ -1,0 +1,37 @@
+핵심 흐름은 [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L3)에 있고, `/submix`는 그 흐름을 그대로 쓰면서 엔진 자동 배치만 추가합니다. 관련 진입 규칙은 [Claude orchestrator SKILL.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/SKILL.md#L35), [submix SKILL.md](/C:/Users/haj/projects/subagent-orchestrator/.claude/skills/submix/SKILL.md#L19)에 있습니다.
+
+1. `CLASSIFY`
+작업을 먼저 분류합니다. 작업 종류, 복잡도, 병렬 가능 여부, 결과물이 영속적인지 판단해서 이후 팀 구성을 결정합니다. 영속 결과물이면 리뷰가 필수입니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L5)
+
+2. `CHOOSE TEAM`
+분류 결과로 팀 패턴을 고릅니다. 기본값은 `Implement + Review`이고, 단순 작업이면 Solo, 독립 범위면 Parallel + Review, 설계가 먼저면 Plan + Implement + Review, 수정이 예상되면 Full Loop를 택합니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L14)
+
+3. `INJECT SHARED DIRECTIVE`
+각 워커 프롬프트 앞에 루트 `AGENTS.md` 운영 계약을 주입합니다. 기본은 “AGENTS.md를 읽고 따르라”는 reference mode이고, 고위험 작업이나 첫 실행이면 inline mode로 직접 넣습니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L26)
+
+4. `BUILD CONTRACTS`
+워커마다 명확한 계약서를 만듭니다. 여기에는 작업 목표, 먼저 볼 파일, 쓰기 허용 범위, 검증 방법, 반환 형식, 중단 조건, 툴 사용 지침이 들어갑니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L50)
+
+5. `SELECT SETTINGS`
+워커별로 `engine`, `model`, `isolation`, `run_in_background`, `max_turns`를 정합니다. 병렬 작성자가 같은 디렉터리를 건드릴 수 있으면 `worktree` 격리를 켜고, 엔진과 역할 조합이 유효한지도 확인합니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L59)
+
+6. `CONFIRM`
+실행 전에 사용자에게 계획표를 보여주고 `yes / no / modify` 확인을 받습니다. 조용히 바로 실행하면 안 되고, 사용자가 수정하면 전체 계획표를 다시 보여줘야 합니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L73)
+
+7. `LAUNCH`
+확인 후 실제 워커를 띄웁니다. 순차 실행도 가능하고, 독립 작업이면 병렬 실행도 가능합니다. Claude 엔진은 Task tool로 직접 띄우고, Codex/Gemini는 CLI 호출 후 stdout을 수집합니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L118)
+
+8. `WATCHDOG HOOK` 선택 사항
+워커 단계가 끝날 때마다 목표 정렬 여부를 따로 감시할 수 있습니다. 결과가 technically correct여도 원래 목표를 못 맞추면 `SHORTFALL`로 보고, 오케스트레이터는 이를 수용해서 고치거나, 거절하거나, 사용자에게 판단을 넘깁니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L184)
+
+9. `VALIDATE`
+워커가 끝나면 결과 파일이 실제로 생성됐는지, 내용이 비어 있지 않은지, 워커 요약과 검증 결과가 타당한지, 리뷰어 판정이 `ACCEPTED / MINOR_ISSUES / MATERIAL_ISSUES` 중 무엇인지 확인합니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L219)
+
+10. `EVIDENCE + RECOVER or ACCEPT`
+이 단계가 사실상 마감 게이트입니다. 오케스트레이터가 직접 증적 파일을 쓰고 나서만 사용자에게 결과를 보고할 수 있습니다. `MATERIAL_ISSUES`면 `sub-fixer -> sub-reviewer`를 최대 2회 반복하고, 그래도 안 되면 증적을 남기고 사용자에게 에스컬레이션합니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L228)
+
+추가 규칙도 중요합니다. 실패 시에는 재시도, 범위 위반 시 결과 폐기, 부분 성공 시 성공분은 보존 같은 fallback 규칙을 따르고, 성공/실패/중단 여부와 무관하게 증적은 사실대로 남겨야 합니다. [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L262)
+
+`/submix`는 이 흐름을 그대로 쓰되, 시작할 때 요청을 분석해서 Claude, Codex, Gemini 중 어떤 엔진에 어떤 역할을 줄지 자동 배치합니다. 그래도 최종 감독자는 항상 Claude이고, 확인 단계는 그대로 필요하며, 증적은 `subagent-runs/mixed/...` 아래에 저장됩니다. [submix SKILL.md](/C:/Users/haj/projects/subagent-orchestrator/.claude/skills/submix/SKILL.md#L19) [submix SKILL.md](/C:/Users/haj/projects/subagent-orchestrator/.claude/skills/submix/SKILL.md#L112)
+
+원하면 다음 답변에서 이걸 `실제 /sub 실행 예시` 기준으로 한 번 더 풀어서 보여드릴게요.

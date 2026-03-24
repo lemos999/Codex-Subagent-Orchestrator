@@ -1,0 +1,41 @@
+**Findings**
+- [agent-contract.md:32](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/agent-contract.md#L32): The default return contract asks for `Assumptions made` and `Remaining uncertainty`, which is useful for safety but weakly bounded; it can reward hedge-heavy output instead of a clear decision with evidence. [agent-contract.md:219](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/agent-contract.md#L219) also asks reviewers for findings but not for a materiality threshold or evidence-per-finding requirement.
+- [sub-command-protocol.md:24](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/sub-command-protocol.md#L24): The `Analyze` route defaults to solo exploration without any output-shape constraint, so “investigate” work can drift into broad possibility-listing. [sub-command-protocol.md:74](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/sub-command-protocol.md#L74) has a good economy rule, but it governs model cost, not reasoning discipline.
+- [orchestration-workflow.md:117](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L117): The confirmation table is crisp, but later workflow stages validate existence/completeness, not whether worker outputs were decisive or bloated. [orchestration-workflow.md:194](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L194) makes watchdog findings specific, but not evidence-backed or explicitly final-decision-oriented.
+- [pattern-a-solo.md:105](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-a-solo.md#L105): The explorer return shape (`findings, key files discovered, patterns identified, recommendations`) invites expansive summaries and recommendations without forcing a single conclusion. [pattern-a-solo.md:79](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-a-solo.md#L79) has the same reviewer issue: verdict/finding output, but no evidence discipline.
+- [pattern-b-implement-review.md:30](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md#L30): Implementer returns again ask for `Remaining uncertainty`, which can normalize unresolved narration after a bounded task. [pattern-b-implement-review.md:55](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md#L55) and [pattern-b-implement-review.md:117](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md#L117) ask for review/watchdog judgments but do not require “choice + evidence + strongest counterpoint addressed.”
+- [pattern-c-parallel-review.md:69](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-c-parallel-review.md#L69): “Per-worker findings” and “cross-worker consistency” are correct, but unconstrained; this is likely to produce long laundry lists instead of only material blockers.
+- [pattern-d-plan-implement-review.md:27](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-d-plan-implement-review.md#L27): Highest risk. The planner is asked for files, decisions, interfaces, edge cases, and validation as structured markdown, but not told to choose among options, justify that choice briefly, or stop once the plan is sufficient. This most directly conflicts with the guide’s anti-overthinking principles.
+- [pattern-e-full-loop.md:49](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-e-full-loop.md#L49): The loop structure is strong, but reviewer/rereviewer/watchdog prompts still lack anti-bloat filters, so repeated findings and speculative follow-ons can survive across cycles.
+
+**Highest-Risk Wording Gaps**
+- `Remaining uncertainty` / `uncertainties` in implementer returns: pushes agents to narrate doubt even after they should stop.
+- `recommendations` in explorer outputs: invites option lists without a selected answer.
+- `structured markdown` in planner outputs: encourages completeness theater unless paired with “pick one approach and justify briefly.”
+- `specific findings` without “material only” or “evidence required”: invites exhaustive issue-dumping.
+- Broad criteria like `logic sound, edge cases handled`: good as coverage prompts, weak as contracts for decisive evidence-based review.
+
+**Reviewer Criteria Suggestions**
+- Require `Verdict first`, then only material findings.
+- Require every finding to include `evidence`, such as file/line or concrete symptom, plus one fix direction.
+- Fail outputs that present multiple possibilities without naming the chosen one.
+- Fail outputs that repeat the same issue in different wording.
+- Add a sufficiency check: “If confidence is already sufficient to accept/reject, stop; do not enumerate non-blocking possibilities.”
+- For planner/watchdog review, require one line on “why this choice over the strongest alternative.”
+
+**What Should Not Be Changed**
+- Do not weaken explicit writable scopes, stop conditions, self-validation, or fix/re-review loops; those are already high-value constraints.
+- Do not add long anti-overthinking text to every template separately; centralize it in the contract/rubric layer and keep templates lean.
+- Do not force exhaustive alternative analysis everywhere; only planner/watchdog/reviewer paths need explicit choice-vs-alternative checks.
+- Do not replace the current economy and scope rules with verbose style rules; the issue is output discipline, not missing process structure.
+
+**File List Referenced**
+- [deep-thinking-tokens-guide.md](/C:/Users/haj/projects/subagent-orchestrator/deep-thinking-tokens-guide.md)
+- [agent-contract.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/agent-contract.md)
+- [sub-command-protocol.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/sub-command-protocol.md)
+- [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md)
+- [pattern-a-solo.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-a-solo.md)
+- [pattern-b-implement-review.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md)
+- [pattern-c-parallel-review.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-c-parallel-review.md)
+- [pattern-d-plan-implement-review.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-d-plan-implement-review.md)
+- [pattern-e-full-loop.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-e-full-loop.md)

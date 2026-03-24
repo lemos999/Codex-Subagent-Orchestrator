@@ -1,0 +1,1 @@
+[POSITION: 현재 WKI의 최적 선택은 `multilingual-e5-large` 자체가 아니라, `multilingual-e5-large`를 살릴 수 있는 query/document 분리까지 포함한 교체다.]

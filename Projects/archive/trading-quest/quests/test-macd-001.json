@@ -1,0 +1,21 @@
+{
+  "quest_id": "test-macd-001",
+  "market": "US",
+  "symbols": [
+    "AAPL",
+    "MSFT",
+    "GOOGL"
+  ],
+  "initial_capital": 100000,
+  "current_capital": 100000,
+  "start_date": "2024-01-01",
+  "current_date": "2024-12-31",
+  "current_day": 0,
+  "phase": 1,
+  "strategy_name": "macd",
+  "total_score": 0.0,
+  "trade_log": [],
+  "daily_results": [],
+  "positions": {},
+  "metadata": {}
+}

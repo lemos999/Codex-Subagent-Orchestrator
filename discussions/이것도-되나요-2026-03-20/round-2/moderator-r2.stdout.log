@@ -1,0 +1,24 @@
+## Participant Positions (3 lines max each)
+
+**Claude**: Ambiguous inputs work technically; the system handled a nearly content-free prompt and produced coherent responses. The graceful degradation (rather than hard failure) proves the system works. Position: No change — technical viability confirmed by successful handling.
+
+**Codex**: Input itself is technically possible but validation quality cannot be expected without minimum specifications (reference target + success criteria). Position: Ambiguous inputs feasible but underspecified for reliable `/discuss` output.
+
+**Gemini**: Ambiguity degrades quality and hinders multi-agent collaboration; different agents may diverge in interpretation. Clear, well-defined requests are essential for leveraging system capabilities. Position: Clarity paramount; ambiguity is primary impediment to effective execution.
+
+---
+
+## Agreement / Disagreement / Open Questions
+
+**Agreement:**
+- All three acknowledge technical feasibility of ambiguous inputs
+- All agree ambiguity carries quality/reliability costs
+
+**Disagreement:**
+- Claude frames graceful degradation as *success* (system proved capable)
+- Codex & Gemini frame it as *limitation* (insufficient for reliable output)
+- Fundamental tension: does "technically works but degrades" = acceptable behavior?
+
+**Open Questions:**
+- At what ambiguity threshold should `/discuss` reject input vs. proceed with degraded quality?
+- Should system have guardrails for minimum specification, or embrace graceful degradation?

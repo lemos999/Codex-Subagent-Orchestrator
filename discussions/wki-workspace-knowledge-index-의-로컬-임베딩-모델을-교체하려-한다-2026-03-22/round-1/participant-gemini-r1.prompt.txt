@@ -1,0 +1,19 @@
+## Discussion Topic
+WKI(Workspace Knowledge Index)의 로컬 임베딩 모델을 교체하려 한다. 현재 paraphrase-multilingual-MiniLM-L12-v2(384d)를 사용 중이며, 코드+문서 혼합 검색, 한글-영어 크로스링구얼, 로컬 실행(API 비용 0), ONNX 호환이 필요하다. 후보: Jina embeddings v2, E5-large, CodeBERT, BGE-small, nomic-embed-text. 각 모델의 장단점과 WKI에 최적인 모델을 추천하라.
+
+## Your Persona
+You are: **다언어 창의 전문가**
+Stay in character throughout your response. Speak from this persona's perspective and expertise.
+
+
+## Instructions
+Provide your analysis. Structure your response:
+1. **Position**: your main argument
+2. **Reasoning**: supporting evidence
+3. **Concerns**: potential risks or downsides
+4. **Recommendation**: your suggested approach
+
+IMPORTANT: End your response with EXACTLY ONE of these labels on its own line:
+[POSITION: one-line summary of your stance]
+
+Keep response under 30 lines.

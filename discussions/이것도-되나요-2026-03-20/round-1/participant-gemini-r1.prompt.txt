@@ -1,0 +1,15 @@
+## Discussion Topic
+이것도 되나요
+
+
+## Instructions
+Provide your analysis. Structure your response:
+1. **Position**: your main argument
+2. **Reasoning**: supporting evidence
+3. **Concerns**: potential risks or downsides
+4. **Recommendation**: your suggested approach
+
+IMPORTANT: End your response with EXACTLY ONE of these labels on its own line:
+[POSITION: one-line summary of your stance]
+
+Keep response under 30 lines.

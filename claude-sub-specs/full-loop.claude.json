@@ -1,0 +1,207 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "E-full-loop",
+    "version": "2.0",
+    "purpose": "Pre-planned full repair cycle: implement → review → fix → re-review. Use when the task has known risk of issues. Codex templates had no equivalent — this is a Claude-origin addition.",
+    "model_strategy": {
+      "quality": "sonnet for implementer and fixer (write capability), haiku for initial review (fast gate), sonnet for re-review (must verify fix quality more carefully)",
+      "optimization": "Fixer receives structured findings — no re-analysis of original task. Re-reviewer only checks fixed findings + regression, not full spec.",
+      "token_saving": "Initial reviewer uses haiku + low reasoning (fast gate). Fixer gets only the findings list, not full task context. Re-reviewer scope is narrower than initial review."
+    },
+    "improvements": [
+      "New Pattern E: pre-planned repair cycle (no Codex equivalent)",
+      "Four-stage pipeline: implement → review → fix → re-review",
+      "Fixer receives only structured findings, not full task context",
+      "Re-reviewer has narrower scope than initial review (regression + fix verification only)",
+      "Tiered reasoning_effort across all 4 stages",
+      "Archive and live_usage enabled",
+      "Timeout safeguard",
+      "Optional watchdog hooks (Stage 1.5 + Stage 4.5, skipped during fix loop)"
+    ]
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "claude-sub-runs/full-loop",
+  "manifest_file": "claude-sub-runs/full-loop/orchestration-manifest.json",
+  "summary_file": "claude-sub-runs/full-loop/orchestration-summary.md",
+  "debug_log_file": "claude-sub-runs/full-loop/launcher-debug.log",
+  "archive_root": "claude-sub-records",
+  "write_run_archive": true,
+  "archive_run_label": "full-loop",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 300,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "requested_deliverables": [
+    "sample-output.txt"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "shared_directive_mode": "compact",
+  "watchdog": {
+    "enabled": false,
+    "stages_to_watch": ["loop-implementer"],
+    "final_watchdog_after": "acceptance",
+    "skip_during_fix_loop": true,
+    "model": "gpt-5.4",
+    "reasoning_effort": "medium",
+    "verdict_format": "PASS | SHORTFALL",
+    "on_shortfall": "3-choice: Accept (fix) | Reject (log + proceed) | Escalate (ask user)",
+    "max_cycles_per_stage": 1
+  },
+  "live_usage": {
+    "enabled": true,
+    "display_mode": "both",
+    "status_file": "claude-sub-runs/full-loop/orchestration-usage.json",
+    "poll_interval_ms": 500
+  },
+  "defaults": {
+    "prompt_profile": "compact",
+    "response_style": "compact"
+  },
+  "agents": [
+    {
+      "name": "loop-implementer",
+      "kind": "implementer",
+      "stage": 1,
+      "model": "gpt-5.4",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 8,
+      "role": "implementer",
+      "mission": "Create the deliverable with best-effort quality. A reviewer will inspect afterward.",
+      "task": "Create or replace sample-output.txt containing exactly three lines:\nLine 1: IMPLEMENT\nLine 2: REVIEW\nLine 3: ACCEPT",
+      "read_first": [
+        "AGENTS.md"
+      ],
+      "writable_scope": [
+        "sample-output.txt"
+      ],
+      "required_paths": [
+        "sample-output.txt"
+      ],
+      "required_non_empty_paths": [
+        "sample-output.txt"
+      ],
+      "success_criteria": [
+        "File exists with exactly 3 lines in the specified order"
+      ],
+      "validation": [
+        "Read the file back. Confirm 3 lines: IMPLEMENT, REVIEW, ACCEPT.",
+        "No trailing whitespace or extra content."
+      ],
+      "return_contract": [
+        "File path, line count, per-line content.",
+        "PASS or FAIL per validation check."
+      ],
+      "stop_when": [
+        "File created and validated. Stop immediately."
+      ]
+    },
+    {
+      "name": "loop-reviewer",
+      "kind": "reviewer",
+      "stage": 2,
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "low",
+      "max_response_lines": 10,
+      "role": "initial quality gate",
+      "mission": "Fast review to catch material issues before accepting. This is a gate, not a deep audit.",
+      "task": "Review sample-output.txt against spec: exactly 3 lines — IMPLEMENT, REVIEW, ACCEPT. Check for content correctness, extra whitespace, encoding issues.",
+      "read_first": [
+        "AGENTS.md",
+        "sample-output.txt"
+      ],
+      "validation": [
+        "File exists and is non-empty.",
+        "Exactly 3 lines.",
+        "Lines match spec in order: IMPLEMENT, REVIEW, ACCEPT.",
+        "No trailing whitespace, BOM, or encoding artifacts."
+      ],
+      "return_contract": [
+        "Verdict: ACCEPTED | MINOR_ISSUES | MATERIAL_ISSUES",
+        "Findings: [line_number — expected — actual — severity] per issue.",
+        "Rereview required: YES | NO"
+      ],
+      "stop_when": [
+        "Verdict delivered. Do not modify files."
+      ]
+    },
+    {
+      "name": "loop-fixer",
+      "kind": "fixer",
+      "stage": 3,
+      "model": "gpt-5.4",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 8,
+      "role": "bounded fixer",
+      "mission": "Fix ONLY the specific findings from the reviewer. Do not rewrite the file from scratch unless necessary.",
+      "task": "Read the reviewer's findings (provided by the supervisor). Apply the minimum edit to resolve each finding. Do not change anything that was not flagged.",
+      "read_first": [
+        "AGENTS.md",
+        "sample-output.txt"
+      ],
+      "writable_scope": [
+        "sample-output.txt"
+      ],
+      "required_paths": [
+        "sample-output.txt"
+      ],
+      "required_non_empty_paths": [
+        "sample-output.txt"
+      ],
+      "success_criteria": [
+        "Each reviewer finding is addressed.",
+        "No new issues introduced."
+      ],
+      "validation": [
+        "Re-read the file after fix.",
+        "Confirm each finding is resolved.",
+        "Confirm no regressions (lines not flagged are unchanged)."
+      ],
+      "return_contract": [
+        "Finding → fix mapping: [finding_id — action_taken — result].",
+        "PASS or FAIL per finding.",
+        "New issues introduced: NONE | [list]."
+      ],
+      "stop_when": [
+        "All findings addressed. Do not optimize, refactor, or improve beyond the findings."
+      ]
+    },
+    {
+      "name": "loop-re-reviewer",
+      "kind": "reviewer",
+      "stage": 4,
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 10,
+      "role": "post-fix verifier",
+      "mission": "Verify the fixer resolved all findings without introducing regressions. Narrower scope than initial review.",
+      "task": "Re-review sample-output.txt. Focus on:\n1. Each previous finding is now resolved.\n2. No new issues introduced by the fix.\n3. File still meets original spec: 3 lines — IMPLEMENT, REVIEW, ACCEPT.",
+      "read_first": [
+        "AGENTS.md",
+        "sample-output.txt"
+      ],
+      "validation": [
+        "Previous findings resolved.",
+        "No regressions or new issues.",
+        "File meets original spec."
+      ],
+      "return_contract": [
+        "Verdict: ACCEPTED | MATERIAL_ISSUES",
+        "Previous findings status: [finding — RESOLVED | UNRESOLVED].",
+        "New issues: NONE | [list].",
+        "If MATERIAL_ISSUES after 2 cycles: escalate to supervisor."
+      ],
+      "stop_when": [
+        "Final verdict delivered. Do not modify files."
+      ]
+    }
+  ]
+}

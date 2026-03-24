@@ -1,0 +1,30 @@
+## 참여자별 입장 요약
+
+**Claude**: BGE-M3 채택 추천
+- Dense + Sparse + ColBERT 하이브리드로 코드+문서 혼합 검색 및 100+ 언어 지원 (한-영 크로스링구얼 최고)
+- 384d → 1024d 전환으로 메모리 2.5배 증가, 인덱스 rebuild 필수
+- Sparse retrieval 비활성화 후 Dense만 사용해 속도 확보 권장
+
+**Codex**: multilingual-e5-large 추천
+- (응답 미상세) 후보군 중 최적이며 query/document 분리 개선 필요
+
+**Gemini**: E5-large 또는 BGE-small 추천
+- E5-large: 광범위한 언어/도메인 커버리지로 유연한 통합 검색 가능
+- BGE-small: 로컬 효율성 우수, 성능도 강력
+- 두 모델 모두 ONNX 호환성과 WKI 실제 데이터셋에서의 성능 검증 필수
+
+---
+
+## 일치 영역
+- ONNX 호환성, 로컬 실행, 한-영 크로스링구얼, 코드+문서 혼합 검색 모두 필수 조건으로 동의
+
+## 불일치 영역
+1. **모델 선택**: BGE-M3 vs E5-large vs BGE-small
+2. **성능 vs 효율성**: Claude는 성능 우선(1024d), Gemini는 균형점(BGE-small) 제시
+3. **메모리 트레이드오프**: Claude는 증가 수용, Gemini는 로컬 리소스 제약 우려
+
+## 미해결 질문
+- WKI 실제 데이터셋에서 모델별 검색 성능 비교 평가
+- 384d → 1024d 전환 시 메모리/속도 실제 영향도
+- BGE-M3 Sparse retrieval 활성화 여부에 따른 성능/속도 트레이드오프
+- 각 모델의 ONNX 변환 안정성 및 성숙도

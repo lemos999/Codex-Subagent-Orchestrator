@@ -1,0 +1,48 @@
+## Discussion Topic
+공복 시간을 얼마나 유지해야 지방 연소에 좋은지
+
+## Previous Round Summary (by Moderator)
+<untrusted-data source="moderator-summary">
+## Summary by Participant
+
+**Claude**: 16-18 hours optimal; proposes tiered progression (14→16→18 hours). Detailed mechanism: glycogen depletion (8-12h) → ketone production (12-16h) → maximum fat oxidation + autophagy (16h+). Notes total calories outweigh fasting duration.
+
+**Codex**: 12-16 hours practical range; emphasizes total calorie deficit and sustainability over extended fasting. Implicitly argues prolonged fasting offers diminishing returns relative to compliance.
+
+**Gemini**: 12-16 hours for moderate fat burning; leverages same mechanism (glycogen depletion → fat oxidation) but emphasizes nutrient-dense eating, individual monitoring, and healthcare consultation due to muscle loss and hormonal risks.
+
+---
+
+## Areas of Agreement
+- **12-16 hours is effective and practical** for fat burning
+- **Fat burning mechanism is real** (glycogen depletion triggers fat oxidation)
+- **Muscle loss and sustainability are genuine concerns** beyond certain thresholds
+- **Individual variation matters** (health status, metabolism, adherence)
+
+## Areas of Disagreement
+- **Optimal duration**: Claude endorses 16-18h as worthwhile; Codex and Gemini treat 12-16h as ceiling for practical gains
+- **Risk profile**: Claude frames >24h as the danger zone; Gemini is more cautious about even moderate fasting without medical oversight
+- **Emphasis**: Claude prioritizes mechanism science; Codex and Gemini prioritize sustainability and safety
+
+## Open Questions
+- **Individual variation**: How do results vary by age, gender, metabolic health, or genetic factors?
+- **Diminishing returns**: Exact fat-loss difference between 14h vs 16h vs 18h in practice?
+- **Sustainability trade-off**: Does 16-18h adherence actually exceed 12-14h long-term for most people?
+- **Health screening**: Who should avoid fasting or need medical guidance (specific conditions)?
+</untrusted-data>
+
+## Instructions
+Review the other participants' arguments. Respond with:
+
+IMPORTANT: Start your response with EXACTLY ONE of these labels on its own line:
+[AGREE] — if you agree with the overall direction
+[PARTIAL] — if you partially agree
+[DISAGREE] — if you disagree
+
+Then provide:
+1. **Reasoning**: why you chose that label
+2. **New insight**: anything missed by others
+3. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under 30 lines.

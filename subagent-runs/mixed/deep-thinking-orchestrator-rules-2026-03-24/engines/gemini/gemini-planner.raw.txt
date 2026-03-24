@@ -1,0 +1,88 @@
+Here is a concise change map for integrating the principles from "Deep-Thinking Tokens" into the subagent orchestration framework.
+
+### 1. Core Principles to Inject
+
+The central idea is to shift agent behavior from prioritizing output *length* to prioritizing reasoning *depth*.
+
+*   **Depth over Length:** Focus cognitive effort on critical, non-obvious decision points. State self-evident facts or boilerplate code concisely without elaboration.
+*   **Decisive Reasoning:** Avoid hedging, listing endless possibilities without commitment, or repeating the same point in different words ("overthinking"). Make a choice and justify it.
+*   **Front-loaded Quality:** The initial approach and problem framing are the most critical. A strong start is a better indicator of success than a long, meandering process.
+*   **Targeted Elaboration:** Output length should be non-uniform. Be brief for simple parts and detailed only for complex, high-uncertainty sections of the task.
+
+### 2. Best Files/Sections to Change
+
+1.  **`skills/claude-subagent-orchestrator/references/agent-contract.md`**:
+    *   **Section to Add**: A new top-level section `## Core Reasoning Principles` should be added to the contract structure. This makes the principles a universal instruction for all agents.
+
+2.  **`skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md`** (and similarly for C, D, E):
+    *   **Implementer Template**: Modify the `Return` section to require self-reflection on decision-making.
+    *   **Reviewer Template**: Add an explicit check for reasoning quality to the `Review criteria`.
+
+### 3. Specific Wording Suggestions
+
+#### Change 1: Update `agent-contract.md`
+
+In `skills/claude-subagent-orchestrator/references/agent-contract.md`, add the following section after the `## Shared Directive`:
+
+```markdown
+## Core Reasoning Principles (Deep-Thinking Protocol)
+
+- **Prioritize Depth, Not Length**: Focus your reasoning on the most complex parts of the task. Be concise about obvious steps. An output with non-uniform length (short for easy parts, long for hard parts) is desirable.
+- **Be Decisive**: Avoid listing many possibilities without making a clear choice. When you select an approach, state the choice and its primary justification.
+- **Prevent Overthinking**: Do not repeat the same point or finding. Once a fact is established or a decision is made, move forward. Avoid lengthy preambles.
+```
+
+#### Change 2: Update Implementer Prompts (Example: `pattern-b-implement-review.md`)
+
+In the `Return` section of the Implementer Prompt Template, add a line to encourage self-awareness of deep thinking:
+
+**Old `Return` section:**
+```markdown
+**Return**:
+- Files created/modified with key decisions
+- Validation results (pass/fail per check)
+- Assumptions made (if any)
+- Remaining uncertainty (if any)
+```
+
+**New `Return` section:**
+```markdown
+**Return**:
+- **Critical Decision**: Briefly state the single most important design choice you made and why.
+- Files created/modified
+- Validation results (pass/fail per check)
+- Assumptions made (if any)
+```
+
+#### Change 3: Update Reviewer Prompts (Example: `pattern-b-implement-review.md`)
+
+In the `Review criteria` of the Reviewer Prompt Template, add a criterion to enforce the new principles:
+
+**Old `Review criteria`:**
+```markdown
+**Review criteria**:
+1. Scope compliance — only authorized paths were modified...
+2. Correctness — logic sound, edge cases handled
+3. Contract fulfillment — output matches the original task spec
+4. {{DOMAIN_SPECIFIC_CRITERION}}
+```
+
+**New `Review criteria`:**
+```markdown
+**Review criteria**:
+1. Scope compliance — only authorized paths were modified...
+2. Correctness — logic sound, edge cases handled
+3. Contract fulfillment — output matches the original task spec
+4. **Reasoning Quality**: The implementation is decisive and avoids "overthinking." It is concise where appropriate and detailed only on complex points.
+5. {{DOMAIN_SPECIFIC_CRITERION}}
+```
+
+### 4. Risks of Over-Applying the Guide
+
+*   **False Conciseness:** Agents might learn to be brief at the expense of necessary detail, omitting important edge-case handling or trade-off analysis. The goal is to cut *fluff*, not substance.
+*   **Inhibiting Exploration:** For complex, ambiguous tasks (e.g., planning, architecture), an initial divergent phase of exploring possibilities is valuable. Over-enforcing decisiveness too early can stifle creativity and lead to suboptimal initial designs.
+*   **Unenforceable Telemetry:** The guide's core metric, DTR, is unmeasurable in this context. Relying purely on behavioral proxies is imprecise. There's a risk of optimizing for the *appearance* of deep thought (e.g., using keywords like "critical decision") without a genuine improvement in reasoning quality.
+*   **Ignoring the `Think@n` Cost:** The `Think@n` pattern, which involves generating multiple prefixes and discarding most, is only cost-effective if the "prefix evaluation" step is significantly cheaper than full generation. A complex LLM-based evaluation of prefixes could negate the cost savings entirely. The proposed changes avoid this by integrating the principles into the existing workflow rather than creating a new, costly evaluation stage.
+YOLO mode is enabled. All tool calls will be automatically approved.
+Loaded cached credentials.
+YOLO mode is enabled. All tool calls will be automatically approved.

@@ -1,8 +1,8 @@
 {
   "cwd": ".",
   "cwd_resolution": "invocation",
-  "output_dir": "subagent-runs/implementer-reviewer",
-  "manifest_file": "subagent-runs/implementer-reviewer/orchestration-manifest.json",
+  "output_dir": "subagent-runs/codex/implementer-reviewer",
+  "manifest_file": "subagent-runs/codex/implementer-reviewer/orchestration-manifest.json",
   "skip_git_repo_check": true,
   "execution_mode": "sequential",
   "write_prompt_files": true,

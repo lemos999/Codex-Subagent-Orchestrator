@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트레이딩 퀘스트 - 퀘스트</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="brand">트레이딩 퀘스트</a>
+        <div class="nav-links">
+            <a href="/">대시보드</a>
+            <a href="/quest">퀘스트</a>
+            <a href="/leaderboard">리더보드</a>
+            <a href="/backtest">임무</a>
+            <a href="/data">백데이터</a>
+        </div>
+    </nav>
+    <main class="container">
+        <h1>퀘스트{% if quest_id %}: {{ quest_id }}{% endif %}</h1>
+        <div class="card">
+            <h2>새 퀘스트 시작</h2>
+            <form id="quest-form">
+                <label>퀘스트 ID: <input type="text" name="quest_id" value="quest-1"></label>
+                <label>시장: <select name="market">
+                    <option value="US">US</option>
+                    <option value="KRX">KRX</option>
+                    <option value="CRYPTO">Crypto</option>
+                </select></label>
+                <label>종목: <input type="text" name="symbols" value="AAPL,MSFT"></label>
+                <label>전략: <input type="text" name="strategy" value="ma_crossover"></label>
+                <label>기간(일): <input type="number" name="days" value="10"></label>
+                <label>초기자본: <input type="number" name="capital" value="100000"></label>
+                <button type="submit">퀘스트 시작</button>
+            </form>
+        </div>
+        <div id="quest-result" class="card" style="display:none;">
+            <h2>결과</h2>
+            <pre id="result-json"></pre>
+        </div>
+    </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

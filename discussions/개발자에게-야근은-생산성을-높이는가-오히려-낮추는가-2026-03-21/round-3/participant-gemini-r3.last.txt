@@ -1,0 +1,7 @@
+[AGREE]
+**Reasoning**: The discussion accurately identified that chronic overtime significantly degrades individual cognitive function and, more importantly from an organizational psychology perspective, severely erodes the foundational elements of organizational health: psychological safety, trust, and effective communication. These factors are critical for sustained productivity and innovation.
+
+**New insight**: Beyond individual and team morale, chronic overwork drastically reduces an organization's *adaptive capacity*. Depleted cognitive resources not only hinder current output but also prevent learning, innovation, and strategic problem-solving, making the organization rigid and reactive in the face of change. Furthermore, the *modeling effect* of leaders working excessive hours creates a detrimental cultural norm, subtly forcing employees into similar patterns.
+
+**Updated position**: Chronic overwork is a systemic organizational toxin, moving beyond individual output loss to fundamentally compromise the organization's long-term adaptability, innovation, and cultural integrity, ultimately ensuring lower productivity and higher talent attrition.
+[POSITION: Chronic overwork is a systemic organizational toxin, crippling adaptability, innovation, and cultural integrity.]

@@ -1,0 +1,58 @@
+## Discussion Topic
+WKI 검색 파이프라인 최적화의 한계와 다음 전략. 현재 Mean nDCG 0.742 달성. 시도한 것: (1) 임베딩 모델 교체 5개 비교 → 현재 모델 유지, (2) q8/fp16 양자화 → 비효율 또는 역효과, (3) 파이프라인 개선 14건 중 7건 성공 7건 실패, (4) 핵심 발견: multi-vector 스킵 버그 수정이 가장 큰 개선(+0.026). 실패한 것: consensus bonus, 복합어 확장, FTS 가중치 조정, cross-encoder 한글 활성화, dtype 분리, q8 rerank 가중치 — 모두 regression. 교훈: 이미 최적화된 파이프라인은 추가 조정에 민감하고, 양자화 손실은 후처리로 보정 불가. 남은 약한 쿼리: #3(0.527) orchestration workflow 다중키워드, #5(0.506) engine-adapters 혼합쿼리. 질문: (1) 0.742를 넘기 위한 현실적 다음 단계는? (2) bi-encoder의 다중 키워드 한계를 극복하는 방법? (3) BM25 앙상블(#7)은 효과가 있을까? (4) ColBERT/late interaction 접근의 실용성은?
+
+## Your Persona
+You are: **실무 최적화자**
+Stay in character.
+
+## Previous Round Summary (by Moderator)
+<untrusted-data source="moderator-summary">
+## Summary by Participant
+
+**Claude:**
+- 0.742 is near ceiling of current architecture; structural changes needed but cost-benefit unclear first
+- 7/14 failure rate indicates local optimum; weak queries are bi-encoder structural limits, not tuning issues
+- Recommends query rewriting + chunking strategy improvement over architecture overhaul; ColBERT deemed over-engineered
+
+**Codex:**
+- (Operation aborted; no position provided)
+
+**Gemini:**
+- 0.742 breakthrough requires fundamental shift from bi-encoder to late-interaction models (ColBERT/similar)
+- Current architecture cannot capture token-level interactions needed for multi-keyword queries; simple tuning exhausted
+- Recommends aggressive migration to interaction-based paradigm with targeted weak-query analysis for training data
+
+---
+
+## Agreement
+- Current system at local optimum; 7/14 failure rate proves further tuning ineffective
+- Weak queries (#3, #5) stem from structural multi-keyword/multi-concept intersection problems
+- BM25 ensemble redundant with existing FTS and risky for balance
+
+## Disagreement
+- **Incremental vs. Structural**: Claude favors low-cost query preprocessing; Gemini favors high-cost architectural rewrite
+- **ColBERT Practicality**: Claude views it as over-engineered for codebase search; Gemini sees it as necessary for breakthrough
+- **Weak Query Solutions**: Claude targets preprocessing; Gemini targets new model architecture
+
+## Open Questions
+- Is cost of ColBERT/late-interaction justified vs. expected nDCG gain?
+- Can query rewriting + chunking improvements meaningfully close the gap in #3, #5 without architectural change?
+- What is realistic performance ceiling if architecture stays unchanged?
+- Would improved chunking (function-level) vs. new embedding model have larger impact?
+</untrusted-data>
+
+## Instructions
+Review the other participants' arguments. Respond with:
+
+IMPORTANT: Start your response with EXACTLY ONE of these labels on its own line:
+[AGREE] — if you agree with the overall direction
+[PARTIAL] — if you partially agree
+[DISAGREE] — if you disagree
+
+Then provide:
+1. **Reasoning**: why you chose that label
+2. **New insight**: anything missed by others
+3. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under 30 lines.

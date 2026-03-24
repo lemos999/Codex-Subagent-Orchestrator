@@ -13,14 +13,14 @@ A healthy launcher run should produce:
 - one prompt file per worker
 - one `last.txt` file per worker unless overridden
 - stable absolute paths in stdout, stderr, and manifest entries
-- a manifest `workspace_root` that still points at the real workspace root even when the spec file lives under `subagent-runs/...`
+- a manifest `workspace_root` that still points at the real workspace root even when the spec file lives under `subagent-runs/codex/...`
 
 ## Recommended Test Order
 
 1. Run a single sequential write worker.
 2. Run two independent workers in parallel.
 3. Run two independent writers in parallel and a read-only reviewer in a later stage.
-4. Run a nested-spec root-safety check where the spec file itself lives under `subagent-runs/...` but `cwd: "."` still resolves to the real workspace root.
+4. Run a nested-spec root-safety check where the spec file itself lives under `subagent-runs/codex/...` but `cwd: "."` still resolves to the real workspace root.
 5. Re-run at least one spec with an absolute non-ASCII workspace path if you need portability confidence for extracted folders.
 6. Only after those pass, test a full `/sub` request from chat.
 
@@ -103,6 +103,6 @@ Get-Content -Raw .\worker.prompt.txt | codex exec `
   -m gpt-5.4 `
   -s workspace-write `
   -c 'model_reasoning_effort="low"' `
-  -o .\subagent-runs\worker.last.txt `
+  -o .\subagent-runs\codex\direct-fallback\worker.last.txt `
   -
 ```

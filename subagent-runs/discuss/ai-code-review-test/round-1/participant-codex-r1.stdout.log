@@ -1,0 +1,5 @@
+1. **Position**: AI code reviews should not replace human code reviews; they should handle first-pass analysis and let humans make final decisions on risk, intent, and tradeoffs.
+2. **Reasoning**: AI is strong at consistency, speed, diff scanning, style checks, obvious bug patterns, and test gap detection across large changes. Humans are still better at product context, architectural fit, ambiguous requirements, security trust boundaries, and spotting when code is “technically valid but operationally wrong.”
+3. **Concerns**: Full replacement creates automation bias, missed domain-specific failures, weaker accountability, and easier approval of subtle regressions. AI also overstates confidence and can miss issues tied to business logic, rollout constraints, or team conventions not visible in code.
+4. **Recommendation**: Use AI as a mandatory reviewer before or alongside humans: let it triage routine findings, summarize diffs, and highlight risk areas, while requiring human review for behavior changes, security-sensitive code, migrations, incident-prone systems, and architectural decisions.
+[POSITION: AI should augment human code review, not replace it]

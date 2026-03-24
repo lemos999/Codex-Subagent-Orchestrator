@@ -1,0 +1,57 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "queue-runner",
+    "version": "2.0",
+    "purpose": "Local queue.json backlog for unattended /sub queue runs. Improved with tighter polling, evidence archiving, and model allocation in launcher defaults.",
+    "model_strategy": {
+      "quality": "Queue runner inherits model from launcher defaults — per-issue specs can override.",
+      "optimization": "drain_on_exit ensures no orphaned issues. max_concurrent_issues limits parallel cost.",
+      "token_saving": "compact directive for all workers, low reasoning default — individual specs can escalate when needed."
+    },
+    "improvements": [
+      "Archive root set for audit trail across queue runs",
+      "Polling max_polls increased for practical batch sizes",
+      "launcher.write_run_archive enabled by default",
+      "Explicit timeout_seconds in launcher defaults",
+      "compact shared_directive_mode reduces per-worker token overhead"
+    ]
+  },
+  "tracker": {
+    "kind": "local-json",
+    "source_file": "tasks/queue.json",
+    "active_states": ["Todo", "In Progress"],
+    "terminal_states": ["Done", "Closed", "Cancelled"]
+  },
+  "polling": {
+    "interval_seconds": 5,
+    "max_polls": 5,
+    "drain_on_exit": true
+  },
+  "workspace": {
+    "root": "workspaces"
+  },
+  "output": {
+    "root": "claude-sub-runs/queue-output",
+    "report_file": "claude-sub-runs/queue-output/queue-report.md"
+  },
+  "hooks": {
+    "after_create": "git clone --depth 1 https://github.com/your-org/your-repo.git .",
+    "after_create_sentinel_paths": [".git", "AGENTS.md", "WORKFLOW.md"]
+  },
+  "launcher": {
+    "max_concurrent_issues": 2,
+    "execution_mode": "sequential",
+    "shared_directive_mode": "compact",
+    "timeout_seconds": 300,
+    "write_run_archive": true,
+    "archive_root": "claude-sub-records",
+    "defaults": {
+      "sandbox": "workspace-write",
+      "reasoning_effort": "low",
+      "prompt_profile": "compact",
+      "response_style": "compact",
+      "max_response_lines": 6
+    }
+  }
+}

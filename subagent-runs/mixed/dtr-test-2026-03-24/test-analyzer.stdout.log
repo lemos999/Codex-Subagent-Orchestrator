@@ -1,0 +1,2 @@
+I will read the file `packages/launcher/src/workers/spawn.ts` to understand the `spawnWorker` function.
+The `spawnWorker` function in `packages/launcher/src/workers/spawn.ts` executes a specified command for a given worker engine (Codex, Claude, or Gemini) as a child process, captures its standard output and error, and returns structured results including paths to output files and execution metadata.

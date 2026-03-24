@@ -1,0 +1,22 @@
+**Files Changed**
+- [agent-contract.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/agent-contract.md): Added the shared reasoning-discipline rules and tightened reviewer/watchdog expectations around material, evidence-backed findings.
+- [sub-command-protocol.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/sub-command-protocol.md): Added policy-level reasoning calibration so deep analysis is reserved for ambiguity, tradeoffs, root-cause, architecture, and high-risk review.
+- [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md): Added contract-building and validation checks for decisive, non-bloated outputs without inventing token metrics.
+- [pattern-a-solo.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-a-solo.md): Narrowed uncertainty language and made explorer/reviewer outputs converge on a conclusion or evidence-backed finding.
+- [pattern-b-implement-review.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md): Kept implementer returns lean and made reviewer/watchdog findings material, evidence-backed, and fix-oriented.
+- [pattern-c-parallel-review.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-c-parallel-review.md): Tightened parallel implementer uncertainty and reviewer/watchdog finding format.
+- [pattern-d-plan-implement-review.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-d-plan-implement-review.md): Made planner/reviewer/watchdog prompts prefer one recommended route or strongest counterargument over broad option dumps.
+- [pattern-e-full-loop.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-e-full-loop.md): Tightened reviewer/rereviewer/watchdog prompts to stay material, evidence-backed, and focused on the strongest remaining issue.
+
+**Key Policy Decisions**
+- Put almost all new doctrine in the shared contract and protocol layers, not repeated across every pattern.
+- Treated uncertainty as reportable only when blocking or correctness-relevant.
+- Required reviewer/watchdog findings to be material, evidence-backed, and paired with one fix direction.
+- For higher-risk planner/reviewer/watchdog paths, preferred one strong alternative or counterargument over broad option surveys.
+- Avoided token-count rules, runtime measurements, or any weakening of review/fixer/rereview safeguards.
+
+**Validation**
+- Shared rules in [agent-contract.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/agent-contract.md) now cover the core doctrine: focus depth, avoid simulated depth, choose decisively, report uncertainty sparingly.
+- Pattern templates align with that shared policy and no longer reward open-ended uncertainty dumps.
+- Reviewer/watchdog templates now consistently require material, evidence-backed findings with one fix direction.
+- No files outside the requested writable scope were modified in this task. Targeted status for the touched paths shows only those eight files; the repo also had unrelated pre-existing changes outside this task.

@@ -1,0 +1,28 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/claude-greeting-smoke-2026-03-24",
+  "skip_git_repo_check": true,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "shared_directive_mode": "disabled",
+  "defaults": {
+    "sandbox": "read-only",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 2
+  },
+  "agents": [
+    {
+      "name": "claude-greeter",
+      "kind": "planner",
+      "stage": 1,
+      "engine": "claude",
+      "model": "haiku",
+      "sandbox": "read-only",
+      "task": "Greet the user in Korean with exactly one short sentence. Output only the greeting sentence and nothing else."
+    }
+  ]
+}

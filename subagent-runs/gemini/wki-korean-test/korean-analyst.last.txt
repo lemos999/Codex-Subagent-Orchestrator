@@ -1,0 +1,24 @@
+I need to explain the rules for recording evidence after a worker execution, including file creation and directory structure. I will start by examining the `subagent-runs` directory for a `README.md` or infer the structure from existing runs.
+The project records worker execution evidence under the `subagent-runs/` directory, following a specific structure and naming convention.
+
+**Directory Structure:**
+
+*   **`subagent-runs/`**: The root directory for all execution evidence.
+    *   **`claude/`**: Stores data from Claude Code sessions.
+    *   **`codex/`**: Stores data from Codex CLI sessions.
+    *   **`gemini/`**: Stores data from Gemini CLI sessions.
+    *   **`mixed/`**: Stores data from runs involving multiple engine types.
+
+Within each engine-specific directory (e.g., `claude/`), evidence is organized into subdirectories named `<run-name>/`.
+
+**File Naming Convention:**
+
+*   The `<run-name>` follows the format `<task-slug>-<YYYY-MM-DD>`.
+*   In case of naming conflicts, numerical suffixes (e.g., `-2`, `-3`) are appended.
+
+**Rules for Storage:**
+
+*   Single-engine executions are stored in their respective engine folders (e.g., `subagent-runs/claude/<run-name>/`).
+*   Runs involving multiple engines are stored under the `mixed/` directory (e.g., `subagent-runs/mixed/<run-name>/`).
+*   No arbitrary new run folders should be created directly under `subagent-runs/`; they must be placed within an engine-specific subdirectory.
+*   The specific format of the evidence files within each `<run-name>` directory adheres to the orchestrator contract of the respective engine.

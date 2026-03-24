@@ -1,0 +1,9 @@
+1. **Position**: For this repository, TypeScript should be the default language for CLI tools. Python is still useful for small, isolated scripts, but not as the main launcher/runtime path.
+
+2. **Reasoning**: The workspace already treats the TS launcher as the primary implementation path in [README.md](/C:/Users/haj/projects/subagent-orchestrator/README.md), with PowerShell marked as fallback. That matters because CLI quality is mostly about packaging, cross-platform behavior, and maintainability, not raw syntax preference. The repo already has Windows-specific command resolution centralized in [platform.ts](/C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/common/platform.ts), which is exactly the kind of platform detail that benefits from a typed, shared codebase. TypeScript also aligns better with JSON-driven orchestration, schema validation, and reuse across launcher, parser, and future UI/API surfaces.
+
+3. **Concerns**: TypeScript CLIs usually have more startup/tooling overhead than Python for quick one-off automation. Distribution can also be messier if the runtime contract is “Node must exist.” Python remains stronger when the task is shell-heavy automation, text munging, or when the surrounding ecosystem is already Python-first. If the team forces TS for every tiny script, they may create unnecessary friction.
+
+4. **Recommendation**: Keep the launcher and any durable CLI surface in TypeScript. Use Python only for bounded support tasks where it is clearly cheaper: disposable ops scripts, data-processing helpers, or experiments that are not part of the long-term CLI contract. In short: primary product CLI in TS, tactical scripting in Python.
+
+[POSITION: Prefer TypeScript as the primary CLI implementation language here; use Python only for narrow scripting cases.]

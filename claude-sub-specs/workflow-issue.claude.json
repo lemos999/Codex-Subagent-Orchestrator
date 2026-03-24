@@ -1,0 +1,132 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "B-implement-review + workflow",
+    "version": "2.0",
+    "purpose": "Issue-driven workflow with WORKFLOW.md template rendering. Connects to issue trackers via workflow_context.",
+    "model_strategy": {
+      "quality": "sonnet for implementer (issue work needs reasoning), haiku for reviewer (verify against spec)",
+      "optimization": "workflow_context passes structured issue data — worker doesn't need to parse tickets. Bootstrap hooks are idempotent.",
+      "token_saving": "compact directive, workflow template avoids repeating issue details in each worker prompt"
+    },
+    "improvements": [
+      "Tiered model allocation",
+      "Archive enabled for issue audit trail",
+      "Live usage monitoring",
+      "Explicit timeout for CI/CD safety",
+      "Reviewer checks deliverables AND scope compliance in one pass"
+    ]
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "claude-sub-runs/workflow-issue",
+  "manifest_file": "claude-sub-runs/workflow-issue/orchestration-manifest.json",
+  "summary_file": "claude-sub-runs/workflow-issue/orchestration-summary.md",
+  "debug_log_file": "claude-sub-runs/workflow-issue/launcher-debug.log",
+  "archive_root": "claude-sub-records",
+  "write_run_archive": true,
+  "archive_run_label": "workflow-issue",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 300,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "shared_directive_mode": "compact",
+  "workflow_file": "WORKFLOW.md",
+  "workflow_prompt_mode": "prepend",
+  "workflow_context": {
+    "attempt": 1,
+    "issue": {
+      "identifier": "ABC-123",
+      "title": "Fix flaky test in CI",
+      "description": "The integration test intermittently fails on Windows runners.",
+      "state": "In Progress",
+      "labels": ["backend", "ci"],
+      "url": "https://tracker.example.com/ABC-123"
+    }
+  },
+  "hooks": {
+    "after_create": "git clone --depth 1 https://github.com/your-org/your-repo.git .",
+    "after_create_sentinel_paths": [".git", "README.md"]
+  },
+  "requested_deliverables": [
+    "README.md"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "live_usage": {
+    "enabled": true,
+    "display_mode": "both",
+    "status_file": "claude-sub-runs/workflow-issue/orchestration-usage.json",
+    "poll_interval_ms": 500
+  },
+  "defaults": {
+    "prompt_profile": "compact",
+    "response_style": "compact"
+  },
+  "agents": [
+    {
+      "name": "issue-implementer",
+      "kind": "implementer",
+      "stage": 1,
+      "model": "gpt-5.4",
+      "sandbox": "workspace-write",
+      "reasoning_effort": "medium",
+      "max_response_lines": 12,
+      "role": "issue implementer",
+      "mission": "Execute the current issue against the local repository. Stay within declared writable scope.",
+      "task": "Implement the requested issue in this repository. Validate the change against the issue's acceptance criteria and stop when they are met.",
+      "writable_scope": [
+        "README.md"
+      ],
+      "success_criteria": [
+        "Requested deliverable files exist and reflect the issue resolution.",
+        "Implementation stays within writable scope."
+      ],
+      "validation": [
+        "Confirm deliverable files exist.",
+        "Confirm implementation addresses the issue description.",
+        "Confirm no files outside writable scope were modified."
+      ],
+      "return_contract": [
+        "Implementation summary: what changed and why.",
+        "PASS or FAIL per validation check.",
+        "Assumptions made (if any)."
+      ],
+      "stop_when": [
+        "Issue acceptance criteria met. Do not gold-plate or expand scope."
+      ]
+    },
+    {
+      "name": "issue-reviewer",
+      "kind": "reviewer",
+      "stage": 2,
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "low",
+      "max_response_lines": 10,
+      "role": "issue compliance reviewer",
+      "mission": "Review the implementation for correctness, scope compliance, and readiness for handoff.",
+      "task": "Review the deliverables against the original issue spec. Check correctness, scope compliance, and completeness.",
+      "read_first": [
+        "AGENTS.md",
+        "README.md"
+      ],
+      "validation": [
+        "Deliverables exist and are non-empty.",
+        "Implementation addresses the issue description.",
+        "No scope violations.",
+        "No obvious regressions or missing validation."
+      ],
+      "return_contract": [
+        "Verdict: ACCEPTED | MINOR_ISSUES | MATERIAL_ISSUES",
+        "Findings: [file — issue — severity — fix_direction]",
+        "Rereview required: YES | NO"
+      ],
+      "stop_when": [
+        "Review verdict delivered. Do not modify files."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+## Relevant Context (auto-injected)
+
+### problem-resolution-log.md (lines 1-4)
+**문제-해결 기록** — markdown-section
+> # 문제-해결 기록
+> 
+> ---
+
+### C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/cli.ts (lines 91-95)
+**other** — other
+```typescript
+// ============================================================
+// Main
+// ============================================================
+```
+
+### C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/types/spec.ts (lines 135-139)
+**other** — other
+```typescript
+// ============================================================
+// Live usage
+// ============================================================
+```
+
+### C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/types/spec.ts (lines 121-125)
+**other** — other
+```typescript
+// ============================================================
+// Hooks
+// ============================================================
+```
+
+### C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/utils/path.ts (lines 7-8)
+**other** — other
+```typescript
+/** 상대 경로를 POSIX 정규화하여 반환 */
+```

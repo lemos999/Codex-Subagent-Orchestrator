@@ -1,0 +1,26 @@
+## Summary by Participant
+
+**Claude**: 16-18 hours optimal; proposes tiered progression (14→16→18 hours). Detailed mechanism: glycogen depletion (8-12h) → ketone production (12-16h) → maximum fat oxidation + autophagy (16h+). Notes total calories outweigh fasting duration.
+
+**Codex**: 12-16 hours practical range; emphasizes total calorie deficit and sustainability over extended fasting. Implicitly argues prolonged fasting offers diminishing returns relative to compliance.
+
+**Gemini**: 12-16 hours for moderate fat burning; leverages same mechanism (glycogen depletion → fat oxidation) but emphasizes nutrient-dense eating, individual monitoring, and healthcare consultation due to muscle loss and hormonal risks.
+
+---
+
+## Areas of Agreement
+- **12-16 hours is effective and practical** for fat burning
+- **Fat burning mechanism is real** (glycogen depletion triggers fat oxidation)
+- **Muscle loss and sustainability are genuine concerns** beyond certain thresholds
+- **Individual variation matters** (health status, metabolism, adherence)
+
+## Areas of Disagreement
+- **Optimal duration**: Claude endorses 16-18h as worthwhile; Codex and Gemini treat 12-16h as ceiling for practical gains
+- **Risk profile**: Claude frames >24h as the danger zone; Gemini is more cautious about even moderate fasting without medical oversight
+- **Emphasis**: Claude prioritizes mechanism science; Codex and Gemini prioritize sustainability and safety
+
+## Open Questions
+- **Individual variation**: How do results vary by age, gender, metabolic health, or genetic factors?
+- **Diminishing returns**: Exact fat-loss difference between 14h vs 16h vs 18h in practice?
+- **Sustainability trade-off**: Does 16-18h adherence actually exceed 12-14h long-term for most people?
+- **Health screening**: Who should avoid fasting or need medical guidance (specific conditions)?

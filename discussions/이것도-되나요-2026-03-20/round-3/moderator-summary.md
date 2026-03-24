@@ -1,0 +1,32 @@
+## Position Summary
+
+**Claude:**
+- Vague inputs like "이것도 되나요" are "capability probes," not task failures
+- Better UX pattern: guided clarification + improvement guidance instead of rejection
+- Implement progressive clarification rather than hard rejection
+
+**Codex:**
+- System can process ambiguous inputs but `/discuss` reliability requires explicit constraint declaration
+- Need stated assumptions, confidence levels, and explicit gaps
+- (Minimal elaboration)
+
+**Gemini:**
+- Ambiguous inputs degrade output quality and increase user cognitive load + iteration cost
+- Graceful degradation ≠ optimal interaction; clarity should be the primary interaction model
+- System burden shifts to user for interpretation and correction cycles
+
+---
+
+## Agreement
+- System can technically process vague inputs without crashing
+- Trade-offs exist between robustness and output quality
+
+## Disagreement
+- **Claude**: Vagueness acceptable *with* clarification guidance
+- **Codex**: Depends on explicit constraint metadata
+- **Gemini**: Vagueness should be avoided; clarity is paramount
+
+## Open Questions
+- Should primary interaction pattern be rejection, guided clarification, or structured constraints?
+- How to balance system robustness against user iteration cost?
+- When does graceful degradation suffice vs. enforce input clarity?

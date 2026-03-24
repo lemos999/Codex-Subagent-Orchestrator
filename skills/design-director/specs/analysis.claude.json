@@ -1,0 +1,91 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "Design-Director-Analysis",
+    "version": "1.0",
+    "purpose": "Mode B 기존 산출물 분석 파이프라인. Step 1(진단) → Step 2(가치 평가) → 종합 보고서 자동 수행."
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/claude/design-analysis",
+  "manifest_file": "subagent-runs/claude/design-analysis/orchestration-manifest.json",
+  "summary_file": "subagent-runs/claude/design-analysis/orchestration-summary.md",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 600,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "shared_directive_mode": "compact",
+  "debug_log_file": "subagent-runs/claude/design-analysis/launcher-debug.log",
+  "agents": [
+    {
+      "name": "diagnostic-analyzer",
+      "kind": "reviewer",
+      "stage": 1,
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 40,
+      "role": "Mode B Step 1 진단 분석기",
+      "mission": "기존 산출물에서 Charter를 추출하고, 컴포넌트를 분류하며, 검증 4단계를 수행하여 진단 보고서를 작성한다.",
+      "task": "제공된 문서/자료를 분석. (1) Charter 5항목 추출 (2) 컴포넌트 Core/Support 분류 (3) 검증 4단계 수행 (4) 진단 보고서 작성.",
+      "read_first": [
+        "skills/design-director/SKILL.md",
+        "skills/design-director/agents/analysis-mode.agent.md",
+        "skills/design-director/core/validation-ladder.md"
+      ],
+      "return_contract": [
+        "Charter 5항목 추출 결과",
+        "컴포넌트 분류 (Core/Support)",
+        "검증 4단계 결과",
+        "진단 보고서 (치명적/주요/경미/누락)"
+      ],
+      "stop_when": [
+        "진단 보고서 완료. 파일 수정하지 않는다."
+      ]
+    },
+    {
+      "name": "value-evaluator",
+      "kind": "reviewer",
+      "stage": 2,
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 20,
+      "role": "Mode B Step 2 가치 평가기",
+      "mission": "각 Core 컴포넌트의 가치 기여도를 평가하고 처방을 제시한다.",
+      "task": "diagnostic-analyzer의 Core 컴포넌트 목록에 가치 기여도 평가(VCT) 적용. 등급 판정 + 처방.",
+      "read_first": [
+        "skills/design-director/agents/analysis-mode.agent.md"
+      ],
+      "return_contract": [
+        "컴포넌트별 VCT 결과 테이블",
+        "등급별 처방"
+      ],
+      "stop_when": [
+        "평가 완료. 파일 수정하지 않는다."
+      ]
+    },
+    {
+      "name": "analysis-watchdog",
+      "kind": "reviewer",
+      "stage": 3,
+      "model": "opus",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 15,
+      "role": "분석 품질 watchdog",
+      "mission": "진단 + 가치 평가 결과의 정확성과 완전성을 감사한다.",
+      "task": "(1) Charter 추출이 문서 내용과 일치하는가 (2) Core/Support 분류가 적절한가 (3) VCT 평가가 일관적인가 (4) 누락된 치명적 문제가 있는가",
+      "return_contract": [
+        "Verdict: PASS | SHORTFALL",
+        "이상 항목 목록 (있을 경우)"
+      ],
+      "stop_when": [
+        "감사 완료. 파일 수정하지 않는다."
+      ]
+    }
+  ]
+}

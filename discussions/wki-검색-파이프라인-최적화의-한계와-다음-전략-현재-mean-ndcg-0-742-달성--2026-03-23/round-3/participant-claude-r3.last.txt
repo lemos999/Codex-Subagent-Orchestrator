@@ -1,0 +1,16 @@
+[PARTIAL]
+
+**Reasoning**: Gemini의 late-interaction 필요성 주장은 구조적으로 맞지만, 타이밍이 너무 이르다. Codex의 candidate generation 재설계 방향은 올바르나, 구체성이 부족해 실행 경로가 불명확하다.
+
+**New insight**: 라운드 1에서 모두 놓친 점 — **쿼리 #3, #5의 실패 원인을 실제로 진단하지 않았다**. "bi-encoder의 다중 키워드 한계"라고 단정하기 전에:
+
+- #3 (orchestration workflow 다중키워드): 토픽이 단일 청크에 공존하지 않을 가능성 → **chunking 문제**
+- #5 (engine-adapters 혼합쿼리): 두 개념이 별도 파일에 분산 → **retrieval 단위 문제**, 벡터 희석이 아닐 수 있음
+
+만약 이것이 chunking/candidate scope 문제라면, ColBERT를 도입해도 동일하게 실패한다. Late-interaction은 *벡터 표현 품질*을 올리지, *retrieval coverage*를 늘리지 않는다.
+
+**실용적 진단 제안**: 두 쿼리에 대해 BM25 단독 recall을 측정해보면, 후보군 자체가 없는 건지 vs. 있는데 순위가 낮은 건지 구분 가능. 이 데이터 없이 아키텍처 결정은 시기상조다.
+
+**Updated position**: 이전 입장 유지 + 보강. Query decomposition보다 **실패 원인 진단(BM25 recall 측정)이 선행**되어야 한다. 진단 결과에 따라: coverage 문제 → chunking/multi-doc fusion, ranking 문제 → subquery 앙상블 또는 late-interaction.
+
+[POSITION: 쿼리 #3/#5에 대한 BM25 recall 진단을 먼저 수행하고, coverage vs. ranking 실패를 구분한 뒤 아키텍처 결정 — ColBERT는 ranking 실패 확인 후 검토]

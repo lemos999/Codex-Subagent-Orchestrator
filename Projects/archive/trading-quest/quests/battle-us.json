@@ -1,0 +1,23 @@
+{
+  "quest_id": "battle-us",
+  "market": "US",
+  "symbols": [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "TSLA",
+    "META"
+  ],
+  "initial_capital": 100000,
+  "current_capital": 100000,
+  "start_date": "2024-01-02",
+  "current_date": "2025-01-01",
+  "current_day": 0,
+  "phase": 1,
+  "strategy_name": "macd",
+  "total_score": 0.0,
+  "trade_log": [],
+  "daily_results": [],
+  "positions": {},
+  "metadata": {}
+}

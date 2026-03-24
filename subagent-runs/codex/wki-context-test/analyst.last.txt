@@ -1,0 +1,1 @@
+In short, Stage 9 is the acceptance/recovery checkpoint plus mandatory evidence persistence. The run is not considered reportable until that evidence package has been written.

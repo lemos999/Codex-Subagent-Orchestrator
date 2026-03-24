@@ -1,0 +1,31 @@
+{
+  "cwd": "C:/Users/haj/projects/subagent-orchestrator",
+  "agents": [
+    {
+      "name": "gemini-analyzer",
+      "engine": "gemini",
+      "model": "gemini-2.5-flash",
+      "kind": "reviewer",
+      "stage": 1,
+      "task": "packages/launcher/src/workers/output-quality.ts 파일을 읽고 checkOutputQuality 함수가 어떤 패턴을 감지하는지 한글로 설명하라. 코드를 수정하지 마라."
+    },
+    {
+      "name": "codex-analyzer",
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "kind": "reviewer",
+      "stage": 1,
+      "task": "packages/launcher/src/workers/output-quality.ts 파일을 읽고 checkOutputQuality 함수가 어떤 패턴을 감지하는지 한글로 설명하라. 코드를 수정하지 마라."
+    },
+    {
+      "name": "claude-analyzer",
+      "engine": "claude",
+      "model": "haiku",
+      "kind": "reviewer",
+      "stage": 1,
+      "task": "packages/launcher/src/workers/output-quality.ts 파일을 읽고 checkOutputQuality 함수가 어떤 패턴을 감지하는지 한글로 설명하라."
+    }
+  ],
+  "shared_directive_text": "분석만 수행. 코드 수정 금지.",
+  "output_dir": "subagent-runs/mixed/dtr-integration-test-2026-03-24"
+}

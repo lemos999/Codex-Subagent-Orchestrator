@@ -1,0 +1,27 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/codex/test-6d-default",
+  "skip_git_repo_check": true,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "shared_directive_mode": "disabled",
+  "defaults": {
+    "model": "gpt-5.4",
+    "sandbox": "workspace-write",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 3
+  },
+  "agents": [
+    {
+      "name": "writer",
+      "kind": "implementer",
+      "task": "Create or replace tests/artifacts/default-engine.txt with exactly: Hello from default engine",
+      "writable_scope": ["tests/artifacts/default-engine.txt"],
+      "validation": ["Ensure tests/artifacts/default-engine.txt exists and contains 'Hello from default engine'"]
+    }
+  ]
+}

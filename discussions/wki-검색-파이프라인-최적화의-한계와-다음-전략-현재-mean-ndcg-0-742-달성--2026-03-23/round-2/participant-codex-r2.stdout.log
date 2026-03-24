@@ -1,0 +1,13 @@
+[PARTIAL]
+
+1. **Reasoning**: 둘 다 반은 맞고 반은 과합니다. Claude 쪽의 “추가 튜닝은 민감하다”는 진단은 맞지만, 현재 구현에는 이미 mixed path/content 분해, multi-vector search, rule-based rerank, cross-encoder fail-soft까지 들어가 있어서 “query rewrite 조금 더”로는 부족합니다. 반대로 Gemini의 “이제 ColBERT로 갈 때”도 성급합니다. 병목은 순수 bi-encoder만이 아니라, 현재 후보 생성이 chunk 단위 교집합에 너무 묶여 있다는 점입니다.
+
+2. **New insight**: 핵심 누락은 lexical branch의 recall ceiling입니다. 현재 FTS는 SQLite FTS5 `bm25()`를 이미 쓰고 있고, 질의를 모든 토큰 `AND`로 묶습니다. 약한 쿼리 #3, #5처럼 다중 키워드/혼합 쿼리는 “한 chunk 안에 모든 단서가 같이 있어야” 살아남습니다. 그래서 BM25 앙상블을 하나 더 얹어도 같은 chunk granularity, 같은 토큰 조건이면 신호 중복일 가능성이 큽니다. 실무적으로 더 유망한 건:
+- file-level 또는 section-level 후보를 먼저 뽑고 chunk-level로 내려가는 2-stage retrieval
+- query facet split: 파일/엔티티 facet + 행동/개념 facet을 따로 검색 후 union candidate 생성
+- 이후에만 rerank
+이건 score tuning보다 구조 개선이고, full ColBERT migration보다 훨씬 싸게 검증 가능합니다.
+
+3. **Updated position**: 제 입장은 Claude 쪽에서 중간으로 이동했습니다. “현 구조에서 ceiling 근접”은 동의하지만, 다음 단계는 단순 전처리가 아니라 candidate generation 재설계입니다. ColBERT/late interaction은 전면 도입보다, 상위 50개 후보 reranker 프로토타입으로 weak-query 전용 A/B를 먼저 하는 게 맞습니다.
+
+[POSITION: 다음 한 수는 BM25 추가나 미세 가중치 조정이 아니라, facet/file-aware 후보 생성 재설계 후 필요하면 late interaction을 제한적으로 붙이는 것이다.]

@@ -1,0 +1,9 @@
+[`checkOutputQuality`](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/workers/output-quality.ts#L22)는 작업자 출력에서 `overthinking` 신호를 경고 수준으로 감지합니다. 짧은 텍스트는 아예 검사하지 않고, 길이가 100자 미만이면 경고 없이 바로 반환합니다. 기준은 [`output-quality.ts`](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/workers/output-quality.ts#L24)입니다.
+
+감지하는 패턴은 3가지입니다.
+
+- 반복 패턴: 문장을 구분한 뒤 소문자화, 공백 정리, 앞 60자 기준으로 정규화해서 같은 문장/구절이 3회 이상 나오면 반복 경고를 냅니다. 너무 짧은 구절은 제외합니다. 기준은 [`output-quality.ts`](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/workers/output-quality.ts#L29)입니다.
+- 유보 표현 과다 + 결론 부재: `could be`, `might be`, `it depends`, `상황에 따라` 같은 가능성 표현이 4회 이상 나오는데, 동시에 `choose`, `recommend`, `결론`, `conclusion` 같은 결정 표현이 없으면 “판단을 미루고만 있다”는 경고를 냅니다. 기준은 [`output-quality.ts`](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/workers/output-quality.ts#L44)입니다.
+- 자기참조 루프: `앞서 말했듯`, `다시 정리하면`, `as mentioned`, `as I said` 같은 메타 참조 표현이 3회 이상 반복되면 자기참조 경고를 냅니다. 기준은 [`output-quality.ts`](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/workers/output-quality.ts#L52)입니다.
+
+즉, 이 함수는 “같은 말을 반복하는지”, “가능성만 늘어놓고 결론을 안 내는지”, “자기 요약/재진술을 반복하는지”를 본다고 이해하면 됩니다. 코드 수정은 하지 않았습니다.

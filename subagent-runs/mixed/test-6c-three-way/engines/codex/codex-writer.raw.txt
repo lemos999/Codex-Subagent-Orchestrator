@@ -1,0 +1,3 @@
+- Use the seven tetromino block types with clear silhouettes and consistent rotation rules to create varied placement choices.
+- Reward scoring through single, double, triple, and four-line clears, with extra bonuses for combos and efficient play.
+- Increase level difficulty by raising fall speed at steady milestones so the game stays readable early and demanding later.

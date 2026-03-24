@@ -5,6 +5,7 @@ No side effects, no API calls, no state.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 import numpy as np
@@ -72,6 +73,176 @@ def compute_ichimoku(
     df["cloud_bottom"] = df[["senkou_a", "senkou_b"]].min(axis=1)
 
     return df
+
+
+# ---------------------------------------------------------------------------
+# 1b. Forward Cloud Analysis — use Ichimoku's predictive power
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ForwardCloudAnalysis:
+    """Analysis of the Ichimoku forward (leading) cloud."""
+    # Future cloud at +26 bars
+    future_cloud_top: float
+    future_cloud_bottom: float
+    future_cloud_thickness: float  # absolute
+    future_cloud_thickness_pct: float  # relative to price
+    # Cloud direction
+    cloud_rising: bool  # future cloud top > current cloud top
+    cloud_falling: bool
+    # Cloud twist (senkou_a crosses senkou_b within next 26 bars)
+    twist_detected: bool
+    twist_direction: str  # "bullish" (a crosses above b) / "bearish" / "none"
+    # Cloud as future support/resistance zones
+    future_support: float  # cloud bottom as support
+    future_resistance: float  # cloud top as resistance
+
+
+def analyze_forward_cloud(
+    df: pd.DataFrame,
+    displacement: int = 26,
+    tenkan: int = 9,
+    kijun: int = 26,
+    senkou_b_period: int = 52,
+) -> ForwardCloudAnalysis | None:
+    """Analyze the forward (leading) cloud for predictive signals.
+
+    The forward cloud is senkou_a and senkou_b shifted 26 bars into the future.
+    This is what makes Ichimoku unique — it predicts future support/resistance.
+    """
+    n = len(df)
+    if n < senkou_b_period + displacement:
+        return None
+
+    high = df["high"].values
+    low = df["low"].values
+
+    def _midpoint(arr, period, idx):
+        start = max(0, idx - period + 1)
+        return (np.max(arr[start:idx + 1]) + np.min(arr[start:idx + 1])) / 2
+
+    last = n - 1
+
+    # Current senkou values (at current bar)
+    tenkan_now = _midpoint(high, tenkan, last) / 2 + _midpoint(low, tenkan, last) / 2
+    kijun_now = _midpoint(high, kijun, last) / 2 + _midpoint(low, kijun, last) / 2
+    # Recompute properly
+    t_h = np.max(high[max(0, last - tenkan + 1):last + 1])
+    t_l = np.min(low[max(0, last - tenkan + 1):last + 1])
+    tenkan_now = (t_h + t_l) / 2
+
+    k_h = np.max(high[max(0, last - kijun + 1):last + 1])
+    k_l = np.min(low[max(0, last - kijun + 1):last + 1])
+    kijun_now = (k_h + k_l) / 2
+
+    senkou_a_now = (tenkan_now + kijun_now) / 2
+    sb_h = np.max(high[max(0, last - senkou_b_period + 1):last + 1])
+    sb_l = np.min(low[max(0, last - senkou_b_period + 1):last + 1])
+    senkou_b_now = (sb_h + sb_l) / 2
+
+    current_cloud_top = max(senkou_a_now, senkou_b_now)
+    current_cloud_bottom = min(senkou_a_now, senkou_b_now)
+
+    # Future cloud = current senkou values (they will be displayed 26 bars ahead)
+    future_top = current_cloud_top
+    future_bottom = current_cloud_bottom
+    thickness = future_top - future_bottom
+    price = float(df["close"].iloc[-1])
+    thickness_pct = thickness / price * 100 if price > 0 else 0
+
+    # Cloud 26 bars ago (what was predicted for now)
+    past_idx = max(0, last - displacement)
+    pt_h = np.max(high[max(0, past_idx - tenkan + 1):past_idx + 1])
+    pt_l = np.min(low[max(0, past_idx - tenkan + 1):past_idx + 1])
+    pk_h = np.max(high[max(0, past_idx - kijun + 1):past_idx + 1])
+    pk_l = np.min(low[max(0, past_idx - kijun + 1):past_idx + 1])
+    past_sa = ((pt_h + pt_l) / 2 + (pk_h + pk_l) / 2) / 2
+    psb_h = np.max(high[max(0, past_idx - senkou_b_period + 1):past_idx + 1])
+    psb_l = np.min(low[max(0, past_idx - senkou_b_period + 1):past_idx + 1])
+    past_sb = (psb_h + psb_l) / 2
+    past_cloud_top = max(past_sa, past_sb)
+
+    cloud_rising = future_top > past_cloud_top
+    cloud_falling = future_top < past_cloud_top
+
+    # Twist detection: check if senkou_a and senkou_b cross in recent bars
+    twist_detected = False
+    twist_direction = "none"
+    for i in range(max(0, last - displacement), last):
+        i_t_h = np.max(high[max(0, i - tenkan + 1):i + 1])
+        i_t_l = np.min(low[max(0, i - tenkan + 1):i + 1])
+        i_k_h = np.max(high[max(0, i - kijun + 1):i + 1])
+        i_k_l = np.min(low[max(0, i - kijun + 1):i + 1])
+        sa_i = ((i_t_h + i_t_l) / 2 + (i_k_h + i_k_l) / 2) / 2
+
+        i1 = i + 1
+        if i1 >= n:
+            break
+        i1_t_h = np.max(high[max(0, i1 - tenkan + 1):i1 + 1])
+        i1_t_l = np.min(low[max(0, i1 - tenkan + 1):i1 + 1])
+        i1_k_h = np.max(high[max(0, i1 - kijun + 1):i1 + 1])
+        i1_k_l = np.min(low[max(0, i1 - kijun + 1):i1 + 1])
+        sa_i1 = ((i1_t_h + i1_t_l) / 2 + (i1_k_h + i1_k_l) / 2) / 2
+
+        isb_h = np.max(high[max(0, i - senkou_b_period + 1):i + 1])
+        isb_l = np.min(low[max(0, i - senkou_b_period + 1):i + 1])
+        sb_i = (isb_h + isb_l) / 2
+
+        i1sb_h = np.max(high[max(0, i1 - senkou_b_period + 1):i1 + 1])
+        i1sb_l = np.min(low[max(0, i1 - senkou_b_period + 1):i1 + 1])
+        sb_i1 = (i1sb_h + i1sb_l) / 2
+
+        if sa_i <= sb_i and sa_i1 > sb_i1:
+            twist_detected = True
+            twist_direction = "bullish"
+        elif sa_i >= sb_i and sa_i1 < sb_i1:
+            twist_detected = True
+            twist_direction = "bearish"
+
+    return ForwardCloudAnalysis(
+        future_cloud_top=future_top,
+        future_cloud_bottom=future_bottom,
+        future_cloud_thickness=thickness,
+        future_cloud_thickness_pct=thickness_pct,
+        cloud_rising=cloud_rising,
+        cloud_falling=cloud_falling,
+        twist_detected=twist_detected,
+        twist_direction=twist_direction,
+        future_support=future_bottom,
+        future_resistance=future_top,
+    )
+
+
+# ---------------------------------------------------------------------------
+# 1c. Donchian Channel
+# ---------------------------------------------------------------------------
+
+
+def compute_donchian(df: pd.DataFrame, period: int = 20) -> tuple[float, float, float]:
+    """Compute Donchian Channel for the most recent bar.
+
+    Returns (upper, lower, middle) where:
+    - upper = highest high over last `period` bars
+    - lower = lowest low over last `period` bars
+    - middle = (upper + lower) / 2
+    """
+    if len(df) < period:
+        raise ValueError(f"Need at least {period} bars, got {len(df)}")
+    recent = df.iloc[-period:]
+    upper = float(recent["high"].max())
+    lower = float(recent["low"].min())
+    middle = (upper + lower) / 2
+    return upper, lower, middle
+
+
+def compute_donchian_series(df: pd.DataFrame, period: int = 20) -> pd.DataFrame:
+    """Compute Donchian Channel for all bars. Returns DataFrame with upper/lower/middle columns."""
+    result = df.copy()
+    result["dc_upper"] = df["high"].rolling(window=period, min_periods=period).max()
+    result["dc_lower"] = df["low"].rolling(window=period, min_periods=period).min()
+    result["dc_middle"] = (result["dc_upper"] + result["dc_lower"]) / 2
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -760,3 +931,26 @@ def build_all_snapshots(
         )
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# 9. Fibonacci Extensions (spec v2)
+# ---------------------------------------------------------------------------
+
+
+def compute_fib_extensions(
+    swing_low: float,
+    swing_high: float,
+    ratios: list[float] | None = None,
+) -> list[float]:
+    """Compute Fibonacci extension levels from a swing range.
+
+    Default ratios: [1.618, 2.0, 2.618]
+    Extension = swing_low + (swing_high - swing_low) * ratio
+    """
+    if ratios is None:
+        ratios = [1.618, 2.0, 2.618]
+    swing_range = swing_high - swing_low
+    if swing_range <= 0:
+        return []
+    return [swing_low + swing_range * r for r in ratios]

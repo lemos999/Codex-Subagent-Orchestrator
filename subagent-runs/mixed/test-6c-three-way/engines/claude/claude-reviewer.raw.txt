@@ -1,0 +1,3 @@
+I'm ready to help! I can see you're working on the subagent-orchestrator project with ongoing work on WKI improvements and multi-engine orchestration testing.
+
+What would you like me to help you with today?

@@ -1,0 +1,184 @@
+{
+    "created_at_utc": "2026-03-18T14:37:04.329Z",
+    "launcher_version": "ts-phase1-v1",
+    "launcher_script": "subagent-launch",
+    "spec_path": "C:\\Users\\haj\\tmp\\wki-korean-retest.json",
+    "spec_directory": "C:\\Users\\haj\\tmp",
+    "spec_sha256": "56e82c231ad1937bc4f2f43367689b92f203a207053ccd6be5fbb494d705ebff",
+    "codex_executable": "codex",
+    "claude_executable": "claude",
+    "gemini_executable": "npx.cmd",
+    "invocation_cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "cwd_requested": ".",
+    "cwd_resolution_mode": "invocation",
+    "cwd_resolution_base": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "workspace_root": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "output_dir": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\wki-korean-retest",
+    "debug_log": null,
+    "summary_file": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\wki-korean-retest\\orchestration-summary.md",
+    "live_usage": {
+        "enabled": false,
+        "display_mode": "none",
+        "poll_interval_ms": 500,
+        "status_file": null,
+        "json_output_forced": false
+    },
+    "archive": {
+        "enabled": false,
+        "root": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-records",
+        "run_label": "wki-korean-retest",
+        "run_directory": null,
+        "launcher_directory": null,
+        "deliverables_directory": null,
+        "workers_directory": null,
+        "supervisor_directory": null
+    },
+    "execution_mode": "sequential",
+    "skip_git_repo_check": true,
+    "shared_directive": {
+        "source": null,
+        "requested_mode": "disabled",
+        "effective_mode": "disabled",
+        "sha256": null,
+        "char_count": 0,
+        "original_char_count": 0,
+        "effective_char_count": 0
+    },
+    "workflow": {
+        "enabled": false,
+        "source": null,
+        "prompt_mode": "disabled",
+        "strict_render": true,
+        "auto_detected": false,
+        "front_matter_text": null,
+        "prompt_template_sha256": null,
+        "prompt_template_chars": 0,
+        "context": {}
+    },
+    "hooks": {
+        "after_create": {
+            "enabled": false,
+            "ran": false,
+            "trigger": null,
+            "exit_code": null,
+            "missing_sentinel_paths": [],
+            "workspace_was_empty": false,
+            "stdout": null,
+            "stderr": null
+        }
+    },
+    "policy": {
+        "execution_mode": "sequential",
+        "supervisor_only": false,
+        "require_final_read_only_review": false,
+        "material_issue_strategy": "none",
+        "requested_deliverables": [],
+        "writable_worker_names": [],
+        "read_only_reviewer_names": [
+            "korean-analyst"
+        ],
+        "final_read_only_reviewer_names": [
+            "korean-analyst"
+        ],
+        "final_read_only_review_present": true,
+        "last_writable_stage": 0
+    },
+    "efficiency_signals": {
+        "measurement_mode": "structure_first",
+        "note": "Use reruns, parent burden, repair-loop shape, and worker-to-deliverable ratios as primary efficiency signals. Treat absolute token totals as secondary.",
+        "execution_mode": "sequential",
+        "total_workers": 1,
+        "succeeded_workers": 1,
+        "failed_workers": 0,
+        "requested_deliverable_count": 0,
+        "workers_per_deliverable": null,
+        "writable_workers_per_deliverable": null,
+        "writable_workers": 0,
+        "read_only_workers": 1,
+        "implementer_workers": 0,
+        "reviewer_workers": 1,
+        "validator_workers": 0,
+        "fixer_workers": 0,
+        "full_auto_writable_workers": 0,
+        "full_auto_read_only_workers": 0,
+        "stage_count": 1,
+        "parallel_stage_count": 0,
+        "max_parallel_workers_in_stage": 1,
+        "uses_parallel_execution": false,
+        "uses_supervisor_only_policy": false,
+        "uses_bounded_repair_policy": false,
+        "final_read_only_review_present": true,
+        "total_prompt_chars": 1784,
+        "total_footer_tokens": 0
+    },
+    "stage_plan": [
+        {
+            "stage": 1,
+            "worker_count": 1,
+            "worker_names": [
+                "korean-analyst"
+            ],
+            "worker_kinds": [
+                "reviewer"
+            ],
+            "read_only_workers": [
+                "korean-analyst"
+            ],
+            "writable_workers": []
+        }
+    ],
+    "defaults": {
+        "model": "gpt-5.4",
+        "sandbox": "read-only",
+        "max_response_lines": 10
+    },
+    "results": [
+        {
+            "name": "korean-analyst",
+            "engine": "codex",
+            "mode": "exec",
+            "stage": 1,
+            "worker_kind": "reviewer",
+            "is_read_only": true,
+            "cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+            "exit_code": 0,
+            "succeeded": true,
+            "required_paths": [],
+            "required_non_empty_paths": [],
+            "missing_required_paths": [],
+            "empty_required_paths": [],
+            "validation_failures": [],
+            "requested_model": "gpt-5.4",
+            "requested_full_auto": false,
+            "requested_json_output": false,
+            "actual_model": "gpt-5.4",
+            "requested_sandbox": "read-only",
+            "actual_sandbox": null,
+            "requested_reasoning_effort": null,
+            "actual_reasoning_effort": null,
+            "prompt_profile": "full",
+            "response_style": "standard",
+            "max_response_lines": 10,
+            "actual_approval": null,
+            "actual_workdir": null,
+            "output_mode": "text",
+            "session_id": null,
+            "footer_tokens_used": null,
+            "turn_failed": false,
+            "failure_message": null,
+            "stdout": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\wki-korean-retest\\korean-analyst.stdout.log",
+            "stderr": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\wki-korean-retest\\korean-analyst.stderr.log",
+            "last": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\wki-korean-retest\\korean-analyst.last.txt",
+            "prompt": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\codex\\wki-korean-retest\\korean-analyst.prompt.txt",
+            "prompt_sha256": "12693c1ab8219c2cbafb8c4c69d152162502b0441089c14fd10c90fa3ee2e27d",
+            "prompt_chars": 1784,
+            "workflow_prompt_mode": "disabled",
+            "workflow_prompt_chars": 0,
+            "command": "codex.cmd exec --full-auto -m gpt-5.4",
+            "last_exists": true,
+            "last_message_preview": "레거시 Codex launcher만 예외적으로 형식이 조금 다릅니다. 이쪽은 `output_dir` 아래 `orchestration-summary.md`, `orchestration-manifest.json`, prompt 파일이 evidence의 기준이고, 런처가 안 만들었으면 parent가 직접 채워야 합니다 ([skills/codex-subagent-...",
+            "stderr_preview": "Reading prompt from stdin...\nOpenAI Codex v0.114.0 (research preview)\n--------",
+            "stdout_preview": "**핵심**\n이 프로젝트에서 evidence 기록은 선택이 아니라 `Stage 9`의 차단 단계입니다. 최종 판정이 난 뒤, 사용자에게 결과를 보고하기 전에 반드시 evidence를 써야 하고, 이 작업은 워커가 아니라 오케스트레이터(parent)가 직접 합니다. 실패·중단 run도 동일하게 기록해야 합니다 ([orchestration-workflow.md..."
+        }
+    ]
+}

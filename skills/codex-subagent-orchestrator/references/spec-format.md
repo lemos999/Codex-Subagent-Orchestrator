@@ -12,10 +12,10 @@ Use this format when you want repeatable worker orchestration with per-worker se
 {
   "cwd": "<WORKSPACE_ROOT>",
   "cwd_resolution": "invocation",
-  "output_dir": "subagent-runs",
-  "manifest_file": "subagent-runs/orchestration-manifest.json",
-  "debug_log_file": "subagent-runs/launcher-debug.log",
-  "summary_file": "subagent-runs/orchestration-summary.md",
+  "output_dir": "subagent-runs/codex/todo-app",
+  "manifest_file": "subagent-runs/codex/todo-app/orchestration-manifest.json",
+  "debug_log_file": "subagent-runs/codex/todo-app/launcher-debug.log",
+  "summary_file": "subagent-runs/codex/todo-app/orchestration-summary.md",
   "archive_root": "subagent-records",
   "write_run_archive": true,
   "archive_run_label": "todo-app",
@@ -50,7 +50,14 @@ Use this format when you want repeatable worker orchestration with per-worker se
       "README.md"
     ]
   },
+  "live_usage": {
+    "enabled": true,
+    "display_mode": "both",
+    "status_file": "subagent-runs/codex/todo-app/orchestration-usage.json",
+    "poll_interval_ms": 500
+  },
   "defaults": {
+    "engine": "codex",
     "model": "gpt-5.4",
     "sandbox": "workspace-write",
     "reasoning_effort": "low",
@@ -102,13 +109,31 @@ Use this format when you want repeatable worker orchestration with per-worker se
 | `workflow_context_file` | no | Path to a JSON file merged into `workflow_context` before rendering |
 | `workflow_render_strict` | no | When true, missing `{{ variable }}` references fail the run; defaults to `true` |
 | `hooks` | no | Optional launcher-side hook object, currently supporting `after_create` bootstrap behavior |
+| `live_usage` | no | Optional live token-usage monitor config for console progress and/or a persisted status file |
 | `defaults` | no | Default worker settings |
 | `agents` | yes | Array of worker definitions |
+
+## Engine Field
+
+`engine` 필드는 워커가 사용하는 CLI 백엔드를 결정한다.
+
+| Engine | CLI Command | Default Model | Authentication |
+|---|---|---|---|
+| `codex` (기본) | `codex exec` | `gpt-5.4` | 구독 |
+| `claude` | `claude --print` | `sonnet` | 구독 |
+| `gemini` | `npx @google/gemini-cli --prompt` | `gemini-2.5-pro` | Google 계정 |
+
+규칙:
+- agent 수준의 `engine`이 `defaults.engine`을 오버라이드
+- `engine` 생략 시 `defaults.engine` 사용
+- `defaults.engine`도 없으면 `"codex"` (하위 호환)
+- `model`은 engine별로 독립적. 잘못된 조합(예: `engine: "claude"`, `model: "gpt-5.4"`)은 에러
 
 ## Defaults Object
 
 Supported fields:
 
+- `engine`
 - `sandbox`
 - `model`
 - `reasoning_effort`
@@ -120,6 +145,28 @@ Supported fields:
 - `max_response_lines`
 
 Defaults are merged into each worker unless the worker overrides them.
+
+`engine`은 워커가 사용하는 CLI 백엔드를 결정한다. 지원 값: `"codex"` (기본), `"claude"`, `"gemini"`. 기본값은 `"codex"` (기존 동작 호환). agent 수준에서 오버라이드 가능.
+
+When `live_usage.enabled` is true, the launcher forces `--json` on each worker even if `defaults.json` is false, because live token updates require JSON event streams.
+
+## Live Usage Fields
+
+The optional top-level `live_usage` object controls real-time usage tracking while workers are running.
+
+Supported fields:
+
+- `enabled`: turn live usage monitoring on or off
+- `display_mode`: `none`, `progress`, `file`, or `both`
+- `status_file`: path for the persisted snapshot JSON file; defaults to `output_dir/orchestration-usage.json`
+- `poll_interval_ms`: polling interval for file-tail updates; values below `100` are treated as `500`
+
+What it does:
+
+- tails each worker `stdout` file while the worker is still running
+- parses both legacy `event_msg/token_count` and newer `thread/tokenUsage/updated` token events
+- updates a single-line PowerShell progress display when `display_mode` includes `progress`
+- writes a machine-readable live snapshot when `display_mode` includes `file`
 
 ## Workflow Fields
 
@@ -183,6 +230,7 @@ Required fields:
 
 Optional fields:
 
+- `engine`
 - `mode`: `exec` or `resume`
 - `kind`: `implementer`, `reviewer`, `validator`, `fixer`, `planner`, or `custom`
 - `stage`: positive integer stage number; same-stage workers can run together when `execution_mode` is `parallel`
@@ -290,7 +338,7 @@ Or:
 ```json
 {
   "cwd": "<WORKSPACE_ROOT>",
-  "output_dir": "subagent-runs",
+  "output_dir": "subagent-runs/codex/parallel-assets",
   "skip_git_repo_check": true,
   "defaults": {
     "sandbox": "workspace-write",
@@ -338,7 +386,7 @@ Use this when you want independent implementers first and a final read-only revi
 {
   "cwd": ".",
   "cwd_resolution": "invocation",
-  "output_dir": "subagent-runs/parallel-build-review",
+  "output_dir": "subagent-runs/codex/parallel-build-review",
   "skip_git_repo_check": true,
   "execution_mode": "parallel",
   "requested_deliverables": [
@@ -475,9 +523,9 @@ When `write_run_archive` is true, the launcher also creates a per-run archive un
 - Use `workflow_prompt_mode: "prepend"` for implementers and reviewers that still need worker-local constraints such as writable scope and validation.
 - Use `hooks.after_create` only for idempotent bootstrap steps such as `git clone ... .` or dependency fetches.
 - For mixed parallel-and-review teams, put independent builders in the same `stage` and put the reviewer or validator in a later stage.
-- The top-level `cwd` resolves relative to the launcher's current working directory by default. This keeps `cwd: "."` portable even when the spec file itself lives under `subagent-runs/...`.
+- The top-level `cwd` resolves relative to the launcher's current working directory by default. This keeps `cwd: "."` portable even when the spec file itself lives under `subagent-runs/codex/...`.
 - Set `cwd_resolution: "spec"` only when you intentionally want the top-level `cwd` to resolve relative to the spec file directory.
-- Prefer relative top-level paths such as `cwd: "."` and `output_dir: "subagent-runs"` when you want the spec to stay portable across extracted workspaces.
+- Prefer relative top-level paths such as `cwd: "."` and `output_dir: "subagent-runs/codex/<run-name>"` when you want the spec to stay portable across extracted workspaces.
 - Absolute paths are allowed, but they should be treated as deployment-specific rather than reusable defaults.
 - Keep worker prompts narrow.
 - Use `read-only` for reviewers and validators unless they truly need write access.
@@ -494,6 +542,6 @@ When `write_run_archive` is true, the launcher also creates a per-run archive un
 - Use `resume` only when the prior session context is worth preserving.
 - Prefer the parent agent to merge results rather than asking workers to merge each other.
 - Keep the manifest and `last.txt` files unless the user explicitly wants a cleanup pass.
-- If you store generated specs under `subagent-runs/...`, keep `cwd: "."` and launch from the workspace root so the manifest still points to the real workspace root.
+- If you store generated specs under `subagent-runs/codex/...`, keep `cwd: "."` and launch from the workspace root so the manifest still points to the real workspace root.
 - If a reviewer finds a material issue, create a bounded fixer worker and then re-run review on the repaired artifact instead of patching deliverables directly in the parent.
 - If you must bypass the launcher and call `codex exec` directly, keep cost controls explicit: pass `-m` when model choice matters and pass `-c 'model_reasoning_effort="low"'` for routine workers unless task risk justifies more.

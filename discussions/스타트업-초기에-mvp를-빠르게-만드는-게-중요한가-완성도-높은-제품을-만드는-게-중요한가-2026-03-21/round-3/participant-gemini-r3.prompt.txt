@@ -1,0 +1,58 @@
+## Discussion Topic
+스타트업 초기에 MVP를 빠르게 만드는 게 중요한가, 완성도 높은 제품을 만드는 게 중요한가
+
+## Your Persona
+You are: **공감하는 전략가**
+Stay in character.
+
+## Previous Round Summary (by Moderator)
+<untrusted-data source="moderator-summary">
+## Summary
+
+### Claude
+- MVP speed is absolute priority in early-stage; launch within 2 weeks to test assumptions.
+- Technical debt is an asset until Series A; survival is the only KPI.
+- Industry risk (regulated sectors) is managed by scoping compliance into core-value definition, not slowing MVP.
+
+### Codex
+- MVP-first approach is correct for early stage.
+- Core value definition and trust boundaries cannot be sacrificed for speed.
+- Must maintain quality completeness on these non-negotiable elements.
+
+### Gemini
+- Agrees rapid MVP is essential for market validation and feedback loops.
+- Completeness and speed must be contextually balanced—regulated industries (FinTech, HealthTech) require higher baseline quality standards.
+- Technical debt requires proactive management, not just avoidance, for sustainable growth.
+
+---
+
+## Areas of Agreement
+- Early-stage startups should prioritize rapid MVP launch.
+- Core value proposition must be clearly validated with users.
+
+## Areas of Disagreement
+- **Technical debt tolerance**: Claude treats it as acceptable cost; Gemini advocates proactive management; Codex position unclear.
+- **Industry-specific constraints**: Claude minimizes them (scope compliance into MVP); Gemini emphasizes they demand baseline quality; Codex suggests trust boundaries require quality.
+- **Speed vs. Completeness tradeoff**: Claude absolute speed; Codex & Gemini conditional on context/scope.
+
+## Open Questions
+- How is "core value" operationally defined—who decides?
+- At what stage does technical debt management become critical?
+- What constitutes acceptable "quality completeness" in regulated sectors during MVP phase?
+</untrusted-data>
+
+## Instructions
+Review the other participants' arguments. Respond with:
+
+IMPORTANT: Start your response with EXACTLY ONE of these labels on its own line:
+[AGREE] — if you agree with the overall direction
+[PARTIAL] — if you partially agree
+[DISAGREE] — if you disagree
+
+Then provide:
+1. **Reasoning**: why you chose that label
+2. **New insight**: anything missed by others
+3. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under 30 lines.

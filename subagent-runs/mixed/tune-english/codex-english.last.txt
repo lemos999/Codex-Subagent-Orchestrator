@@ -1,0 +1,1 @@
+Verification: `npm.cmd test` and `npm.cmd run build` both pass in `C:\Users\haj\projects\subagent-orchestrator\packages\launcher`.

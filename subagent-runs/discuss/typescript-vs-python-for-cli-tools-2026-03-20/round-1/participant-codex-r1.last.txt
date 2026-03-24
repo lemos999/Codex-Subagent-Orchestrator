@@ -1,0 +1,1 @@
+[POSITION: Prefer TypeScript as the primary CLI implementation language here; use Python only for narrow scripting cases.]

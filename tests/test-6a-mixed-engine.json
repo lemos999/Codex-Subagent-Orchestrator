@@ -1,0 +1,40 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/test-6a-mixed",
+  "skip_git_repo_check": true,
+  "execution_mode": "parallel",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "shared_directive_mode": "disabled",
+  "defaults": {
+    "sandbox": "workspace-write",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 3
+  },
+  "agents": [
+    {
+      "name": "codex-writer",
+      "kind": "implementer",
+      "stage": 1,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "task": "Create or replace the file tests/artifacts/mixed-hello.txt with exactly this content: Hello from Codex engine",
+      "writable_scope": ["tests/artifacts/mixed-hello.txt"],
+      "validation": ["Ensure tests/artifacts/mixed-hello.txt exists and contains 'Hello from Codex engine'"]
+    },
+    {
+      "name": "claude-reviewer",
+      "kind": "reviewer",
+      "stage": 2,
+      "engine": "claude",
+      "model": "haiku",
+      "sandbox": "read-only",
+      "task": "Read the file tests/artifacts/mixed-hello.txt and verify it contains exactly 'Hello from Codex engine'. Return ACCEPTED if correct, MATERIAL_ISSUES if not.",
+      "read_first": ["tests/artifacts/mixed-hello.txt"],
+      "validation": ["Confirm verdict is stated clearly"]
+    }
+  ]
+}

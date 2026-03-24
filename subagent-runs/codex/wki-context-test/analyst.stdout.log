@@ -1,0 +1,32 @@
+Evidence recording is the workflow’s audit trail. The parent orchestrator, not any worker, must write it after the final verdict is known and before anything is reported to the user. Stage 9 is explicitly a blocking gate: no user-facing result can be reported until evidence exists. That rule is defined in [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L228), expanded in [evidence-format.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md#L7), and restated in the Codex agent contract at [codex-subagent-orchestrator.md](/C:/Users/haj/projects/subagent-orchestrator/.claude/agents/codex-subagent-orchestrator.md#L47).
+
+**Stage 9 flow**
+1. Take the review outcome from the prior stage.
+2. If the verdict is `ACCEPTED` or `MINOR_ISSUES`, the orchestrator writes evidence directly with the Write tool:
+   - choose a run name: `<task-slug>-<YYYY-MM-DD>` with `-2`, `-3` on collision
+   - choose the directory: `subagent-runs/<engine>/<run-name>/` for single-engine runs, or `subagent-runs/mixed/<run-name>/` for multi-engine runs
+   - write `run-manifest.md` as the authoritative structured record
+   - write `run-summary.md` as the compact per-agent summary
+   - write `prompts/<role>.prompt.md` for each worker’s exact prompt
+   - write `results/<role>.result.md` for each worker’s full returned text
+   - include watchdog prompt/result files and decisions if a watchdog was used
+   - only then report the outcome to the user, including the evidence directory path
+3. If the verdict is `MATERIAL_ISSUES`, Stage 9 becomes recovery:
+   - extract the reviewer’s findings
+   - launch a bounded `sub-fixer` with only those findings and the original writable scope
+   - run `sub-reviewer` again
+   - allow at most 2 fix/review cycles
+   - if it still fails, stop automation, write evidence anyway, and escalate to the user
+
+**What the evidence contains**
+- `run-manifest.md`: request, team/pattern, all agents, deliverables, review verdict, fix cycles, metrics, timeline, errors/notes
+- `run-summary.md`: quick scan table of agents, models, stage, status, result, plus watchdog columns when used
+- `prompts/`: exact prompts sent, for replay/debugging
+- `results/`: full worker outputs, for audit/debugging
+
+**Key operating rules**
+- Evidence writing is mandatory and non-delegatable: the parent orchestrator writes it, never a worker. See [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L234).
+- Evidence is written for successful, failed, and aborted runs. Failed runs get full evidence documenting exactly what completed, failed, or timed out. See [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L278) and [evidence-format.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/evidence-format.md#L179).
+- The workflow forbids “phantom evidence”: never claim files or artifacts were produced if they were not. See [orchestration-workflow.md](/C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L276).
+
+In short, Stage 9 is the acceptance/recovery checkpoint plus mandatory evidence persistence. The run is not considered reportable until that evidence package has been written.

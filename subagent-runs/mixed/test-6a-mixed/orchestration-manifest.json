@@ -1,0 +1,249 @@
+{
+    "created_at_utc": "2026-03-19T13:22:08.594Z",
+    "launcher_version": "ts-phase1-v1",
+    "launcher_script": "subagent-launch",
+    "spec_path": "C:\\Users\\haj\\projects\\subagent-orchestrator\\tests\\test-6a-mixed-engine.json",
+    "spec_directory": "C:\\Users\\haj\\projects\\subagent-orchestrator\\tests",
+    "spec_sha256": "2ffab6d7045313c598cee3f423c40d486f271718e6897cb29f38f91a42428f1f",
+    "codex_executable": "codex",
+    "claude_executable": "claude",
+    "gemini_executable": "npx.cmd",
+    "invocation_cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "cwd_requested": ".",
+    "cwd_resolution_mode": "invocation",
+    "cwd_resolution_base": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "workspace_root": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "output_dir": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed",
+    "debug_log": null,
+    "summary_file": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\orchestration-summary.md",
+    "live_usage": {
+        "enabled": false,
+        "display_mode": "none",
+        "poll_interval_ms": 500,
+        "status_file": null,
+        "json_output_forced": false
+    },
+    "archive": {
+        "enabled": false,
+        "root": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-records",
+        "run_label": "test-6a-mixed",
+        "run_directory": null,
+        "launcher_directory": null,
+        "deliverables_directory": null,
+        "workers_directory": null,
+        "supervisor_directory": null
+    },
+    "execution_mode": "parallel",
+    "skip_git_repo_check": true,
+    "shared_directive": {
+        "source": null,
+        "requested_mode": "disabled",
+        "effective_mode": "disabled",
+        "sha256": null,
+        "char_count": 0,
+        "original_char_count": 0,
+        "effective_char_count": 0
+    },
+    "workflow": {
+        "enabled": false,
+        "source": null,
+        "prompt_mode": "disabled",
+        "strict_render": true,
+        "auto_detected": false,
+        "front_matter_text": null,
+        "prompt_template_sha256": null,
+        "prompt_template_chars": 0,
+        "context": {}
+    },
+    "hooks": {
+        "after_create": {
+            "enabled": false,
+            "ran": false,
+            "trigger": null,
+            "exit_code": null,
+            "missing_sentinel_paths": [],
+            "workspace_was_empty": false,
+            "stdout": null,
+            "stderr": null
+        }
+    },
+    "policy": {
+        "execution_mode": "parallel",
+        "supervisor_only": false,
+        "require_final_read_only_review": false,
+        "material_issue_strategy": "none",
+        "requested_deliverables": [],
+        "writable_worker_names": [
+            "codex-writer"
+        ],
+        "read_only_reviewer_names": [
+            "claude-reviewer"
+        ],
+        "final_read_only_reviewer_names": [
+            "claude-reviewer"
+        ],
+        "final_read_only_review_present": true,
+        "last_writable_stage": 1
+    },
+    "efficiency_signals": {
+        "measurement_mode": "structure_first",
+        "note": "Use reruns, parent burden, repair-loop shape, and worker-to-deliverable ratios as primary efficiency signals. Treat absolute token totals as secondary.",
+        "execution_mode": "parallel",
+        "total_workers": 2,
+        "succeeded_workers": 2,
+        "failed_workers": 0,
+        "requested_deliverable_count": 0,
+        "workers_per_deliverable": null,
+        "writable_workers_per_deliverable": null,
+        "writable_workers": 1,
+        "read_only_workers": 1,
+        "implementer_workers": 1,
+        "reviewer_workers": 1,
+        "validator_workers": 0,
+        "fixer_workers": 0,
+        "full_auto_writable_workers": 1,
+        "full_auto_read_only_workers": 0,
+        "stage_count": 2,
+        "parallel_stage_count": 0,
+        "max_parallel_workers_in_stage": 1,
+        "uses_parallel_execution": true,
+        "uses_supervisor_only_policy": false,
+        "uses_bounded_repair_policy": false,
+        "final_read_only_review_present": true,
+        "total_prompt_chars": 1009,
+        "total_footer_tokens": 0
+    },
+    "stage_plan": [
+        {
+            "stage": 1,
+            "worker_count": 1,
+            "worker_names": [
+                "codex-writer"
+            ],
+            "worker_kinds": [
+                "implementer"
+            ],
+            "read_only_workers": [],
+            "writable_workers": [
+                "codex-writer"
+            ]
+        },
+        {
+            "stage": 2,
+            "worker_count": 1,
+            "worker_names": [
+                "claude-reviewer"
+            ],
+            "worker_kinds": [
+                "reviewer"
+            ],
+            "read_only_workers": [
+                "claude-reviewer"
+            ],
+            "writable_workers": []
+        }
+    ],
+    "defaults": {
+        "sandbox": "workspace-write",
+        "reasoning_effort": "low",
+        "prompt_profile": "compact",
+        "response_style": "compact",
+        "max_response_lines": 3
+    },
+    "results": [
+        {
+            "name": "codex-writer",
+            "engine": "codex",
+            "mode": "exec",
+            "stage": 1,
+            "worker_kind": "implementer",
+            "is_read_only": false,
+            "cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+            "exit_code": 0,
+            "succeeded": true,
+            "required_paths": [],
+            "required_non_empty_paths": [],
+            "missing_required_paths": [],
+            "empty_required_paths": [],
+            "validation_failures": [],
+            "requested_model": "gpt-5.4",
+            "requested_full_auto": true,
+            "requested_json_output": false,
+            "actual_model": "gpt-5.4",
+            "requested_sandbox": "workspace-write",
+            "actual_sandbox": null,
+            "requested_reasoning_effort": "low",
+            "actual_reasoning_effort": "low",
+            "prompt_profile": "compact",
+            "response_style": "compact",
+            "max_response_lines": 3,
+            "actual_approval": null,
+            "actual_workdir": null,
+            "output_mode": "text",
+            "session_id": null,
+            "footer_tokens_used": null,
+            "turn_failed": false,
+            "failure_message": null,
+            "stdout": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\codex-writer.stdout.log",
+            "stderr": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\codex-writer.stderr.log",
+            "last": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\codex-writer.last.txt",
+            "prompt": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\codex-writer.prompt.txt",
+            "prompt_sha256": "da6a6609a9fe1449eda5d386995a4012bf8b80d78df106200b2217faead80198",
+            "prompt_chars": 592,
+            "workflow_prompt_mode": "disabled",
+            "workflow_prompt_chars": 0,
+            "command": "codex.cmd exec --full-auto -m gpt-5.4",
+            "last_exists": true,
+            "last_message_preview": "[tests/artifacts/mixed-hello.txt](/C:/Users/haj/projects/subagent-orchestrator/tests/artifacts/mixed-hello.txt) already contained the exact requested content, verified byte-for-byte as `Hello from Cod...",
+            "stderr_preview": "Reading prompt from stdin...\nOpenAI Codex v0.114.0 (research preview)\n--------",
+            "stdout_preview": "[tests/artifacts/mixed-hello.txt](/C:/Users/haj/projects/subagent-orchestrator/tests/artifacts/mixed-hello.txt) already contained the exact requested content, verified byte-for-byte as `Hello from Cod..."
+        },
+        {
+            "name": "claude-reviewer",
+            "engine": "claude",
+            "mode": "exec",
+            "stage": 2,
+            "worker_kind": "reviewer",
+            "is_read_only": true,
+            "cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+            "exit_code": 0,
+            "succeeded": true,
+            "required_paths": [],
+            "required_non_empty_paths": [],
+            "missing_required_paths": [],
+            "empty_required_paths": [],
+            "validation_failures": [],
+            "requested_model": "haiku",
+            "requested_full_auto": false,
+            "requested_json_output": false,
+            "actual_model": "haiku",
+            "requested_sandbox": "read-only",
+            "actual_sandbox": null,
+            "requested_reasoning_effort": "low",
+            "actual_reasoning_effort": "low",
+            "prompt_profile": "compact",
+            "response_style": "compact",
+            "max_response_lines": 3,
+            "actual_approval": null,
+            "actual_workdir": null,
+            "output_mode": "text",
+            "session_id": null,
+            "footer_tokens_used": null,
+            "turn_failed": false,
+            "failure_message": null,
+            "stdout": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\claude-reviewer.stdout.log",
+            "stderr": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\claude-reviewer.stderr.log",
+            "last": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\claude-reviewer.last.txt",
+            "prompt": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\test-6a-mixed\\claude-reviewer.prompt.txt",
+            "prompt_sha256": "99f4b2e889781a78f54051f135eab7c28480e2fb72745b3688c2ce71b271582a",
+            "prompt_chars": 417,
+            "workflow_prompt_mode": "disabled",
+            "workflow_prompt_chars": 0,
+            "command": "claude --print --model haiku",
+            "last_exists": true,
+            "last_message_preview": "**ACCEPTED**\n\nThe file contains exactly \"Hello from Codex engine\" as expected.",
+            "stderr_preview": "",
+            "stdout_preview": "**ACCEPTED**\n\nThe file contains exactly \"Hello from Codex engine\" as expected."
+        }
+    ]
+}

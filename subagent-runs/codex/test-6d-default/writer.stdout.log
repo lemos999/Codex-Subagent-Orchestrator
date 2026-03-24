@@ -1,0 +1,1 @@
+[tests/artifacts/default-engine.txt](C:/Users/haj/projects/subagent-orchestrator/tests/artifacts/default-engine.txt) already contained exactly `Hello from default engine` with no trailing newline, so no edit was needed. I verified the raw file bytes match that 25-byte ASCII string exactly.

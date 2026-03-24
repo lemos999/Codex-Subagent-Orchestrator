@@ -1,0 +1,1 @@
+[POSITION: AI should front-load and narrow human review, but humans should retain final authority for correctness, risk, and design.]

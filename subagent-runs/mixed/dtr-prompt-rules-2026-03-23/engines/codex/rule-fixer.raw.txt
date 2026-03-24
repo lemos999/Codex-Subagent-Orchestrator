@@ -1,0 +1,32 @@
+Finding -> fix mapping
+
+1. [pattern-c-parallel-review.md](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-c-parallel-review.md)
+Replaced corrupted reviewer/watchdog separators and labels with plain ASCII English:
+`--` in review criteria, `single message -- both Task calls together`, `Parallel implementation -- Worker ...`, ASCII flow lines using `->`, and ASCII watchdog decision comments.
+
+2. [pattern-e-full-loop.md](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-e-full-loop.md)
+Normalized the corrupted title, fixer contract, finding format, return line, watchdog flow, and watchdog comments to plain ASCII English while preserving the existing implement-review-fix-review workflow semantics.
+
+3. [pattern-a-solo.md](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-a-solo.md)
+Prepended the shared directive opener to the Solo Explorer prompt so it now begins with the same `AGENTS.md` contract instruction used by the other prompt templates.
+
+Validation results
+
+- No malformed separator artifacts remain in the edited files: `rg -n "\?\?|[^\x00-\x7F]"` returned no matches for the three authorized templates.
+- `pattern-a-solo.md` explorer prompt now begins with the shared-directive opener at [pattern-a-solo.md:98](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-a-solo.md#L98).
+- Edited sections read cleanly in the targeted spots:
+  [pattern-c-parallel-review.md:64](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-c-parallel-review.md#L64),
+  [pattern-c-parallel-review.md:82](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-c-parallel-review.md#L82),
+  [pattern-c-parallel-review.md:129](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-c-parallel-review.md#L129),
+  [pattern-c-parallel-review.md:182](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-c-parallel-review.md#L182),
+  [pattern-e-full-loop.md:1](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-e-full-loop.md#L1),
+  [pattern-e-full-loop.md:60](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-e-full-loop.md#L60),
+  [pattern-e-full-loop.md:71](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-e-full-loop.md#L71),
+  [pattern-e-full-loop.md:83](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-e-full-loop.md#L83),
+  [pattern-e-full-loop.md:153](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-e-full-loop.md#L153),
+  [pattern-e-full-loop.md:231](C:\Users\haj\projects\subagent-orchestrator\skills\claude-subagent-orchestrator\assets\prompt-templates\pattern-e-full-loop.md#L231).
+- No files outside the authorized scope were edited by this fix operation.
+
+Uncertainty
+
+- The repository already had many unrelated pre-existing changes, so whole-workspace cleanliness is not inferable from current `git` state alone. The scoped fix itself only modified the three authorized template files.

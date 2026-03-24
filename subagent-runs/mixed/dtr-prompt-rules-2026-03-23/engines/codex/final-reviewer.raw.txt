@@ -1,0 +1,45 @@
+Verdict: MATERIAL_ISSUES
+
+Findings:
+- File: workspace scope via `git status --short`
+  Location: workspace root status output
+  Evidence: many modified/untracked paths outside the authorized review set are present, including `packages/launcher/src/cli.ts`, `packages/launcher/src/orchestrator.ts`, `workspace-knowledge-index/src/index.ts`, multiple `skills/codex-subagent-orchestrator/...` files, and many unrelated project files.
+  Problem: scope compliance for this `/submix` doc/template run is not verifiable from the current workspace state. I cannot confirm that only the authorized files changed for this run.
+  Fix direction: provide run-isolated evidence for the docs/templates change set only, or rerun/repackage the review against a clean worktree or a scoped diff/commit.
+
+- File: [deep-thinking-tokens-guide.md](C:/Users/haj/projects/subagent-orchestrator/deep-thinking-tokens-guide.md#L1)
+  Location: line 1 and throughout
+  Evidence: the file content is mojibake/gibberish (`源딆씠 ?덈뒗 異붾줎???대걣?대궡??AI ?쒖슜 媛?대뱶`, repeated `??` artifacts throughout).
+  Problem: the guide is not reliably readable, so it cannot serve as a clear source for the shared deep-thinking doctrine. That breaks internal consistency and makes the intended prompt discipline impossible to audit or apply.
+  Fix direction: restore/save the file with the intended encoding, then rereview the actual prose for clarity and prompt economy.
+
+- File: [pattern-c-parallel-review.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-c-parallel-review.md#L64)
+  Location: lines 64-67, 82, 129-146, 181-184
+  Evidence: corrupted separators and text appear in reviewer/watchdog contracts, e.g. `Scope compliance per worker ??each worker only modified...`, `Parallel Implementation ??Worker`, and multiple `??` markers in the flow comments.
+  Problem: this template no longer cleanly encodes the contract. The corruption adds noise exactly where reviewer/watchdog quality rules must stay precise, which undermines decision-point focus and prompt economy.
+  Fix direction: repair the encoding/text so each criterion and flow step is plain, unambiguous English with normal separators.
+
+- File: [pattern-e-full-loop.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-e-full-loop.md#L1)
+  Location: lines 1, 60, 71, 83, 133, 153-156, 231-240
+  Evidence: corrupted text appears in the pattern title, fixer contract, and watchdog flow, e.g. `Implement ??Review ??Fix ??Review`, `{{this.file}}:{{this.location}} ??{{this.problem}} ??{{this.fix_direction}}`, and repeated `??` markers in the control-flow comments.
+  Problem: the full-loop template is internally inconsistent and risks emitting malformed reviewer/fixer/watchdog prompts. This is material because this pattern depends on exact finding-to-fix wiring.
+  Fix direction: normalize the text/encoding and recheck that reviewer findings map to fixer inputs with one clear evidence-backed fix direction per issue.
+
+- File: [pattern-a-solo.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-a-solo.md#L97)
+  Location: lines 97-108
+  Evidence: the Solo Explorer prompt starts directly with `## Exploration Contract` and omits the shared directive, while [orchestration-workflow.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md#L28) states every worker prompt must begin with the workspace contract from `AGENTS.md`.
+  Problem: this violates the shared-policy discipline and creates an exception in one template that is not justified in the references.
+  Fix direction: prepend the same shared-directive opener used by the other templates, or explicitly carve out explorer-only behavior in the shared reference if omission is intentional.
+
+Files checked:
+- [deep-thinking-tokens-guide.md](C:/Users/haj/projects/subagent-orchestrator/deep-thinking-tokens-guide.md)
+- [agent-contract.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/agent-contract.md)
+- [sub-command-protocol.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/sub-command-protocol.md)
+- [orchestration-workflow.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/orchestration-workflow.md)
+- [pattern-a-solo.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-a-solo.md)
+- [pattern-b-implement-review.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-b-implement-review.md)
+- [pattern-c-parallel-review.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-c-parallel-review.md)
+- [pattern-d-plan-implement-review.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-d-plan-implement-review.md)
+- [pattern-e-full-loop.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/assets/prompt-templates/pattern-e-full-loop.md)
+
+Rereview required: YES

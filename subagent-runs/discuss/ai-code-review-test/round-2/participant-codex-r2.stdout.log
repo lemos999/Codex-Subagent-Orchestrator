@@ -1,0 +1,7 @@
+[AGREE]
+
+1. **Reasoning**: Claude and Gemini are directionally right: AI is strong at breadth, consistency, and speed, but weak on intent, business context, and whether a change is the right tradeoff for this codebase now. Replacing humans would optimize for detectable defects while degrading judgment.
+2. **New insight**: The real boundary is accountability, not capability. If a team is not willing to let AI own rollback risk, incident follow-up, and architectural consequences, then AI should not be the final reviewer. The review split should be risk-based: low-risk mechanical changes can be AI-heavy; security, data correctness, migrations, and public API changes need human sign-off. The best workflow is AI first, human second, with AI findings attached and tracked against escape-rate metrics.
+3. **Updated position**: My view has not changed materially; the other arguments reinforced the hybrid model, but I would state the operating rule more sharply: AI can replace parts of review work, not review ownership.
+
+[POSITION: AI should front-load and narrow human review, but humans should retain final authority for correctness, risk, and design.]

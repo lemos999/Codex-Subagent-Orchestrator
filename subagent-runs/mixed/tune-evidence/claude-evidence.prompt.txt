@@ -1,0 +1,38 @@
+## Relevant Context (auto-injected)
+
+### subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md (lines 22-28)
+**Agent 1: file-writer (sub-implementer)** — markdown-section
+> ### Agent 1: file-writer (sub-implementer)
+> 
+> - **Contract summary**: Create tests/artifacts/evidence-test.txt with exact content
+> - **Result summary**: File created, all 3 validation checks passed
+> - **Prompt file**: prompts/file-writer.prompt.md
+
+### subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md (lines 1-2)
+**Run Manifest — evidence-test-2026-03-16** — markdown-section
+> # Run Manifest — evidence-test-2026-03-16
+
+### subagent-runs/codex/wki-context-test/orchestration-summary.md (lines 25-29)
+**Workers** — markdown-section
+> ## Workers
+> 
+> - `analyst`: ok; engine=codex; stage=1; kind=reviewer; read_only=True; full_auto=False; model=gpt-5.4; sandbox=; reasoning=; prompt_chars=1525; footer_tokens=n/a; workflow_mode=disabled
+>   preview: In short, Stage 9 is the acceptance/recovery checkpoint plus mandatory evidence persistence. The run is not considered reportable until that evidence package has been written.
+
+### skills/claude-subagent-orchestrator/references/evidence-format.md (lines 179-193)
+**Error Evidence** — markdown-section
+> ## Error Evidence
+> 
+> When a run fails partially:
+> 
+> ```markdown
+
+### .claude/agents/sub-implementer.md (lines 19-28)
+**상태 보고 (Status Reporting)** — markdown-section
+> ## 상태 보고 (Status Reporting)
+> 
+> 작업 진행 중 각 단계마다 한글로 현재 상태를 출력하세요.
+> 형식: `현재 [과제 요약]을(를) 위해 [수행 중인 작업]하는 중.`
+>
+
+이 프로젝트에서 워커 실행 후 증거를 기록하는 규칙을 설명해줘

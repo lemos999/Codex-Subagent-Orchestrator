@@ -1,0 +1,27 @@
+## Relevant Context (auto-injected)
+
+### tests/artifacts/evidence-test.txt (lines 1-1)
+**line-block** — line-block
+```
+Evidence recording test - 2026-03-16
+```
+
+### skills/claude-subagent-orchestrator/references/evidence-format.md (lines 1-2)
+**Evidence Format** — markdown-section
+> # Evidence Format
+
+### game-design-director/game-design-director-integrated.md (lines 2137-2137)
+**C-7. 파트 간 모순 검증 결과** — markdown-section
+> # C-7. 파트 간 모순 검증 결과
+
+### subagent-runs/codex/wki-context-test/analyst.last.txt (lines 1-1)
+**line-block** — line-block
+```
+In short, Stage 9 is the acceptance/recovery checkpoint plus mandatory evidence persistence. The run is not considered reportable until that evidence package has been written.
+```
+
+### subagent-runs/claude/evidence-test-2026-03-16/run-manifest.md (lines 1-2)
+**Run Manifest — evidence-test-2026-03-16** — markdown-section
+> # Run Manifest — evidence-test-2026-03-16
+
+evidence recording Stage 9

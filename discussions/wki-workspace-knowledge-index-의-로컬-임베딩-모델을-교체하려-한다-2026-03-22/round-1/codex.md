@@ -1,0 +1,1 @@
+[POSITION: WKI에는 `multilingual-e5-large`가 후보군 중 최적이며, 도입 전 query/document 분리부터 고쳐야 한다]

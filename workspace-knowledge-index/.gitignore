@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.knowledge/
+*.lance
+*.db
+*.tsbuildinfo

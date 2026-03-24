@@ -1,0 +1,56 @@
+{
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/mixed-impl-review",
+  "manifest_file": "subagent-runs/mixed/mixed-impl-review/orchestration-manifest.json",
+  "summary_file": "subagent-runs/mixed/mixed-impl-review/orchestration-summary.md",
+  "skip_git_repo_check": true,
+  "execution_mode": "parallel",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "requested_deliverables": [
+    "output.txt"
+  ],
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "material_issue_strategy": "fixer_then_rereview",
+  "shared_directive_mode": "reference",
+  "defaults": {
+    "engine": "codex",
+    "model": "gpt-5.4",
+    "sandbox": "workspace-write",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 4
+  },
+  "agents": [
+    {
+      "name": "implementer",
+      "kind": "implementer",
+      "stage": 1,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "task": "{{IMPLEMENTER_TASK}}",
+      "writable_scope": [
+        "output.txt"
+      ],
+      "validation": [
+        "Ensure output.txt exists.",
+        "Ensure output.txt is non-empty."
+      ]
+    },
+    {
+      "name": "reviewer",
+      "kind": "reviewer",
+      "stage": 2,
+      "engine": "claude",
+      "model": "haiku",
+      "sandbox": "read-only",
+      "task": "Review output.txt for correctness and scope compliance.",
+      "read_first": [
+        "output.txt"
+      ]
+    }
+  ]
+}

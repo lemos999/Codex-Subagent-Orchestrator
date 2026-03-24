@@ -1,0 +1,1 @@
+"""Built-in trading strategies."""

@@ -1,0 +1,40 @@
+I need to understand the orchestration workflow. I will start by reading the referenced `orchestration-workflow.md` file within the `claude-subagent-orchestrator` skill.
+Here is a step-by-step explanation of the orchestration workflow:
+
+1.  **CLASSIFY**: The first step involves classifying the task based on its type (create, fix, refactor, review, analyze), complexity (low, medium, high), potential for parallelism, and the need for review (if the output persists).
+
+2.  **CHOOSE TEAM**: Based on the classification, an agent team pattern is selected. Common patterns include:
+    *   **Solo**: For single, bounded tasks.
+    *   **Implement + Review (Default)**: For standard deliverables.
+    *   **Parallel + Review**: For independent outputs with disjoint scopes.
+    *   **Plan + Implement + Review**: For complex tasks requiring an initial design.
+    *   **Full Loop**: For tasks with known risks, expecting repairs.
+
+3.  **INJECT SHARED DIRECTIVE**: A shared directive, typically from `AGENTS.md`, is injected into each worker's prompt. This can be in "reference mode" (default, token-saving) or "inline mode" (for critical workers or first runs, for explicit contract awareness).
+
+4.  **BUILD CONTRACTS**: A comprehensive contract is built for each worker, detailing their task, inspect-first list, writable scope, validation criteria, return contract, and stop conditions. This also includes the shared directive and tool guidance.
+
+5.  **SELECT SETTINGS**: Specific settings are chosen for each worker, including:
+    *   `engine`: The model engine (e.g., `claude`, `codex`, `gemini`), chosen based on compatibility and user specification.
+    *   `model`: The specific model within the chosen engine.
+    *   `isolation`: Set to `"worktree"` if parallel writers might overlap.
+    *   `run_in_background`: For truly independent long tasks.
+    *   `max_turns`: Optional, to limit runaway agents.
+
+6.  **CONFIRM**: Before launching, the execution plan is presented to the user for confirmation. The user can choose to proceed (`yes`), cancel (`no`), or modify (`modify`) the plan. This step is crucial to ensure user oversight.
+
+7.  **LAUNCH**: Upon user confirmation, workers are launched. This can be sequential (one after another) or parallel (concurrently). Engine dispatch varies:
+    *   **claude**: Called directly via the Agent tool.
+    *   **codex**: Executed via Bash using `codex exec`.
+    *   **gemini**: Executed via Bash using the Gemini CLI.
+    Mixed-engine parallel execution is supported.
+
+8.  **WATCHDOG HOOK (Optional)**: If enabled, a watchdog agent (a sub-reviewer) evaluates each worker's output against the original goal after each stage. If a "SHORTFALL" is reported, the orchestrator decides to accept the feedback, reject it, or escalate to the user. A maximum of one watchdog-fix cycle per worker stage is allowed.
+
+9.  **VALIDATE**: After each worker returns, the orchestrator validates the output by checking for deliverables, reading file content, and parsing worker summaries and reviewer verdicts (ACCEPTED, MINOR_ISSUES, MATERIAL_ISSUES).
+
+10. **EVIDENCE + RECOVER or ACCEPT**:
+    *   **If ACCEPTED or MINOR_ISSUES**: Evidence files (run manifest, summary, prompts, results) are mandatory and written by the orchestrator to a designated `subagent-runs` directory. The run directory path is then reported to the user.
+    *   **If MATERIAL_ISSUES**: The orchestrator extracts reviewer findings and launches a `sub-fixer` with these findings. After the fixer returns, a `sub-reviewer` is launched again. A maximum of two fix-review cycles are allowed before escalating to the user if issues persist.
+
+This workflow also includes a **Fallback Protocol** for handling various failure scenarios and a detailed **Evidence Writing Mechanism** to ensure comprehensive documentation of every run.

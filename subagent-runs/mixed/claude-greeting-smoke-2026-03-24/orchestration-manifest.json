@@ -1,0 +1,186 @@
+{
+    "created_at_utc": "2026-03-24T04:54:35.123Z",
+    "launcher_version": "ts-phase1-v1",
+    "launcher_script": "subagent-launch",
+    "spec_path": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\claude-greeting-smoke.spec.json",
+    "spec_directory": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed",
+    "spec_sha256": "3fbc7aa0285194f185ce84ca1baf8a038a1e4a9afa6187c3a552f9ecded7e931",
+    "codex_executable": "codex",
+    "claude_executable": "claude",
+    "gemini_executable": "npx.cmd",
+    "invocation_cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "cwd_requested": ".",
+    "cwd_resolution_mode": "invocation",
+    "cwd_resolution_base": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "workspace_root": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+    "output_dir": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\claude-greeting-smoke-2026-03-24",
+    "debug_log": null,
+    "summary_file": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\claude-greeting-smoke-2026-03-24\\orchestration-summary.md",
+    "live_usage": {
+        "enabled": false,
+        "display_mode": "none",
+        "poll_interval_ms": 500,
+        "status_file": null,
+        "json_output_forced": false
+    },
+    "archive": {
+        "enabled": false,
+        "root": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-records",
+        "run_label": "claude-greeting-smoke-2026-03-24",
+        "run_directory": null,
+        "launcher_directory": null,
+        "deliverables_directory": null,
+        "workers_directory": null,
+        "supervisor_directory": null
+    },
+    "execution_mode": "sequential",
+    "skip_git_repo_check": true,
+    "shared_directive": {
+        "source": null,
+        "requested_mode": "disabled",
+        "effective_mode": "disabled",
+        "sha256": null,
+        "char_count": 0,
+        "original_char_count": 0,
+        "effective_char_count": 0
+    },
+    "workflow": {
+        "enabled": false,
+        "source": null,
+        "prompt_mode": "disabled",
+        "strict_render": true,
+        "auto_detected": false,
+        "front_matter_text": null,
+        "prompt_template_sha256": null,
+        "prompt_template_chars": 0,
+        "context": {}
+    },
+    "hooks": {
+        "after_create": {
+            "enabled": false,
+            "ran": false,
+            "trigger": null,
+            "exit_code": null,
+            "missing_sentinel_paths": [],
+            "workspace_was_empty": false,
+            "stdout": null,
+            "stderr": null
+        }
+    },
+    "policy": {
+        "execution_mode": "sequential",
+        "supervisor_only": false,
+        "require_final_read_only_review": false,
+        "material_issue_strategy": "none",
+        "requested_deliverables": [],
+        "writable_worker_names": [],
+        "read_only_reviewer_names": [
+            "claude-greeter"
+        ],
+        "final_read_only_reviewer_names": [
+            "claude-greeter"
+        ],
+        "final_read_only_review_present": true,
+        "last_writable_stage": 0
+    },
+    "efficiency_signals": {
+        "measurement_mode": "structure_first",
+        "note": "Use reruns, parent burden, repair-loop shape, and worker-to-deliverable ratios as primary efficiency signals. Treat absolute token totals as secondary.",
+        "execution_mode": "sequential",
+        "total_workers": 1,
+        "succeeded_workers": 1,
+        "failed_workers": 0,
+        "requested_deliverable_count": 0,
+        "workers_per_deliverable": null,
+        "writable_workers_per_deliverable": null,
+        "writable_workers": 0,
+        "read_only_workers": 1,
+        "implementer_workers": 0,
+        "reviewer_workers": 0,
+        "validator_workers": 0,
+        "fixer_workers": 0,
+        "full_auto_writable_workers": 0,
+        "full_auto_read_only_workers": 0,
+        "stage_count": 1,
+        "parallel_stage_count": 0,
+        "max_parallel_workers_in_stage": 1,
+        "uses_parallel_execution": false,
+        "uses_supervisor_only_policy": false,
+        "uses_bounded_repair_policy": false,
+        "final_read_only_review_present": true,
+        "total_prompt_chars": 1711,
+        "total_footer_tokens": 0
+    },
+    "stage_plan": [
+        {
+            "stage": 1,
+            "worker_count": 1,
+            "worker_names": [
+                "claude-greeter"
+            ],
+            "worker_kinds": [
+                "planner"
+            ],
+            "read_only_workers": [
+                "claude-greeter"
+            ],
+            "writable_workers": []
+        }
+    ],
+    "defaults": {
+        "sandbox": "read-only",
+        "reasoning_effort": "low",
+        "prompt_profile": "compact",
+        "response_style": "compact",
+        "max_response_lines": 2
+    },
+    "results": [
+        {
+            "name": "claude-greeter",
+            "engine": "claude",
+            "mode": "exec",
+            "stage": 1,
+            "worker_kind": "planner",
+            "is_read_only": true,
+            "cwd": "C:\\Users\\haj\\projects\\subagent-orchestrator",
+            "exit_code": 0,
+            "succeeded": true,
+            "required_paths": [],
+            "required_non_empty_paths": [],
+            "missing_required_paths": [],
+            "empty_required_paths": [],
+            "validation_failures": [],
+            "requested_model": "haiku",
+            "requested_full_auto": false,
+            "requested_json_output": false,
+            "actual_model": "haiku",
+            "requested_sandbox": "read-only",
+            "actual_sandbox": null,
+            "requested_reasoning_effort": "low",
+            "actual_reasoning_effort": "low",
+            "prompt_profile": "compact",
+            "response_style": "compact",
+            "max_response_lines": 2,
+            "actual_approval": null,
+            "actual_workdir": null,
+            "output_mode": "text",
+            "session_id": null,
+            "footer_tokens_used": null,
+            "turn_failed": false,
+            "failure_message": null,
+            "stdout": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\claude-greeting-smoke-2026-03-24\\claude-greeter.stdout.log",
+            "stderr": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\claude-greeting-smoke-2026-03-24\\claude-greeter.stderr.log",
+            "last": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\claude-greeting-smoke-2026-03-24\\claude-greeter.last.txt",
+            "prompt": "C:\\Users\\haj\\projects\\subagent-orchestrator\\subagent-runs\\mixed\\claude-greeting-smoke-2026-03-24\\claude-greeter.prompt.txt",
+            "prompt_sha256": "992044b9589ccaa27b003eb04e16a4f541e3449c0f0e842d23b77075d840ded6",
+            "prompt_chars": 1711,
+            "workflow_prompt_mode": "disabled",
+            "workflow_prompt_chars": 0,
+            "command": "claude --print --model haiku",
+            "last_exists": true,
+            "last_message_preview": "안녕하세요!",
+            "stderr_preview": "",
+            "stdout_preview": "안녕하세요!"
+        }
+    ]
+}

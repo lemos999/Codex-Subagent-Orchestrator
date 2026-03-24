@@ -1,0 +1,75 @@
+{
+  "_meta": {
+    "origin": "claude",
+    "pattern": "A-solo",
+    "version": "2.0",
+    "purpose": "Launcher validation probe — verifies the orchestration pipeline end-to-end with minimal cost.",
+    "model_strategy": {
+      "quality": "Single worker with low reasoning — sufficient for smoke test probe",
+      "optimization": "Compact directive avoids reading full AGENTS.md. Tight max_response_lines (3) prevents verbose output.",
+      "token_saving": "Lowest possible cost: low reasoning, compact prompt, minimal response. This is a pipeline test, not production work."
+    },
+    "improvements": [
+      "Added timeout safeguard",
+      "Archive enabled for evidence trail",
+      "stop_when enforces bounded execution",
+      "success_criteria separates pass/fail from validation detail"
+    ]
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "claude-sub-runs/minimal-write",
+  "manifest_file": "claude-sub-runs/minimal-write/orchestration-manifest.json",
+  "summary_file": "claude-sub-runs/minimal-write/orchestration-summary.md",
+  "debug_log_file": "claude-sub-runs/minimal-write/launcher-debug.log",
+  "archive_root": "claude-sub-records",
+  "write_run_archive": true,
+  "archive_run_label": "minimal-write",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 60,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "shared_directive_mode": "compact",
+  "defaults": {
+    "model": "gpt-5.4",
+    "sandbox": "workspace-write",
+    "reasoning_effort": "low",
+    "prompt_profile": "compact",
+    "response_style": "compact",
+    "max_response_lines": 3
+  },
+  "agents": [
+    {
+      "name": "probe-writer",
+      "kind": "implementer",
+      "role": "launcher validation probe",
+      "mission": "Verify the orchestration pipeline by creating one bounded file. This is a smoke test, not production work.",
+      "task": "Create or replace launcher-probe.txt in the working directory containing exactly the text OK.",
+      "read_first": [
+        "AGENTS.md"
+      ],
+      "writable_scope": [
+        "launcher-probe.txt"
+      ],
+      "required_paths": [
+        "launcher-probe.txt"
+      ],
+      "required_non_empty_paths": [
+        "launcher-probe.txt"
+      ],
+      "success_criteria": [
+        "launcher-probe.txt exists with content exactly OK"
+      ],
+      "validation": [
+        "Read launcher-probe.txt and confirm content is exactly OK with no trailing whitespace or extra lines."
+      ],
+      "return_contract": [
+        "One line: PASS or FAIL with the file path."
+      ],
+      "stop_when": [
+        "File created and validated. Do not read other files or explore the workspace."
+      ]
+    }
+  ]
+}

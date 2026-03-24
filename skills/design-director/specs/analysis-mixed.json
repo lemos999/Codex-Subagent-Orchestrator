@@ -1,0 +1,117 @@
+{
+  "_meta": {
+    "origin": "mixed",
+    "pattern": "Design-Director-Analysis-Mixed",
+    "version": "1.0",
+    "purpose": "Mode B 기존 산출물 분석 멀티엔진 파이프라인. Gemini(대규모 문서 분석) + Codex(독립 평가) + Claude(최종 감사).",
+    "model_strategy": {
+      "quality": "Gemini pro: 긴 문서 일괄 분석. Codex gpt-5.4: 독립적 가치 평가. Claude opus: 최종 감사.",
+      "cross_validation": "3개 엔진이 각기 다른 관점에서 분석하여 편향 최소화."
+    }
+  },
+  "cwd": ".",
+  "cwd_resolution": "invocation",
+  "output_dir": "subagent-runs/mixed/design-analysis",
+  "manifest_file": "subagent-runs/mixed/design-analysis/orchestration-manifest.json",
+  "summary_file": "subagent-runs/mixed/design-analysis/orchestration-summary.md",
+  "debug_log_file": "subagent-runs/mixed/design-analysis/launcher-debug.log",
+  "skip_git_repo_check": true,
+  "timeout_seconds": 600,
+  "execution_mode": "sequential",
+  "write_prompt_files": true,
+  "write_summary_file": true,
+  "supervisor_only": true,
+  "require_final_read_only_review": true,
+  "shared_directive_mode": "compact",
+  "agents": [
+    {
+      "name": "diagnostic-analyzer-gemini",
+      "kind": "reviewer",
+      "stage": 1,
+      "engine": "gemini",
+      "model": "gemini-2.5-pro",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 40,
+      "role": "Mode B Step 1 진단 분석기 (Gemini)",
+      "mission": "긴 컨텍스트를 활용하여 기존 산출물 전체를 일괄 분석. Charter 추출, 컴포넌트 분류, 검증 4단계 수행.",
+      "task": "제공된 문서/자료 전체를 분석. (1) Charter 5항목 추출 (2) 컴포넌트 Core/Support 분류 (3) 검증 4단계 수행 (4) 진단 보고서 작성. 특히 대규모 문서의 전체 맥락을 놓치지 않도록 주의.",
+      "read_first": [
+        "skills/design-director/SKILL.md",
+        "skills/design-director/agents/analysis-mode.agent.md",
+        "skills/design-director/core/validation-ladder.md"
+      ],
+      "return_contract": [
+        "Charter 5항목 추출 결과",
+        "컴포넌트 분류 (Core/Support)",
+        "검증 4단계 결과",
+        "진단 보고서 (치명적/주요/경미/누락)"
+      ],
+      "stop_when": ["진단 보고서 완료. 파일 수정하지 않는다."]
+    },
+    {
+      "name": "value-evaluator-codex",
+      "kind": "reviewer",
+      "stage": 2,
+      "engine": "codex",
+      "model": "gpt-5.4",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 25,
+      "role": "Mode B Step 2 가치 평가기 (Codex/GPT)",
+      "mission": "Gemini 진단 결과를 기반으로, GPT 관점에서 독립적으로 각 Core 컴포넌트의 가치 기여도를 평가하고 처방 제시.",
+      "task": "diagnostic-analyzer-gemini의 Core 컴포넌트 목록에 가치 기여도 평가(VCT) 적용. 등급 판정 + 처방. Gemini가 놓친 관점이 있으면 추가.",
+      "read_first": [
+        "skills/design-director/agents/analysis-mode.agent.md"
+      ],
+      "return_contract": [
+        "컴포넌트별 VCT 결과 테이블",
+        "등급별 처방",
+        "Gemini 진단과의 차이점 (있을 경우)"
+      ],
+      "stop_when": ["평가 완료. 파일 수정하지 않는다."]
+    },
+    {
+      "name": "diagnostic-cross-check-claude",
+      "kind": "reviewer",
+      "stage": 3,
+      "engine": "claude",
+      "model": "sonnet",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 30,
+      "role": "진단 교차 검증 (Claude)",
+      "mission": "Gemini 진단 + Codex 평가를 Claude 관점에서 교차 검증. 두 엔진의 결과를 비교하고 불일치를 식별.",
+      "task": "Gemini 진단 보고서와 Codex 가치 평가 결과를 읽고 교차 검증. (1) Charter 추출이 일치하는가 (2) Core/Support 분류가 일치하는가 (3) VCT 평가가 일관적인가 (4) 두 엔진이 놓친 이슈는 없는가",
+      "read_first": [
+        "skills/design-director/SKILL.md",
+        "skills/design-director/core/validation-ladder.md"
+      ],
+      "return_contract": [
+        "3엔진 결과 비교 매트릭스",
+        "불일치 항목 및 해결 방향",
+        "최종 통합 진단 결과"
+      ],
+      "stop_when": ["교차 검증 완료. 파일 수정하지 않는다."]
+    },
+    {
+      "name": "analysis-watchdog",
+      "kind": "reviewer",
+      "stage": 4,
+      "engine": "claude",
+      "model": "opus",
+      "sandbox": "read-only",
+      "reasoning_effort": "medium",
+      "max_response_lines": 15,
+      "role": "분석 품질 최종 watchdog",
+      "mission": "3개 엔진의 분석 결과를 최종 감사. 누락된 치명적 문제, 과소/과대 평가, 엔진 간 편향을 확인.",
+      "task": "(1) 3엔진 교차 검증 결과가 신뢰할 수 있는가 (2) 누락된 치명적 문제가 있는가 (3) 특정 엔진의 편향이 최종 결과에 반영되었는가",
+      "return_contract": [
+        "Verdict: PASS | SHORTFALL",
+        "이상 항목 목록 (있을 경우)",
+        "종합 분석 보고서 초안"
+      ],
+      "stop_when": ["최종 감사 완료. 파일 수정하지 않는다."]
+    }
+  ]
+}

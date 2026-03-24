@@ -1,0 +1,1 @@
+[POSITION: 다음 한 수는 BM25 추가나 미세 가중치 조정이 아니라, facet/file-aware 후보 생성 재설계 후 필요하면 late interaction을 제한적으로 붙이는 것이다.]

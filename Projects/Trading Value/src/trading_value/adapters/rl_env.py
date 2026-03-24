@@ -16,7 +16,12 @@ import gymnasium
 import numpy as np
 import pandas as pd
 
-from ..core.indicators import build_all_snapshots
+from ..core.indicators import (
+    analyze_forward_cloud,
+    build_all_snapshots,
+    compute_donchian_series,
+    detect_swings,
+)
 from ..core.models import (
     CloudPosition,
     ProfileBias,
@@ -129,7 +134,14 @@ class TradingEnv(gymnasium.Env):
         random_start: bool = True,
         min_rr: float = 1.5,
         max_hold_bars: int = 48,
+        leverage: int = 10,
         render_mode: str | None = None,
+        # Reward tuning parameters (v5)
+        position_change_penalty: float = 0.40,
+        holding_cost: float = 0.002,
+        profitable_hold_bonus_max: float = 0.02,
+        profitable_close_bonus: float = 0.2,
+        drawdown_penalty_factor: float = 0.15,
     ):
         super().__init__()
 
@@ -141,12 +153,21 @@ class TradingEnv(gymnasium.Env):
         self.random_start = random_start
         self.min_rr = min_rr
         self.max_hold_bars = max_hold_bars
+        self.leverage = leverage
         self.render_mode = render_mode
 
+        # Reward tuning
+        self.position_change_penalty = position_change_penalty
+        self.holding_cost = holding_cost
+        self.profitable_hold_bonus_max = profitable_hold_bonus_max
+        self.profitable_close_bonus = profitable_close_bonus
+        self.drawdown_penalty_factor = drawdown_penalty_factor
+
         # --- Spaces ---
-        # 25-dimensional continuous observation vector
+        # 33-dimensional continuous observation vector
+        # v5: +4 cloud twist, +4 donchian/swing
         self.observation_space = gymnasium.spaces.Box(
-            low=-5.0, high=5.0, shape=(25,), dtype=np.float32,
+            low=-5.0, high=5.0, shape=(33,), dtype=np.float32,
         )
         # 5 discrete actions
         self.action_space = gymnasium.spaces.Discrete(5)
@@ -200,6 +221,7 @@ class TradingEnv(gymnasium.Env):
         self._m30_df: pd.DataFrame = m30_df.reset_index(drop=True)
         self._m30_timestamps: list[datetime] = self._m30_df["timestamp"].tolist()
         self._m30_closes: np.ndarray = self._m30_df["close"].values.astype(np.float64)
+        self._m30_opens: np.ndarray = self._m30_df["open"].values.astype(np.float64)
         self._m30_highs: np.ndarray = self._m30_df["high"].values.astype(np.float64)
         self._m30_lows: np.ndarray = self._m30_df["low"].values.astype(np.float64)
         self._m30_volumes: np.ndarray = self._m30_df["volume"].values.astype(np.float64)
@@ -254,6 +276,7 @@ class TradingEnv(gymnasium.Env):
         self._entry_price = 0.0
         self._stop_price = 0.0
         self._position_qty = 0.0
+        self._entry_notional = 0.0
         self._bars_held = 0
         self._consecutive_losses = 0
         self._total_commission = 0.0
@@ -281,8 +304,12 @@ class TradingEnv(gymnasium.Env):
         current_close = float(self._m30_closes[self._step_idx])
         current_atr = self._get_atr_at_step()
 
+        # ---- 0. Position change penalty (discourage excessive trading) ----
+        prev_position = self._position
         # ---- 1. Apply action ----
         reward += self._apply_action(action, current_close, current_atr)
+        if self._position != prev_position:
+            reward -= self.position_change_penalty
 
         # ---- 2. Advance to next bar ----
         self._step_idx += 1
@@ -303,38 +330,106 @@ class TradingEnv(gymnasium.Env):
             new_close = float(self._m30_closes[min(self._step_idx, len(self._m30_df) - 1)])
             reward += self._close_position(new_close)
 
-        # ---- 4. Check stop loss (1R) ----
+        # ---- 4. Realistic shock model: stop loss + dynamic slippage + liquidation ----
         if not truncated and self._position != 0:
             new_close = float(self._m30_closes[self._step_idx])
             new_high = float(self._m30_highs[self._step_idx])
             new_low = float(self._m30_lows[self._step_idx])
+            new_open = float(self._m30_opens[self._step_idx])
+            bar_range = new_high - new_low
+            atr = self._get_atr_at_step()
+
+            # --- 4a. Dynamic slippage based on bar volatility ---
+            # Normal bar: slippage = 0. Volatile bar: slippage scales with range/ATR
+            volatility_ratio = bar_range / atr if atr > 0 else 1.0
+            if volatility_ratio > 2.0:
+                # Abnormal bar: slippage = (ratio - 2) * 0.1% of price, capped at 1%
+                shock_slippage_pct = min(0.01, (volatility_ratio - 2.0) * 0.001)
+            else:
+                shock_slippage_pct = 0.0
+
+            # --- 4b. Gap check: open vs prev close ---
+            prev_close = float(self._m30_closes[self._step_idx - 1])
+            gap_pct = abs(new_open - prev_close) / prev_close if prev_close > 0 else 0.0
 
             stopped = False
+
+            # --- 4c. Stop loss with worst-case fill ---
             if self._position == 1 and new_low <= self._stop_price:
-                # Long stopped out at stop price
-                reward += self._close_position(self._stop_price, stopped_out=True)
+                # Long stopped: fill at worst of (stop - slippage) or gap open
+                base_fill = self._stop_price
+                if new_open < self._stop_price:
+                    base_fill = new_open  # gap through stop
+                shock_slip = base_fill * shock_slippage_pct
+                fill_price = base_fill - shock_slip
+                reward += self._close_position(fill_price, stopped_out=True)
                 stopped = True
             elif self._position == -1 and new_high >= self._stop_price:
-                # Short stopped out at stop price
-                reward += self._close_position(self._stop_price, stopped_out=True)
+                # Short stopped: fill at worst of (stop + slippage) or gap open
+                base_fill = self._stop_price
+                if new_open > self._stop_price:
+                    base_fill = new_open  # gap through stop
+                shock_slip = base_fill * shock_slippage_pct
+                fill_price = base_fill + shock_slip
+                reward += self._close_position(fill_price, stopped_out=True)
                 stopped = True
 
-            # Max hold exit
-            if not stopped and self._bars_held >= self.max_hold_bars:
-                reward += self._close_position(new_close)
+            # --- 4d. Liquidation check (leverage risk) ---
+            if not stopped and self.leverage > 1:
+                if self._position == 1:
+                    unrealized = (new_low - self._entry_price) * self._position_qty
+                else:
+                    unrealized = (self._entry_price - new_high) * self._position_qty
+                # Liquidation if unrealized loss exceeds margin (balance)
+                if self._balance + unrealized <= 0:
+                    # Liquidated at worst intra-bar price
+                    liq_price = new_low if self._position == 1 else new_high
+                    self._balance = 0.0
+                    self._position = 0
+                    self._position_qty = 0.0
+                    reward = -10.0  # severe penalty
+                    terminated = True
+                    stopped = True
 
-        # ---- 5. Holding cost ----
+            # --- 4e. Auto-reduce leverage on extreme volatility ---
+            if not stopped and volatility_ratio > 3.0 and self.leverage > 1:
+                # Reduce position by 50% as emergency measure
+                reduce_qty = self._position_qty * 0.5
+                reduce_pnl = (new_close - self._entry_price) * reduce_qty * self._position
+                comm = new_close * reduce_qty * self.commission_rate
+                self._balance += reduce_pnl - comm
+                self._position_qty -= reduce_qty
+                reward -= 0.2  # penalty for forced reduction
+
+            # Max hold exit (with shock slippage applied)
+            if not stopped and self._bars_held >= self.max_hold_bars:
+                exit_price = new_close
+                if shock_slippage_pct > 0:
+                    exit_price = new_close - (new_close * shock_slippage_pct * self._position)
+                reward += self._close_position(exit_price)
+
+        # ---- 5. Asymmetric holding cost / profitable hold reward ----
         if self._position != 0:
-            reward -= 0.001 * self._bars_held
+            if not truncated and self._step_idx < len(self._m30_closes):
+                new_close = float(self._m30_closes[self._step_idx])
+                unrealized = (new_close - self._entry_price) * self._position
+                risk_dist = abs(self._entry_price - self._stop_price) if self._stop_price else 1.0
+                risk_amt = risk_dist * self._position_qty if self._position_qty else 1.0
+                if unrealized > 0 and risk_amt > 0:
+                    # Reward profitable holding (no cost charged)
+                    reward += min(self.profitable_hold_bonus_max, 0.005 * unrealized / risk_amt)
+                else:
+                    # Only charge holding cost when losing/flat
+                    reward -= self.holding_cost
 
         # ---- 6. Drawdown penalty ----
         if self._balance < self._peak_balance:
             dd_pct = (self._peak_balance - self._balance) / self._peak_balance
-            reward -= 0.5 * dd_pct
+            reward -= self.drawdown_penalty_factor * dd_pct
 
         # ---- 7. Build observation ----
         if truncated:
-            obs = np.zeros(25, dtype=np.float32)
+            obs = np.zeros(33, dtype=np.float32)
         else:
             obs = self._build_observation()
 
@@ -394,14 +489,17 @@ class TradingEnv(gymnasium.Env):
         else:
             self._stop_price = price + risk_distance
 
-        # Position sizing: risk_pct of balance
+        # Position sizing: risk_pct of balance × leverage
         risk_amount = self._balance * self.risk_pct
-        self._position_qty = risk_amount / risk_distance if risk_distance > 0 else 0.0
+        self._position_qty = (risk_amount / risk_distance if risk_distance > 0 else 0.0) * self.leverage
 
         # Charge commission
         comm = price * self._position_qty * self.commission_rate
         self._balance -= comm
         self._total_commission += comm
+
+        # Track notional for liquidation check
+        self._entry_notional = price * self._position_qty
 
     def _close_position(
         self, price: float, stopped_out: bool = False,
@@ -457,7 +555,7 @@ class TradingEnv(gymnasium.Env):
         # Reward = realized PnL in R units (commission included) + bonus
         reward = pnl_r
         if pnl_r > 0:
-            reward += 0.2  # bonus for profitable close
+            reward += self.profitable_close_bonus
 
         # Reset position
         self._position = 0
@@ -473,9 +571,9 @@ class TradingEnv(gymnasium.Env):
     # -----------------------------------------------------------------
 
     def _build_observation(self) -> np.ndarray:
-        """Build the 25-dim observation vector from current state."""
+        """Build the 33-dim observation vector from current state."""
         _SENTINEL = -1.0  # distinct from any valid encoding {-1, 0, 1}
-        obs = np.full(25, _SENTINEL, dtype=np.float32)
+        obs = np.full(33, _SENTINEL, dtype=np.float32)
         ts = self._m30_timestamps[self._step_idx]
         current_close = float(self._m30_closes[self._step_idx])
 
@@ -568,6 +666,50 @@ class TradingEnv(gymnasium.Env):
             mode = self._infer_mode(regime)
             obs[24] = _MODE_MAP.get(mode, -1.0)
 
+        # [25-28] Forward cloud twist analysis
+        fca = self._get_forward_cloud_at_step()
+        if fca is not None:
+            # [25] cloud twist: -1 bearish, 0 none, 1 bullish
+            if fca.twist_detected:
+                obs[25] = 1.0 if fca.twist_direction == "bullish" else -1.0
+            else:
+                obs[25] = 0.0
+            # [26] cloud direction: -1 falling, 0 flat, 1 rising
+            if fca.cloud_rising:
+                obs[26] = 1.0
+            elif fca.cloud_falling:
+                obs[26] = -1.0
+            else:
+                obs[26] = 0.0
+            # [27] future cloud thickness (normalized)
+            obs[27] = np.clip(fca.future_cloud_thickness_pct, 0.0, 5.0)
+            # [28] price vs future cloud
+            if current_close > fca.future_resistance:
+                obs[28] = 1.0
+            elif current_close < fca.future_support:
+                obs[28] = -1.0
+            else:
+                obs[28] = 0.0
+
+        # [29-32] Donchian channel + swing features
+        dc_data = self._get_donchian_at_step()
+        if dc_data is not None:
+            dc_upper, dc_lower = dc_data
+            dc_range = dc_upper - dc_lower
+            if dc_range > 0:
+                # [29] donchian position: 0=lower, 1=upper
+                obs[29] = np.clip((current_close - dc_lower) / dc_range, -0.5, 1.5)
+
+        swing_data = self._get_nearest_swings_at_step()
+        if swing_data is not None and atr > 0:
+            nearest_high, nearest_low, bars_since = swing_data
+            # [30] distance to swing high / ATR
+            obs[30] = np.clip(abs(current_close - nearest_high) / atr, 0.0, 5.0)
+            # [31] distance to swing low / ATR
+            obs[31] = np.clip(abs(current_close - nearest_low) / atr, 0.0, 5.0)
+            # [32] bars since last swing (normalized 0-1, max 48)
+            obs[32] = min(bars_since / 48.0, 1.0)
+
         return obs
 
     # -----------------------------------------------------------------
@@ -586,6 +728,65 @@ class TradingEnv(gymnasium.Env):
         if idx < 0:
             return None
         return cache[keys[idx]]
+
+    def _precompute_donchian_swings(self) -> None:
+        """Pre-compute Donchian channels and swings on M30 data."""
+        m30_df = self._m30_df
+        if len(m30_df) >= 20:
+            dc = compute_donchian_series(m30_df, period=20)
+            self._dc_upper = dc["dc_upper"].values
+            self._dc_lower = dc["dc_lower"].values
+        else:
+            self._dc_upper = np.full(len(m30_df), np.nan)
+            self._dc_lower = np.full(len(m30_df), np.nan)
+
+        if len(m30_df) >= 5:
+            sh, sl = detect_swings(m30_df, left=2, right=2)
+            self._swing_highs = sh  # list of (index, price)
+            self._swing_lows = sl
+        else:
+            self._swing_highs = []
+            self._swing_lows = []
+
+    def _get_donchian_at_step(self) -> tuple[float, float] | None:
+        """Get Donchian upper/lower at current step."""
+        if not hasattr(self, '_dc_upper'):
+            self._precompute_donchian_swings()
+        idx = self._step_idx
+        if idx < len(self._dc_upper) and not np.isnan(self._dc_upper[idx]):
+            return float(self._dc_upper[idx]), float(self._dc_lower[idx])
+        return None
+
+    def _get_nearest_swings_at_step(self) -> tuple[float, float, int] | None:
+        """Get nearest swing high/low and bars since last swing."""
+        if not hasattr(self, '_swing_highs'):
+            self._precompute_donchian_swings()
+        idx = self._step_idx
+        # Find nearest swing high at or before current step
+        nearest_high = None
+        for i in range(len(self._swing_highs) - 1, -1, -1):
+            si, sp = self._swing_highs[i]
+            if si <= idx:
+                nearest_high = (si, sp)
+                break
+        nearest_low = None
+        for i in range(len(self._swing_lows) - 1, -1, -1):
+            si, sp = self._swing_lows[i]
+            if si <= idx:
+                nearest_low = (si, sp)
+                break
+        if nearest_high is None or nearest_low is None:
+            return None
+        bars_since = idx - max(nearest_high[0], nearest_low[0])
+        return nearest_high[1], nearest_low[1], bars_since
+
+    def _get_forward_cloud_at_step(self):
+        """Get forward cloud analysis at the current step."""
+        end_idx = self._step_idx + 1
+        if end_idx < 78:  # need senkou_b(52) + displacement(26)
+            return None
+        df_slice = self._m30_df.iloc[:end_idx]
+        return analyze_forward_cloud(df_slice)
 
     def _get_atr_at_step(self) -> float:
         """Get ATR from the 30m snapshot at the current step."""

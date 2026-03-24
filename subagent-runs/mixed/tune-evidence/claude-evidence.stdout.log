@@ -1,0 +1,61 @@
+이 프로젝트의 **워커 실행 후 증거 기록 규칙**을 정리하면:
+
+## 디렉토리 구조
+
+```
+subagent-runs/
+├── claude/          # Claude 엔진 실행
+├── codex/           # Codex/GPT 엔진 실행
+├── gemini/          # Gemini 엔진 실행
+└── mixed/           # 혼합 엔진 실행 (engines/ 하위에 엔진별 증거 분리)
+    └── <run-name>/
+        ├── run-manifest.md
+        ├── run-summary.md
+        ├── prompts/
+        ├── results/
+        └── engines/
+```
+
+## 필수 증거 파일
+
+### 1. **run-manifest.md** (공식 기록)
+오케스트레이터가 작성하는 **권위 있는 문서**로:
+- Request: 원본 요청 분류, 복잡도
+- Team: 패턴, 에이전트 수
+- Agents: 각 워커의 역할, 엔진, 모델, 상태, 계약, 결과 요약
+- Deliverables: 생성/수정된 파일 목록
+- Review: 최종 검증 결과
+- Metrics: 비용 프로필, 수정 사이클
+- Timeline: 시작/완료 시간
+- Errors/Notes: 실패 사항, 경고
+
+### 2. **run-summary.md** (빠른 스캔용)
+간단한 테이블 형식:
+```markdown
+| # | Role | Engine | Model | Stage | Status | Result |
+```
+
+### 3. **prompts/<role>.prompt.md**
+워커에게 **정확히 보낸 텍스트** 보존 → 재현성
+
+### 4. **results/<role>.result.md**
+워커가 **반환한 전체 텍스트** 보존 → 감사, 디버깅, 학습
+
+## 증거 레벨 (시나리오별)
+
+| 시나리오 | 증거 레벨 |
+|---------|----------|
+| 구현 + 검증 | **전체**: manifest + summary + prompts + results |
+| 단일 구현자 | **표준**: manifest + summary + prompts |
+| 단일 검증자 | **최소**: summary만 |
+| 실패/중단 실행 | **전체**: 무엇이 실패했는지 명확히 기록 |
+
+## Run Naming 규칙
+
+형식: `<task-slug>-<YYYY-MM-DD>`
+- 예: `auth-middleware-2026-03-11`
+- 충돌 시: `-2`, `-3` 추가
+
+---
+
+**핵심**: 모든 워커 실행은 재현성, 감사성, 학습을 위해 **프롬프트와 결과를 완전히 기록**합니다. 실패도 전체 증거로 남겨 디버깅 및 개선에 활용합니다.

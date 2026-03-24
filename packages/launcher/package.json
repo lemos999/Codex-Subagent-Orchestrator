@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "vitest run",
+    "test": "npm run build && node --test --test-isolation=none tests/normalized-writer.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "engines": {

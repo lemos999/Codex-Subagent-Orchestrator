@@ -1,0 +1,756 @@
+Reading prompt from stdin...
+OpenAI Codex v0.114.0 (research preview)
+--------
+workdir: C:\Users\haj\projects\subagent-orchestrator
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\haj\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019d0624-03b8-7da3-be46-942e5f0345a6
+--------
+user
+## Relevant Context (auto-injected)
+
+### skills/claude-subagent-orchestrator/references/wki-integration.md (lines 1-2)
+**WKI Integration Guide** — markdown-section
+> # WKI Integration Guide
+
+### skills/claude-subagent-orchestrator/references/wki-integration.md (lines 3-6)
+**목적** — markdown-section
+> ## 목적
+> 
+> 워커에게 작업을 위임하기 전에 WKI(Workspace Knowledge Index)에서 관련 맥락을 검색하여 워커 프롬프트에 주입한다. 이를 통해 워커가 올바른 맥락으로 작업을 시작할 수 있다.
+
+### C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/supervisor/wki-context.ts (lines 41-49)
+**other** — other
+```typescript
+// ============================================================
+// Detection
+// ============================================================
+
+/**
+```
+
+### game-design-director/game-design-director-integrated.md (lines 10-10)
+**║  AI 에이전트 작업 지시서 (AGENT TASK DIRECTIVE)  ║** — markdown-section
+> # ║  AI 에이전트 작업 지시서 (AGENT TASK DIRECTIVE)  ║
+
+### C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/types/index.ts (lines 1-4)
+**other** — other
+```typescript
+// ============================================================
+// WKI Core Types
+// ============================================================
+```
+
+이 프로젝트의 WKI 자동 인덱싱이 어떻게 동작하는지 설명해줘
+mcp startup: no servers
+codex
+프로젝트에서 WKI 자동 인덱싱이 어디서 트리거되고 어떤 경로로 컨텍스트가 주입되는지 먼저 확인하겠습니다. 관련 런처, supervisor, WKI 패키지 쪽 구현을 읽고 동작 순서 기준으로 정리하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"WKI|workspace-knowledge-index|index\\(\" packages workspace-knowledge-index skills .claude -g '"'!**/dist/**'"'" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"skills\\claude-subagent-orchestrator\\references\\wki-integration.md\" -TotalCount 250" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\types\\index.ts\" -TotalCount 220" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"packages\\launcher\\src\\supervisor\\wki-context.ts\" -TotalCount 260" in C:\Users\haj\projects\subagent-orchestrator succeeded in 899ms:
+# WKI Integration Guide
+
+## 紐⑹쟻
+
+?뚯빱?먭쾶 ?묒뾽???꾩엫?섍린 ?꾩뿉 WKI(Workspace Knowledge Index)?먯꽌 愿??留λ씫??寃?됲븯???뚯빱 ?꾨＼?꾪듃??二쇱엯?쒕떎. ?대? ?듯빐 ?뚯빱媛 ?щ컮瑜?留λ씫?쇰줈 ?묒뾽???쒖옉?????덈떎.
+
+## ?ъ슜 議곌굔
+
+- `.knowledge/` ?붾젆?곕━媛 ?뚰겕?ㅽ럹?댁뒪 猷⑦듃??議댁옱
+- WKI媛 ?몃뜳?깅맂 ?곹깭 (理쒖냼 1??`wki index` ?ㅽ뻾)
+
+## TS ?곗쿂 ?ъ슜 ??(?먮룞)
+
+TS ?곗쿂(`packages/launcher/dist/cli.js`)瑜??듯빐 ?뚯빱瑜??ㅽ뻾?섎㈃ **?먮룞?쇰줈**:
+1. 利앸텇 ?몃뜳???ㅽ뻾 (蹂寃??놁쑝硫??ㅽ궢)
+2. ?뚯빱 ?쒖뒪?щ줈 WKI 寃??
+3. 愿??留λ씫??`## Relevant Context (auto-injected)` 釉붾줉?쇰줈 ?꾨＼?꾪듃??二쇱엯
+
+紐⑤뱺 ?붿쭊(Claude, Codex, Gemini)???숈씪?섍쾶 ?곸슜?쒕떎.
+
+ succeeded in 870ms:
+// ============================================================
+// WKI Core Types
+// ============================================================
+
+export type ChunkType =
+  | 'function'
+  | 'class'
+  | 'interface'
+  | 'type'
+  | 'enum'
+  | 'variable'
+  | 'import'
+  | 'export'
+  | 'markdown-section'
+  | 'line-block'
+  | 'other';
+
+/** A raw chunk output from a Parser (before ID/token assignment). */
+export interface RawChunk {
+  filePath: string;
+ succeeded in 1.01s:
+.claude\settings.local.json:124:      "Bash(cd workspace-knowledge-index:*)",
+.claude\agents\codex-subagent-orchestrator.md:13:3. `./skills/claude-subagent-orchestrator/references/wki-integration.md` — WKI 맥락 주입 (워커 프롬프트에 관련 코드/문서 자동 포함)
+workspace-knowledge-index\package-lock.json:2:  "name": "workspace-knowledge-index",
+workspace-knowledge-index\package-lock.json:8:      "name": "workspace-knowledge-index",
+workspace-knowledge-index\package-lock.json:3960:      "integrity": "sha512-2cNEiYDhCWKI+Gs9T0Tiysk136SnR13hhO8yW6BGNyhOC4qYFnwF1nKfD3HFAIXA5c45RrIG1ub11GiXeYd1xA==",
+workspace-knowledge-index\docs\plan-workspace-index.md:657:- **API 키**: 환경변수(`WKI_OPENAI_KEY`, `WKI_VOYAGE_KEY`)로 관리. config 파일에 직접 기재 금지
+workspace-knowledge-index\eval\gold-set-v1.json:3:  "description": "Gold set for WKI search quality evaluation — covers evidence, workflow, context injection, engine adapters, and Korean queries",
+workspace-knowledge-index\eval\gold-set-v1.json:84:      "query": "WKI context injection sub-hook",
+workspace-knowledge-index\eval\gold-set-v2.json:104:      "query": "WKI context injection sub-hook",
+workspace-knowledge-index\eval\gold-set-v2.json:111:          "filePath": "workspace-knowledge-index/src/context/sub-hook.ts",
+workspace-knowledge-index\eval\gold-set-v2.json:115:          "filePath": "workspace-knowledge-index/src/context/context-builder.ts",
+workspace-knowledge-index\docs\implementation-plan-ai-assisted.md:67:workspace-knowledge-index/
+workspace-knowledge-index\package.json:2:  "name": "workspace-knowledge-index",
+skills\claude-subagent-orchestrator\references\wki-integration.md:1:# WKI Integration Guide
+skills\claude-subagent-orchestrator\references\wki-integration.md:5:워커에게 작업을 위임하기 전에 WKI(Workspace Knowledge Index)에서 관련 맥락을 검색하여 워커 프롬프트에 주입한다. 이를 통해 워커가 올바른 맥락으로 작업을 시작할 수 있다.
+skills\claude-subagent-orchestrator\references\wki-integration.md:10:- WKI가 인덱싱된 상태 (최소 1회 `wki index` 실행)
+skills\claude-subagent-orchestrator\references\wki-integration.md:16:2. 워커 태스크로 WKI 검색
+skills\claude-subagent-orchestrator\references\wki-integration.md:23:Claude Task tool로 직접 워커를 실행할 때는 WKI가 자동 연동되지 않는다. 대신 오케스트레이터가 직접 맥락을 검색하여 워커 계약에 포함해야 한다.
+skills\claude-subagent-orchestrator\references\wki-integration.md:30:node workspace-knowledge-index/dist/index.js search "<워커 태스크 요약>" --top 5 --output json
+skills\claude-subagent-orchestrator\references\wki-integration.md:36:## Context (WKI auto-search results)
+ succeeded in 940ms:
+/**
+ * WKI context injection ??queries the Workspace Knowledge Index
+ * and injects relevant context into worker prompts.
+ *
+ * This runs at prompt composition time, BEFORE the prompt is sent
+ * to any engine. Therefore it works identically for Claude, Codex,
+ * and Gemini workers.
+ *
+ * Flow:
+ *   0. Auto incremental indexing (if stale)
+ *   1. Worker task/prompt ??extract search query
+ *   2. WKI search ??top-K relevant code/doc chunks
+ *   3. Format as "## Relevant Context (auto-injected)" markdown
+ *   4. Prepend to worker prompt
+ */
+
+import { execFileSync } from 'node:child_process';
+import * as path from 'node:path';
+import * as fsSync from 'node:fs';
+
+codex
+WKI 자동 인덱싱은 런처 단계에서 먼저 훅으로 걸리고, 실제 증분 판단은 `workspace-knowledge-index` 쪽이 맡는 구조로 보입니다. 이제 트리거 지점, freshness 판정, 실제 인덱싱 파이프라인을 연결해서 보겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\index.ts\" | Select-Object -Index (1..360)" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"packages\\launcher\\src\\orchestrator.ts\" | Select-Object -Index (140..340)" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"freshness|incremental|file_hashes|dirty|indexed_at|wki index|ensureFresh|isStale|up to date|changed files\" workspace-knowledge-index\\src -g '"'!**/dist/**'"'" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\core\\index-lock.ts\" -TotalCount 220" in C:\Users\haj\projects\subagent-orchestrator succeeded in 458ms:
+workspace-knowledge-index\src\index.ts:14:import { FreshnessManager } from './core/freshness.js';
+workspace-knowledge-index\src\index.ts:35:  status    Show index health and freshness
+workspace-knowledge-index\src\index.ts:73:  // 6. Capture and save freshness state
+workspace-knowledge-index\src\index.ts:74:  const freshness = new FreshnessManager();
+workspace-knowledge-index\src\index.ts:75:  const state = freshness.captureState(projectRoot);
+workspace-knowledge-index\src\index.ts:76:  const freshnessPath = path.join(knowledgeDir, 'freshness.lock');
+workspace-knowledge-index\src\index.ts:77:  freshness.save(freshnessPath, state);
+workspace-knowledge-index\src\index.ts:98:    // 2. Load existing freshness state
+workspace-knowledge-index\src\index.ts:99:    const freshness = new FreshnessManager();
+workspace-knowledge-index\src\index.ts:100:    const freshnessPath = path.join(knowledgeDir, 'freshness.lock');
+workspace-knowledge-index\src\index.ts:101:    const prevState = freshness.load(freshnessPath);
+workspace-knowledge-index\src\index.ts:118:      const changes = freshness.detectChanges(prevState, projectRoot);
+workspace-knowledge-index\src\index.ts:145:    // 5. Save new freshness state
+workspace-knowledge-index\src\index.ts:146:    const newState = freshness.captureState(projectRoot);
+workspace-knowledge-index\src\index.ts:147:    freshness.save(freshnessPath, newState);
+workspace-knowledge-index\src\index.ts:211:    const freshness = new FreshnessManager();
+workspace-knowledge-index\src\index.ts:212:    const freshnessPath = path.join(knowledgeDir, 'freshness.lock');
+workspace-knowledge-index\src\index.ts:221:      const prevState = freshness.load(freshnessPath);
+workspace-knowledge-index\src\index.ts:226:        const changedFiles = freshness.detectChanges(prevState, projectRoot);
+workspace-knowledge-index\src\index.ts:234:          console.log('Index is up to date. No changes detected.');
+ succeeded in 597ms:
+
+/**
+ * WKI CLI entry point.
+ * Parses process.argv for subcommands.
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { loadConfig, resolveFtsDbPath } from './config/schema.js';
+import type { EmbeddingProvider } from './interfaces/embedding.js';
+import type { VectorBackend } from './interfaces/vector-backend.js';
+import { FileMap } from './core/file-map.js';
+import { FreshnessManager } from './core/freshness.js';
+import { IndexLock } from './core/index-lock.js';
+import { Indexer } from './core/indexer.js';
+import { FtsStore } from './store/fts-store.js';
+import { ChunkStore } from './store/chunk-store.js';
+import { LanceVectorStore } from './store/vector-store.js';
+import { SearchService } from './search/search-service.js';
+import { createEmbeddingProvider } from './embedding/factory.js';
+ succeeded in 566ms:
+  resolvedPaths: ResolvedPaths,
+  sharedDirective: string | null,
+  wkiConfig: WkiContextConfig | null,
+): Promise<ResolvedWorkerSpec[]> {
+  const defaultEngine = spec.defaults?.engine ?? 'codex';
+  const defaultModel = spec.defaults?.model ?? ENGINE_DEFAULTS[defaultEngine];
+  const defaultSandbox = spec.defaults?.sandbox ?? 'workspace-write';
+  const defaultReasoning = spec.defaults?.reasoning_effort ?? null;
+  const defaultPromptProfile = spec.defaults?.prompt_profile ?? 'full';
+  const defaultResponseStyle = spec.defaults?.response_style ?? 'standard';
+  const defaultMaxResponseLines = spec.defaults?.max_response_lines ?? 0;
+  const defaultJson = spec.defaults?.json ?? false;
+  const writePromptFiles = spec.write_prompt_files ?? false;
+  const timeoutMs = (spec.timeout_seconds ?? 0) * 1000;
+
+  return Promise.all(spec.agents.map(async (agent): Promise<ResolvedWorkerSpec> => {
+    const engine = agent.engine ?? defaultEngine;
+    const model = agent.model ?? defaultModel;
+    const kind = agent.kind ?? 'custom';
+    const sandbox = agent.sandbox ?? defaultSandbox;
+ succeeded in 519ms:
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+
+export interface LockInfo {
+  pid: number;
+  lockId: string;     // unique per acquire() call ??prevents PID-reuse collisions
+  timestamp: string;  // ISO 8601
+  operation: string;  // 'index' | 'rebuild' | 'scan'
+}
+
+export class IndexLock {
+  private readonly lockPath: string;
+  private currentLockId: string | null = null;
+  private reentrant = false;
+
+  constructor(private knowledgeDir: string) {
+    this.lockPath = path.join(knowledgeDir, '.wki.lock');
+  }
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\core\\freshness.ts\" -TotalCount 260" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\core\\indexer.ts\" | Select-Object -Index (1..420)" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\context\\sub-hook.ts\" -TotalCount 260" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\context\\context-builder.ts\" -TotalCount 260" in C:\Users\haj\projects\subagent-orchestrator succeeded in 507ms:
+import fs from 'node:fs';
+import path from 'node:path';
+import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import type { FreshnessState } from '../types/index.js';
+
+/** Files that have changed since the last index. */
+export interface ChangedFiles {
+  added: string[];
+  modified: string[];
+  deleted: string[];
+  renamed: Array<{ from: string; to: string }>;
+}
+
+/**
+ * Manages freshness.lock for incremental indexing.
+ * Tracks git state to detect which files need re-indexing.
+ */
+export class FreshnessManager {
+  private state: FreshnessState | null = null;
+ succeeded in 476ms:
+import path from 'node:path';
+import type { EmbeddingConfig, StorageConfig, SearchConfig } from '../config/schema.js';
+import type { EmbeddingProvider } from '../interfaces/embedding.js';
+import { IndexLock } from '../core/index-lock.js';
+import { FtsStore } from '../store/fts-store.js';
+import { ChunkStore } from '../store/chunk-store.js';
+import { LanceVectorStore } from '../store/vector-store.js';
+import { SearchService } from '../search/search-service.js';
+import { buildContextBlock, type ContextBlock, type ContextBlockOptions } from './context-builder.js';
+
+// ============================================================
+// Sub-Agent Hook
+// ============================================================
+
+export interface SubHookConfig {
+  knowledgeDir: string;      // path to .knowledge/
+  projectId: string;
+  ftsDbPath?: string;        // resolved FTS DB path (from resolveFtsDbPath). Falls back to knowledgeDir/fts.db
+  embeddingConfig: EmbeddingConfig;
+  storageConfig: StorageConfig;
+ succeeded in 564ms:
+import fs from 'node:fs';
+import path from 'node:path';
+import type { RawChunk, Chunk, ChunkWithEmbedding, SymbolInfo, ImportInfo } from '../types/index.js';
+import type { TsParserResult } from '../interfaces/parser.js';
+import type { EmbeddingProvider } from '../interfaces/embedding.js';
+import type { VectorBackend } from '../interfaces/vector-backend.js';
+import { Scanner } from './scanner.js';
+import { TsParser } from '../parsers/ts-parser.js';
+import { MdParser } from '../parsers/md-parser.js';
+import { LineParser } from '../parsers/line-parser.js';
+import { FtsStore, CHUNK_META_UPSERT_SQL, toChunkMetaParams } from '../store/fts-store.js';
+import { DepsGraphImpl } from './deps-graph.js';
+import { normalizePath, toRelativePosix } from '../utils/path.js';
+import type { ChangedFiles } from './freshness.js';
+import type { ChunkingConfig, IndexingConfig } from '../config/schema.js';
+
+export interface IndexerConfig {
+  chunking: ChunkingConfig;
+  indexing: IndexingConfig;
+}
+ succeeded in 480ms:
+import type { SearchService } from '../search/search-service.js';
+import type { SearchResult } from '../types/index.js';
+
+// ============================================================
+// Context Block Builder
+// ============================================================
+
+export interface ContextBlockOptions {
+  topK?: number;           // default 10
+  maxContentLines?: number; // max lines per chunk snippet, default 5
+  includeScore?: boolean;   // show score in output, default false
+}
+
+export interface ContextBlock {
+  markdown: string;       // formatted "## Relevant Context" block
+  chunks: SearchResult[]; // raw results for programmatic use
+  query: string;
+  durationMs: number;
+}
+
+codex
+트리거는 `packages/launcher`의 TS 런처에만 들어가 있고, 실제 “무엇이 바뀌었는지” 계산은 Git 기반 `freshness.lock`로 처리합니다. PS 런처는 아직 이 자동 경로를 타지 않는지도 문서에서 확인하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"skills\\claude-subagent-orchestrator\\references\\wki-integration.md\" -Encoding utf8 -TotalCount 120" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\config\\schema.ts\" -TotalCount 260" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\core\\file-map.ts\" -TotalCount 240" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Path \"workspace-knowledge-index\\src\\search\\search-service.ts\" -TotalCount 260" in C:\Users\haj\projects\subagent-orchestrator succeeded in 505ms:
+# WKI Integration Guide
+
+## 목적
+
+워커에게 작업을 위임하기 전에 WKI(Workspace Knowledge Index)에서 관련 맥락을 검색하여 워커 프롬프트에 주입한다. 이를 통해 워커가 올바른 맥락으로 작업을 시작할 수 있다.
+
+## 사용 조건
+
+- `.knowledge/` 디렉터리가 워크스페이스 루트에 존재
+- WKI가 인덱싱된 상태 (최소 1회 `wki index` 실행)
+
+## TS 런처 사용 시 (자동)
+
+TS 런처(`packages/launcher/dist/cli.js`)를 통해 워커를 실행하면 **자동으로**:
+1. 증분 인덱싱 실행 (변경 없으면 스킵)
+2. 워커 태스크로 WKI 검색
+3. 관련 맥락을 `## Relevant Context (auto-injected)` 블록으로 프롬프트에 주입
+
+모든 엔진(Claude, Codex, Gemini)에 동일하게 적용된다.
+
+ succeeded in 487ms:
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { resolve } from 'node:path';
+
+// ============================================================
+// wki.config.json Type Definitions
+// ============================================================
+
+export interface WkiConfig {
+  projects: ProjectConfig[];
+  storage: StorageConfig;
+  embedding: EmbeddingConfig;
+  chunking: ChunkingConfig;
+  indexing: IndexingConfig;
+  logging: LoggingConfig;
+  search: SearchConfig;
+  schema_version: number;
+}
+
+export interface ProjectConfig {
+ succeeded in 462ms:
+import fs from 'node:fs';
+import path from 'node:path';
+import type { FileMapEntry } from '../types/index.js';
+import { normalizePath } from '../utils/path.js';
+import { EXTENSION_TYPE_MAP } from '../utils/file-types.js';
+import { Scanner } from './scanner.js';
+
+interface FileMapJson {
+  version: number;
+  root: string;
+  generatedAt: string;
+  files: FileMapEntry[];
+}
+
+/**
+ * Manages the file-map.json that tracks all indexed files in a project.
+ */
+export class FileMap {
+  private entries: Map<string, FileMapEntry> = new Map();
+  private rootDir: string = '';
+ succeeded in 492ms:
+import type Database from 'better-sqlite3';
+import type { SearchConfig } from '../config/schema.js';
+import type { EmbeddingProvider } from '../interfaces/embedding.js';
+import type { FtsSearchResult } from '../interfaces/fts-backend.js';
+import { FtsStore } from '../store/fts-store.js';
+import { ChunkStore } from '../store/chunk-store.js';
+import { LanceVectorStore } from '../store/vector-store.js';
+import type { Chunk, SearchFilter, SearchResult, VectorSearchResult } from '../types/index.js';
+import { QueryRouter, type RouteDecision, type SearchMode } from './query-router.js';
+import { expandKoreanQuery } from './korean-expansion.js';
+
+const CHUNK_ID_BATCH_SIZE = 300;
+const FTS_NORMALIZATION_WINDOW = 50;
+const RRF_K = 60;
+
+interface WeightedCandidate {
+  chunkId: string;
+  score: number;
+  ftsScore: number;
+  vectorScore: number;
+codex
+설명할 때 파일 기준으로 바로 따라갈 수 있게 핵심 함수들의 줄 번호를 잡겠습니다. 자동 인덱싱은 “런처가 호출”, “WKI CLI가 증분 판단”, “인덱서가 변경 파일만 반영”, “그 뒤 검색/주입” 순서입니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'packages\\\\launcher\\\\src\\\\supervisor\\\\wki-context.ts'; "'$i=1; Get-Content $p | ForEach-Object { if(($i -ge 40 -and $i -le 110) -or ($i -ge 150 -and $i -le 210) -or ($i -ge 220 -and $i -le 340)){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'packages\\\\launcher\\\\src\\\\orchestrator.ts'; "'$i=1; Get-Content $p | ForEach-Object { if($i -ge 285 -and $i -le 315){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'workspace-knowledge-index\\\\src\\\\index.ts'; "'$i=1; Get-Content $p | ForEach-Object { if(($i -ge 130 -and $i -le 255) -or ($i -ge 560 -and $i -le 610)){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'workspace-knowledge-index\\\\src\\\\core\\\\freshness.ts'; "'$i=1; Get-Content $p | ForEach-Object { if($i -le 180){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestrator succeeded in 558ms:
+40: }
+41: 
+42: // ============================================================
+43: // Detection
+44: // ============================================================
+45: 
+46: /**
+47:  * Auto-detect WKI configuration from workspace root.
+48:  * Returns null if WKI is not set up.
+49:  */
+50: export function detectWkiConfig(workspaceRoot: string): WkiContextConfig | null {
+51:   const knowledgeDir = path.resolve(workspaceRoot, '.knowledge');
+52: 
+53:   if (!fsSync.existsSync(knowledgeDir)) return null;
+54: 
+55:   // Check if FTS database exists (minimum viable index)
+56:   const ftsFiles = fsSync.readdirSync(knowledgeDir).filter(
+57:     (f) => f.endsWith('.db') || f === 'fts.db',
+58:   );
+59:   if (ftsFiles.length === 0) {
+ succeeded in 544ms:
+285:   await fs.mkdir(resolvedPaths.outputDir, { recursive: true });
+286: 
+287:   // Phase 3.5: Run after_create hook
+288:   const hookResult = await runAfterCreateHook(
+289:     spec.hooks,
+290:     resolvedPaths.workspaceRoot,
+291:   );
+292: 
+293:   // Phase 4: Bootstrap (shared directive + workflow)
+294:   const sharedDirective = await loadSharedDirective(spec, resolvedPaths);
+295:   const workflow = await loadWorkflow(spec, resolvedPaths.workspaceRoot, resolvedPaths.specDirectory);
+296: 
+297:   // Phase 4.5: Detect WKI and ensure index is fresh
+298:   const wkiConfig = detectWkiConfig(resolvedPaths.workspaceRoot);
+299:   if (wkiConfig) {
+300:     ensureIndexFresh(wkiConfig);
+301:     console.error(`[wki] Context injection enabled (${wkiConfig.knowledgeDir})`);
+302:   }
+303: 
+304:   // Phase 5: Build stage plan and validate policies
+ succeeded in 539ms:
+130: 
+131:       fileMap.update(projectRoot, allChanged, excludePatterns);
+132: 
+133:       console.log(
+134:         `Scanned: ${changes.added.length} added, ${changes.modified.length} modified, ${changes.deleted.length} deleted`,
+135:       );
+136:     } else {
+137:       // No previous state: full regeneration
+138:       fileMap.generate(projectRoot, excludePatterns);
+139:       console.log(`Full scan: ${fileMap.size} files`);
+140:     }
+141: 
+142:     // 4. Save updated file map
+143:     fileMap.save(fileMapPath);
+144: 
+145:     // 5. Save new freshness state
+146:     const newState = freshness.captureState(projectRoot);
+147:     freshness.save(freshnessPath, newState);
+148:   } finally {
+149:     lock.release();
+ succeeded in 535ms:
+1: import fs from 'node:fs';
+2: import path from 'node:path';
+3: import { execSync } from 'node:child_process';
+4: import { createHash } from 'node:crypto';
+5: import type { FreshnessState } from '../types/index.js';
+6: 
+7: /** Files that have changed since the last index. */
+8: export interface ChangedFiles {
+9:   added: string[];
+10:   modified: string[];
+11:   deleted: string[];
+12:   renamed: Array<{ from: string; to: string }>;
+13: }
+14: 
+15: /**
+16:  * Manages freshness.lock for incremental indexing.
+17:  * Tracks git state to detect which files need re-indexing.
+18:  */
+19: export class FreshnessManager {
+20:   private state: FreshnessState | null = null;
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'workspace-knowledge-index\\\\src\\\\context\\\\sub-hook.ts'; "'$i=1; Get-Content $p | ForEach-Object { if($i -le 140){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'workspace-knowledge-index\\\\src\\\\core\\\\indexer.ts'; "'$i=1; Get-Content $p | ForEach-Object { if(($i -ge 240 -and $i -le 420) -or ($i -ge 420 -and $i -le 540)){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'workspace-knowledge-index\\\\src\\\\context\\\\context-builder.ts'; "'$i=1; Get-Content $p | ForEach-Object { if($i -le 120){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'skills\\\\claude-subagent-orchestrator\\\\references\\\\wki-integration.md'; "'$i=1; Get-Content $p -Encoding utf8 | ForEach-Object { if($i -le 80){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestrator succeeded in 620ms:
+1: import path from 'node:path';
+2: import type { EmbeddingConfig, StorageConfig, SearchConfig } from '../config/schema.js';
+3: import type { EmbeddingProvider } from '../interfaces/embedding.js';
+4: import { IndexLock } from '../core/index-lock.js';
+5: import { FtsStore } from '../store/fts-store.js';
+6: import { ChunkStore } from '../store/chunk-store.js';
+7: import { LanceVectorStore } from '../store/vector-store.js';
+8: import { SearchService } from '../search/search-service.js';
+9: import { buildContextBlock, type ContextBlock, type ContextBlockOptions } from './context-builder.js';
+10: 
+11: // ============================================================
+12: // Sub-Agent Hook
+13: // ============================================================
+14: 
+15: export interface SubHookConfig {
+16:   knowledgeDir: string;      // path to .knowledge/
+17:   projectId: string;
+18:   ftsDbPath?: string;        // resolved FTS DB path (from resolveFtsDbPath). Falls back to knowledgeDir/fts.db
+19:   embeddingConfig: EmbeddingConfig;
+20:   storageConfig: StorageConfig;
+ succeeded in 630ms:
+240:         const embeddings = await this.embeddingProvider.batchEmbed(contents);
+241: 
+242:         const chunksWithEmbedding: ChunkWithEmbedding[] = allChunks.map((chunk, i) => ({
+243:           ...chunk,
+244:           embedding: embeddings[i],
+245:         }));
+246: 
+247:         await this.vectorStore.insert(chunksWithEmbedding);
+248:         result.embeddingsGenerated = embeddings.length;
+249:       } catch (err) {
+250:         console.warn(`[indexer] Embedding generation failed: ${err instanceof Error ? err.message : String(err)}`);
+251:       }
+252:     }
+253: 
+254:     // 5. Save symbols.idx (JSONL)
+255:     const symbolsPath = path.join(this.knowledgeDir, 'symbols.idx');
+256:     this.saveSymbolsIdx(allSymbols, symbolsPath);
+257: 
+258:     // 6. Build and save deps.graph (JSON)
+259:     const depsGraph = new DepsGraphImpl();
+ succeeded in 607ms:
+1: import type { SearchService } from '../search/search-service.js';
+2: import type { SearchResult } from '../types/index.js';
+3: 
+4: // ============================================================
+5: // Context Block Builder
+6: // ============================================================
+7: 
+8: export interface ContextBlockOptions {
+9:   topK?: number;           // default 10
+10:   maxContentLines?: number; // max lines per chunk snippet, default 5
+11:   includeScore?: boolean;   // show score in output, default false
+12: }
+13: 
+14: export interface ContextBlock {
+15:   markdown: string;       // formatted "## Relevant Context" block
+16:   chunks: SearchResult[]; // raw results for programmatic use
+17:   query: string;
+18:   durationMs: number;
+19: }
+20: 
+ succeeded in 598ms:
+1: # WKI Integration Guide
+2: 
+3: ## 목적
+4: 
+5: 워커에게 작업을 위임하기 전에 WKI(Workspace Knowledge Index)에서 관련 맥락을 검색하여 워커 프롬프트에 주입한다. 이를 통해 워커가 올바른 맥락으로 작업을 시작할 수 있다.
+6: 
+7: ## 사용 조건
+8: 
+9: - `.knowledge/` 디렉터리가 워크스페이스 루트에 존재
+10: - WKI가 인덱싱된 상태 (최소 1회 `wki index` 실행)
+11: 
+12: ## TS 런처 사용 시 (자동)
+13: 
+14: TS 런처(`packages/launcher/dist/cli.js`)를 통해 워커를 실행하면 **자동으로**:
+15: 1. 증분 인덱싱 실행 (변경 없으면 스킵)
+16: 2. 워커 태스크로 WKI 검색
+17: 3. 관련 맥락을 `## Relevant Context (auto-injected)` 블록으로 프롬프트에 주입
+18: 
+19: 모든 엔진(Claude, Codex, Gemini)에 동일하게 적용된다.
+20: 
+codex
+문서상 전제는 명확합니다. 이 저장소에서는 TS 런처를 쓸 때만 WKI가 자동으로 갱신되고, Claude Task 직접 실행이나 PS 런처는 수동 검색 경로입니다. 실제 이 워크스페이스 설정도 같이 확인하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "if (Test-Path wki.config.json) { Get-Content wki.config.json -TotalCount 220 } else { 'NO_WKI_CONFIG' }" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'workspace-knowledge-index\\\\src\\\\config\\\\schema.ts'; "'$i=1; Get-Content $p | ForEach-Object { if(($i -ge 70 -and $i -le 130) -or ($i -ge 215 -and $i -le 235)){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "if (Test-Path .knowledge) { Get-ChildItem .knowledge -Force | Select-Object Name,Mode,Length | Format-Table -AutoSize | Out-String -Width 200 } else { 'NO_KNOWLEDGE_DIR' }" in C:\Users\haj\projects\subagent-orchestrator succeeded in 529ms:
+{
+  "projects": [
+    {
+      "name": "my-project",
+      "root": ".",
+      "exclude": ["node_modules", "dist", ".next", "dev.db"]
+    }
+  ],
+
+  "storage": {
+    "index_root": ".knowledge",
+    "vector_backend": "lancedb",
+    "lancedb": {
+      "path": ".knowledge/{project}/vectors.lance"
+    },
+    "qdrant": {
+      "url": "http://localhost:6333",
+      "api_key": null
+    }
+  },
+ succeeded in 513ms:
+70:   level: 'debug' | 'info' | 'warn' | 'error';
+71: }
+72: 
+73: export interface SearchConfig {
+74:   fts_db: string;
+75:   fusion: {
+76:     strategy: 'weighted_sum' | 'rrf';
+77:     weights: {
+78:       fts: number;
+79:       vector: number;
+80:     };
+81:   };
+82: }
+83: 
+84: // ============================================================
+85: // Defaults
+86: // ============================================================
+87: 
+88: export const DEFAULT_CONFIG: WkiConfig = {
+89:   projects: [],
+ succeeded in 583ms:
+
+Name                  Mode   Length 
+----                  ----   ------ 
+.knowledge            d-----        
+my-project            d-----        
+subagent-orchestrator d-----        
+.wki.lock             -a---- 137    
+deps.graph            -a---- 48754  
+file-map.json         -a---- 1707138
+freshness.lock        -a---- 352    
+symbols.idx           -a---- 3070106
+
+
+
+codex
+한 가지 중요한 점이 더 있습니다. 이 구현은 “처음부터 인덱스를 만들어주는 자동 부트스트랩”이 아니라, 이미 존재하는 WKI를 런처가 호출 시마다 신선하게 유지하는 방식입니다. 락과 graceful degradation도 함께 보겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'workspace-knowledge-index\\\\src\\\\core\\\\index-lock.ts'; "'$i=1; Get-Content $p | ForEach-Object { if($i -le 140){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content .knowledge\\freshness.lock -TotalCount 80" in C:\Users\haj\projects\subagent-orchestratorexec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content .knowledge\\.wki.lock -TotalCount 80" in C:\Users\haj\projects\subagent-orchestrator succeeded in 535ms:
+1: import crypto from 'node:crypto';
+2: import fs from 'node:fs';
+3: import path from 'node:path';
+4: 
+5: export interface LockInfo {
+6:   pid: number;
+7:   lockId: string;     // unique per acquire() call ??prevents PID-reuse collisions
+8:   timestamp: string;  // ISO 8601
+9:   operation: string;  // 'index' | 'rebuild' | 'scan'
+10: }
+11: 
+12: export class IndexLock {
+13:   private readonly lockPath: string;
+14:   private currentLockId: string | null = null;
+15:   private reentrant = false;
+16: 
+17:   constructor(private knowledgeDir: string) {
+18:     this.lockPath = path.join(knowledgeDir, '.wki.lock');
+19:   }
+20: 
+ succeeded in 488ms:
+{
+  "head_commit": "8702c3c7a2c180e80acabcf370f900032de65295",
+  "branch": "main",
+  "dirty": true,
+  "staged_fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "untracked_fingerprint": "8268e4b9afbcda38d0a6d470e564e5ae9ee1b75acda42adac2ce39459a45bdfb",
+  "file_hashes": {},
+  "indexed_at": "2026-03-19T05:40:21.061Z"
+}
+ succeeded in 472ms:
+{
+  "pid": 35244,
+  "lockId": "4f8a38e4-8e3f-42a0-9c35-efcc3558d639",
+  "timestamp": "2026-03-19T12:43:30.094Z",
+  "operation": "index"
+}
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem .knowledge\\my-project -Force | Select-Object Name,Mode,Length | Format-Table -AutoSize | Out-String -Width 200" in C:\Users\haj\projects\subagent-orchestrator succeeded in 512ms:
+
+Name       Mode      Length
+----       ----      ------
+fts.db     -a---- 177360896
+fts.db-shm -a----    294912
+fts.db-wal -a---- 141011152
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem .knowledge\\my-project\\vectors.lance -Force | Select-Object Name,Mode,Length | Format-Table -AutoSize | Out-String -Width 200" in C:\Users\haj\projects\subagent-orchestrator exited 1 in 544ms:
+
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\.knowledge\my-project\vectors.lance' 경로는 존재하지 않으므로 찾을 수 없습
+니다.
+위치 줄:2 문자:1
++ Get-ChildItem .knowledge\my-project\vectors.lance -Force | Select-Obj ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\haj\pr...t\vectors.lance:String) [Get-ChildItem], ItemNotFound 
+   Exception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+codex
+현재 저장소 설정값도 한 줄로 넣을 수 있게 `wki.config.json` 줄 번호만 확인하겠습니다. 이 부분까지 보면 “이론”이 아니라 “이 repo에서 실제로 어떤 백엔드와 모델을 쓰는지”까지 설명 가능합니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'wki.config.json'; "'$i=1; Get-Content $p | ForEach-Object { if($i -le 80){"$i`:` $_"}; $i++ }' in C:\Users\haj\projects\subagent-orchestrator succeeded in 486ms:
+1: {
+2:   "projects": [
+3:     {
+4:       "name": "my-project",
+5:       "root": ".",
+6:       "exclude": ["node_modules", "dist", ".next", "dev.db"]
+7:     }
+8:   ],
+9: 
+10:   "storage": {
+11:     "index_root": ".knowledge",
+12:     "vector_backend": "lancedb",
+13:     "lancedb": {
+14:       "path": ".knowledge/{project}/vectors.lance"
+15:     },
+16:     "qdrant": {
+17:       "url": "http://localhost:6333",
+18:       "api_key": null
+19:     }
+20:   },
+codex
+이 프로젝트의 WKI 자동 인덱싱은 “TS 런처 실행 시 1회 freshness 확인 -> 변경 파일만 증분 인덱싱 -> 그 인덱스로 워커 프롬프트용 컨텍스트 검색” 흐름입니다. 시작점은 [orchestrator.ts](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/orchestrator.ts#L297)이고, 문서 요약도 [wki-integration.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/wki-integration.md#L12)에 맞춰져 있습니다.
+
+**동작 순서**
+1. TS 런처가 오케스트레이션을 시작하면 WKI를 감지하고 `ensureIndexFresh()`를 한 번 호출합니다. 감지 조건은 `.knowledge/`와 FTS DB가 이미 있어야 한다는 점이라서, “처음부터 WKI를 생성”하는 부트스트랩까지 자동은 아닙니다. [wki-context.ts](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/supervisor/wki-context.ts#L50)
+2. `ensureIndexFresh()`는 `node workspace-knowledge-index/dist/index.js index`를 실행합니다. 변경이 없으면 즉시 끝나고, 실패하거나 `dist`가 없으면 전체 런처를 죽이지 않고 조용히 폴백합니다. [wki-context.ts](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/supervisor/wki-context.ts#L164)
+3. WKI CLI의 `index` 명령은 `.wki.lock`으로 동시 쓰기를 막고, `freshness.lock`을 읽어 이전 인덱싱 시점 상태를 가져옵니다. [index.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/index.ts#L153) [index-lock.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/index-lock.ts#L27)
+4. stale 판단은 Git 기반입니다. 이전 `head_commit` 대비 현재 `HEAD`의 committed diff, 현재 워킹트리의 unstaged diff, staged diff, untracked files를 합쳐 changed set을 만듭니다. 변경이 0이면 `"Index is up to date"`로 종료합니다. [freshness.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/freshness.ts#L53) [index.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/index.ts#L220)
+5. 변경이 있으면 `Indexer.indexIncremental()`이 삭제/rename된 파일의 기존 chunk와 vector를 지우고, added/modified/renamed 파일만 다시 파싱해서 FTS DB를 갱신합니다. 가능하면 임베딩도 다시 만들고 `symbols.idx`, `deps.graph`도 함께 갱신합니다. [indexer.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/core/indexer.ts#L270)
+6. 인덱싱이 끝나면 각 워커의 task 텍스트로 WKI 검색을 수행해서 `## Relevant Context (auto-injected)` 블록을 만들고 프롬프트 앞에 붙입니다. [wki-context.ts](C:/Users/haj/projects/subagent-orchestrator/packages/launcher/src/supervisor/wki-context.ts#L209) [sub-hook.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/context/sub-hook.ts#L29) [context-builder.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/context/context-builder.ts#L26)
+
+**이 저장소 기준**
+- 설정은 [wki.config.json](C:/Users/haj/projects/subagent-orchestrator/wki.config.json)에 있고, `project.name`은 `my-project`, 인덱스 루트는 `.knowledge`, 검색 DB는 `.knowledge/{project}/fts.db`, 검색 fusion은 FTS 0.4 + vector 0.6입니다.
+- 임베딩은 로컬 `transformers.js` + `Xenova/paraphrase-multilingual-MiniLM-L12-v2`로 잡혀 있어서, 가능하면 hybrid search를 쓰고 실패하면 FTS-only로 폴백합니다. [wki.config.json](C:/Users/haj/projects/subagent-orchestrator/wki.config.json) [index.ts](C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/src/index.ts#L182)
+- 자동 연동은 TS 런처에서만 됩니다. Claude Task 직접 실행이나 `start-codex-subagent-team.ps1` 경로는 아직 수동입니다. [wki-integration.md](C:/Users/haj/projects/subagent-orchestrator/skills/claude-subagent-orchestrator/references/wki-integration.md#L21)
+
+원하면 다음 답변에서 `freshness.lock` 예시를 기준으로 “수정 파일이 생겼을 때 실제로 어떤 파일만 다시 인덱싱되는지”까지 더 풀어드리겠습니다.
+tokens used
+85,802

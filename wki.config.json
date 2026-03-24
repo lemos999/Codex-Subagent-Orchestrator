@@ -3,10 +3,14 @@
     {
       "name": "my-project",
       "root": ".",
-      "exclude": ["node_modules", "dist", ".next", "dev.db"]
+      "exclude": [
+        "node_modules",
+        "dist",
+        ".next",
+        "dev.db"
+      ]
     }
   ],
-
   "storage": {
     "index_root": ".knowledge",
     "vector_backend": "lancedb",
@@ -18,7 +22,6 @@
       "api_key": null
     }
   },
-
   "embedding": {
     "provider": "local",
     "openai": {
@@ -35,15 +38,12 @@
       "dimensions": 384
     }
   },
-
   "schema_version": 1,
-
   "chunking": {
     "max_lines": 100,
     "overlap_lines": 30,
     "max_tokens": 1000
   },
-
   "indexing": {
     "concurrency": 4,
     "max_file_size_mb": 10,
@@ -51,16 +51,17 @@
     "timeout_ms": 30000,
     "retry": 2
   },
-
   "logging": {
     "level": "info"
   },
-
   "search": {
     "fts_db": ".knowledge/{project}/fts.db",
     "fusion": {
       "strategy": "weighted_sum",
-      "weights": { "fts": 0.4, "vector": 0.6 }
+      "weights": {
+        "fts": 0.4,
+        "vector": 0.6
+      }
     }
   }
 }

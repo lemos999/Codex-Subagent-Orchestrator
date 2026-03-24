@@ -20,6 +20,7 @@ import { runAfterCreateHook } from './supervisor/hooks.js';
 import { loadWorkflow } from './supervisor/workflow.js';
 import { detectWkiConfig, ensureIndexFresh, generateContext, injectContextIntoPrompt, type WkiContextConfig } from './supervisor/wki-context.js';
 import { writeManifest } from './evidence/manifest-writer.js';
+import { writeNormalizedEvidence } from './evidence/normalized-writer.js';
 import { writeSummary } from './evidence/summary-writer.js';
 import { writeArchive } from './evidence/archive-writer.js';
 import { buildManifest, type SharedDirectiveInfo } from './evidence/manifest-builder.js';
@@ -198,6 +199,7 @@ async function resolveWorkers(
       name: agent.name,
       engine,
       model,
+      taskText,
       prompt: promptParts.join('\n'),
       cwd: agentCwd,
       outputDir: resolvedPaths.outputDir,
@@ -341,6 +343,8 @@ export async function orchestrate(
     await writeSummary(resolvedPaths.summaryFile, manifest);
     summaryPath = resolvedPaths.summaryFile;
   }
+
+  await writeNormalizedEvidence(resolvedPaths, manifest, results, workers);
 
   // Phase 8.5: Write archive and update manifest
   const archiveResult = await writeArchive(
