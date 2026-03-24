@@ -1,7 +1,9 @@
-# 웹 개발 제작 바이블
+# 개발 제작 바이블
 
-> **목적**: 프로젝트 유형에 관계없이 적용할 수 있는 웹 개발 원칙과 경험 기록.
-> **기반**: ShortLive Shop Helper (라이브 커머스 SaaS) 개발에서 축적한 실전 경험.
+> **목적**: 프로젝트 유형에 관계없이 적용할 수 있는 소프트웨어 개발 원칙과 경험 기록.
+> **적용 범위**: 서비스 앱, 커뮤니티 사이트, 관리 도구, 유틸리티 프로그램, CLI, 모바일 앱
+> **기반**: ShortLive Shop Helper (라이브 커머스 SaaS) + 다수 프로젝트에서 축적한 실전 경험.
+> **구조**: 각 섹션은 **[원칙]** (스택 무관) + **[레시피]** (특정 스택 예시)로 구성.
 > **최초 작성**: 2026-03-24
 > **최종 업데이트**: 2026-03-24
 
@@ -27,6 +29,11 @@
 16. [캐싱 & 성능 최적화](#16-캐싱--성능-최적화)
 17. [관측성 (Observability)](#17-관측성-observability)
 18. [CI/CD 파이프라인](#18-cicd-파이프라인)
+19. [백그라운드 작업 & 큐](#19-백그라운드-작업--큐)
+20. [파일 업로드 & 스토리지](#20-파일-업로드--스토리지)
+21. [권한 모델 (RBAC)](#21-권한-모델-rbac)
+22. [API 버전관리 & 하위호환](#22-api-버전관리--하위호환)
+23. [모바일 / 데스크톱 / CLI 확장](#23-모바일--데스크톱--cli-확장)
 
 ---
 
@@ -38,8 +45,15 @@
 |------|-----------|-----|------|--------|
 | MVP / 1인 개발 | Next.js (App Router) | SQLite → PostgreSQL | NextAuth | Socket.IO |
 | 포털 / 대규모 | Next.js 또는 별도 FE+BE | PostgreSQL | NextAuth 또는 자체 | Socket.IO / SSE |
-| 관리자 도구 | Next.js | PostgreSQL | NextAuth | 불필요 또는 SSE |
-| API 서비스 | Fastify / Express | PostgreSQL | JWT 자체 구현 | WebSocket |
+| 관리자 도구 | Next.js / Retool | PostgreSQL | NextAuth | 불필요 또는 SSE |
+| API 서비스 | Fastify / Express / NestJS | PostgreSQL | JWT 자체 구현 | WebSocket |
+| 커뮤니티 / 포럼 | Next.js / Django | PostgreSQL | OAuth + 자체 | SSE |
+| 모바일 앱 (하이브리드) | React Native / Flutter | PostgreSQL (API 서버) | JWT + refresh token | WebSocket |
+| CLI / 유틸리티 | Node.js / Python | SQLite / JSON | N/A | N/A |
+| 데스크톱 앱 | Electron / Tauri | SQLite | 로컬 인증 | IPC |
+
+> **[원칙]** 위 표는 참고용이다. 핵심 원칙은 아래이며 어떤 스택이든 적용된다.
+> **[레시피]** 코드 예시는 주로 Next.js + TypeScript를 사용하지만, 원칙은 Django/Rails/Spring/Flask에도 동일하게 적용된다.
 
 ### 선택 시 고려 순서
 
@@ -1024,6 +1038,232 @@ return <LegacyCheckout />;
 
 > **"CI가 통과하지 않으면 머지하지 마라."**
 > 예외를 한 번 허용하면 습관이 된다. CI 실패 = 머지 차단을 자동화하라.
+
+---
+
+---
+
+## 19. 백그라운드 작업 & 큐
+
+### [원칙] 언제 백그라운드로 보내는가
+
+```
+1. 응답 시간에 포함하면 안 되는 작업 (이메일 발송, PDF 생성, 알림 전송)
+2. 재시도가 필요한 작업 (외부 API 호출, 결제 확인)
+3. 스케줄링이 필요한 작업 (일일 정산, 만료 처리, 리포트 생성)
+4. 무거운 연산 (이미지 리사이즈, 데이터 집계)
+```
+
+### [원칙] 큐 설계 규칙
+
+| 원칙 | 이유 |
+|------|------|
+| **멱등성(idempotency) 필수** | 같은 작업이 2번 실행돼도 결과가 동일해야 한다 |
+| **재시도 횟수 제한** | 무한 재시도는 시스템을 죽인다 (3~5회 + exponential backoff) |
+| **dead letter queue** | 최종 실패한 작업을 별도 큐에 보관하여 수동 처리 |
+| **작업 상태 추적** | pending → processing → completed / failed |
+| **타임아웃 설정** | 한 작업이 큐를 점유하는 시간 제한 |
+
+### [레시피] 도구 선택
+
+| 규모 | 도구 | 비고 |
+|------|------|------|
+| 소규모 | `node-cron` + DB 상태 관리 | 별도 인프라 불필요 |
+| 중규모 | BullMQ (Redis 기반) | Node.js 생태계 표준 |
+| 대규모 | RabbitMQ / SQS / Kafka | 분산 시스템, 멀티 컨슈머 |
+| Python | Celery + Redis/RabbitMQ | Django/Flask 표준 |
+
+### 멱등성 패턴
+
+```typescript
+// [원칙] idempotency key로 중복 실행 방지
+async function processPayment(idempotencyKey: string, amount: number) {
+  const existing = await db.payment.findUnique({ where: { idempotencyKey } });
+  if (existing) return existing; // 이미 처리됨 — 결과만 반환
+
+  return await db.$transaction(async (tx) => {
+    const payment = await tx.payment.create({
+      data: { idempotencyKey, amount, status: "completed" },
+    });
+    return payment;
+  });
+}
+```
+
+---
+
+## 20. 파일 업로드 & 스토리지
+
+### [원칙] 파일 처리 규칙
+
+```
+1. 파일을 DB에 저장하지 마라 — 파일은 스토리지, 메타데이터만 DB
+2. 업로드 전 검증: 파일 크기 상한, MIME 타입 화이트리스트, 파일명 정제
+3. 사용자가 올린 파일명을 그대로 쓰지 마라 — UUID로 변환
+4. 이미지는 업로드 시 리사이즈 (원본 + 썸네일)
+5. 민감 파일은 서명된 URL(presigned URL)로만 접근 가능하게
+6. 업로드 용량 제한: API 단위 (10MB), 사용자 단위 (1GB) 등 이중 제한
+```
+
+### [원칙] 스토리지 선택
+
+| 규모 | 저장소 | 비고 |
+|------|--------|------|
+| 로컬 개발 | 파일 시스템 (`uploads/`) | gitignore에 추가 |
+| 프로덕션 | S3 / R2 / GCS | CDN 연동 필수 |
+| 데스크톱 앱 | 로컬 파일 시스템 | OS별 경로 분기 |
+
+### [레시피] 안전한 업로드 핸들러
+
+```typescript
+// [원칙] MIME 타입 화이트리스트 + 크기 제한
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+
+function validateUpload(file: File): string | null {
+  if (!ALLOWED_TYPES.includes(file.type)) return "허용되지 않는 파일 형식";
+  if (file.size > MAX_SIZE) return "파일 크기 초과 (최대 10MB)";
+  return null; // 유효
+}
+```
+
+---
+
+## 21. 권한 모델 (RBAC)
+
+### [원칙] 권한 설계
+
+```
+1. 인증(Authentication) ≠ 인가(Authorization) — 분리해서 다루라
+2. 역할(Role)은 최소화 — admin, editor, viewer 3개면 대부분 충분
+3. 리소스 소유권 확인은 역할과 별개로 항상 적용
+4. 관리자라도 다른 사용자의 민감 데이터를 무분별하게 접근하면 안 됨
+5. 권한 변경은 감사 로그 필수
+```
+
+### [원칙] 역할 설계 패턴
+
+| 패턴 | 적합한 경우 | 예시 |
+|------|-----------|------|
+| **단순 역할** | 소규모 SaaS | admin, member |
+| **계층 역할** | 조직 구조가 있는 서비스 | owner > admin > editor > viewer |
+| **RBAC (역할 기반)** | 세밀한 권한 제어 | role → permissions 매핑 |
+| **ABAC (속성 기반)** | 복잡한 규칙 | 부서 + 직급 + 시간대로 판단 |
+
+### [레시피] 미들웨어 패턴
+
+```typescript
+// [원칙] 역할 확인을 미들웨어로 중앙화
+function requireRole(allowedRoles: string[]) {
+  return async (req, res, next) => {
+    const user = req.user; // 인증 미들웨어에서 주입
+    if (!user) return res.status(401).json({ error: "미인증" });
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(404).json({ error: "Not found" }); // 403 대신 404 (IDOR 방지)
+    }
+    next();
+  };
+}
+
+// 사용
+app.delete("/api/users/:id", requireRole(["admin"]), deleteUserHandler);
+```
+
+### [원칙] 멀티테넌시
+
+```
+1. 모든 쿼리에 tenantId 필터 — ORM 미들웨어로 자동화
+2. 테넌트 간 데이터 절대 교차 금지
+3. URL에 테넌트 식별자 포함 (/org/:orgId/...) 또는 서브도메인
+4. 관리자 API도 테넌트 스코프 내에서만 동작
+```
+
+---
+
+## 22. API 버전관리 & 하위호환
+
+### [원칙] 버전관리 규칙
+
+```
+1. 내부 API (자체 프론트엔드)는 버전관리 불필요 — 동시 배포하면 됨
+2. 외부 API (제3자 사용)는 반드시 버전관리
+3. 삭제보다 추가가 안전 — 필드 추가는 하위호환, 필드 삭제는 파괴적 변경
+4. 폐기(deprecation)는 최소 3개월 전 공지
+```
+
+### [원칙] 하위호환 변경 vs 파괴적 변경
+
+| 안전 (하위호환) | 위험 (파괴적) |
+|----------------|--------------|
+| 응답에 새 필드 추가 | 응답에서 기존 필드 제거 |
+| 새 엔드포인트 추가 | 기존 엔드포인트 URL 변경 |
+| 선택적 요청 파라미터 추가 | 필수 요청 파라미터 추가 |
+| 에러 코드 추가 | 기존 에러 코드 의미 변경 |
+
+### [레시피] URL 기반 버전관리
+
+```
+/api/v1/users     ← 현재 버전
+/api/v2/users     ← 새 버전 (구조 변경 시)
+```
+
+### 실전 교훈
+
+> **"내부 API도 버전관리 하자"는 함정.**
+> 자체 프론트엔드만 쓰는 API에 v1/v2를 붙이면 유지보수 비용만 늘고, 어차피 프론트와 동시 배포한다. 외부 사용자가 있을 때만 버전관리하라.
+
+---
+
+## 23. 모바일 / 데스크톱 / CLI 확장
+
+### [원칙] 플랫폼별 고려사항
+
+| 플랫폼 | 핵심 차이 | 추가 고려 |
+|--------|----------|----------|
+| **모바일 (React Native / Flutter)** | 오프라인 지원, 푸시 알림, 앱스토어 심사 | 토큰 저장은 SecureStore, 네트워크 상태 체크 |
+| **데스크톱 (Electron / Tauri)** | 파일 시스템 접근, 로컬 DB, 자동 업데이트 | OS별 경로 분기, 코드 서명 |
+| **CLI** | stdin/stdout, 종료 코드, 인수 파싱 | --help 필수, JSON 출력 옵션, 파이프 지원 |
+| **PWA** | 서비스 워커, 캐시 전략, 설치 프롬프트 | 오프라인 폴백 페이지 |
+
+### [원칙] 공유 가능한 것 vs 분리해야 하는 것
+
+```
+공유 가능:
+  ✓ 비즈니스 로직 (유틸리티 함수, 검증 로직)
+  ✓ API 클라이언트 (타입 정의, 엔드포인트)
+  ✓ 데이터 모델 (TypeScript 타입, 스키마)
+
+분리 필수:
+  ✗ UI 컴포넌트 (웹 ≠ 모바일 ≠ 데스크톱)
+  ✗ 저장소 접근 (localStorage ≠ AsyncStorage ≠ fs)
+  ✗ 인증 흐름 (쿠키 ≠ 토큰 ≠ OS keychain)
+  ✗ 알림 (웹 푸시 ≠ FCM/APNs ≠ OS 알림)
+```
+
+### [원칙] 모바일 인증 패턴
+
+```
+1. JWT access token (15분 만료) + refresh token (30일)
+2. Access token은 메모리에, refresh token은 SecureStore에
+3. 401 응답 시 자동 refresh → 실패하면 로그인 화면으로
+4. 생체 인증(Face ID / 지문)은 앱 잠금에만, 서버 인증과 분리
+```
+
+### [원칙] CLI 프로그램 규칙
+
+```
+1. --help, --version 필수
+2. 성공 시 exit code 0, 실패 시 1
+3. 에러 메시지는 stderr, 결과 데이터는 stdout
+4. --json 옵션으로 파싱 가능한 출력 지원
+5. 긴 작업은 프로그레스 바 또는 상태 메시지
+6. 설정은 ~/.config/<app>/ 또는 환경변수
+```
+
+### 실전 교훈
+
+> **"한 코드베이스로 모든 플랫폼"은 환상이다.**
+> 비즈니스 로직은 공유하되, UI와 플랫폼 접근은 분리하라. 무리하게 통합하면 모든 플랫폼에서 2류가 된다.
 
 ---
 
