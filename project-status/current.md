@@ -21,12 +21,29 @@
 | Codex 오케스트레이터 | 완료 | `skills/codex-subagent-orchestrator/` |
 | **토론 시스템 (/discuss)** | **Phase 1~3 완료** | `packages/launcher/src/discussion/` |
 | **큐 러너 TS** | **Phase 1~2 완료** | `packages/launcher/src/queue/` |
+| **범용 설계 디렉터 (/design)** | **완료** | `skills/design-director/` + `.claude/skills/design/` |
+| **게임 기획 디렉터 (/gdd)** | **완료** | `skills/game-design-director/` + `.claude/skills/gdd/` |
 
 ## 다음 작업 (우선순위 순)
 
-1. **WKI 도메인 특화 임베딩** — 현재 범용 모델의 한계 (evidence/workflow 쿼리 약함, Mean nDCG 0.686)
+1. **/design 실전 테스트** — 실제 기획 프로젝트 1건 수행하여 범용화 검증
+2. **/design domains/software/** 도메인 팩 추가 — 소프트웨어 설계 특화
+3. **/discuss WKI 연동 강화** — 토론 시스템에 마이크로 맥락 자동 주입 (코드 수정)
+4. **WKI nDCG 추가 개선** — 현재 0.744, ColBERT/청킹 전략 변경 검토
 
-## 최근 완료 (2026-03-17~22)
+## 최근 완료 (2026-03-24)
+
+- `/design` 범용 설계 디렉터 스킬 완성 (26개 파일, Watchdog 24기 교차 검수)
+  - /gdd 골격 포크 → 게임 특화 제거 → 도메인 팩 플러그인 구조
+  - Phase 0~6 + Mode B + 멀티엔진(Claude+GPT+Gemini) 지원
+  - generic 도메인 팩 완비, /sub + /submix 스펙 4개
+- 맥락 공유 구조 개선:
+  - CLAUDE.md 생성 (포인터 3줄), AGENTS.md에 project-status 참조 추가
+  - /design, /gdd SKILL.md에 project-status 참조 추가
+  - 3엔진 감사(/submix) → CLAUDE.md 경량화, memory 정본 규칙 적용
+- WKI 검색 파이프라인: nDCG 0.686 → 0.744 (+8.5%)
+
+## 이전 완료 (2026-03-17~22)
 
 - TS 런처 Phase 0~4 (PS 런처 대체)
 - WKI 로컬 임베딩 (paraphrase-multilingual-MiniLM-L12-v2)
