@@ -24,6 +24,7 @@
   "supervisor_only": true,
   "require_final_read_only_review": true,
   "shared_directive_mode": "compact",
+  "shared_directive_text": "구현 기준: 이 프로젝트는 DEVELOPMENT-BIBLE.md의 원칙을 따릅니다. 특히 입력값 검증(§6), 보안(§7), 테스트(§10), 코드 리뷰(§25), 런칭 체크리스트(§28)를 필수 참조하세요.",
   "agents": [
     {
       "name": "cross-impact-validator",

@@ -18,6 +18,7 @@
   "supervisor_only": true,
   "require_final_read_only_review": true,
   "shared_directive_mode": "compact",
+  "shared_directive_text": "분석 기준: DEVELOPMENT-BIBLE.md의 원칙을 참조하여 현재 프로젝트의 보안(§7), 성능(§16), 관측성(§17), 테스트(§10) 수준을 평가하세요.",
   "debug_log_file": "subagent-runs/claude/design-analysis/launcher-debug.log",
   "agents": [
     {
