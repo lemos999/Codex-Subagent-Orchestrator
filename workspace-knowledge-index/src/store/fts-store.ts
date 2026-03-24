@@ -405,7 +405,7 @@ function normalizeChunkType(value: string | null): ChunkType {
   return 'other';
 }
 
-function buildFtsMatchExpression(query: string): string {
+function buildFtsMatchExpression(query: string, operator: 'AND' | 'OR' = 'AND'): string {
   const tokens = query
     .trim()
     .split(/\s+/u)
@@ -416,7 +416,7 @@ function buildFtsMatchExpression(query: string): string {
     return '';
   }
 
-  return tokens.map((token) => `"${token}"`).join(' AND ');
+  return tokens.map((token) => `"${token}"`).join(` ${operator} `);
 }
 
 function sanitizeFtsToken(token: string): string {

@@ -49,6 +49,9 @@ export interface EmbeddingConfig {
     runtime: string;
     model: string;
     dimensions: number;
+    dtype?: string;       // default dtype for both indexing and search
+    indexDtype?: string;   // override for indexing (e.g., 'q8' for faster rebuild)
+    searchDtype?: string;  // override for search (e.g., 'fp32' for accuracy)
   };
 }
 
@@ -79,6 +82,7 @@ export interface SearchConfig {
       vector: number;
     };
   };
+  indexDtype?: string;  // dtype used for indexing — enables q8-aware search adjustments
 }
 
 // ============================================================

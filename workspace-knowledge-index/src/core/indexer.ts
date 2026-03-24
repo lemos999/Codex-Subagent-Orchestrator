@@ -236,7 +236,7 @@ export class Indexer {
         // Clear existing vectors for this project before re-inserting
         await this.vectorStore.rebuild();
 
-        const contents = allChunks.map(c => c.content);
+        const contents = allChunks.map(c => buildEmbeddingText(c));
         const embeddings = await this.embeddingProvider.batchEmbed(contents);
 
         const chunksWithEmbedding: ChunkWithEmbedding[] = allChunks.map((chunk, i) => ({
@@ -500,7 +500,7 @@ export class Indexer {
     // Embedding generation + vector storage (optional)
     if (this.embeddingProvider && this.vectorStore && allNewChunks.length > 0) {
       try {
-        const contents = allNewChunks.map(c => c.content);
+        const contents = allNewChunks.map(c => buildEmbeddingText(c));
         const embeddings = await this.embeddingProvider.batchEmbed(contents);
 
         const chunksWithEmbedding: ChunkWithEmbedding[] = allNewChunks.map((chunk, i) => ({
@@ -593,4 +593,17 @@ export class Indexer {
       return [];
     }
   }
+}
+
+/**
+ * Build embedding text with structural context prepended.
+ * Format: "file: <path> | section: <heading>\n<content>"
+ * This helps the embedding model associate chunks with their file/section context.
+ */
+function buildEmbeddingText(chunk: Chunk): string {
+  const parts: string[] = [];
+  if (chunk.filePath) parts.push(`file: ${chunk.filePath}`);
+  if (chunk.heading) parts.push(`section: ${chunk.heading}`);
+  const prefix = parts.length > 0 ? parts.join(' | ') + '\n' : '';
+  return prefix + chunk.content;
 }

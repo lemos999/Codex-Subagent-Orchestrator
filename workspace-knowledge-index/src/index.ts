@@ -223,7 +223,7 @@ async function cmdIndex(args: string[]): Promise<void> {
 
     if (config.storage.vector_backend !== 'none') {
       try {
-        embeddingProvider = await createEmbeddingProvider(config.embedding);
+        embeddingProvider = await createEmbeddingProvider(config.embedding, 'index');
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         console.warn(`[wki] Embedding provider (${config.embedding.provider}) failed: ${msg}`);
@@ -379,7 +379,7 @@ async function cmdSearch(args: string[]): Promise<void> {
 
   if (config.storage.vector_backend !== 'none' && mode !== 'fts') {
     try {
-      embeddingProvider = await createEmbeddingProvider(config.embedding);
+      embeddingProvider = await createEmbeddingProvider(config.embedding, 'search');
     } catch {
       if (mode === 'vector') {
         console.error('Error: Vector search requested but no embedding API key found.');
@@ -401,7 +401,8 @@ async function cmdSearch(args: string[]): Promise<void> {
     }
   }
 
-  const searchService = new SearchService(ftsStore, vectorStore, chunkStore, embeddingProvider, config.search);
+  const searchCfg = { ...config.search, indexDtype: config.embedding.local?.indexDtype ?? config.embedding.local?.dtype };
+  const searchService = new SearchService(ftsStore, vectorStore, chunkStore, embeddingProvider, searchCfg);
 
   const startTime = Date.now();
   const results = await searchService.search(query, {
@@ -632,7 +633,7 @@ async function cmdEval(args: string[]): Promise<void> {
 
   if (config.storage.vector_backend !== 'none') {
     try {
-      embeddingProvider = await createEmbeddingProvider(config.embedding);
+      embeddingProvider = await createEmbeddingProvider(config.embedding, 'search');
     } catch {
       console.warn('[wki] No embedding API key. Evaluating FTS-only.');
     }
@@ -652,12 +653,13 @@ async function cmdEval(args: string[]): Promise<void> {
     }
   }
 
+  const evalSearchCfg = { ...config.search, indexDtype: config.embedding.local?.indexDtype ?? config.embedding.local?.dtype };
   const searchService = new SearchService(
     ftsStore,
     vectorStore,
     chunkStore,
     embeddingProvider,
-    config.search,
+    evalSearchCfg,
   );
 
   // Run evaluation

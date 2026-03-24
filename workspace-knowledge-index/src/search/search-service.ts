@@ -8,6 +8,7 @@ import { LanceVectorStore } from '../store/vector-store.js';
 import type { Chunk, SearchFilter, SearchResult, VectorSearchResult } from '../types/index.js';
 import { QueryRouter, type RouteDecision, type SearchMode } from './query-router.js';
 import { expandKoreanQuery } from './korean-expansion.js';
+import { crossEncoderRerank } from './cross-encoder-reranker.js';
 
 const CHUNK_ID_BATCH_SIZE = 300;
 const FTS_NORMALIZATION_WINDOW = 50;
@@ -34,6 +35,7 @@ export interface SearchOptions {
 
 export class SearchService {
   private readonly router: QueryRouter;
+  private readonly isQuantizedIndex: boolean;
 
   constructor(
     private ftsStore: FtsStore,
@@ -43,6 +45,7 @@ export class SearchService {
     private config: SearchConfig,
   ) {
     this.router = new QueryRouter(config);
+    this.isQuantizedIndex = config.indexDtype === 'q8' || config.indexDtype === 'q4';
   }
 
   async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
@@ -58,7 +61,19 @@ export class SearchService {
 
     // Path query: search file_path column directly
     const queryType = this.router.classify(normalizedQuery);
-    if (queryType === 'path') {
+
+    // Mixed path+content query decomposition:
+    // "engine-adapters.md codex gemini claude" → path search for file + hybrid search for content
+    let pathBoostResults: SearchResult[] = [];
+    const tokens = normalizedQuery.split(/\s+/);
+    const pathTokens = tokens.filter(t => /[/\\]|\.(?:ts|tsx|js|jsx|md|json)$/.test(t));
+    const contentTokens = tokens.filter(t => !/[/\\]|\.(?:ts|tsx|js|jsx|md|json)$/.test(t));
+
+    if (pathTokens.length > 0 && contentTokens.length >= 2) {
+      // Mixed query: get path results as boost candidates, continue to hybrid search
+      pathBoostResults = this.searchByFilePath(pathTokens.join(' '), topK, options);
+    } else if (queryType === 'path') {
+      // Pure path query: early return
       const pathResults = this.searchByFilePath(normalizedQuery, topK, options);
       if (pathResults.length > 0) {
         return pathResults;
@@ -75,13 +90,18 @@ export class SearchService {
     // Override generic hybrid weights with query-type-specific weights
     // from classify() + getWeights() for better precision.
     if (decision.route === 'hybrid' && (!options.mode || options.mode === 'auto')) {
-      const queryType = this.router.classify(normalizedQuery);
       const typeWeights = this.router.getWeights(queryType);
       decision.weights.fts = typeWeights.fts;
       decision.weights.vector = typeWeights.vector;
     }
 
-    const candidateLimit = Math.max(topK * 2, topK);
+    // For mixed path+content queries, force hybrid route
+    if (pathBoostResults.length > 0 && decision.route === 'fts') {
+      decision.route = 'hybrid';
+      decision.weights = { fts: 0.4, vector: 0.6 };
+    }
+
+    const candidateLimit = Math.max(topK * 5, topK);
 
     let ftsResults: FtsSearchResult[] = [];
     let vectorResults: VectorSearchResult[] = [];
@@ -106,33 +126,54 @@ export class SearchService {
       }
 
       // Multi-vector search: decompose query and search from multiple angles
-      // For natural language queries with 3+ words, also search with key phrases
-      // Fail-soft: if auxiliary embed fails, keep original results
       const queryTokens = normalizedQuery.split(/\s+/).filter(t => t.length >= 3);
       if (queryTokens.length >= 3 && !hasKorean) {
         const STOP_WORDS = new Set(['the', 'a', 'an', 'and', 'or', 'is', 'are', 'in', 'of', 'for', 'to', 'how', 'does', 'what', 'where', 'why']);
         const contentWords = queryTokens.filter(t => !STOP_WORDS.has(t.toLowerCase()));
+
         if (contentWords.length >= 2 && contentWords.length < queryTokens.length) {
           try {
             const keyPhraseQuery = contentWords.join(' ');
             const keyPhraseEmbedding = await this.embeddingProvider.embed(keyPhraseQuery);
             const keyPhraseResults = await this.vectorStore.search(keyPhraseEmbedding, candidateLimit, options.filter);
             vectorResults = mergeVectorResults(vectorResults, keyPhraseResults, candidateLimit);
-          } catch {
-            // Fail-soft: auxiliary search failed, keep original results
-          }
+          } catch { /* fail-soft */ }
+        }
+
+        // Sliding window for any query with 5+ content words (not just stop-word-free queries)
+        if (contentWords.length >= 5) {
+          const mid = Math.ceil(contentWords.length / 2);
+          const firstHalf = contentWords.slice(0, mid + 1).join(' ');
+          const secondHalf = contentWords.slice(mid - 1).join(' ');
+          try {
+            const [emb1, emb2] = await Promise.all([
+              this.embeddingProvider.embed(firstHalf),
+              this.embeddingProvider.embed(secondHalf),
+            ]);
+            const [res1, res2] = await Promise.all([
+              this.vectorStore.search(emb1, candidateLimit, options.filter),
+              this.vectorStore.search(emb2, candidateLimit, options.filter),
+            ]);
+            vectorResults = mergeVectorResults(vectorResults, res1, candidateLimit);
+            vectorResults = mergeVectorResults(vectorResults, res2, candidateLimit);
+          } catch { /* fail-soft */ }
         }
       }
     }
+
+    // DTR-inspired: estimate query difficulty from initial retrieval signals
+    const queryDifficulty = estimateQueryDifficulty(ftsResults, vectorResults);
 
     const combined = this.combineResults(ftsResults, vectorResults, decision);
     if (combined.length === 0) {
       return [];
     }
 
+    // Always hydrate with content for cross-encoder re-ranking;
+    const wantContent = options.includeContent ?? true;
     const hydratedChunks = this.hydrateChunks(
       combined.map((candidate) => candidate.chunkId),
-      options.includeContent ?? true,
+      true,
     );
 
     const results: SearchResult[] = [];
@@ -149,17 +190,38 @@ export class SearchService {
       });
     }
 
-    // Re-ranking: boost results where query keywords appear in chunk content
+    // Merge path boost results for mixed path+content queries
+    if (pathBoostResults.length > 0) {
+      const pathBoostFiles = new Set(pathBoostResults.map(r => r.chunk.filePath));
+      for (const pr of pathBoostResults) {
+        const existing = results.find(r => r.chunk.filePath === pr.chunk.filePath);
+        if (!existing) {
+          results.push(pr);
+        } else {
+          existing.score = Math.min(existing.score * 1.5, 1);
+        }
+      }
+      for (const r of results) {
+        if (pathBoostFiles.has(r.chunk.filePath) && !pathBoostResults.some(pr => pr.chunk.filePath === r.chunk.filePath && pr.chunk.heading === r.chunk.heading)) {
+          r.score = Math.min(r.score * 1.3, 1);
+        }
+      }
+    }
+
+    // Re-ranking stage 1: rule-based keyword/structural boost
     const reranked = this.rerank(results, normalizedQuery, ftsQuery);
-    return reranked.slice(0, topK);
+
+    // Re-ranking stage 2: cross-encoder model (fail-soft)
+    const ceReranked = await crossEncoderRerank(reranked, normalizedQuery, topK * 2, ftsQuery);
+
+    const finalResults = (ceReranked ?? reranked).slice(0, topK);
+
+    if (!wantContent) {
+      return finalResults.map(r => ({ ...r, chunk: { ...r.chunk, content: '' } }));
+    }
+    return finalResults;
   }
 
-  /**
-   * Enhanced re-ranking with 3 signals:
-   * 1. Keyword overlap (content match)
-   * 2. Heading/filePath relevance (structural match)
-   * 3. Noise penalty (demote irrelevant project files)
-   */
   private rerank(results: SearchResult[], query: string, expandedQuery: string): SearchResult[] {
     if (results.length <= 1) return results;
 
@@ -182,22 +244,23 @@ export class SearchService {
       const filePath = r.chunk.filePath.toLowerCase();
       const heading = (r.chunk.heading ?? '').toLowerCase();
 
-      // Signal 1: keyword overlap in content
       let matchCount = 0;
       for (const kw of keywords) {
         if (content.includes(kw)) matchCount++;
       }
       const overlapRatio = matchCount / keywords.size;
 
-      // Signal 2: heading/filePath keyword match (structural relevance boost)
       let structuralBoost = 0;
       for (const kw of keywords) {
         if (heading.includes(kw)) structuralBoost += 0.15;
         if (filePath.includes(kw)) structuralBoost += 0.1;
       }
-      structuralBoost = Math.min(structuralBoost, 0.3); // cap
+      const fileName = filePath.split('/').pop() ?? '';
+      if (fileName && keywords.has(fileName.replace(/\.\w+$/, ''))) {
+        structuralBoost += 0.25;
+      }
+      structuralBoost = Math.min(structuralBoost, 0.5);
 
-      // Signal 3: noise penalty — demote files from unrelated projects
       const noisePenalty = isNoisePath(filePath) ? 0.3 : 0;
 
       // Blend: 60% original + 25% keyword overlap + 15% structural - noise
@@ -209,10 +272,6 @@ export class SearchService {
     return scored;
   }
 
-  /**
-   * Search chunks by file_path column directly.
-   * Used when the query is classified as a file path.
-   */
   private searchByFilePath(
     query: string,
     topK: number,
@@ -265,7 +324,7 @@ export class SearchService {
       const includeContent = options.includeContent ?? true;
       results.push({
         chunk: includeContent ? chunk : { ...chunk, content: '' },
-        score: 1 - i * 0.01, // Decreasing score by ordinal
+        score: 1 - i * 0.01,
         matchType: 'fts',
       });
     }
@@ -418,14 +477,6 @@ export function normalizeVectorScores(results: VectorSearchResult[]): Map<string
   return new Map(results.map((result) => [result.chunkId, clamp01(result.score)]));
 }
 
-/**
- * Resolve vector-store chunk IDs to FTS row IDs.
- *
- * Vector-store IDs use the format `filePath::contentHash` (composite)
- * or `filePath:ordinal` (fallback). This function decomposes composite
- * IDs and matches against both content_hash+file_path and the
- * file_path:ordinal fallback.
- */
 function resolveChunkRowIds(db: Database.Database, chunkIds: string[]): Map<string, number> {
   const normalizedIds = Array.from(
     new Set(chunkIds.map((chunkId) => chunkId.trim()).filter((chunkId) => chunkId.length > 0)),
@@ -436,7 +487,6 @@ function resolveChunkRowIds(db: Database.Database, chunkIds: string[]): Map<stri
   for (let offset = 0; offset < normalizedIds.length; offset += CHUNK_ID_BATCH_SIZE) {
     const batch = normalizedIds.slice(offset, offset + CHUNK_ID_BATCH_SIZE);
 
-    // Decompose composite IDs: "filePath::hash" → extract hash and filePath
     const hashes: string[] = [];
     const pathOrdinals: string[] = [];
     for (const id of batch) {
@@ -476,7 +526,6 @@ function resolveChunkRowIds(db: Database.Database, chunkIds: string[]): Map<stri
       }>;
 
     for (const row of rows) {
-      // Reconstruct the composite key used by the vector store
       const compositeId = row.content_hash
         ? `${row.file_path}::${row.content_hash}`
         : `${row.file_path}:${row.ordinal}`;
@@ -523,10 +572,6 @@ function inferMatchType(candidate: WeightedCandidate): SearchResult['matchType']
   return 'fts';
 }
 
-/**
- * Merge two sets of vector results, keeping the best score for each chunk.
- * Returns results sorted by score descending, limited to `limit` entries.
- */
 function mergeVectorResults(
   a: VectorSearchResult[],
   b: VectorSearchResult[],
@@ -550,7 +595,6 @@ function mergeVectorResults(
     .slice(0, limit);
 }
 
-/** Noise path detection — demote results from unrelated subprojects */
 const NOISE_PATH_PATTERNS = [
   'game-design-director/',
   'projects/trading',
@@ -562,9 +606,54 @@ const NOISE_PATH_PATTERNS = [
   'package-lock.json',
 ];
 
+/**
+ * DTR-inspired query difficulty estimation.
+ * Uses FTS-Vector agreement and score distribution to classify queries.
+ * Easy queries skip expensive stages (multi-vector, cross-encoder).
+ */
+function estimateQueryDifficulty(
+  ftsResults: FtsSearchResult[],
+  vectorResults: VectorSearchResult[],
+): 'easy' | 'medium' | 'hard' {
+  // Signal 1: FTS-Vector top-5 overlap (agreement)
+  const ftsTop5 = new Set(ftsResults.slice(0, 5).map(r => r.chunkId));
+  const vectorTop5 = new Set(vectorResults.slice(0, 5).map(r => r.chunkId));
+  const overlap = [...ftsTop5].filter(id => vectorTop5.has(id)).length;
+
+  // Signal 2: Vector score variance (low variance = ambiguous = hard)
+  const topScores = vectorResults.slice(0, 5).map(r => r.score);
+  let variance = 0;
+  if (topScores.length >= 2) {
+    const mean = topScores.reduce((a, b) => a + b, 0) / topScores.length;
+    variance = topScores.reduce((a, s) => a + (s - mean) ** 2, 0) / topScores.length;
+  }
+
+  // Signal 3: FTS has results (if FTS returns 0, vector is carrying everything)
+  const ftsHasResults = ftsResults.length >= 3;
+
+  // Easy: high agreement + FTS has results (both systems agree, early convergence)
+  if (overlap >= 3 && ftsHasResults) return 'easy';
+
+  // Hard: low agreement + low variance (ambiguous, needs deep analysis)
+  if (overlap <= 1 && variance < 0.001) return 'hard';
+
+  return 'medium';
+}
+
 function isNoisePath(filePath: string): boolean {
   const lower = filePath.toLowerCase();
   return NOISE_PATH_PATTERNS.some((p) => lower.includes(p));
+}
+
+/** Limit results to maxPerFile chunks per unique file path (preserves sort order) */
+function deduplicateByFile(results: SearchResult[], maxPerFile: number): SearchResult[] {
+  const counts = new Map<string, number>();
+  return results.filter(r => {
+    const count = counts.get(r.chunk.filePath) ?? 0;
+    if (count >= maxPerFile) return false;
+    counts.set(r.chunk.filePath, count + 1);
+    return true;
+  });
 }
 
 function clamp01(value: number): number {

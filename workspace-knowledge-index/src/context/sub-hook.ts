@@ -52,7 +52,7 @@ export async function generateAgentContext(
   if (config.storageConfig.vector_backend !== 'none') {
     try {
       const { createEmbeddingProvider } = await import('../embedding/factory.js');
-      embeddingProvider = await createEmbeddingProvider(config.embeddingConfig);
+      embeddingProvider = await createEmbeddingProvider(config.embeddingConfig, 'search');
     } catch {
       console.warn('[wki] No embedding provider available. Using FTS-only mode.');
     }

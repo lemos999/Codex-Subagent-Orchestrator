@@ -31,6 +31,9 @@ const MODEL_PRESETS: Record<string, number> = {
   'BAAI/bge-small-en-v1.5': 384,
   'BAAI/bge-base-en-v1.5': 768,
   'BAAI/bge-m3': 1024,
+  // E5-large models
+  'Xenova/multilingual-e5-large': 1024,
+  'intfloat/multilingual-e5-large': 1024,
 };
 
 // Models that benefit from query instruction prefixes
@@ -43,16 +46,20 @@ const INSTRUCTION_MODELS = new Set([
   'BAAI/bge-m3',
   'Xenova/multilingual-e5-small',
   'Xenova/multilingual-e5-base',
+  'Xenova/multilingual-e5-large',
   'intfloat/multilingual-e5-small',
   'intfloat/multilingual-e5-base',
+  'intfloat/multilingual-e5-large',
 ]);
 
 // E5 models use "query: " prefix instead of BGE's longer instruction
 const E5_MODELS = new Set([
   'Xenova/multilingual-e5-small',
   'Xenova/multilingual-e5-base',
+  'Xenova/multilingual-e5-large',
   'intfloat/multilingual-e5-small',
   'intfloat/multilingual-e5-base',
+  'intfloat/multilingual-e5-large',
 ]);
 
 export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
@@ -64,13 +71,15 @@ export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
   private pipelinePromise: Promise<unknown> | null = null;
   private readonly useInstruction: boolean;
   private readonly isE5: boolean;
+  private readonly dtype: string;
 
-  constructor(options?: { model?: string; dimensions?: number }) {
+  constructor(options?: { model?: string; dimensions?: number; dtype?: string }) {
     super();
     this.modelName = options?.model || 'Xenova/bge-small-en-v1.5';
     this.dimensions = options?.dimensions || MODEL_PRESETS[this.modelName] || 384;
     this.useInstruction = INSTRUCTION_MODELS.has(this.modelName);
     this.isE5 = E5_MODELS.has(this.modelName);
+    this.dtype = options?.dtype || 'fp32';
   }
 
   /**
@@ -89,7 +98,7 @@ export class LocalEmbeddingProvider extends BaseEmbeddingProvider {
         env.allowLocalModels = true;
 
         const pipe = await pipeline('feature-extraction', this.modelName, {
-          dtype: 'fp32',
+          dtype: this.dtype as 'fp32',
         });
 
         const elapsedMs = Date.now() - startMs;
