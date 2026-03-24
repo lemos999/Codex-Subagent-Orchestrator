@@ -34,6 +34,12 @@
 21. [권한 모델 (RBAC)](#21-권한-모델-rbac)
 22. [API 버전관리 & 하위호환](#22-api-버전관리--하위호환)
 23. [모바일 / 데스크톱 / CLI 확장](#23-모바일--데스크톱--cli-확장)
+24. [12-Factor 원칙](#24-12-factor-원칙)
+25. [코드 리뷰](#25-코드-리뷰)
+26. [DB 성능 튜닝 (심화)](#26-db-성능-튜닝-심화)
+27. [커뮤니티 & UGC 관리](#27-커뮤니티--ugc-관리)
+28. [런칭 전 최종 체크리스트](#28-런칭-전-최종-체크리스트)
+29. [참조 문서 & 출처](#29-참조-문서--출처)
 
 ---
 
@@ -380,6 +386,8 @@ async function parseBodyWithLimit(req: Request, maxBytes = 1_000_000) {
 | **Insecure Deserialization** | JSON.parse + 스키마 검증 | API 입력 |
 | **Known Vulnerabilities** | npm audit, 의존성 업데이트 | CI/CD |
 | **Insufficient Logging** | AuditLog 테이블, IP 기록 | 상태 변경 시 |
+| **Supply Chain (2025 신규)** | npm audit, 의존성 잠금, lockfile 커밋 | CI/CD |
+| **Exceptional Conditions (2025 신규)** | 예외 상황 안전 처리, fail-open 방지 | 에러 핸들링 |
 
 ### 7.2 API 보안 체크리스트
 
@@ -1264,6 +1272,231 @@ app.delete("/api/users/:id", requireRole(["admin"]), deleteUserHandler);
 
 > **"한 코드베이스로 모든 플랫폼"은 환상이다.**
 > 비즈니스 로직은 공유하되, UI와 플랫폼 접근은 분리하라. 무리하게 통합하면 모든 플랫폼에서 2류가 된다.
+
+---
+
+---
+
+## 24. 12-Factor 원칙
+
+> 출처: [12factor.net](https://12factor.net/)
+
+### [원칙] 핵심 12가지 (서비스 앱 필수)
+
+| # | 원칙 | 요약 | 우리 바이블 연결 |
+|---|------|------|----------------|
+| 1 | Codebase | 하나의 코드베이스, 여러 배포 | §13 인프라 |
+| 2 | Dependencies | 명시적 선언, 격리 | package.json, requirements.txt |
+| 3 | Config | 환경변수로 관리, 코드에 넣지 않기 | §2 초기 설정 |
+| 4 | Backing Services | DB, 캐시, 큐를 교체 가능한 리소스로 | §3 DB, §16 캐싱 |
+| 5 | Build/Release/Run | 빌드→릴리스→실행 엄격 분리 | §18 CI/CD |
+| 6 | Processes | **상태 없는 프로세스** — 세션은 외부 저장소에 | §5 인증 |
+| 7 | Port Binding | 자체 포트로 서비스 노출 | §9 WebSocket |
+| 8 | Concurrency | 수평 확장 (프로세스 복제) | §19 백그라운드 |
+| 9 | Disposability | 빠른 시작, 우아한 종료 | §18 롤백 |
+| 10 | Dev/Prod Parity | 개발=스테이징=운영 최대한 동일 | §13 인프라 |
+| 11 | Logs | 로그는 stdout 이벤트 스트림 | §17 관측성 |
+| 12 | Admin Processes | 마이그레이션, 일회성 스크립트도 동일 환경 | §3 DB |
+
+### 실전 교훈
+
+> **"12개 전부 지키려 하지 마라."**
+> MVP에서는 3(Config), 5(Build/Run), 6(Stateless), 10(Dev/Prod Parity)만 지켜도 80%의 가치를 얻는다. 나머지는 서비스가 성장하면서 점진적으로 적용하라.
+
+---
+
+## 25. 코드 리뷰
+
+> 출처: [Google Engineering Practices](https://google.github.io/eng-practices/review/)
+
+### [원칙] 코드 리뷰의 목적
+
+```
+코드 리뷰는 "완벽한 코드"를 만드는 것이 아니라 "더 나은 코드"를 만드는 것이다.
+리뷰어는 작성자가 모든 것을 완벽하게 다듬을 때까지 블로킹하면 안 된다.
+— Google Engineering Practices
+```
+
+### [원칙] 리뷰어 체크리스트
+
+```
+□ 기능: 의도대로 동작하는가?
+□ 복잡성: 더 단순하게 만들 수 있는가?
+□ 테스트: 올바르고 잘 설계된 테스트가 있는가?
+□ 네이밍: 변수, 함수, 클래스 이름이 명확한가?
+□ 주석: 왜(why)를 설명하는가? (무엇(what)은 코드가 말해야 한다)
+□ 스타일: 프로젝트 컨벤션을 따르는가?
+□ 보안: 입력 검증, 인증/인가, 에러 노출이 안전한가?
+```
+
+### [원칙] 리뷰 요청자 규칙
+
+```
+1. PR은 작게 — 200줄 이하가 이상적, 400줄 초과는 분할
+2. 자체 리뷰를 먼저 — 제출 전에 diff를 한 번 읽어라
+3. 설명을 써라 — "왜" 이 변경이 필요한지 PR 설명에 기록
+4. 리뷰어 피드백에 방어적이지 마라 — 코드는 소유물이 아니다
+```
+
+### AI 에이전트 코드 리뷰 시
+
+```
+□ 에이전트 출력물도 동일한 리뷰 기준 적용
+□ "구현만 하고 테스트 안 고침" 패턴 주의 (§14 실수 #14)
+□ 에이전트가 만든 코드에 주석이 과도하면 제거
+□ 에이전트는 반론을 못 하므로 리뷰어가 더 꼼꼼해야 한다
+```
+
+---
+
+## 26. DB 성능 튜닝 (심화)
+
+> 출처: [PostgreSQL Best Practices](https://dev.to/_d7eb1c1703182e3ce1782/postgresql-performance-tuning-checklist-2026-complete-guide-65a)
+
+### [원칙] 인덱스 전략
+
+| 인덱스 타입 | 용도 | 언제 |
+|-----------|------|------|
+| B-tree (기본) | 등호, 범위 검색 | WHERE, ORDER BY 대상 컬럼 |
+| GIN | 배열, JSONB, 전문 검색 | JSONB 필드 조회 시 |
+| BRIN | 대용량 시계열 데이터 | createdAt 순서가 보장된 테이블 |
+| Partial | 조건부 인덱스 | `WHERE status = 'active'`만 인덱싱 |
+
+### [원칙] 쿼리 최적화 규칙
+
+```
+1. SELECT * 금지 — 필요한 컬럼만 명시
+2. N+1 쿼리 감지 — ORM의 include/join 활용
+3. EXPLAIN ANALYZE로 실행 계획 확인
+4. 100만 행 이상이면 파티셔닝 고려
+5. 느린 쿼리 로그 활성화 (1초 이상)
+```
+
+### [원칙] 커넥션 관리
+
+```
+1. 커넥션 풀 사용 필수 (PgBouncer 또는 ORM 내장 풀)
+2. 풀 크기 = CPU 코어 수 × 2 + 디스크 수 (기본 가이드)
+3. 트랜잭션은 가능한 짧게 — 장시간 트랜잭션은 lock 경합 유발
+4. IDLE 커넥션 타임아웃 설정
+```
+
+### [레시피] PostgreSQL 설정 (프로덕션)
+
+```
+shared_buffers = 총 RAM의 25~40%
+work_mem = 64MB (복잡한 쿼리용)
+maintenance_work_mem = 512MB (VACUUM, CREATE INDEX용)
+log_min_duration_statement = 1000 (1초 이상 쿼리 로깅)
+```
+
+---
+
+## 27. 커뮤니티 & UGC 관리
+
+### [원칙] 사용자 생성 콘텐츠(UGC) 처리
+
+```
+1. 모든 UGC는 XSS 정제 후 저장/표시
+2. 이미지/파일 업로드는 §20 규칙 적용
+3. HTML 허용 시 화이트리스트 기반 정제 (sanitize-html 등)
+4. Markdown은 서버에서 렌더링 후 HTML로 저장 (클라이언트 렌더링 XSS 주의)
+```
+
+### [원칙] 콘텐츠 모더레이션
+
+| 방식 | 설명 | 적합한 경우 |
+|------|------|-----------|
+| **사전 검수** | 게시 전 관리자 승인 | 민감한 커뮤니티, 초기 단계 |
+| **사후 검수** | 게시 즉시, 신고 시 검토 | 대규모 커뮤니티 |
+| **자동 필터** | 금칙어, 스팸 패턴 자동 차단 | 모든 규모 |
+| **AI 필터** | 유해 콘텐츠 자동 감지 | 대규모 + 예산 있을 때 |
+
+### [원칙] 신고/차단 시스템
+
+```
+1. 신고 버튼은 모든 콘텐츠에 — 사유 선택식 (스팸/욕설/사기/기타)
+2. 신고 3건 이상 누적 → 자동 숨김 + 관리자 큐
+3. 차단된 사용자의 기존 콘텐츠 처리 정책 사전 결정 (숨김 vs 삭제 vs 유지)
+4. 차단 이력은 감사 로그에 기록
+```
+
+### [원칙] 커뮤니티 스케일링
+
+```
+1. 게시글/댓글은 커서 기반 페이지네이션 (오프셋은 대량 데이터에서 느림)
+2. 인기글 정렬은 캐시 (Redis) — 매 요청마다 계산하지 않기
+3. 알림은 비동기 큐로 (§19) — 동기 처리하면 게시 응답이 느려짐
+4. 검색은 DB LIKE가 아닌 전문 검색 엔진 (Meilisearch, Elasticsearch)
+```
+
+---
+
+## 28. 런칭 전 최종 체크리스트
+
+> 출처: [Vercel Production Checklist](https://vercel.com/docs/production-checklist), [OWASP Top 10 2025](https://owasp.org/Top10/2025/)
+
+### 보안
+
+```
+□ OWASP Top 10 2025 대응 확인 (특히 A01:접근제어, A03:공급망)
+□ 모든 API에 인증 + 소유권 확인
+□ 입력값 검증 누락 없음
+□ 에러 응답에 내부 정보 없음
+□ HTTPS 강제 + 보안 헤더 설정
+□ 의존성 취약점 스캔 (npm audit / pip audit)
+□ 환경변수에 시크릿 하드코딩 없음
+□ rate limiting 적용
+```
+
+### 성능
+
+```
+□ Core Web Vitals 기준 충족 (LCP < 2.5s, INP < 200ms, CLS < 0.1)
+□ 이미지 최적화 + lazy loading
+□ DB 인덱스 확인 (느린 쿼리 로그 활성화)
+□ 캐시 전략 적용 (CDN, Redis)
+□ 번들 사이즈 확인 (코드 스플리팅)
+```
+
+### 운영
+
+```
+□ 에러 추적 설정 (Sentry 등)
+□ 로그 수집 설정 (구조화된 JSON)
+□ 알림 규칙 설정 (5xx > 1%, p95 > 3초)
+□ 백업 스케줄 확인
+□ 롤백 절차 문서화
+□ 도메인 + SSL 인증서 설정
+□ 개인정보처리방침 / 이용약관 페이지
+```
+
+### 접근성
+
+```
+□ 키보드 네비게이션 동작
+□ 스크린 리더 테스트
+□ 색상 대비 4.5:1 이상
+□ 폼에 label 연결
+```
+
+---
+
+## 29. 참조 문서 & 출처
+
+이 바이블은 아래 문서들의 원칙을 참조하여 작성되었습니다.
+
+| 문서 | URL | 핵심 |
+|------|-----|------|
+| 12-Factor App | https://12factor.net/ | SaaS 12원칙 |
+| Google Engineering Practices | https://google.github.io/eng-practices/review/ | 코드 리뷰 표준 |
+| Microsoft REST API Guidelines | https://github.com/microsoft/api-guidelines | API 설계 |
+| OWASP Top 10 (2025) | https://owasp.org/Top10/2025/ | 보안 위협 |
+| Node.js Best Practices | https://github.com/goldbergyoni/nodebestpractices | Node.js 체크리스트 |
+| Vercel Production Checklist | https://vercel.com/docs/production-checklist | 런칭 체크 |
+| PostgreSQL Tuning Guide | https://dev.to/_d7eb1c1703182e3ce1782 | DB 성능 |
+| Tauri Security | https://v2.tauri.app/security/ | 데스크톱 보안 |
+| Express Security Best Practices | https://expressjs.com/en/advanced/best-practice-security.html | Express 보안 |
 
 ---
 
