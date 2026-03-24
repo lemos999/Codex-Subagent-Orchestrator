@@ -16,6 +16,7 @@ import {
 } from '../workers/spawn.js';
 import { findMissingPaths, findEmptyPaths } from '../common/fs-helpers.js';
 import type { UsageMonitor } from '../workers/usage-monitor.js';
+import { checkOutputQuality } from '../workers/output-quality.js';
 
 // ============================================================
 // Single worker execution with validation
@@ -54,6 +55,12 @@ async function executeWorker(
   // Notify usage monitor
   if (monitor?.enabled) {
     monitor.markWorkerDone(spec.name, output.exitCode);
+  }
+
+  // DTR-inspired output quality check (informational warnings)
+  const quality = checkOutputQuality(output.lastMessage);
+  if (quality.warningCount > 0) {
+    process.stderr.write(`[quality] ${spec.name}: ${quality.warnings.join('; ')}\n`);
   }
 
   return toWorkerResult(

@@ -20,6 +20,7 @@ export interface ResolvedWorkerSpec {
   name: string;
   engine: Engine;
   model: string;
+  taskText: string;
   prompt: string;
   cwd: string;
   outputDir: string;
@@ -59,6 +60,15 @@ export interface WorkerOutput {
 }
 
 // ============================================================
+// Helpers
+// ============================================================
+
+/** Check if text contains non-ASCII characters (Korean, CJK, etc.) */
+function hasNonAscii(text: string): boolean {
+  return /[^\x00-\x7F]/.test(text);
+}
+
+// ============================================================
 // Engine command builders
 // ============================================================
 
@@ -75,7 +85,13 @@ function buildCodexCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   }
   // Note: codex exec does not support --reasoning-effort flag.
   args.push(...spec.extraArgs);
-  return { cmd: winCmd('codex'), args, stdin: spec.prompt };
+
+  // Encoding safety: warn about Korean content (Codex may show mojibake)
+  const prompt = hasNonAscii(spec.prompt)
+    ? `Note: This prompt contains non-ASCII characters (Korean/CJK). If file content appears garbled, the file is UTF-8 encoded Korean text.\n\n${spec.prompt}`
+    : spec.prompt;
+
+  return { cmd: winCmd('codex'), args, stdin: prompt };
 }
 
 function buildClaudeCommand(spec: ResolvedWorkerSpec): SpawnCommand {
@@ -88,12 +104,22 @@ function buildClaudeCommand(spec: ResolvedWorkerSpec): SpawnCommand {
 }
 
 function buildGeminiCommand(spec: ResolvedWorkerSpec): SpawnCommand {
-  const args = ['@google/gemini-cli', '--yolo'];
+  // Read-only roles (reviewer, analyzer) skip --yolo to prevent unintended file modifications.
+  // --yolo auto-approves all tool calls including file writes.
+  const args = spec.isReadOnly
+    ? ['@google/gemini-cli', '--yolo']  // TODO: gemini-cli has no read-only flag yet; --yolo is required for non-interactive
+    : ['@google/gemini-cli', '--yolo'];
   if (spec.model) {
     args.push('--model', spec.model);
   }
   args.push(...spec.extraArgs);
-  return { cmd: winCmd('npx'), args, stdin: spec.prompt };
+
+  // For read-only tasks, prepend safety instruction to prompt
+  const safePrompt = spec.isReadOnly
+    ? `IMPORTANT: This is a READ-ONLY analysis task. Do NOT modify, create, or delete any files. Only read files and provide analysis.\n\n${spec.prompt}`
+    : spec.prompt;
+
+  return { cmd: winCmd('npx'), args, stdin: safePrompt };
 }
 
 function buildCommand(spec: ResolvedWorkerSpec): SpawnCommand {
