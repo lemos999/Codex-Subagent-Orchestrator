@@ -17,6 +17,7 @@ import {
 import { findMissingPaths, findEmptyPaths } from '../common/fs-helpers.js';
 import type { UsageMonitor } from '../workers/usage-monitor.js';
 import { checkOutputQuality } from '../workers/output-quality.js';
+import type { TrustRegistry } from '../workers/trust-registry.js';
 
 // ============================================================
 // Single worker execution with validation
@@ -25,6 +26,7 @@ import { checkOutputQuality } from '../workers/output-quality.js';
 async function executeWorker(
   spec: ResolvedWorkerSpec,
   monitor?: UsageMonitor,
+  trustRegistry?: TrustRegistry,
 ): Promise<WorkerResult> {
   // Register with usage monitor before spawn
   if (monitor?.enabled) {
@@ -61,6 +63,13 @@ async function executeWorker(
   const quality = checkOutputQuality(output.lastMessage);
   if (quality.warningCount > 0) {
     process.stderr.write(`[quality] ${spec.name}: ${quality.warnings.join('; ')}\n`);
+  }
+
+  // Trust & Reputation: record run outcome
+  if (trustRegistry) {
+    const succeeded = output.exitCode === 0 && validationFailures.length === 0;
+    trustRegistry.recordRun(spec.engine, succeeded, 0,
+      succeeded ? undefined : validationFailures[0] ?? `exit code ${output.exitCode}`);
   }
 
   return toWorkerResult(
@@ -139,6 +148,7 @@ export async function runStages(
   workers: ResolvedWorkerSpec[],
   executionMode: ExecutionMode = 'sequential',
   monitor?: UsageMonitor,
+  trustRegistry?: TrustRegistry,
 ): Promise<WorkerResult[]> {
   const results: WorkerResult[] = [];
   const workerMap = new Map(workers.map((w) => [w.name, w]));
@@ -155,7 +165,7 @@ export async function runStages(
     if (executionMode === 'parallel' && stageWorkers.length > 1) {
       // Parallel: same-stage workers run concurrently
       const settled = await Promise.allSettled(
-        stageWorkers.map((w) => executeWorker(w, monitor)),
+        stageWorkers.map((w) => executeWorker(w, monitor, trustRegistry)),
       );
 
       for (let i = 0; i < settled.length; i++) {
@@ -171,7 +181,7 @@ export async function runStages(
     } else {
       // Sequential: one worker at a time
       for (const spec of stageWorkers) {
-        const result = await executeWorker(spec, monitor);
+        const result = await executeWorker(spec, monitor, trustRegistry);
         results.push(result);
       }
     }
