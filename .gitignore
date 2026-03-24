@@ -7,3 +7,10 @@ dist/
 *.db-shm
 .npm-cache/
 .pytest_cache/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Data cache
+*.sqlite
