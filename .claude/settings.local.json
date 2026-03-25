@@ -1,4 +1,18 @@
 {
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node workspace-knowledge-index/dist/index.js index 2>/dev/null || true",
+            "timeout": 300,
+            "statusMessage": "WKI 인덱싱 중..."
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(*)",
@@ -14,7 +28,11 @@
       "NotebookEdit(*)"
     ]
   },
+  "enabledMcpjsonServers": [
+    "codex"
+  ],
   "disabledMcpjsonServers": [
     "wki"
-  ]
+  ],
+  "enableAllProjectMcpServers": true
 }

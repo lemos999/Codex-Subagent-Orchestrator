@@ -5,6 +5,8 @@ description: 3개 AI 엔진(Claude + Codex/GPT + Gemini)이 하나의 주제에 
 
 # /discuss
 
+> 실행 전 WKI 인덱싱: `node workspace-knowledge-index/dist/index.js index`
+
 3개 AI가 **같은 주제를 교차 검증**하는 토론 시스템.
 
 ## `/sub` vs `/submix` vs `/discuss` 차이

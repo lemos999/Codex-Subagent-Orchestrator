@@ -6,6 +6,7 @@ description: "범용 설계 디렉터 — 신규 기획 / 기존 분석 / 변경
 # /design — Design Director
 
 > 실행 전 워크스페이스 루트의 `project-status/current.md`를 읽어 현재 프로젝트 상태를 파악한다.
+> 실행 전 WKI 인덱싱: `node workspace-knowledge-index/dist/index.js index`
 
 모든 도메인의 기획/설계를 체계적으로 수행하는 범용 AI 디렉터.
 
