@@ -58,7 +58,7 @@ Core 컴포넌트 5개 이하 + 1인 개발 → Solo Lite 자동 적용.
 | | Full | Solo Lite |
 |---|------|----------|
 | Stage 수 | 9단계 | 4단계 (Design+Plan → Build → Verify → Release) |
-| 페르소나 | 30개 | 6개 |
+| 페르소나 | 41개 | 8개 |
 | 게이트 | 6개 | 3개 (G1: 설계, G2: 리뷰, G3: 배포) |
 | 교차 검증 | 3엔진 필수 | 2엔진 최소 |
 
@@ -72,7 +72,7 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 
 ---
 
-## 분야별 에이전트 페르소나 — Full (30개)
+## 분야별 에이전트 페르소나 — Full (41개)
 
 ### 기획/설계
 
@@ -117,7 +117,7 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 
 | # | 페르소나 | 엔진 | BIBLE § | 역할 |
 |---|---------|------|---------|------|
-| 15 | Frontend Builder | Codex | §15, §20 | 컴포넌트, 페이지, 스타일, 업로드 UI |
+| 15 | Frontend Builder | Codex | §15, §20, §23 | 컴포넌트, 페이지, 스타일, 업로드 UI, 모바일/데스크톱/CLI 확장 |
 | 16 | UX Reviewer | Gemini (pro) | §15 | 사용자 흐름, 접근성, 모바일 |
 | 17 | State Architect | Claude (sonnet) | §15 | React Query, Zustand, URL 상태 |
 
@@ -128,7 +128,7 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 | 18 | Unit Tester | Codex | §10 | 함수/컴포넌트 단위 테스트 |
 | 19 | Integration Tester | Codex | §10 | DB/API 통합 테스트 |
 | 20 | E2E Tester | Codex | §10 | 사용자 흐름 E2E |
-| 21 | Test Reviewer | Claude (sonnet) | §10, §25 | 커버리지, 엣지 케이스, 코드 리뷰 기준 |
+| 21 | Test Reviewer | Claude (sonnet) | §10, §14, §25 | 커버리지, 엣지 케이스, 코드 리뷰 기준, 보편적 실수 참조 |
 
 ### 인프라/서버
 
@@ -178,6 +178,12 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 |---|---------|------|---------|------|
 | 39 | Notification Engineer | Codex | — | 이메일(트랜잭셔널), 푸시 알림, 인앱 알림 구현 |
 | 40 | SEO Specialist | Gemini (pro) | §15 | 메타태그, sitemap, OG, 구조화 데이터, Core Web Vitals |
+
+### 성장/분석
+
+| # | 페르소나 | 엔진 | BIBLE § | 역할 |
+|---|---------|------|---------|------|
+| 41 | Growth Engineer | Codex | — | GA4/Mixpanel 트래킹 코드, 이벤트 설계, 전환 퍼널 분석, A/B 테스트 기반 |
 
 ### Solo Lite 페르소나 (8개)
 
@@ -258,6 +264,17 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 7. **기본 모니터링** — 에러 로깅 + 헬스체크 설정
 8. **백업 계획** — DB 백업 스케줄, 복구 테스트 1회
 
+**플랫폼별 프로필:**
+
+| 절차 | Managed PaaS (Vercel+Supabase) | AWS (ALB+RDS+Route53) | VPS (자체 서버) |
+|------|-------------------------------|----------------------|----------------|
+| 서버 | Vercel 자동 | EC2/ECS + ALB 설정 | 서버 OS + Nginx/Caddy |
+| 도메인/DNS | Vercel 도메인 추가 → DNS 자동 | Route53 alias → ALB | A 레코드 직접 설정 |
+| SSL | Vercel 자동 발급 | ACM 인증서 → ALB 연결 | Let's Encrypt (certbot) |
+| DB | Supabase 프로젝트 생성 → 연결 풀링 | RDS 인스턴스 → VPC 보안 그룹 | PostgreSQL 직접 설치 |
+| 방화벽 | Vercel WAF | 보안 그룹 + NACL | iptables/ufw |
+| 백업 | Supabase 자동 (DB만, Storage 별도) | RDS PITR + S3 | pg_dump cron + rsync |
+
 **산출물:** 동작하는 기반 인프라 (서버 + 도메인 + DB + Auth + 배포 + 모니터링)
 **게이트 G3:** `npm run build` + 로그인 + DB 연결 + SSL 확인 + 배포 파이프라인 동작
 
@@ -321,6 +338,15 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
    - [ ] 헬스체크 엔드포인트 응답
    - [ ] rate limiting 활성
    - [ ] 이용약관 + 개인정보처리방침 페이지 존재
+   - [ ] CORS 설정 확인 (API 서비스 시)
+   - [ ] 보안 헤더 (CSP, HSTS, X-Frame-Options)
+   - [ ] 로그 수집 + 알림 규칙 동작 테스트
+   - [ ] DB 백업 복구 테스트 1회 완료 (RTO/RPO 확인)
+   - [ ] DB 연결 풀/서버리스 모드 검증
+   - [ ] 큐/cron/background job 동작 확인 (해당 시)
+   - [ ] 스토리지 백업 확인 (DB + 파일 업로드)
+   - [ ] Preview/Staging noindex 확인
+   - [ ] 캐시/CDN 무효화 + 롤백 시 캐시 오염 방지
 4. 프로덕션 배포 (수동 승인)
 5. 배포 후 스모크 테스트
 6. 롤백 절차 문서화 + 테스트
@@ -355,6 +381,22 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 
 Stage 7 결과를 기반으로 Stage 4 → 5 → 6 → 7 순환.
 정식 오픈 결정 시 순환 종료.
+
+### Hotfix Fast-Track (긴급 패치)
+
+보안 취약점 또는 치명적 버그 발견 시, 정규 Stage 순환을 건너뛰는 긴급 경로:
+
+```
+[발견] → Security Auditor(Claude) 긴급 분석
+      → Codex 즉시 패치 구현
+      → Claude 리뷰 (보안 집중)
+      → 스테이징 스모크 테스트
+      → 프로덕션 배포 (G5 간소화 — 체크리스트 중 해당 항목만)
+      → 포스트모템 기록
+```
+
+대상: Stage 4(Implement) → Stage 5(Verify 간소화) → Stage 6(Deploy) 직행.
+일반 이터레이션(Stage 8)과 별도. 포스트모템 후 정규 Stage로 복귀.
 
 ---
 
