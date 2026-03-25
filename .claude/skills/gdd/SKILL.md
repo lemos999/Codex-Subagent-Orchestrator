@@ -35,6 +35,17 @@ description: "게임 기획 디렉터 — 새 게임 기획 / 기획서 분석 /
 ■ 변경 관리 (Phase 6)
   /gdd HP 공식을 변경하고 싶다          → Tier 판단 → 영향 분석 → 재검증
 
+■ 내보내기
+  /gdd 기획서를 HTML로                  → 통합 HTML 기획서 (열람용)
+  /gdd 기획서를 docx로                  → Word 문서 (팀 공유, 외부 전달)
+  /gdd 수치 테이블을 xlsx로             → 엑셀 시트 (밸런스 시뮬레이션)
+
+■ 멀티엔진 교차 검증
+  /gdd Phase 3.5~5 자동화 (/submix)     → Claude+GPT+Gemini 교차 검증
+
+■ 게임 개발 연계
+  /product Stage 3부터                  → /gdd 기획 완료 후 게임 개발 착수
+
 ■ 참조
   프레임워크: game-design-director/game-design-director-integrated.md
   에이전트:   skills/game-design-director/agents/

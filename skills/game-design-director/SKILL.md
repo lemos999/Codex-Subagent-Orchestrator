@@ -270,9 +270,47 @@
 
 ---
 
-# `/sub` 연동
+# 산출물 형식
 
-Phase별 에이전트를 `/sub` orchestrator로 실행 가능.
+## 기본 출력: Markdown
+
+모든 Phase의 산출물은 **Markdown (.md)** 이 기본. `_confirmed/` 디렉터리에 md 파일로 저장.
+
+```
+project-name/
+├── CLAUDE.md                        ← 프로젝트 지침
+├── _confirmed/
+│   ├── game-dna.md                  ← Phase 1
+│   ├── glossary.md                  ← 용어 정의
+│   ├── [시스템명].md                 ← 각 Core 시스템
+│   ├── cross-part-contradictions.md ← Phase 3.5
+│   └── cross-system-registry.md    ← 공유 변수
+├── parts/
+│   └── [파트명].md                  ← 파트별 기획서
+└── system-dependency-map.md         ← 의존 관계도
+```
+
+## 선택적 내보내기
+
+사용자 요청 시 추가 형식으로 내보내기:
+
+| 형식 | 명령 예시 | 용도 |
+|------|----------|------|
+| **HTML** | `/gdd 기획서를 HTML로` | 열람용 통합 문서 (다크 테마, 사이드바 목차) |
+| **DOCX** | `/gdd 기획서를 docx로` | 팀 공유, 외부 전달, 인쇄 |
+| **XLSX** | `/gdd 수치 테이블을 xlsx로` | 밸런스 시트, 수치 시뮬레이션 |
+
+**내보내기 절차:**
+1. `_confirmed/` md 파일이 정본 (항상 최신)
+2. 사용자가 내보내기 요청 시 md → 해당 형식 변환
+3. 변환 도구: `pandoc` (docx), 코드 생성 (xlsx/html)
+4. 내보내기 파일은 정본이 아님 — 수정 시 md를 수정하고 재내보내기
+
+---
+
+# `/sub` + `/submix` 연동
+
+Phase별 에이전트를 `/sub`(Claude 단독) 또는 `/submix`(멀티엔진) orchestrator로 실행 가능.
 
 **자동 실행 가능 Phase (사용자 입력 불필요):**
 - Phase 3.5 교차 검증
@@ -285,20 +323,28 @@ Phase별 에이전트를 `/sub` orchestrator로 실행 가능.
 - Phase 2 시스템 분류 확인
 - Phase 3 핀셋 인터뷰
 
-**하이브리드 파이프라인:**
-Phase 1~3은 대화형으로 진행, Phase 3.5~5를 `/sub`로 자동화.
+**엔진 선택:**
+- `/sub` (Claude 단독): 빠른 실행, 일관된 품질
+- `/submix` (멀티엔진): Claude 검증 + Gemini UX/밸런스 리뷰 + Codex 구현 가능성 검증
 
+**하이브리드 파이프라인:**
 ```
 [사용자 대화] Phase 1→2→3
         ↓ (★ 확정 완료)
-[/sub 자동] Phase 3.5 → Phase 4 → Phase 5
+[/sub 또는 /submix 자동] Phase 3.5 → Phase 4 → Phase 5
         ↓
 [사용자 확인] 최종 산출물 리뷰
+        ↓ (선택)
+[내보내기] HTML / DOCX / XLSX
+        ↓ (선택)
+[/product Stage 3~] 게임 개발 착수
 ```
 
 ---
 
 # 에이전트 배정
+
+## Claude 단독 (/sub)
 
 | Phase | 역할 | 권장 모델 | reasoning |
 |-------|------|----------|-----------|
@@ -310,6 +356,59 @@ Phase 1~3은 대화형으로 진행, Phase 3.5~5를 `/sub`로 자동화.
 | 5 | 문서 생성기 | sonnet | 템플릿 기반 생성 |
 | 6 | 변경 관리자 | opus | 영향 분석 |
 | watchdog | 품질 감사 | sonnet | 결과물 검증 |
+
+## 멀티엔진 (/submix)
+
+| Phase | Claude | Codex (GPT) | Gemini |
+|-------|--------|-------------|--------|
+| 3.5 | 교차 검증 (정본) | 구현 가능성 검증 | 밸런스/UX 감사 |
+| 4 | 재귀 검증 (정본) | 코딩 관점 셀프체크 | 플레이어 경험 검증 |
+| 5 | 문서 생성 (파일 쓰기) | — | 전체 문서 일괄 리뷰 |
+| Mode B | 진단 (정본) | 경쟁작 기술 분석 | 시장/UX 분석 |
+
+---
+
+# /product 연동
+
+`/gdd`로 기획이 완료되면 `/product`로 게임 개발에 착수할 수 있다.
+
+```
+/gdd (게임 기획 완료)
+  ↓ _confirmed/ 설계 문서
+/product Stage 2 (Codex 앱 plan mode로 구현 계획)
+  ↓
+/product Stage 3~ (게임 개발)
+```
+
+`/gdd`의 `_confirmed/`가 `/product` Stage 1의 산출물로 직접 사용됨.
+
+---
+
+# 품질 원칙 — 게임 기획 특화
+
+### 깊이 > 길이 (DTR 논문)
+
+- 핀셋 인터뷰 선택지는 **3개 이내**, 각 선택지에 **구체적 수치** 필수
+- 리뷰어/워치독은 "발견 N건 + Verdict"만 반환. 장문 분석 금지
+- 재미 4문항은 **YES/NO + 1줄 근거**로 판정
+
+### 파이프라인 균형 보존 (WKI 교훈)
+
+- Phase 2에서 확정한 시스템 구조를 Phase 3~5에서 임의 변경 금지
+- 모순 발견 시 해당 시스템만 Phase 3 복귀 (전체 리셋 아님)
+- 이미 검증된 시스템에 추가 "개선" 시도 → regression 위험
+
+### 도메인 전문성 (WKI cross-encoder 교훈)
+
+- 게임 밸런스 리뷰는 게임 설계 전문성이 있는 에이전트만
+- "범용 리뷰어"에게 전투 밸런스 판단을 맡기면 역효과
+- /submix 사용 시 Gemini에게 "플레이어 경험" 관점만 위임
+
+### 지능형 위임 (Delegation 논문)
+
+- 만장일치 PASS → 추가 리뷰 불필요 (Adaptive Coordination)
+- 모든 Phase 완료 시 Settlement Record 작성 (Verifiable Completion)
+- 외부 엔진은 read-only (Privilege Attenuation)
 
 ---
 
