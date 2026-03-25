@@ -130,40 +130,67 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 | 20 | E2E Tester | Codex | §10 | 사용자 흐름 E2E |
 | 21 | Test Reviewer | Claude (sonnet) | §10, §25 | 커버리지, 엣지 케이스, 코드 리뷰 기준 |
 
-### 인프라/배포
+### 인프라/서버
 
 | # | 페르소나 | 엔진 | BIBLE § | 역할 |
 |---|---------|------|---------|------|
-| 22 | DevOps Engineer | Codex | §18, §19 | CI/CD, 파이프라인, cron, 큐 |
-| 23 | Infra Architect | Claude (sonnet) | §13, §24 | 환경 분리, 스케일링, 12-Factor |
-| 24 | Deploy Verifier | Gemini (flash) | §28 | 런칭 체크리스트 대조 |
+| 22 | Cloud Architect | Claude (opus) | §13, §24 | 클라우드 선택(Vercel/AWS/GCP), 환경 분리, 12-Factor, 스케일링 전략 |
+| 23 | Network Engineer | Claude (sonnet) | §7 | 방화벽, CDN, DDoS 방어, SSL/TLS, 도메인/DNS 설정 |
+| 24 | DB Admin | Claude (sonnet) | §3, §26 | DB 서버 설정, 연결 풀, 백업/복구, 마이그레이션 운영, 성능 튜닝 |
+
+### CI/CD/배포
+
+| # | 페르소나 | 엔진 | BIBLE § | 역할 |
+|---|---------|------|---------|------|
+| 25 | DevOps Engineer | Codex | §18, §19 | CI/CD 파이프라인, cron, 큐, 자동 배포 |
+| 26 | Deploy Verifier | Gemini (flash) | §28 | 런칭 체크리스트 대조, 스테이징 검증 |
+| 27 | Secrets Manager | Claude (sonnet) | §7, §24 | 환경변수 관리, vault, 시크릿 로테이션 |
 
 ### 운영/관측
 
 | # | 페르소나 | 엔진 | BIBLE § | 역할 |
 |---|---------|------|---------|------|
-| 25 | Observability Engineer | Claude (sonnet) | §17 | 구조화 로그, 메트릭, 알림 |
-| 26 | Error Handler | Codex | §11 | 에러 바운더리, 복구 로직 |
-| 27 | Performance Tuner | Codex → Claude | §16, §26 | 캐싱, 쿼리 최적화, 번들 |
+| 28 | SRE (Site Reliability) | Claude (sonnet) | §17 | 구조화 로그, 메트릭, 알림, 가동률, 헬스체크 |
+| 29 | Error Handler | Codex | §11 | 에러 바운더리, 복구 로직, Sentry 연동 |
+| 30 | Performance Tuner | Codex → Claude | §16, §26 | 캐싱, 쿼리 최적화, 번들, CDN, 이미지 최적화 |
+| 31 | Incident Manager | Claude (opus) | — | 장애 대응 런북, 에스컬레이션, 포스트모템 |
+| 32 | Cost Optimizer | Gemini (pro) | — | 클라우드 비용 분석, 스케일 다운, 예산 관리 |
 
-### 콘텐츠/정책
+### 백업/재해 복구
 
 | # | 페르소나 | 엔진 | BIBLE § | 역할 |
 |---|---------|------|---------|------|
-| 28 | Content Moderator | Claude (sonnet) | §27 | 모더레이션, 신고/제재 |
-| 29 | Policy Writer | Claude (opus) | §28 | 이용약관, 개인정보처리방침 |
-| 30 | Policy UX Reviewer | Gemini (pro) | — | 사용자 관점 정책 검토 |
+| 33 | Backup Engineer | Codex | §3, §13 | DB 백업 스크립트, 파일 백업, 복구 테스트 |
+| 34 | DR Planner | Claude (opus) | §13 | 재해 복구 계획, RTO/RPO 정의, 롤백 절차 |
 
-### Solo Lite 페르소나 (6개)
+### 콘텐츠/정책/법무
+
+| # | 페르소나 | 엔진 | BIBLE § | 역할 |
+|---|---------|------|---------|------|
+| 35 | Content Moderator | Claude (sonnet) | §27 | 모더레이션, 신고/제재, UGC 정제 |
+| 36 | Policy Writer | Claude (opus) | §28 | 이용약관, 개인정보처리방침, 커뮤니티 규칙 |
+| 37 | Privacy Engineer | Claude (opus) | §7 | 개인정보 암호화, 데이터 보존/삭제, GDPR 대응 |
+| 38 | Policy UX Reviewer | Gemini (pro) | — | 사용자 관점 정책/약관 검토 |
+
+### 커뮤니케이션
+
+| # | 페르소나 | 엔진 | BIBLE § | 역할 |
+|---|---------|------|---------|------|
+| 39 | Notification Engineer | Codex | — | 이메일(트랜잭셔널), 푸시 알림, 인앱 알림 구현 |
+| 40 | SEO Specialist | Gemini (pro) | §15 | 메타태그, sitemap, OG, 구조화 데이터, Core Web Vitals |
+
+### Solo Lite 페르소나 (8개)
 
 | # | 페르소나 | 엔진 | Full 통합 대상 |
 |---|---------|------|--------------|
 | 1 | Planner | Codex | #3+#6+#8 |
-| 2 | Architect | Claude (opus) | #4+#9+#12+#13+#14 |
-| 3 | Builder | Codex | #10+#15+#18~20+#22+#26 |
-| 4 | Reviewer | Claude (sonnet) | #7+#17+#21+#25+#28 |
-| 5 | UX | Gemini (pro) | #2+#5+#16+#24+#30 |
-| 6 | Writer | Claude (opus) | #1+#29 |
+| 2 | Architect | Claude (opus) | #4+#9+#12+#13+#14+#22+#23+#34 |
+| 3 | Builder | Codex | #10+#15+#18~20+#25+#29+#33+#39 |
+| 4 | Reviewer | Claude (sonnet) | #7+#17+#21+#24+#27+#28+#35+#37 |
+| 5 | UX | Gemini (pro) | #2+#5+#16+#26+#32+#38+#40 |
+| 6 | Writer | Claude (opus) | #1+#31+#36 |
+| 7 | Ops | Claude (sonnet) | #28+#30+#31+#34 (운영 시작 후 활성화) |
+| 8 | DevOps | Codex | #25+#33 (배포 단계에서 활성화) |
 
 ---
 
@@ -213,19 +240,26 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 
 **실행:** `/submix`
 **담당:**
+- Cloud Architect (Claude) — 클라우드/서버 환경 설계
+- DB Admin (Claude) — DB 서버 설정 + 연결 + 백업 계획
 - Data Architect (Codex) — DB 스키마 + migration + seed
 - Auth Architect (Claude) — 인증 설계 + 보안 검증 + 차단 시 세션 즉시 무효화 (BIBLE §5)
+- Network Engineer (Claude) — SSL/TLS, 도메인/DNS, 방화벽
 - DevOps Engineer (Codex) — CI/CD 초기 설정
-- Infra Architect (Claude) — 환경 분리, 12-Factor 검증
+- Secrets Manager (Claude) — 환경변수, 시크릿 관리
 
 **절차:**
-1. DB 스키마 → migration → seed (Codex 구현, Claude 리뷰)
-2. 인증 구조 (Claude 설계, Codex 구현)
-3. 배포 파이프라인 초안 (Codex 설정, Claude 검증)
-4. 기본 에러 로깅 설정
+1. **인프라 선택** — 클라우드/서버 환경 결정 (Vercel/AWS/VPS 등)
+2. **도메인/DNS** — 도메인 구매, DNS 설정, SSL 인증서
+3. **DB 설정** — DB 서버 설정 + 연결 + 스키마 → migration → seed
+4. **인증 구조** — OAuth/세션/JWT (Claude 설계, Codex 구현)
+5. **환경변수/시크릿** — `.env` 관리, production 시크릿 분리
+6. **배포 파이프라인** — CI/CD 초안 (Codex 설정, Claude 검증)
+7. **기본 모니터링** — 에러 로깅 + 헬스체크 설정
+8. **백업 계획** — DB 백업 스케줄, 복구 테스트 1회
 
-**산출물:** 동작하는 기반 인프라 (DB + Auth + 배포)
-**게이트 G3:** `npm run build` + 로그인 + DB 연결 확인
+**산출물:** 동작하는 기반 인프라 (서버 + 도메인 + DB + Auth + 배포 + 모니터링)
+**게이트 G3:** `npm run build` + 로그인 + DB 연결 + SSL 확인 + 배포 파이프라인 동작
 
 ### Stage 4: Implement (기능 구현)
 
@@ -263,35 +297,58 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 **산출물:** 검증 보고서 + Settlement Record
 **게이트 G4:** 보안 PASS + 테스트 PASS + UX PASS
 
-### Stage 6: Deploy (배포)
+### Stage 6: Deploy (배포 + 인프라 최종 확인)
 
 **실행:** CI/CD 자동 + 수동 승인
 **담당:**
-- DevOps Engineer (Codex) — 배포 스크립트
-- Infra Architect (Claude) — 환경 검증
+- DevOps Engineer (Codex) — 배포 스크립트, 롤백 절차
+- Cloud Architect (Claude) — 프로덕션 환경 최종 검증
+- Network Engineer (Claude) — SSL, CDN, 방화벽 최종 확인
+- DB Admin (Claude) — 프로덕션 DB 연결, 백업 확인
+- Deploy Verifier (Gemini) — BIBLE §28 런칭 체크리스트
 
 **절차:**
 1. 스테이징 배포 (자동)
 2. 스테이징 검증 (자동 테스트 + 수동 확인)
-3. 프로덕션 배포 (수동 승인)
+3. **인프라 최종 체크리스트:**
+   - [ ] 도메인 + SSL 동작
+   - [ ] DNS 전파 완료
+   - [ ] CDN 설정 (정적 자산)
+   - [ ] 방화벽 규칙 (필요 포트만 개방)
+   - [ ] DB 프로덕션 연결 + 백업 스케줄 활성
+   - [ ] 환경변수 프로덕션 값 설정
+   - [ ] 에러 추적 (Sentry 등) 활성
+   - [ ] 헬스체크 엔드포인트 응답
+   - [ ] rate limiting 활성
+   - [ ] 이용약관 + 개인정보처리방침 페이지 존재
+4. 프로덕션 배포 (수동 승인)
+5. 배포 후 스모크 테스트
+6. 롤백 절차 문서화 + 테스트
 
-**게이트 G5:** 프로덕션 배포 승인
+**게이트 G5:** 인프라 체크리스트 전항목 PASS + 프로덕션 배포 승인
 
-### Stage 7: Validate (검증/베타)
+### Stage 7: Validate (베타 + 운영 검증)
 
 **실행:** 수동 + AI 분석
 **담당:**
 - UX Reviewer (Gemini) — 사용자 피드백 분석
-- Content Moderator (Claude) — 운영 이슈 분석
-- Performance Tuner (Codex → Claude) — 성능 이슈
+- Content Moderator (Claude) — 운영 이슈, 모더레이션 검증
+- Performance Tuner (Codex → Claude) — 성능/부하 이슈
+- SRE (Claude) — 가동률, 에러율, 응답 시간 모니터링
+- Incident Manager (Claude) — 장애 대응 런북 수립
+- Cost Optimizer (Gemini) — 클라우드 비용 분석
+- Privacy Engineer (Claude) — 개인정보 처리 실태 점검
 
 **절차:**
 1. 소규모 베타 운영
 2. Gemini가 사용자 피드백 분석
-3. Claude가 운영/보안 이슈 분석
-4. 우선순위 재판단
+3. Claude가 운영/보안/개인정보 이슈 분석
+4. SRE 메트릭 검토 (에러율, p95 응답, 가동률)
+5. 비용 분석 (예상 vs 실제)
+6. 장애 대응 런북 수립 (에스컬레이션, 연락처, 롤백 절차)
+7. 우선순위 재판단
 
-**산출물:** 베타 보고서 + 다음 이터레이션 태스크 목록
+**산출물:** 베타 보고서 + 운영 런북 + 비용 보고서 + 다음 이터레이션 태스크
 **게이트 G6:** 다음 이터레이션 방향 결정 (또는 정식 오픈)
 
 ### Stage 8: Iterate (반복)
