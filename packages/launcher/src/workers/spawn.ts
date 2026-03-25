@@ -139,6 +139,7 @@ function buildGeminiCommand(spec: ResolvedWorkerSpec): SpawnCommand {
 function buildCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   switch (spec.engine) {
     case 'codex':
+    case 'codex-mcp':
       return buildCodexCommand(spec);
     case 'claude':
       return buildClaudeCommand(spec);
@@ -147,6 +148,143 @@ function buildCommand(spec: ResolvedWorkerSpec): SpawnCommand {
     default:
       throw new Error(`Unknown engine: ${spec.engine as string}`);
   }
+}
+
+// ============================================================
+// Codex MCP adapter — multi-turn conversation via stdio JSON-RPC
+// ============================================================
+
+interface McpResponse {
+  jsonrpc: string;
+  id: number;
+  result?: { threadId?: string; content?: string; tools?: unknown[] };
+  error?: { code: number; message: string };
+}
+
+async function spawnCodexMcp(
+  spec: ResolvedWorkerSpec,
+): Promise<{ exitCode: number; stdoutBuf: string; stderrBuf: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(winCmd('codex'), ['mcp-server'], {
+      cwd: spec.cwd,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: IS_WINDOWS,
+    });
+
+    let stdoutBuf = '';
+    let stderrBuf = '';
+    const responses: McpResponse[] = [];
+
+    child.stdout.on('data', (chunk: Buffer) => {
+      stdoutBuf += chunk.toString('utf8');
+      // Parse complete JSON-RPC lines
+      const lines = stdoutBuf.split('\n');
+      stdoutBuf = lines.pop() || ''; // keep incomplete line
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            responses.push(JSON.parse(line));
+          } catch { /* skip non-JSON */ }
+        }
+      }
+    });
+
+    child.stderr.on('data', (chunk: Buffer) => {
+      stderrBuf += chunk.toString('utf8');
+    });
+
+    // Step 1: Initialize
+    const initMsg = JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'subagent-launcher', version: '1.0' },
+      },
+    });
+
+    // Step 2: Call codex tool
+    const sandboxMode = spec.isReadOnly ? 'read-only' : 'workspace-write';
+    const prompt = buildPermissionNotice(spec) + spec.prompt;
+    const callMsg = JSON.stringify({
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: {
+        name: 'codex',
+        arguments: {
+          prompt,
+          sandbox: sandboxMode,
+          model: spec.model || undefined,
+          cwd: spec.cwd,
+          'developer-instructions': spec.isReadOnly
+            ? 'You are in read-only mode. Do NOT modify any files. Analyze and respond only.'
+            : undefined,
+        },
+      },
+    });
+
+    child.stdin.write(initMsg + '\n');
+
+    // Wait for init response, then send call
+    const initCheck = setInterval(() => {
+      if (responses.some((r) => r.id === 1)) {
+        clearInterval(initCheck);
+        child.stdin.write(callMsg + '\n');
+
+        // Wait for call response
+        const callCheck = setInterval(() => {
+          const callResp = responses.find((r) => r.id === 2);
+          if (callResp) {
+            clearInterval(callCheck);
+            child.stdin.end();
+            // Don't wait for child close — kill after response
+            setTimeout(() => {
+              try { child.kill(); } catch { /* ignore */ }
+            }, 1000);
+          }
+        }, 200);
+
+        // Timeout for call
+        setTimeout(() => {
+          clearInterval(callCheck);
+          try { child.kill(); } catch { /* ignore */ }
+        }, spec.timeoutMs > 0 ? spec.timeoutMs : 300000);
+      }
+    }, 100);
+
+    // Timeout for init
+    setTimeout(() => {
+      clearInterval(initCheck);
+    }, 10000);
+
+    child.on('close', () => {
+      const callResp = responses.find((r) => r.id === 2);
+      if (callResp?.error) {
+        resolve({
+          exitCode: 1,
+          stdoutBuf: JSON.stringify(callResp.error),
+          stderrBuf,
+        });
+      } else if (callResp?.result?.content) {
+        resolve({
+          exitCode: 0,
+          stdoutBuf: callResp.result.content,
+          stderrBuf,
+        });
+      } else {
+        resolve({
+          exitCode: 1,
+          stdoutBuf: responses.map((r) => JSON.stringify(r)).join('\n'),
+          stderrBuf,
+        });
+      }
+    });
+
+    child.on('error', reject);
+  });
 }
 
 function formatCommand(cmd: string, args: string[]): string {
@@ -165,6 +303,9 @@ function extractLastMessage(
   if (!stdout.trim()) return '';
 
   switch (engine) {
+    case 'codex-mcp':
+      // MCP responses are already extracted as plain text
+      return stdout.trim();
     case 'codex': {
       const lines = stdout.trim().split('\n');
       for (let i = lines.length - 1; i >= 0; i--) {
@@ -274,8 +415,11 @@ function spawnProcess(
 export async function spawnWorker(
   spec: ResolvedWorkerSpec,
 ): Promise<WorkerOutput> {
-  const { cmd, args, stdin } = buildCommand(spec);
-  const command = formatCommand(cmd, args);
+  const isMcp = spec.engine === 'codex-mcp';
+  const { cmd, args, stdin } = isMcp
+    ? { cmd: 'codex mcp-server', args: [] as string[], stdin: undefined }
+    : buildCommand(spec);
+  const command = isMcp ? 'codex mcp-server (MCP)' : formatCommand(cmd, args);
 
   // Ensure output directory exists
   await fs.mkdir(spec.outputDir, { recursive: true });
@@ -295,14 +439,10 @@ export async function spawnWorker(
     await fs.writeFile(promptPath, spec.prompt, 'utf8');
   }
 
-  // Spawn process — returns raw buffers synchronously on close
-  const { exitCode, stdoutBuf, stderrBuf } = await spawnProcess(
-    cmd,
-    args,
-    spec.cwd,
-    stdin,
-    spec.timeoutMs,
-  );
+  // Spawn process — MCP or CLI
+  const { exitCode, stdoutBuf, stderrBuf } = isMcp
+    ? await spawnCodexMcp(spec)
+    : await spawnProcess(cmd, args, spec.cwd, stdin, spec.timeoutMs);
 
   // Write output files (outside Promise constructor — fix #9)
   await fs.writeFile(stdoutPath, stdoutBuf, 'utf8');
@@ -346,7 +486,7 @@ export function toWorkerResult(
   return {
     name: spec.name,
     engine: spec.engine,
-    mode: 'exec',
+    mode: spec.engine === 'codex-mcp' ? 'mcp' : 'exec',
     stage: spec.stage,
     worker_kind: spec.kind,
     is_read_only: spec.isReadOnly,

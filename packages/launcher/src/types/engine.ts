@@ -7,7 +7,7 @@
 // Engine identifiers
 // ============================================================
 
-export type Engine = 'codex' | 'claude' | 'gemini';
+export type Engine = 'codex' | 'codex-mcp' | 'claude' | 'gemini';
 
 export type CodexModel = 'gpt-5.4' | 'o3' | 'o4-mini';
 export type ClaudeModel = 'haiku' | 'sonnet' | 'opus';
@@ -33,12 +33,14 @@ export type WorkerKind =
 
 export const ENGINE_MODELS: Record<Engine, readonly string[]> = {
   codex: ['gpt-5.4', 'o3', 'o4-mini'],
+  'codex-mcp': ['gpt-5.4', 'o3', 'o4-mini'],
   claude: ['haiku', 'sonnet', 'opus'],
   gemini: ['gemini-2.5-pro', 'gemini-2.5-flash'],
 } as const;
 
 export const ENGINE_DEFAULTS: Record<Engine, string> = {
   codex: 'gpt-5.4',
+  'codex-mcp': 'gpt-5.4',
   claude: 'sonnet',
   gemini: 'gemini-2.5-pro',
 } as const;

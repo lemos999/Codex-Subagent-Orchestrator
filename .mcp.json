@@ -4,6 +4,11 @@
       "command": "node",
       "args": ["C:/Users/haj/projects/subagent-orchestrator/workspace-knowledge-index/dist/mcp/index.js"],
       "cwd": "C:/Users/haj/projects/subagent-orchestrator"
+    },
+    "codex": {
+      "command": "codex",
+      "args": ["mcp-server"],
+      "cwd": "C:/Users/haj/projects/subagent-orchestrator"
     }
   }
 }
