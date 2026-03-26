@@ -89,3 +89,17 @@ export async function findEmptyPaths(paths: string[]): Promise<string[]> {
 export function sha256(content: string): string {
   return crypto.createHash('sha256').update(content, 'utf8').digest('hex');
 }
+
+/**
+ * Compute a salted SHA-256 hex digest of a UTF-8 string.
+ */
+export function sha256WithSalt(content: string, salt: string): string {
+  return crypto.createHash('sha256').update(salt + content, 'utf8').digest('hex');
+}
+
+/**
+ * Generate a random 16-byte salt encoded as 32 hex characters.
+ */
+export function generateSalt(): string {
+  return crypto.randomBytes(16).toString('hex');
+}

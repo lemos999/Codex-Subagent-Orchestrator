@@ -1,0 +1,113 @@
+engine: claude
+profiles:
+  - model: opus
+    dimensions:
+      tool-access:
+        declaredScore: 0.95
+        evidence: "Full tool access via Claude Code CLI (file read/write/edit, bash, glob, grep)"
+      code-gen:
+        declaredScore: 0.95
+        evidence: "Top-tier code generation with deep reasoning; strong across languages"
+      long-context:
+        declaredScore: 0.95
+        evidence: "1M token context window; excels at large codebase comprehension"
+      korean-quality:
+        declaredScore: 0.90
+        evidence: "Native-quality Korean output; nuanced cultural understanding"
+      reasoning:
+        declaredScore: 0.95
+        evidence: "Strongest reasoning capability; complex multi-step planning"
+      speed:
+        declaredScore: 0.40
+        evidence: "Slower due to deep reasoning; not optimized for latency"
+      cost-efficiency:
+        declaredScore: 0.30
+        evidence: "Highest cost per token; best reserved for complex tasks"
+      multimodal:
+        declaredScore: 0.85
+        evidence: "Image understanding; PDF reading; screenshot analysis"
+    roleAffinity:
+      planner: 0.95
+      reviewer: 0.90
+      implementer: 0.85
+      validator: 0.85
+      fixer: 0.80
+    constraints:
+      - file-write-capable
+      - file-read-capable
+      - bash-capable
+      - long-context-capable
+
+  - model: sonnet
+    dimensions:
+      tool-access:
+        declaredScore: 0.95
+        evidence: "Full tool access via Claude Code CLI"
+      code-gen:
+        declaredScore: 0.85
+        evidence: "Strong code generation; good balance of quality and speed"
+      long-context:
+        declaredScore: 0.90
+        evidence: "200K token context; handles most codebases well"
+      korean-quality:
+        declaredScore: 0.85
+        evidence: "High-quality Korean; occasional nuance gaps vs opus"
+      reasoning:
+        declaredScore: 0.80
+        evidence: "Good reasoning; handles most multi-step tasks"
+      speed:
+        declaredScore: 0.70
+        evidence: "Moderate speed; good throughput for standard tasks"
+      cost-efficiency:
+        declaredScore: 0.60
+        evidence: "Mid-range cost; good value for routine implementation"
+      multimodal:
+        declaredScore: 0.80
+        evidence: "Image and PDF understanding"
+    roleAffinity:
+      implementer: 0.90
+      fixer: 0.85
+      reviewer: 0.80
+      validator: 0.75
+      planner: 0.70
+    constraints:
+      - file-write-capable
+      - file-read-capable
+      - bash-capable
+
+  - model: haiku
+    dimensions:
+      tool-access:
+        declaredScore: 0.90
+        evidence: "Full tool access via Claude Code CLI"
+      code-gen:
+        declaredScore: 0.70
+        evidence: "Adequate for simple tasks; struggles with complex architecture"
+      long-context:
+        declaredScore: 0.70
+        evidence: "200K context but reduced quality at long ranges"
+      korean-quality:
+        declaredScore: 0.75
+        evidence: "Acceptable Korean; simpler vocabulary"
+      reasoning:
+        declaredScore: 0.60
+        evidence: "Basic reasoning; suitable for straightforward tasks"
+      speed:
+        declaredScore: 0.95
+        evidence: "Fastest Claude model; excellent for high-throughput"
+      cost-efficiency:
+        declaredScore: 0.90
+        evidence: "Lowest cost Claude model; best for simple/bulk tasks"
+      multimodal:
+        declaredScore: 0.70
+        evidence: "Basic image understanding"
+    roleAffinity:
+      validator: 0.80
+      fixer: 0.70
+      implementer: 0.65
+      reviewer: 0.60
+      planner: 0.40
+    constraints:
+      - file-write-capable
+      - file-read-capable
+      - bash-capable

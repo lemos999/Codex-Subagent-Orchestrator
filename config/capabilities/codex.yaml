@@ -1,0 +1,115 @@
+engine: codex
+profiles:
+  - model: gpt-5.4
+    dimensions:
+      tool-access:
+        declaredScore: 0.90
+        evidence: "Sandbox file operations via Codex CLI; full bash access"
+      code-gen:
+        declaredScore: 0.90
+        evidence: "Strong code generation; excellent at following patterns"
+      long-context:
+        declaredScore: 0.85
+        evidence: "Large context window; good at multi-file understanding"
+      korean-quality:
+        declaredScore: 0.70
+        evidence: "Acceptable Korean; English-centric training shows in nuance"
+      reasoning:
+        declaredScore: 0.85
+        evidence: "Strong reasoning; good at complex implementation tasks"
+      speed:
+        declaredScore: 0.65
+        evidence: "Moderate speed; sandboxed execution adds overhead"
+      cost-efficiency:
+        declaredScore: 0.50
+        evidence: "Higher cost; justified for complex coding tasks"
+      multimodal:
+        declaredScore: 0.75
+        evidence: "Image understanding supported"
+    roleAffinity:
+      implementer: 0.90
+      fixer: 0.85
+      reviewer: 0.75
+      validator: 0.70
+      planner: 0.65
+    constraints:
+      - file-write-capable
+      - file-read-capable
+      - bash-capable
+      - sandbox-isolated
+
+  - model: o3
+    dimensions:
+      tool-access:
+        declaredScore: 0.85
+        evidence: "Sandbox file operations via Codex CLI"
+      code-gen:
+        declaredScore: 0.85
+        evidence: "Good code generation with strong reasoning backing"
+      long-context:
+        declaredScore: 0.80
+        evidence: "Adequate context handling"
+      korean-quality:
+        declaredScore: 0.65
+        evidence: "Functional Korean; prefers English"
+      reasoning:
+        declaredScore: 0.90
+        evidence: "Excellent reasoning; chain-of-thought optimized"
+      speed:
+        declaredScore: 0.50
+        evidence: "Slower due to extended thinking; not for latency-sensitive tasks"
+      cost-efficiency:
+        declaredScore: 0.45
+        evidence: "High cost due to reasoning tokens"
+      multimodal:
+        declaredScore: 0.70
+        evidence: "Basic multimodal support"
+    roleAffinity:
+      reviewer: 0.85
+      planner: 0.80
+      validator: 0.80
+      implementer: 0.75
+      fixer: 0.70
+    constraints:
+      - file-write-capable
+      - file-read-capable
+      - bash-capable
+      - sandbox-isolated
+
+  - model: o4-mini
+    dimensions:
+      tool-access:
+        declaredScore: 0.85
+        evidence: "Sandbox file operations via Codex CLI"
+      code-gen:
+        declaredScore: 0.75
+        evidence: "Good for straightforward coding tasks"
+      long-context:
+        declaredScore: 0.75
+        evidence: "Standard context handling"
+      korean-quality:
+        declaredScore: 0.60
+        evidence: "Basic Korean support"
+      reasoning:
+        declaredScore: 0.75
+        evidence: "Good reasoning for its size class"
+      speed:
+        declaredScore: 0.80
+        evidence: "Fast for a reasoning model"
+      cost-efficiency:
+        declaredScore: 0.75
+        evidence: "Good cost-performance ratio for routine tasks"
+      multimodal:
+        declaredScore: 0.65
+        evidence: "Basic multimodal"
+    roleAffinity:
+      validator: 0.80
+      fixer: 0.75
+      implementer: 0.70
+      reviewer: 0.65
+      planner: 0.50
+    constraints:
+      - file-write-capable
+      - file-read-capable
+      - bash-capable
+      - sandbox-isolated

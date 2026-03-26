@@ -1,0 +1,74 @@
+engine: gemini
+profiles:
+  - model: gemini-2.5-pro
+    dimensions:
+      tool-access:
+        declaredScore: 0.70
+        evidence: "Limited tool access; primarily through Gemini CLI with restricted sandbox"
+      code-gen:
+        declaredScore: 0.80
+        evidence: "Good code generation; strong at analysis and review"
+      long-context:
+        declaredScore: 0.95
+        evidence: "1M+ token context; best-in-class for massive document analysis"
+      korean-quality:
+        declaredScore: 0.80
+        evidence: "Good Korean quality; Google's multilingual strength"
+      reasoning:
+        declaredScore: 0.85
+        evidence: "Strong reasoning with thinking mode; good at analysis"
+      speed:
+        declaredScore: 0.60
+        evidence: "Moderate speed; variable latency"
+      cost-efficiency:
+        declaredScore: 0.65
+        evidence: "Competitive pricing; good value for analysis tasks"
+      multimodal:
+        declaredScore: 0.90
+        evidence: "Excellent multimodal; video, image, audio, PDF native support"
+    roleAffinity:
+      reviewer: 0.90
+      validator: 0.85
+      planner: 0.75
+      implementer: 0.55
+      fixer: 0.50
+    constraints:
+      - file-read-capable
+      - long-context-capable
+      - multimodal-native
+
+  - model: gemini-2.5-flash
+    dimensions:
+      tool-access:
+        declaredScore: 0.65
+        evidence: "Limited tool access; Gemini CLI with restricted sandbox"
+      code-gen:
+        declaredScore: 0.65
+        evidence: "Adequate for simple code tasks and reviews"
+      long-context:
+        declaredScore: 0.85
+        evidence: "Large context window; good for document review"
+      korean-quality:
+        declaredScore: 0.75
+        evidence: "Acceptable Korean; simpler expressions"
+      reasoning:
+        declaredScore: 0.70
+        evidence: "Adequate reasoning for standard tasks"
+      speed:
+        declaredScore: 0.90
+        evidence: "Very fast; optimized for throughput"
+      cost-efficiency:
+        declaredScore: 0.90
+        evidence: "Very low cost; excellent for bulk validation"
+      multimodal:
+        declaredScore: 0.80
+        evidence: "Good multimodal support"
+    roleAffinity:
+      validator: 0.85
+      reviewer: 0.75
+      planner: 0.50
+      implementer: 0.40
+      fixer: 0.40
+    constraints:
+      - file-read-capable
+      - multimodal-native

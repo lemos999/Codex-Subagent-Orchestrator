@@ -36,6 +36,7 @@ export interface Manifest {
   hooks: ManifestHooks;
   policy: ManifestPolicy;
   efficiency_signals: ManifestEfficiencySignals;
+  evidence?: ManifestEvidence;
   stage_plan: StagePlan[];
   defaults: Record<string, unknown>;
   results: WorkerResult[];
@@ -139,6 +140,14 @@ export interface ManifestEfficiencySignals {
   final_read_only_review_present: boolean;
   total_prompt_chars: number;
   total_footer_tokens: number;
+}
+
+export interface ManifestEvidence {
+  chain_index: number;
+  prev_hash: string;
+  current_hash: string;
+  salt: string;
+  spec_sha256: string;
 }
 
 export interface StagePlan {

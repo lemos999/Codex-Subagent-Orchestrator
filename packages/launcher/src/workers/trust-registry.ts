@@ -14,6 +14,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+export type TrustTier = 'probation' | 'standard' | 'trusted';
+
 export interface EngineRecord {
   engine: string;
   successes: number;
@@ -24,6 +26,12 @@ export interface EngineRecord {
   lastFailureReason?: string;
   /** Trust score 0-1. Computed from success rate + recency. */
   trustScore: number;
+  // C5 Behavioral Metrics (optional — backward compatible)
+  approvalRate?: number;        // 0-1, EMA-based
+  revisionRate?: number;        // 0-1, EMA-based
+  scopeExitCount?: number;      // 범위 이탈 횟수
+  consecutiveFailures?: number; // 현재 연속 실패 수 (성공 시 0 리셋)
+  trustTier?: TrustTier;
 }
 
 export interface TrustRegistryData {
@@ -35,7 +43,19 @@ export interface TrustRegistryData {
 const DEFAULT_RECORD: Omit<EngineRecord, 'engine'> = {
   successes: 0, failures: 0, timeouts: 0, totalRuns: 0,
   avgLatencyMs: 0, trustScore: 0.5,
+  approvalRate: undefined, revisionRate: undefined,
+  scopeExitCount: 0, consecutiveFailures: 0, trustTier: 'probation',
 };
+
+function computeTrustTier(rec: EngineRecord): TrustTier {
+  // 강등 조건 우선
+  if ((rec.consecutiveFailures ?? 0) >= 3) return 'probation';
+  if ((rec.scopeExitCount ?? 0) >= 2) return 'probation';
+  // 승급 조건
+  if (rec.totalRuns >= 5 && rec.trustScore >= 0.85) return 'trusted';
+  if (rec.totalRuns >= 3 && rec.trustScore >= 0.65) return 'standard';
+  return 'probation';
+}
 
 export class TrustRegistry {
   private data: TrustRegistryData;
@@ -69,14 +89,35 @@ export class TrustRegistry {
     return this.data.engines[engine]!;
   }
 
+  /** Append a JSONL event to trust-events.jsonl. */
+  private appendEvent(engine: string, event: string, payload: Record<string, unknown>): void {
+    const logPath = path.join(path.dirname(this.filePath), 'trust-events.jsonl');
+    const entry = JSON.stringify({ ts: new Date().toISOString(), engine, event, ...payload });
+    const dir = path.dirname(logPath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(logPath, entry + '\n', 'utf8');
+  }
+
   /** Record a completed worker run. */
-  recordRun(engine: string, succeeded: boolean, latencyMs: number, failureReason?: string): void {
+  recordRun(
+    engine: string,
+    succeeded: boolean,
+    latencyMs: number,
+    failureReason?: string,
+    options?: {
+      approved?: boolean;
+      revised?: boolean;
+      scopeExited?: boolean;
+    },
+  ): void {
     const rec = this.getOrCreate(engine);
     rec.totalRuns++;
     if (succeeded) {
       rec.successes++;
+      rec.consecutiveFailures = 0;
     } else {
       rec.failures++;
+      rec.consecutiveFailures = (rec.consecutiveFailures ?? 0) + 1;
       if (failureReason) rec.lastFailureReason = failureReason;
     }
     // Running average latency
@@ -92,6 +133,30 @@ export class TrustRegistry {
       rec.trustScore = 0.5; // neutral until enough data
     }
 
+    // C5 behavioral metrics
+    if (options) {
+      const alpha = 0.2;
+      if (options.approved !== undefined) {
+        const prev = rec.approvalRate ?? 0.5;
+        rec.approvalRate = prev * (1 - alpha) + (options.approved ? 1 : 0) * alpha;
+      }
+      if (options.revised !== undefined) {
+        const prev = rec.revisionRate ?? 0;
+        rec.revisionRate = prev * (1 - alpha) + (options.revised ? 1 : 0) * alpha;
+      }
+      if (options.scopeExited) {
+        rec.scopeExitCount = (rec.scopeExitCount ?? 0) + 1;
+      } else if ((rec.scopeExitCount ?? 0) > 0) {
+        // Decay: successful non-exit runs gradually reduce scopeExitCount
+        // Simulates "recent 10 runs" window without full event log scan
+        rec.scopeExitCount = Math.max(0, (rec.scopeExitCount ?? 0) - 0.2);
+      }
+    }
+
+    // Recompute trust tier
+    rec.trustTier = computeTrustTier(rec);
+
+    this.appendEvent(engine, 'run', { succeeded, latencyMs, ...options });
     this.save();
   }
 
@@ -101,16 +166,24 @@ export class TrustRegistry {
     rec.totalRuns++;
     rec.timeouts++;
     rec.failures++;
+    rec.consecutiveFailures = (rec.consecutiveFailures ?? 0) + 1;
     rec.lastFailureReason = 'timeout';
     if (rec.totalRuns >= 3) {
       rec.trustScore = Math.round((rec.successes / rec.totalRuns) * 100) / 100;
     }
+    rec.trustTier = computeTrustTier(rec);
+    this.appendEvent(engine, 'timeout', {});
     this.save();
   }
 
   /** Get trust score for an engine. Returns 0.5 (neutral) if no history. */
   getTrustScore(engine: string): number {
     return this.data.engines[engine]?.trustScore ?? 0.5;
+  }
+
+  /** Get trust tier for an engine. Returns 'probation' if no history. */
+  getTrustTier(engine: string): TrustTier {
+    return this.data.engines[engine]?.trustTier ?? 'probation';
   }
 
   /** Get full record for an engine. */

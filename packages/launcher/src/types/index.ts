@@ -26,6 +26,7 @@ export type {
   StagePlan,
   ManifestPolicy,
   ManifestEfficiencySignals,
+  ManifestEvidence,
 } from './manifest.js';
 
 export type {
@@ -36,3 +37,7 @@ export type {
   RestartStrategy,
   SupervisorPolicy,
 } from './state.js';
+
+export type { DimensionKey, DimensionScore, CapabilityProfile, Constraint, TaskScorecard, MatchResult } from './capability.js';
+export type { AuthorityLevel, AuthorityProfile } from './authority.js';
+export { AUTHORITY_NAMES, AUTHORITY_VALUES, ATTENUATION_FACTOR, DEFAULT_MAX_DEPTH, ABSOLUTE_MAX_DEPTH } from './authority.js';

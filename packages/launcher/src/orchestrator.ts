@@ -7,11 +7,16 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import type { LauncherSpec } from './types/spec.js';
-import type { Manifest, StagePlan, WorkerResult } from './types/manifest.js';
+import type {
+  Manifest,
+  StagePlan,
+  WorkerResult,
+  ManifestEvidence,
+} from './types/manifest.js';
 import type { ResolvedPaths } from './types/state.js';
 import { ENGINE_DEFAULTS } from './types/engine.js';
 
-import { sha256 } from './common/fs-helpers.js';
+import { generateSalt, sha256 } from './common/fs-helpers.js';
 import { parseSpec } from './validation/spec-schema.js';
 import { resolvePaths } from './supervisor/path-resolver.js';
 import { runStages } from './supervisor/stage-runner.js';
@@ -24,6 +29,7 @@ import { writeNormalizedEvidence } from './evidence/normalized-writer.js';
 import { writeSummary } from './evidence/summary-writer.js';
 import { writeArchive } from './evidence/archive-writer.js';
 import { buildManifest, type SharedDirectiveInfo } from './evidence/manifest-builder.js';
+import { appendEntry, computeWorkerResultsHash, DEFAULT_CHAIN_FILENAME } from './evidence/chain-manager.js';
 import { UsageMonitor } from './workers/usage-monitor.js';
 import { TrustRegistry } from './workers/trust-registry.js';
 import type { ResolvedWorkerSpec } from './workers/spawn.js';
@@ -265,6 +271,39 @@ function initUsageMonitor(
   return monitor;
 }
 
+function buildManifestEvidence(
+  resolvedPaths: ResolvedPaths,
+  specSha256: string,
+  results: WorkerResult[],
+): ManifestEvidence {
+  const salt = generateSalt();
+  const workerResultsHash = computeWorkerResultsHash(
+    results.map((result) => ({
+      name: result.name,
+      succeeded: result.succeeded,
+      result_summary:
+        result.last_message_preview ||
+        result.failure_message ||
+        result.stdout_preview ||
+        undefined,
+    })),
+  );
+  const chainEntry = appendEntry(
+    path.resolve(resolvedPaths.workspaceRoot, DEFAULT_CHAIN_FILENAME),
+    specSha256,
+    workerResultsHash,
+    salt,
+  );
+
+  return {
+    chain_index: chainEntry.index,
+    prev_hash: chainEntry.prev_hash,
+    current_hash: chainEntry.hash,
+    salt,
+    spec_sha256: specSha256,
+  };
+}
+
 // ============================================================
 // Main orchestration entry point
 // ============================================================
@@ -328,6 +367,7 @@ export async function orchestrate(
   }
 
   // Phase 7: Build manifest
+  const evidence = buildManifestEvidence(resolvedPaths, specSha256, results);
   const manifest = buildManifest(
     spec,
     resolvedPaths,
@@ -337,6 +377,7 @@ export async function orchestrate(
     specSha256,
     hookResult,
     workflow,
+    evidence,
   );
 
   // Phase 8: Write evidence

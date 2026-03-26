@@ -16,6 +16,7 @@ import type {
   ManifestHooks,
   ManifestPolicy,
   ManifestEfficiencySignals,
+  ManifestEvidence,
 } from '../types/manifest.js';
 import type { LauncherSpec } from '../types/spec.js';
 import type { ResolvedPaths } from '../types/state.js';
@@ -276,6 +277,7 @@ export function buildManifest(
   specSha256: string,
   hookResult?: HookResult,
   workflowInfo?: WorkflowInfo,
+  evidence?: ManifestEvidence,
 ): Manifest {
   const counts = countWorkers(results);
   const policySection = buildPolicySection(spec, results, stagePlan);
@@ -326,6 +328,7 @@ export function buildManifest(
     hooks: buildHooksSection(spec, resolvedPaths.outputDir, hookResult),
     policy: policySection,
     efficiency_signals: buildEfficiencySection(spec, stagePlan, results, counts, policySection),
+    evidence,
     stage_plan: stagePlan,
     defaults: buildDefaultsRecord(spec),
     results,

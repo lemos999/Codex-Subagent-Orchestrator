@@ -5,4 +5,6 @@ export {
   findMissingPaths,
   findEmptyPaths,
   sha256,
+  sha256WithSalt,
+  generateSalt,
 } from './fs-helpers.js';
