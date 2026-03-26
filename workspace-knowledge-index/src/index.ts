@@ -683,6 +683,12 @@ async function cmdEval(args: string[]): Promise<void> {
   console.log(`  Median: ${summary.medianNdcg.toFixed(3)}`);
   console.log(`  Min:    ${summary.minNdcg.toFixed(3)}`);
   console.log(`  Max:    ${summary.maxNdcg.toFixed(3)}`);
+  if (summary.fileOnlySubset) {
+    console.log(`  File-only (${summary.fileOnlySubset.count}): ${summary.fileOnlySubset.meanNdcg.toFixed(3)}`);
+  }
+  if (summary.lineScopedSubset) {
+    console.log(`  Line-scoped (${summary.lineScopedSubset.count}): ${summary.lineScopedSubset.meanNdcg.toFixed(3)}`);
+  }
 
   // Cleanup
   if (vectorStore) await vectorStore.close();

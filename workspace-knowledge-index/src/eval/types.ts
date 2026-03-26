@@ -32,6 +32,11 @@ export interface EvalResult {
   actualType?: string;
 }
 
+export interface SubsetStats {
+  count: number;
+  meanNdcg: number;
+}
+
 export interface EvalSummary {
   goldSetName: string;
   meanNdcg: number;
@@ -40,4 +45,8 @@ export interface EvalSummary {
   maxNdcg: number;
   queryCount: number;
   results: EvalResult[];
+  /** Breakdown: queries where gold chunks have only filePath (no line range) */
+  fileOnlySubset?: SubsetStats;
+  /** Breakdown: queries where gold chunks have line range */
+  lineScopedSubset?: SubsetStats;
 }

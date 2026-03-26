@@ -124,6 +124,22 @@ export async function evaluate(
         ? sorted[Math.floor(sorted.length / 2)]!
         : (sorted[sorted.length / 2 - 1]! + sorted[sorted.length / 2]!) / 2;
 
+  // Subset breakdown: file-only vs line-scoped
+  const fileOnlyNdcg: number[] = [];
+  const lineScopedNdcg: number[] = [];
+
+  for (let i = 0; i < goldSet.queries.length; i++) {
+    const gq = goldSet.queries[i]!;
+    const hasLineRange = gq.relevantChunks.some(c => c.startLine !== undefined);
+    if (hasLineRange) {
+      lineScopedNdcg.push(results[i]!.ndcg);
+    } else {
+      fileOnlyNdcg.push(results[i]!.ndcg);
+    }
+  }
+
+  const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+
   return {
     goldSetName: goldSet.name,
     meanNdcg,
@@ -132,5 +148,7 @@ export async function evaluate(
     maxNdcg: sorted.length > 0 ? sorted[sorted.length - 1]! : 0,
     queryCount: results.length,
     results,
+    fileOnlySubset: fileOnlyNdcg.length > 0 ? { count: fileOnlyNdcg.length, meanNdcg: avg(fileOnlyNdcg) } : undefined,
+    lineScopedSubset: lineScopedNdcg.length > 0 ? { count: lineScopedNdcg.length, meanNdcg: avg(lineScopedNdcg) } : undefined,
   };
 }
