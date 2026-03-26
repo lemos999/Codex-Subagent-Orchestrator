@@ -110,9 +110,11 @@ class SimEngine:
         self.paused = False
         self.running = False
         self.status_data = {}  # latest status for dashboard
-        self.pnl_history = []  # [(sim_time, total_pnl), ...]
+        self.pnl_history = []
         self._prices = {}      # coin -> current price
         self._lock = threading.Lock()
+        self.test_history = []  # completed test results
+        self.last_report = None  # latest completion report
 
         self._build_models()
 
@@ -207,10 +209,23 @@ class SimEngine:
                 "pending_intent": s.pending_intent, "intent_price": s.intent_price,
             }
 
-        total_pnl = sum(m["pnl"] for m in models.values())
-        self.pnl_history.append((now.isoformat(), round(total_pnl, 2)))
-        if len(self.pnl_history) > 5000:
-            self.pnl_history = self.pnl_history[-5000:]
+        # PnL history: per-coin and per-model
+        ts_iso = now.isoformat()
+        coin_pnl = {}
+        model_pnl = {}
+        for name, m in models.items():
+            c = m["coin"]
+            coin_pnl[c] = coin_pnl.get(c, 0) + m["pnl"]
+            model_pnl[name] = m["pnl"]
+
+        self.pnl_history.append({
+            "t": ts_iso,
+            "total": round(sum(m["pnl"] for m in models.values()), 2),
+            "coins": {c: round(v, 2) for c, v in coin_pnl.items()},
+            "models": {n: round(v, 2) for n, v in model_pnl.items() if v != 0},
+        })
+        if len(self.pnl_history) > 3000:
+            self.pnl_history = self.pnl_history[-3000:]
 
         with self._lock:
             self.status_data = {
@@ -220,7 +235,7 @@ class SimEngine:
                 "paused": self.paused,
                 "prices": self._prices,
                 "models": models,
-                "pnl_history": self.pnl_history[-200:],
+                "pnl_history": self.pnl_history[-300:],
             }
 
     def run(self):
@@ -254,7 +269,82 @@ class SimEngine:
 
         self.running = False
         self._update_status()
+        self._generate_report()
         print(f"\n  [sim] Complete!")
+
+    def _generate_report(self):
+        """Generate per-coin and per-model performance report."""
+        start_str = self.clock.start.strftime("%Y-%m-%d")
+        end_str = self.clock.end.strftime("%Y-%m-%d")
+
+        coin_summary = {}
+        model_results = []
+
+        for name, t in self.traders:
+            s = t.state
+            coin = "ETH"
+            for c in COINS[1:]:
+                if name.startswith(c["short"] + "-"): coin = c["short"]; break
+
+            pnl = s.balance - 10000
+            wr = round(s.wins / s.total_trades * 100, 1) if s.total_trades > 0 else 0
+            model_results.append({
+                "name": name, "coin": coin, "pnl": round(pnl, 2),
+                "trades": s.total_trades, "wins": s.wins, "losses": s.losses,
+                "win_rate": wr, "max_dd": round(s.max_drawdown * 100, 2),
+                "balance": round(s.balance, 2),
+            })
+
+            if coin not in coin_summary:
+                coin_summary[coin] = {"pnl": 0, "trades": 0, "wins": 0, "losses": 0}
+            coin_summary[coin]["pnl"] += pnl
+            coin_summary[coin]["trades"] += s.total_trades
+            coin_summary[coin]["wins"] += s.wins
+            coin_summary[coin]["losses"] += s.losses
+
+        for c in coin_summary:
+            cs = coin_summary[c]
+            cs["pnl"] = round(cs["pnl"], 2)
+            cs["win_rate"] = round(cs["wins"] / cs["trades"] * 100, 1) if cs["trades"] > 0 else 0
+
+        model_results.sort(key=lambda x: x["pnl"], reverse=True)
+
+        report = {
+            "period": f"{start_str} ~ {end_str}",
+            "start": start_str, "end": end_str,
+            "total_pnl": round(sum(r["pnl"] for r in model_results), 2),
+            "total_trades": sum(r["trades"] for r in model_results),
+            "coin_summary": coin_summary,
+            "model_ranking": model_results,
+            "top5": model_results[:5],
+            "bottom5": model_results[-5:],
+        }
+
+        with self._lock:
+            self.last_report = report
+        self.test_history.append(report)
+
+    def restart(self, start_str: str, days: int):
+        """Stop current sim and start a new one with different period."""
+        self.running = False
+        time.sleep(0.5)
+
+        end_dt = datetime.strptime(start_str, "%Y-%m-%d") + timedelta(days=days)
+        end_str = end_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+        self.clock = SimClock(start=start_str + " 00:00:00", end=end_str)
+        self.exchange = MockExchange(self.clock, db_path=str(DB_PATH))
+        self.traders = []
+        self.pnl_history = []
+        self.last_report = None
+        self._prices = {}
+        self.status_data = {}
+        self._build_models()
+
+        # Start in new thread
+        t = threading.Thread(target=self.run, daemon=True)
+        t.start()
+        return {"status": "started", "start": start_str, "days": days}
 
 
 # ══════════════════════════════════════════════════════════════
@@ -337,6 +427,23 @@ body{background:#0a0e17;color:#e0e0e0;font-family:'Segoe UI',system-ui,monospace
   </div>
   <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
 
+  <!-- Period Selector -->
+  <div class="controls" style="background:#141926;padding:10px 14px;border-radius:8px;border:1px solid #2a3040;margin-bottom:10px">
+    <span style="color:#888;font-size:12px;margin-right:8px">TEST PERIOD:</span>
+    <input type="date" id="simStart" value="2026-03-01" style="background:#0a0e17;color:#fff;border:1px solid #2a3040;padding:4px 8px;border-radius:4px;font-family:inherit;font-size:12px">
+    <select id="simDays" style="background:#0a0e17;color:#fff;border:1px solid #2a3040;padding:4px 8px;border-radius:4px;font-family:inherit;font-size:12px">
+      <option value="3">3 days</option>
+      <option value="7" selected>7 days</option>
+      <option value="14">14 days</option>
+      <option value="30">30 days</option>
+      <option value="60">60 days</option>
+      <option value="90">90 days</option>
+    </select>
+    <button id="startBtn" style="background:#ff980022;border:1px solid #ff9800;color:#ff9800;padding:5px 16px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:bold;font-family:inherit">START</button>
+    <div style="flex:1"></div>
+    <span id="historyBadge" style="color:#555;font-size:11px;cursor:pointer" title="Click to view test history">Tests: 0</span>
+  </div>
+
   <!-- Controls -->
   <div class="controls">
     <button class="speed-btn active" data-speed="1">1x</button>
@@ -350,6 +457,18 @@ body{background:#0a0e17;color:#e0e0e0;font-family:'Segoe UI',system-ui,monospace
     <button class="coin-tab" data-coin="SOL">SOL</button>
     <button class="coin-tab" data-coin="XRP">XRP</button>
     <button class="coin-tab" data-coin="ALL">ALL</button>
+  </div>
+
+  <!-- Results Report (hidden until sim complete) -->
+  <div id="reportPanel" style="display:none;background:#141926;border:1px solid #ff9800;border-radius:8px;padding:16px;margin-bottom:14px">
+    <h2 style="font-size:14px;color:#ff9800;margin-bottom:12px">TEST RESULTS</h2>
+    <div id="reportContent"></div>
+  </div>
+
+  <!-- Test History (hidden by default) -->
+  <div id="historyPanel" style="display:none;background:#141926;border:1px solid #2a3040;border-radius:8px;padding:16px;margin-bottom:14px">
+    <h2 style="font-size:14px;color:#888;margin-bottom:10px">TEST HISTORY</h2>
+    <div id="historyContent"></div>
   </div>
 
   <!-- Chart -->
@@ -409,7 +528,7 @@ const candleSeries = chart.addCandlestickSeries({
   wickUpColor:'#00d4aa88',wickDownColor:'#ff4d6a88',
 });
 
-// PnL curve
+// PnL curve (multi-line)
 const pnlEl = document.getElementById('pnlCurve');
 const pnlChart = LightweightCharts.createChart(pnlEl, {
   layout:{background:{color:'#141926'},textColor:'#888'},
@@ -417,7 +536,9 @@ const pnlChart = LightweightCharts.createChart(pnlEl, {
   timeScale:{timeVisible:true,borderColor:'#2a3040'},
   rightPriceScale:{borderColor:'#2a3040'},
 });
-const pnlSeries = pnlChart.addLineSeries({color:'#ff9800',lineWidth:2});
+const COIN_COLORS = {ETH:'#627eea',BTC:'#f7931a',SOL:'#9945ff',XRP:'#00aae4'};
+const MODEL_COLORS = {B:'#ff6b35',C:'#4ecdc4',D:'#95e1d3',E:'#f38181',F:'#00d4aa',G:'#ffd700',H:'#7b68ee',I:'#ff69b4',J:'#1e90ff'};
+let pnlSeriesMap = {}; // dynamically created series
 
 function posTag(pos) {
   if (pos===1) return '<span class="tag tag-long">LONG</span>';
@@ -431,8 +552,10 @@ function render(data) {
   lastData = data;
 
   // Progress
-  document.getElementById('progressFill').style.width = data.sim_progress + '%';
-  document.getElementById('simPct').textContent = data.sim_progress + '%';
+  const pct = data.sim_progress || 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('simPct').textContent = pct + '%';
+  if (pct >= 100) { document.getElementById('progressFill').style.background = 'linear-gradient(90deg,#00d4aa,#4ecdc4)'; }
 
   const simDt = new Date(data.timestamp);
   document.getElementById('simTime').textContent = simDt.toLocaleString('ko-KR',{timeZone:'Asia/Seoul'});
@@ -475,13 +598,46 @@ function render(data) {
   }
   document.getElementById('cards').innerHTML = cards;
 
-  // PnL curve
+  // PnL curves (per-coin or per-model based on tab)
   if (data.pnl_history && data.pnl_history.length > 0) {
-    const pnlData = data.pnl_history.map(([t,v]) => ({
-      time: Math.floor(new Date(t).getTime()/1000),
-      value: v,
-    }));
-    pnlSeries.setData(pnlData);
+    // Remove old series
+    for (const key in pnlSeriesMap) {
+      try { pnlChart.removeSeries(pnlSeriesMap[key]); } catch(e) {}
+    }
+    pnlSeriesMap = {};
+
+    if (selectedCoin === 'ALL') {
+      // Show per-coin lines
+      for (const coin of ['ETH','BTC','SOL','XRP']) {
+        const points = data.pnl_history
+          .filter(h => h.coins && h.coins[coin] !== undefined)
+          .map(h => ({time: Math.floor(new Date(h.t).getTime()/1000), value: h.coins[coin]}));
+        if (points.length > 0) {
+          const s = pnlChart.addLineSeries({color: COIN_COLORS[coin], lineWidth: 2, title: coin});
+          s.setData(points);
+          pnlSeriesMap[coin] = s;
+        }
+      }
+    } else {
+      // Show per-model lines for selected coin
+      const modelNames = Object.keys(data.models).filter(n => {
+        const mc = data.models[n].coin || 'ETH';
+        return mc === selectedCoin;
+      });
+      for (const name of modelNames) {
+        const letter = name.replace(/^[A-Z]{2,3}-/,'')[0];
+        const clr = MODEL_COLORS[letter] || '#888';
+        const shortName = name.replace(/^[A-Z]{2,3}-/,'').split(' ')[0];
+        const points = data.pnl_history
+          .filter(h => h.models)
+          .map(h => ({time: Math.floor(new Date(h.t).getTime()/1000), value: h.models[name] || 0}));
+        if (points.length > 0) {
+          const s = pnlChart.addLineSeries({color: clr, lineWidth: 1, title: shortName});
+          s.setData(points);
+          pnlSeriesMap[name] = s;
+        }
+      }
+    }
   }
 }
 
@@ -506,10 +662,101 @@ async function refresh() {
   } catch(e) {}
 }
 
+// Start button
+document.getElementById('startBtn').addEventListener('click', () => {
+  const start = document.getElementById('simStart').value;
+  const days = document.getElementById('simDays').value;
+  if (!start) return;
+  document.getElementById('reportPanel').style.display = 'none';
+  fetch(`/api/start?start=${start}&days=${days}`).then(r => r.json()).then(d => {
+    console.log('Started:', d);
+  });
+});
+
+// History toggle
+document.getElementById('historyBadge').addEventListener('click', () => {
+  const panel = document.getElementById('historyPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') fetchHistory();
+});
+
+let lastReportShown = '';
+
+function checkReport() {
+  fetch('/api/report?' + Date.now()).then(r => r.json()).then(report => {
+    if (!report || !report.period) return;
+    if (report.period === lastReportShown) return;
+    lastReportShown = report.period;
+    showReport(report);
+    fetchHistory();
+  }).catch(()=>{});
+}
+
+function showReport(r) {
+  document.getElementById('reportPanel').style.display = 'block';
+  let html = `<div style="margin-bottom:12px;font-size:13px;color:#fff">
+    <strong>${r.period}</strong> | Total PnL: <span class="${r.total_pnl>=0?'gn':'rd'}">${fmt(r.total_pnl)}</span> | Trades: ${r.total_trades}
+  </div>`;
+
+  // Coin summary
+  html += `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">`;
+  for (const coin of ['ETH','BTC','SOL','XRP']) {
+    const cs = r.coin_summary[coin];
+    if (!cs) continue;
+    const clr = cs.pnl >= 0 ? '#00d4aa' : '#ff4d6a';
+    html += `<div style="background:#0a0e17;padding:10px;border-radius:6px;border:1px solid #2a3040">
+      <div style="font-size:12px;color:#888">${coin}</div>
+      <div style="font-size:20px;font-weight:bold;color:${clr}">${fmt(cs.pnl)}</div>
+      <div style="font-size:11px;color:#666">Trades: ${cs.trades} | WR: ${cs.win_rate}%</div>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // Model ranking table
+  html += `<div style="font-size:12px;color:#888;margin-bottom:6px">MODEL RANKING</div>`;
+  html += `<table style="width:100%;border-collapse:collapse;font-size:11px">
+    <tr style="color:#666"><th style="text-align:left;padding:4px">Rank</th><th style="text-align:left">Model</th><th style="text-align:left">Coin</th><th style="text-align:right">PnL</th><th style="text-align:right">Trades</th><th style="text-align:right">WinRate</th><th style="text-align:right">MaxDD</th></tr>`;
+  r.model_ranking.forEach((m, i) => {
+    const clr = m.pnl >= 0 ? '#00d4aa' : '#ff4d6a';
+    const bg = i < 3 ? '#00d4aa08' : i >= r.model_ranking.length - 3 ? '#ff4d6a08' : '';
+    html += `<tr style="background:${bg}">
+      <td style="padding:3px 4px;color:#555">#${i+1}</td>
+      <td style="color:#ddd">${m.name}</td>
+      <td style="color:#888">${m.coin}</td>
+      <td style="text-align:right;color:${clr};font-weight:bold">${fmt(m.pnl)}</td>
+      <td style="text-align:right;color:#aaa">${m.trades}</td>
+      <td style="text-align:right;color:#aaa">${m.win_rate}%</td>
+      <td style="text-align:right;color:#aaa">${m.max_dd}%</td>
+    </tr>`;
+  });
+  html += `</table>`;
+
+  document.getElementById('reportContent').innerHTML = html;
+}
+
+function fetchHistory() {
+  fetch('/api/history?' + Date.now()).then(r => r.json()).then(history => {
+    document.getElementById('historyBadge').textContent = `Tests: ${history.length}`;
+    if (history.length === 0) {
+      document.getElementById('historyContent').innerHTML = '<div style="color:#555;font-size:12px">No completed tests yet</div>';
+      return;
+    }
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+    html += '<tr style="color:#666"><th style="text-align:left;padding:4px">Period</th><th style="text-align:right">PnL</th><th style="text-align:right">Trades</th></tr>';
+    for (const t of history.reverse()) {
+      const clr = t.total_pnl >= 0 ? '#00d4aa' : '#ff4d6a';
+      html += `<tr><td style="padding:3px 4px;color:#aaa">${t.period}</td><td style="text-align:right;color:${clr}">${fmt(t.total_pnl)}</td><td style="text-align:right;color:#888">${t.total_trades}</td></tr>`;
+    }
+    html += '</table>';
+    document.getElementById('historyContent').innerHTML = html;
+  }).catch(()=>{});
+}
+
 refresh();
 fetchCandles();
 setInterval(refresh, 1000);
 setInterval(fetchCandles, 5000);
+setInterval(checkReport, 3000);
 window.addEventListener('resize', () => {
   chart.applyOptions({width:chartEl.clientWidth});
   pnlChart.applyOptions({width:pnlEl.clientWidth});
@@ -537,6 +784,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif self.path.startswith("/api/pause"):
             sim_engine.paused = not sim_engine.paused
             self._json_response({"paused": sim_engine.paused})
+        elif self.path.startswith("/api/start"):
+            start = self.path.split("start=")[1].split("&")[0] if "start=" in self.path else "2026-03-01"
+            days = int(self.path.split("days=")[1].split("&")[0]) if "days=" in self.path else 7
+            result = sim_engine.restart(start, days)
+            self._json_response(result)
+        elif self.path.startswith("/api/report"):
+            self._json_response(sim_engine.last_report or {})
+        elif self.path.startswith("/api/history"):
+            self._json_response(sim_engine.test_history)
         elif self.path.startswith("/api/candles"):
             self._serve_candles()
         else:
@@ -580,14 +836,17 @@ def main():
     parser.add_argument("--port", type=int, default=8890)
     args = parser.parse_args()
 
-    end_dt = datetime.strptime(args.start, "%Y-%m-%d %H:%M:%S") + timedelta(days=args.days)
+    start_clean = args.start.strip()
+    if len(start_clean) == 10:
+        start_clean += " 00:00:00"
+    end_dt = datetime.strptime(start_clean, "%Y-%m-%d %H:%M:%S") + timedelta(days=args.days)
 
     print(f"Simulation Dashboard")
     print(f"  Period: {args.start} -> {end_dt.strftime('%Y-%m-%d')}")
     print(f"  Port: {args.port}")
     print(f"  Loading data...")
 
-    clock = SimClock(start=args.start, end=end_dt.strftime("%Y-%m-%d %H:%M:%S"))
+    clock = SimClock(start=start_clean, end=end_dt.strftime("%Y-%m-%d %H:%M:%S"))
     exchange = MockExchange(clock, db_path=str(DB_PATH))
 
     print(f"  Loading models...")
