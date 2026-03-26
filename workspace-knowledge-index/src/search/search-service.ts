@@ -604,6 +604,11 @@ const NOISE_PATH_PATTERNS = [
   'subagent-records/',
   '.npm-cache/',
   'package-lock.json',
+  'workspace-knowledge-index/docs/',
+  'projects/vibe-web/_confirmed/',
+  'projects/vibe-web/docs/',
+  'projects/archive/',
+  'discussions/',
 ];
 
 /**
