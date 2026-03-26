@@ -405,12 +405,27 @@ function normalizeChunkType(value: string | null): ChunkType {
   return 'other';
 }
 
+// Common words that rarely narrow search results when used with AND
+const FTS_STOP_WORDS = new Set([
+  'the', 'a', 'an', 'and', 'or', 'is', 'are', 'in', 'of', 'for', 'to',
+  'how', 'does', 'what', 'where', 'why', 'do', 'it', 'be', 'at', 'by',
+  'with', 'from', 'this', 'that', 'on', 'not', 'can', 'but', 'all',
+  'writing', 'using', 'based', 'about', 'into', 'through', 'between',
+]);
+
 function buildFtsMatchExpression(query: string, operator: 'AND' | 'OR' = 'AND'): string {
-  const tokens = query
+  let tokens = query
     .trim()
     .split(/\s+/u)
     .map((token) => sanitizeFtsToken(token))
     .filter((token): token is string => token.length > 0);
+
+  // For long AND queries, remove stop words to improve recall
+  if (operator === 'AND' && tokens.length >= 4) {
+    const filtered = tokens.filter(t => !FTS_STOP_WORDS.has(t.toLowerCase()));
+    if (filtered.length >= 2) tokens = filtered;
+  }
+
 
   if (tokens.length === 0) {
     return '';
