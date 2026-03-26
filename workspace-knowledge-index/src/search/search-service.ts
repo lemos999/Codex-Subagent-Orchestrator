@@ -218,11 +218,13 @@ export class SearchService {
     const reranked = this.rerank(results, normalizedQuery, ftsQuery);
 
     // Re-ranking stage 2: cross-encoder model (fail-soft)
-    const ceReranked = await crossEncoderRerank(reranked, normalizedQuery, topK * 2, ftsQuery);
+    // Larger candidate pool improves line-scoped accuracy for long files
+    const ceReranked = await crossEncoderRerank(reranked, normalizedQuery, topK * 3, ftsQuery);
 
-    // Deduplicate: max 3 chunks per file to improve diversity
+    // Deduplicate: max 3 chunks per file path, max 4 chunks per filename across directories
     const deduplicated = deduplicateByFile(ceReranked ?? reranked, 3);
-    const finalResults = deduplicated.slice(0, topK);
+    const diversified = deduplicateByFilename(deduplicated, 4);
+    const finalResults = diversified.slice(0, topK);
 
     if (!wantContent) {
       return finalResults.map(r => ({ ...r, chunk: { ...r.chunk, content: '' } }));
@@ -259,20 +261,28 @@ export class SearchService {
       const overlapRatio = matchCount / keywords.size;
 
       let structuralBoost = 0;
+      let headingMatchCount = 0;
       for (const kw of keywords) {
-        if (heading.includes(kw)) structuralBoost += 0.15;
+        if (heading.includes(kw)) {
+          structuralBoost += 0.15;
+          headingMatchCount++;
+        }
         if (filePath.includes(kw)) structuralBoost += 0.1;
       }
       const fileName = filePath.split('/').pop() ?? '';
       if (fileName && keywords.has(fileName.replace(/\.\w+$/, ''))) {
         structuralBoost += 0.25;
       }
-      structuralBoost = Math.min(structuralBoost, 0.5);
+      structuralBoost = Math.min(structuralBoost, 0.6);
+
+      // Heading diversity bonus: chunks whose heading matches 3+ query terms
+      // are very likely the target section (e.g., "Stage 9: EVIDENCE + RECOVER")
+      const headingDiversityBonus = headingMatchCount >= 3 ? 0.15 : 0;
 
       const noisePenalty = isNoisePath(filePath) ? 0.3 : 0;
 
-      // Blend: 60% original + 25% keyword overlap + 15% structural - noise
-      const rerankScore = r.score * (0.60 + overlapRatio * 0.25 + structuralBoost * 0.15 - noisePenalty);
+      // Blend: 55% original + 25% keyword overlap + 20% structural + heading bonus - noise
+      const rerankScore = r.score * (0.55 + overlapRatio * 0.25 + structuralBoost * 0.20 + headingDiversityBonus - noisePenalty);
       return { ...r, score: rerankScore };
     });
 
@@ -616,7 +626,9 @@ const NOISE_PATH_PATTERNS = [
   'projects/vibe-web/_confirmed/',
   'projects/vibe-web/docs/',
   'projects/archive/',
+  'projects/intelligent-delegation/',
   'discussions/',
+  'intelligent_ai_delegation',
 ];
 
 /**
@@ -665,6 +677,21 @@ function deduplicateByFile(results: SearchResult[], maxPerFile: number): SearchR
     const count = counts.get(r.chunk.filePath) ?? 0;
     if (count >= maxPerFile) return false;
     counts.set(r.chunk.filePath, count + 1);
+    return true;
+  });
+}
+
+/**
+ * Limit results per filename (basename) across different directories.
+ * e.g., orchestration-workflow.md in claude/, codex/, gemini/ dirs → max N total.
+ */
+function deduplicateByFilename(results: SearchResult[], maxPerFilename: number): SearchResult[] {
+  const counts = new Map<string, number>();
+  return results.filter(r => {
+    const basename = r.chunk.filePath.split('/').pop() ?? r.chunk.filePath;
+    const count = counts.get(basename) ?? 0;
+    if (count >= maxPerFilename) return false;
+    counts.set(basename, count + 1);
     return true;
   });
 }

@@ -41,8 +41,8 @@ description: "범용 설계 디렉터 — 신규 기획 / 기존 분석 / 변경
   /design 이 기획서를 검토해줘 (/submix)  → 3엔진 독립 분석
 
 ■ 도메인 팩
-  현재 지원: generic (기본)
-  추가 가능: game, software, business 등
+  현재 지원: generic (기본), software (소프트웨어 설계)
+  추가 가능: game, business 등
 
 ■ 참조
   프레임워크: skills/design-director/SKILL.md

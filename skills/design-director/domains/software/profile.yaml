@@ -1,0 +1,16 @@
+domain: software
+display_name: "소프트웨어 설계"
+terminology:
+  primary_outcome: "핵심 품질 속성"
+  operating_loop: "요청-처리 흐름"
+  baseline: "기본 요구사항"
+  differentiation: "아키텍처 차별점"
+  target_audience: "사용자/클라이언트"
+  component: "모듈"
+  execution_ready: "코딩 착수 가능"
+context_validation:
+  # 최소 1개 필수 (Phase 4 맥락 검증 무효화 방지)
+  axes: ["아키텍처 원칙", "운영 제약", "보안 요구사항"]
+value_test_override: false
+trust:
+  validated_count: 0
