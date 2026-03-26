@@ -11,6 +11,10 @@ Determine before choosing any team shape:
 - **Parallelism**: are there independent subtasks with disjoint file scopes?
 - **Review need**: does output persist? (if yes, review is required)
 
+### 1.5 Ambiguity Gate
+
+After classification, run the Ambiguity Gate (see sub-command-protocol.md § Ambiguity Gate). If the gate triggers, resolve ambiguity before proceeding to Stage 2 (team planning).
+
 ### Stage 2: CHOOSE TEAM
 
 See `sub-command-protocol.md` for team sizing rules and model allocation. Choose the pattern:

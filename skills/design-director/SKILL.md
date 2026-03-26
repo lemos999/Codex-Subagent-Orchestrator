@@ -65,6 +65,19 @@ value_test_override: false        # true면 heuristics.md의 가치 평가를 VC
 - 범용 에이전트의 게이트 조건은 오버라이드 시에도 유지 (게이트 삭제/완화 금지)
 - 도메인 팩에 없는 Phase는 범용 에이전트 사용
 
+### Domain Pack Trust Profile (S8)
+
+도메인 팩에 Trust Profile 메타데이터를 부여한다:
+
+| 도메인 팩 | validated_projects | 리뷰 깊이 |
+|----------|-------------------|----------|
+| 신규 (0회) | 0 | deep (전체 검증) |
+| 검증 1회+ | 1~2 | standard |
+| 검증 3회+ | 3+ | light (핵심만) |
+
+도메인 팩의 `profile.yaml`에 `trust: { validated_count: N }` 필드를 추가하여 추적.
+신규 도메인 팩은 자동으로 deep 리뷰가 적용된다.
+
 ---
 
 ## 공통 원칙

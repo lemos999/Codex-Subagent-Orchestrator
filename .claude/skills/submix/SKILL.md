@@ -26,6 +26,16 @@ description: 3개 AI 엔진(Claude + Codex/GPT + Gemini)을 혼합 활용하는 
 
 ## 엔진별 특성 및 역할 적합도
 
+### Capability Registry 연동 (S3)
+
+엔진/모델 자동 분담 시 C1 Capability Registry(`config/capabilities/*.yaml`)를 참조한다:
+
+1. 작업 요구사항에서 TaskScorecard 구성 (역할, 필수 차원, 제약)
+2. `CapabilityRegistry.matchEngine()` 호출로 최적 엔진/모델 선택
+3. 실행 계획 표시 시 **엔진 분담 근거**에 Registry 매칭 결과 포함
+
+Registry 미사용 시 아래 정적 테이블을 폴백으로 사용한다.
+
 ### Claude (Task tool 네이티브)
 
 | 강점 | 적합 역할 |
@@ -180,6 +190,16 @@ cat /tmp/prompt.md | npx @google/gemini-cli --yolo
 ## Evidence
 
 혼합 엔진 실행 증거는 `subagent-runs/mixed/<run-name>/`에 저장:
+
+### Hash-Chain Evidence 연동 (S4)
+
+멀티엔진 실행 결과를 해시 체인으로 연결한다:
+
+1. 각 워커 실행 완료 시 `chain-manager.appendEntry()`로 체인에 기록
+2. 다른 엔진의 결과를 검증할 때, 이전 엔진 결과의 `output_hash`를 참조
+3. 최종 run-manifest에 `evidence` 섹션 포함 (chain_index, prev_hash, current_hash, salt)
+
+이를 통해 멀티엔진 실행의 전체 이력이 불변 기록되며, 사후 감사가 가능하다.
 
 ```
 subagent-runs/mixed/<run-name>/

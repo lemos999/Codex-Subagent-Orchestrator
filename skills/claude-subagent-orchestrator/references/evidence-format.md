@@ -190,3 +190,27 @@ When a run fails partially:
 ```
 
 Failed runs still get full evidence. The manifest documents exactly what happened for debugging.
+
+### Hash-Chain Fields (C4)
+
+Run manifest에 다음 optional 필드가 포함될 수 있다:
+
+```json
+{
+  "evidence": {
+    "chain_index": 5,
+    "prev_hash": "<64-char hex>",
+    "current_hash": "<64-char hex>",
+    "salt": "<32-char hex>",
+    "spec_sha256": "<64-char hex>"
+  }
+}
+```
+
+- `chain_index`: 이 run의 체인 내 순번
+- `prev_hash`: 직전 run의 hash ("0"x64 if genesis)
+- `current_hash`: 이 run의 결정적 해시
+- `salt`: 세션 랜덤 salt (재검증에 필요)
+- `spec_sha256`: spec 파일 해시
+
+전체 체인 검증: `--verify-chain` CLI 옵션으로 실행.

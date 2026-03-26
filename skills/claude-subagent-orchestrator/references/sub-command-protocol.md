@@ -13,6 +13,32 @@ This is the single source of truth for task classification, team sizing, and mod
 7. On `modify`: adjust plan per user feedback, re-present, and re-confirm.
 8. On `no`: abort without execution.
 
+## Ambiguity Gate
+
+Before team planning (Stage 2), assess request clarity on 4 dimensions:
+
+| Dimension | Weight | Clear (0) | Ambiguous (0.25) |
+|-----------|--------|-----------|-----------------|
+| Goal | 0.25 | Measurable success condition stated | Vague or missing outcome |
+| Scope | 0.25 | Explicit boundary (files, modules, area) | Open-ended or unbounded |
+| Criteria | 0.25 | Verification method defined | No way to check completion |
+| Constraints | 0.25 | Prohibitions/limits stated or "none" confirmed | Unstated assumptions |
+
+**Ambiguity score** = sum of ambiguous dimensions (0.00 = fully clear, 1.00 = fully ambiguous).
+
+**Risk-based threshold** (requires C6 Risk Level from task type):
+
+| Risk Level | Threshold | Action when exceeded |
+|------------|-----------|---------------------|
+| L1 Fast | — | Gate skipped |
+| L2 Normal | 0.50 | Present clarifying options to user, proceed on choice |
+| L3 Safe | 0.70 | Ask structured questions, block until answered |
+| L4 Strict | 0.85 | Ask structured questions + require explicit user approval |
+
+If no Risk Level is available, default to L2 behavior.
+
+**When gate triggers**: generate one structured question per ambiguous dimension, present to user, and wait for response before proceeding to team planning.
+
 ## Task Classification
 
 | Category | Indicators | Default Pattern |
@@ -62,6 +88,20 @@ Watchdog hooks are optional and add one agent per watched stage. Enable when:
 
 When watchdog is enabled, team size increases by the number of watched stages (typically +1 to +3 agents). The 4-agent-per-`/sub` limit applies to non-watchdog agents only.
 
+## Trust-Aware Review (S2)
+
+워커의 Trust Tier(C5)에 따라 리뷰 강도를 자동 조절한다:
+
+| Trust Tier | 리뷰 수준 | 적용 |
+|------------|----------|------|
+| probation | 전체 diff + 필수 승인 | 새 엔진, 연속 실패 후 |
+| standard | 변경 요약 + 선택적 승인 | 일반 실행 |
+| trusted + L1/L2 | 승인 생략 가능 | 검증된 엔진 + 저위험 작업 |
+
+- Trust Tier는 `TrustRegistry.getTrustTier(engine)`으로 조회
+- L3/L4 작업은 Tier에 무관하게 전체 리뷰 + 승인 강제
+- 워커 실행 후 `recordRun(engine, succeeded, latency, reason, { approved, revised, scopeExited })`로 메트릭 갱신
+
 ## Engine & Model Allocation (Authoritative)
 
 ### Engine Allocation
@@ -83,6 +123,19 @@ If `engine` is omitted, default to `"claude"` (Task tool). See [engine-adapters.
 | `claude` | `haiku`, `sonnet`, `opus` | `sonnet` |
 | `codex` | `gpt-5.4`, `o3`, `o4-mini` | `gpt-5.4` |
 | `gemini` | `gemini-2.5-pro`, `gemini-2.5-flash` | `gemini-2.5-pro` |
+
+### Capability-Aware Model Selection (S1)
+
+When C1 Capability Registry is available (`config/capabilities/*.yaml`), use it for model selection instead of the static table above:
+
+1. Construct a `TaskScorecard` from the classified task:
+   - `role`: from team pattern (implementer/reviewer/fixer/planner)
+   - `requiredDimensions`: infer from task type (e.g., code-gen tasks need high `code-gen` score)
+   - `constraints`: from task requirements (e.g., file write → `required_tag: file-write-capable`)
+2. Call `CapabilityRegistry.matchEngine(scorecard, trustScores)` to get the optimal engine/model.
+3. Record the `MatchResult.reasoning` in the execution plan shown to the user.
+
+If the registry is unavailable or returns no candidates, fall back to the static table above.
 
 ### Model Allocation (`engine: "claude"` default path)
 

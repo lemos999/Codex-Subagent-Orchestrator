@@ -51,6 +51,28 @@ Stage 8: Iterate     — 피드백 반영 → Stage 4로 순환
 
 게이트 미통과 → 해당 Stage 반복. 다음 Stage 진행 금지.
 
+### Stage Handoff Receipt (S9)
+
+Stage 전환(G1~G6) 시 Handoff Receipt를 생성한다:
+
+```markdown
+## Handoff Receipt: Stage N → Stage N+1
+
+| 항목 | 값 |
+|------|-----|
+| From Stage | N |
+| To Stage | N+1 |
+| Timestamp | ISO-8601 |
+| Deliverables Hash | SHA-256 of stage outputs |
+| Gate Verdict | PASS |
+| Pending Items | [목록 또는 "없음"] |
+| Accepting Engine | [다음 Stage 주 엔진] |
+```
+
+- Receipt는 Evidence에 포함 (C4 Hash-Chain 연동)
+- 다음 Stage는 Receipt 없이 시작 불가
+- Receipt의 Deliverables Hash는 `chain-manager.computeWorkerResultsHash()`로 계산
+
 ### Solo Lite 모드 (1인 개발용)
 
 Core 컴포넌트 5개 이하 + 1인 개발 → Solo Lite 자동 적용.
@@ -215,6 +237,24 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 
 **실패 시:** 누락 항목 안내 → 사용자에게 설정 요청
 
+### Stage 0.5: Ambiguity Gate
+
+사용자 요청의 명확성을 4항목으로 점검:
+
+| 항목 | 가중치 | 평가 기준 |
+|------|--------|----------|
+| 목표 (Goal) | 0.25 | 제품의 핵심 가치/문제가 측정 가능한가 |
+| 범위 (Scope) | 0.25 | 기능 경계, 플랫폼, 사용자 범위가 명확한가 |
+| 성공 기준 (Criteria) | 0.25 | MVP 완료 조건이 정의되었나 |
+| 제약 (Constraints) | 0.25 | 기술스택/예산/기간/보안 제약이 명시되었나 |
+
+**모호성 점수** = 모호한 항목 가중치 합산 (0.00~1.00).
+
+- 점수 0.50 이상: 모호한 항목별 구조화 질문 제시, 응답 전까지 Stage 1 진입 금지.
+- 점수 0.50 미만: Stage 1 진행.
+
+이 게이트는 /product의 모든 모드(Full, Solo Lite)에 적용된다.
+
 ### Stage 1: Design (기획/설계)
 
 **실행:** `/design <프로젝트 설명>`
@@ -310,6 +350,22 @@ Step 4: Release      — 배포 + 베타 + 정식 오픈
 4. Gemini 런칭 체크리스트 대조
 5. **Settlement Record 작성** — "누가, 무엇을, 어떤 기준으로 검증했는가" 기록 (Delegation 논문)
 6. **만장일치 PASS → 조기 종료** (Adaptive Coordination)
+
+### Persona Performance Tracker (S10)
+
+페르소나별 성과를 Settlement Record에 추적한다:
+
+| 필드 | 설명 |
+|------|------|
+| persona_id | 페르소나 식별자 |
+| engine | 실행 엔진 |
+| task_duration_min | 작업 소요 시간 (분) |
+| defects_found | 발견된 결함 수 |
+| defects_missed | 다음 Stage에서 발견된 미탐지 결함 수 |
+| reuse_recommendation | 재사용 권장 여부 |
+
+- 3회 이상 `defects_missed > 2`인 페르소나 → 엔진 재배정 또는 프롬프트 개선 플래그
+- C5 Behavioral Metrics와 연동: 페르소나별 approvalRate가 TrustRegistry에 기록됨
 
 **산출물:** 검증 보고서 + Settlement Record
 **게이트 G4:** 보안 PASS + 테스트 PASS + UX PASS
