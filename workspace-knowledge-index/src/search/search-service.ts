@@ -214,7 +214,9 @@ export class SearchService {
     // Re-ranking stage 2: cross-encoder model (fail-soft)
     const ceReranked = await crossEncoderRerank(reranked, normalizedQuery, topK * 2, ftsQuery);
 
-    const finalResults = (ceReranked ?? reranked).slice(0, topK);
+    // Deduplicate: max 3 chunks per file to improve diversity
+    const deduplicated = deduplicateByFile(ceReranked ?? reranked, 3);
+    const finalResults = deduplicated.slice(0, topK);
 
     if (!wantContent) {
       return finalResults.map(r => ({ ...r, chunk: { ...r.chunk, content: '' } }));

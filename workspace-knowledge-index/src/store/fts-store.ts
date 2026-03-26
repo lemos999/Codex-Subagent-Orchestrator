@@ -279,7 +279,7 @@ export class FtsStore implements FtsBackend {
             THEN chunks_meta.file_path || '::' || chunks_meta.content_hash
             ELSE chunks_meta.file_path || ':' || chunks_meta.ordinal
           END AS chunk_id,
-          bm25(chunks_fts) AS score,
+          bm25(chunks_fts, 1.0, 2.5) AS score,
           snippet(chunks_fts, 0, '[', ']', '...', 12) AS content_highlight,
           snippet(chunks_fts, 1, '[', ']', '...', 6) AS heading_highlight
         FROM chunks_fts
