@@ -584,7 +584,16 @@ export class Indexer {
     allImports: ImportInfo[],
   ): void {
     for (const raw of tsResult.chunks) {
+      // Normalize TS parser absolute paths to relative
+      raw.filePath = toRelativePosix(this.projectRoot, raw.filePath);
       allChunks.push(this.enrichChunk(raw, this.projectId));
+    }
+    // Also normalize symbol/import paths
+    for (const sym of tsResult.symbols) {
+      sym.filePath = toRelativePosix(this.projectRoot, sym.filePath);
+    }
+    for (const imp of tsResult.imports) {
+      imp.source = toRelativePosix(this.projectRoot, imp.source);
     }
     allSymbols.push(...tsResult.symbols);
     allImports.push(...tsResult.imports);
@@ -656,11 +665,12 @@ function buildFileSummary(chunks: Chunk[]): string {
     }
   }
 
+  // Keep summaries short to avoid diluting chunk content in embedding
   if (exports.length > 0) {
-    return `exports: ${exports.slice(0, 8).join(', ')}`;
+    return `exports: ${exports.slice(0, 4).join(', ')}`;
   }
   if (headings.length > 0) {
-    return `sections: ${headings.slice(0, 6).join(', ')}`;
+    return `topic: ${headings[0]}`;
   }
   return '';
 }
