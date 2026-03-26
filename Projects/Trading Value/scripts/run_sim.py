@@ -94,9 +94,10 @@ def _sim_log_path(coin_short, letter):
     return str(DATA_DIR / f"sim_log_{prefix}{letter}.jsonl")
 
 
-def _clone_trader(src, symbol, state_file, log_file, exchange):
+def _clone_trader(src, symbol, state_file, log_file, exchange, time_func=None):
     """Clone a PaperTrader for a different coin, sharing model weights."""
     t = PaperTrader.__new__(PaperTrader)
+    t._now = time_func or src._now
     t.model = src.model
     t._is_lstm = src._is_lstm
     if t._is_lstm:
@@ -128,9 +129,10 @@ class SimRunner:
         self._build_models()
 
     def _build_models(self):
-        """Build all 36 model instances, injecting MockExchange."""
+        """Build all 36 model instances, injecting MockExchange + SimClock."""
         eth_sym = "ETH/USDT:USDT"
         eth_traders = {}
+        sim_time = self.clock.now  # inject sim clock
 
         # RL models (ETH first, loads weights)
         for m in RL_MODELS:
@@ -139,6 +141,7 @@ class SimRunner:
                 leverage=10, risk_pct=0.0035, commission_rate=0.0004,
                 state_file=_sim_state_path("ETH", m["name"][0]),
                 log_file=_sim_log_path("ETH", m["name"][0]),
+                time_func=sim_time,
             )
             t.exchange = self.exchange  # inject mock
             eth_traders[m["name"]] = t
@@ -151,6 +154,7 @@ class SimRunner:
                 leverage=10, risk_pct=0.0035, commission_rate=0.0004,
                 state_file=_sim_state_path("ETH", cfg["name"][0]),
                 log_file=_sim_log_path("ETH", cfg["name"][0]),
+                time_func=sim_time,
             )
             t.model = EnsembleTrader(cfg["m1"], cfg["m2"])
             t._is_lstm = False
@@ -167,6 +171,7 @@ class SimRunner:
                 risk_pct=0.005, commission_rate=0.0004,
                 state_file=_sim_state_path("ETH", fvg["name"][0]),
                 log_file=_sim_log_path("ETH", fvg["name"][0]),
+                time_func=sim_time,
             )
             t.exchange = self.exchange
             self.traders.append((fvg["name"], t))
@@ -179,7 +184,7 @@ class SimRunner:
                 clone = _clone_trader(src, sym,
                     _sim_state_path(cs, m["name"][0]),
                     _sim_log_path(cs, m["name"][0]),
-                    self.exchange)
+                    self.exchange, time_func=sim_time)
                 self.traders.append((_display_name(cs, m["name"]), clone))
 
             for cfg in ENSEMBLE_CONFIGS:
@@ -187,7 +192,7 @@ class SimRunner:
                 clone = _clone_trader(src, sym,
                     _sim_state_path(cs, cfg["name"][0]),
                     _sim_log_path(cs, cfg["name"][0]),
-                    self.exchange)
+                    self.exchange, time_func=sim_time)
                 clone.model = src.model
                 clone._is_lstm = False
                 self.traders.append((_display_name(cs, cfg["name"]), clone))
@@ -200,6 +205,7 @@ class SimRunner:
                     risk_pct=0.005, commission_rate=0.0004,
                     state_file=_sim_state_path(cs, fvg["name"][0]),
                     log_file=_sim_log_path(cs, fvg["name"][0]),
+                    time_func=sim_time,
                 )
                 t.exchange = self.exchange
                 self.traders.append((_display_name(cs, fvg["name"]), t))
@@ -217,12 +223,11 @@ class SimRunner:
     def _fast_check_all(self):
         """1-minute fast check for all models."""
         for name, t in self.traders:
-            if t.state.position != 0:
-                try:
-                    t.fast_check()
-                    t._save_state()
-                except Exception:
-                    pass
+            try:
+                t.fast_check()
+                t._save_state()
+            except Exception:
+                pass
 
     def _write_status(self):
         """Write sim status JSON for dashboard."""

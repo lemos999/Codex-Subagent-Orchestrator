@@ -56,6 +56,12 @@ class PaperState:
     peak_balance: float = 10000.0
     max_drawdown: float = 0.0
     trades: list = field(default_factory=list)
+    # Execution engine: signal-execution separation
+    pending_intent: str = ""      # "LONG", "SHORT", "CLOSE", "REVERSE", ""
+    intent_price: float = 0.0     # 30m close price when intent was generated
+    intent_atr: float = 0.0       # ATR at intent time
+    intent_time: str = ""         # when intent was set
+    intent_fills: int = 0         # how many 1-min checks since intent
     # Track A state (with virtual trading)
     track_a: dict = field(default_factory=lambda: {
         "regime": "UNKNOWN", "h1": "UNKNOWN", "m30": "UNKNOWN",
@@ -78,9 +84,18 @@ class PaperTrader:
         commission_rate: float = 0.0004,
         state_file: str = "data/paper_state.json",
         log_file: str = "data/paper_log.jsonl",
+        time_func=None,
     ):
-        from stable_baselines3 import PPO
-        self.model = PPO.load(model_path)
+        self._now = time_func or (lambda: self._now())
+        self._is_lstm = model_path and ("_c_" in model_path or "lstm" in model_path.lower())
+        if self._is_lstm:
+            from sb3_contrib import RecurrentPPO
+            self.model = RecurrentPPO.load(model_path)
+            self._lstm_states = None
+            self._episode_start = np.ones((1,), dtype=bool)
+        else:
+            from stable_baselines3 import PPO
+            self.model = PPO.load(model_path)
         self.symbol = symbol
         self.symbol_short = symbol.replace("/", "").replace(":USDT", "")
         self.leverage = leverage
@@ -90,8 +105,11 @@ class PaperTrader:
         self.log_file = Path(log_file)
 
         # Exchange connection (read-only, no API key needed for public data)
-        self.exchange = ccxt.binance({"options": {"defaultType": "future"}})
-        self.exchange.load_markets()
+        # Shared singleton to avoid MemoryError when running 6 models
+        if not hasattr(PaperTrader, '_shared_exchange'):
+            PaperTrader._shared_exchange = ccxt.binance({"options": {"defaultType": "future"}})
+            PaperTrader._shared_exchange.load_markets()
+        self.exchange = PaperTrader._shared_exchange
 
         # Load or create state
         self.state = self._load_state()
@@ -131,6 +149,11 @@ class PaperTrader:
             "peak_balance": self.state.peak_balance,
             "max_drawdown": self.state.max_drawdown,
             "trades": [asdict(t) for t in self.state.trades[-100:]],  # keep last 100
+            "pending_intent": self.state.pending_intent,
+            "intent_price": self.state.intent_price,
+            "intent_atr": self.state.intent_atr,
+            "intent_time": self.state.intent_time,
+            "intent_fills": self.state.intent_fills,
             "track_a": self.state.track_a,
         }
         with open(self.state_file, "w") as f:
@@ -139,7 +162,7 @@ class PaperTrader:
     def _log(self, event: str, details: dict):
         self.log_file.parent.mkdir(parents=True, exist_ok=True)
         entry = {
-            "time": datetime.now(tz=timezone.utc).isoformat(),
+            "time": self._now().isoformat(),
             "event": event,
             **details,
         }
@@ -402,7 +425,10 @@ class PaperTrader:
             ta["signal"] = f"error: {e}"
 
     def build_observation(self) -> np.ndarray | None:
-        """Build the 25-dim observation vector from live data."""
+        """Build the 33-dim observation vector from live data."""
+        from ..core.indicators import analyze_forward_cloud, compute_donchian_series, detect_swings
+        from ..core.regime import classify_regime
+
         try:
             df_30m = self.fetch_history("30m", 200)
             df_1h = self.fetch_history("1h", 200)
@@ -426,13 +452,14 @@ class PaperTrader:
         # Evaluate Track A with these snapshots
         self._evaluate_track_a(snapshots)
 
-        # Build obs vector (same encoding as rl_env.py)
-        obs = np.full(25, -1.0, dtype=np.float32)
+        # Build obs vector (same encoding as rl_env.py, 33 dims)
+        obs = np.full(33, -1.0, dtype=np.float32)
 
         _CLOUD = {"above": 1.0, "in": 0.0, "below": -1.0}
         _TK = {"bullish": 1.0, "bearish": -1.0}
         _PROF = {"above_va": 1.0, "inside_va": 0.0, "below_va": -1.0}
 
+        # [0-8] Cloud/TK/Profile for H4, H1, M30
         for i, tf in enumerate([Timeframe.H4, Timeframe.H1, Timeframe.M30]):
             if tf in snapshots:
                 s = snapshots[tf]
@@ -440,34 +467,115 @@ class PaperTrader:
                 obs[i * 3 + 1] = _TK.get(str(s.tk_state), 0.0)
                 obs[i * 3 + 2] = _PROF.get(str(s.profile_bias), 0.0)
 
-        # Position info
+        # [9] Position
         obs[9] = float(self.state.position)
+
+        # [10] Unrealized PnL in R units
         if self.state.position != 0 and self.state.entry_price > 0:
             current = snapshots[Timeframe.M30].close
             risk_dist = abs(self.state.entry_price - self.state.stop_price) or 1.0
             unrealized = (current - self.state.entry_price) * self.state.position
             obs[10] = np.clip(unrealized / risk_dist, -5, 5)
 
-        # ATR normalized
+        # [11] ATR normalized
         atr = snapshots[Timeframe.M30].atr
         close = snapshots[Timeframe.M30].close
-        obs[11] = np.clip(atr / close * 100, 0, 5) if close > 0 else 0.0
+        obs[11] = np.clip(atr / close, 0, 5) if close > 0 else 0.0
 
-        # Recent returns (last 5 bars)
-        if len(df_30m) >= 6:
+        # [12-16] Recent 5 bar returns
+        if len(df_30m) >= 6 and atr > 0:
             for j in range(5):
                 idx = len(df_30m) - 5 + j
                 ret = (df_30m.iloc[idx]["close"] - df_30m.iloc[idx - 1]["close"])
-                obs[12 + j] = np.clip(ret / atr if atr > 0 else 0, -5, 5)
+                obs[12 + j] = np.clip(ret / atr, -5, 5)
 
-        # Volume ratio
+        # [17] Distance to nearest zone / ATR
+        if atr > 0:
+            zone_levels = []
+            for s in snapshots.values():
+                if hasattr(s, 'vah') and s.vah > 0: zone_levels.append(s.vah)
+                if hasattr(s, 'val') and s.val > 0: zone_levels.append(s.val)
+                if hasattr(s, 'poc') and s.poc > 0: zone_levels.append(s.poc)
+            if zone_levels:
+                min_dist = min(abs(close - z) for z in zone_levels)
+                obs[17] = np.clip(min_dist / atr, 0, 5)
+
+        # [18] Volume ratio
         vol = snapshots[Timeframe.M30].volume
         vol_sma = snapshots[Timeframe.M30].volume_sma_20
         obs[18] = np.clip(vol / vol_sma if vol_sma > 0 else 1.0, 0, 5)
 
-        # Consecutive losses, time in position
+        # [19] Consecutive losses
         obs[19] = min(self.state.losses, 5) / 5.0
+
+        # [20] Time in position
         obs[20] = min(self.state.bars_held, 48) / 48.0
+
+        # [21-24] Regime encoding
+        _HTF = {"HTF_BULLISH": 1.0, "HTF_NEUTRAL": 0.0, "HTF_BEARISH": -1.0}
+        _H1 = {"H1_BULLISH": 1.0, "H1_NEUTRAL": 0.0, "H1_BEARISH": -1.0}
+        _M30 = {"M30_BULLISH": 1.0, "M30_NEUTRAL": 0.0, "M30_BEARISH": -1.0}
+        _MODE = {"MODE_TREND_LONG": 1.0, "MODE_PULLBACK_LONG": 0.33,
+                 "MODE_REBOUND_SHORT": -0.33, "MODE_NO_TRADE": -1.0}
+
+        if all(tf in snapshots for tf in [Timeframe.H4, Timeframe.H1, Timeframe.M30]):
+            regime = classify_regime(snapshots)
+            if regime is not None:
+                obs[21] = _HTF.get(regime.htf.value, 0.0)
+                obs[22] = _H1.get(regime.h1.value, 0.0)
+                obs[23] = _M30.get(regime.m30.value, 0.0)
+                # Infer mode
+                htf, h1, m30 = regime.htf.value, regime.h1.value, regime.m30.value
+                if htf == "HTF_BULLISH" and h1 == "H1_BULLISH" and m30 == "M30_BULLISH":
+                    obs[24] = _MODE["MODE_TREND_LONG"]
+                elif htf == "HTF_BULLISH" and h1 != "H1_BEARISH":
+                    obs[24] = _MODE["MODE_PULLBACK_LONG"]
+                elif htf == "HTF_BEARISH" and m30 == "M30_BEARISH":
+                    obs[24] = _MODE["MODE_REBOUND_SHORT"]
+                else:
+                    obs[24] = _MODE["MODE_NO_TRADE"]
+
+        # [25-28] Forward cloud twist
+        try:
+            if len(df_30m) >= 78:
+                fca = analyze_forward_cloud(df_30m)
+                if fca is not None:
+                    if fca.twist_detected:
+                        obs[25] = 1.0 if fca.twist_direction == "bullish" else -1.0
+                    else:
+                        obs[25] = 0.0
+                    obs[26] = 1.0 if fca.cloud_rising else (-1.0 if fca.cloud_falling else 0.0)
+                    obs[27] = np.clip(fca.future_cloud_thickness_pct, 0, 5)
+                    if close > fca.future_resistance:
+                        obs[28] = 1.0
+                    elif close < fca.future_support:
+                        obs[28] = -1.0
+                    else:
+                        obs[28] = 0.0
+        except Exception:
+            pass
+
+        # [29-32] Donchian channel + swing features
+        try:
+            if len(df_30m) >= 20 and atr > 0:
+                dc = compute_donchian_series(df_30m, period=20)
+                dc_upper = dc["dc_upper"].iloc[-1]
+                dc_lower = dc["dc_lower"].iloc[-1]
+                dc_range = dc_upper - dc_lower
+                if dc_range > 0:
+                    obs[29] = np.clip((close - dc_lower) / dc_range, -0.5, 1.5)
+
+            if len(df_30m) >= 5 and atr > 0:
+                sh, sl = detect_swings(df_30m, left=2, right=2)
+                if sh and sl:
+                    nearest_high = sh[-1][1]
+                    nearest_low = sl[-1][1]
+                    obs[30] = np.clip(abs(close - nearest_high) / atr, 0, 5)
+                    obs[31] = np.clip(abs(close - nearest_low) / atr, 0, 5)
+                    bars_since = len(df_30m) - 1 - max(sh[-1][0], sl[-1][0])
+                    obs[32] = min(bars_since / 48.0, 1.0)
+        except Exception:
+            pass
 
         return obs
 
@@ -517,7 +625,7 @@ class PaperTrader:
         self.state.stop_price = stop
         self.state.position_qty = qty
         self.state.bars_held = 0
-        self.state.entry_time = datetime.now(tz=timezone.utc).isoformat()
+        self.state.entry_time = self._now().isoformat()
 
         side_str = "LONG" if side == 1 else "SHORT"
         self._log("OPEN", {
@@ -546,7 +654,7 @@ class PaperTrader:
 
         trade = PaperTrade(
             entry_time=self.state.entry_time,
-            exit_time=datetime.now(tz=timezone.utc).isoformat(),
+            exit_time=self._now().isoformat(),
             side="LONG" if self.state.position == 1 else "SHORT",
             entry_price=self.state.entry_price,
             exit_price=price,
@@ -583,18 +691,78 @@ class PaperTrader:
     def fast_check(self) -> None:
         """1-minute fast monitoring between 30m evaluations.
 
-        Three profit-protecting features:
-        1. Real-time stop loss: check current price vs stop every minute
-        2. Trailing profit lock: if unrealized > 2R, move stop to breakeven+1R
-        3. Volatility circuit breaker: if 5m range > 3x ATR, emergency close
+        Four features:
+        1. Pending intent execution: enter at better price (pullback) or timeout
+        2. Real-time stop loss: check current price vs stop every minute
+        3. Trailing profit lock: if unrealized > 2R, move stop to breakeven+1R
+        4. Volatility circuit breaker: if 5m range > 3x ATR, emergency close
         """
-        if self.state.position == 0:
-            return
-
         try:
             ticker = self.exchange.fetch_ticker(self.symbol)
             current = ticker["last"]
         except Exception:
+            return
+
+        # --- 0. Execute pending intent ---
+        if self.state.pending_intent and self.state.position == 0:
+            self.state.intent_fills += 1
+            signal_price = self.state.intent_price
+            atr = self.state.intent_atr or (current * 0.01)
+            intent = self.state.pending_intent  # "LONG" or "SHORT"
+
+            # Entry conditions:
+            # a) Pullback: price moved favorably by 0.1~0.5 ATR from signal
+            # b) Timeout: 15 minutes (15 checks) passed, enter at market
+            # c) Adverse move > 1 ATR: cancel intent (opportunity gone)
+
+            if intent == "LONG":
+                pullback = signal_price - current  # positive = price dropped = good for long
+                adverse = current - signal_price    # positive = price ran away
+            else:  # SHORT
+                pullback = current - signal_price  # positive = price rose = good for short
+                adverse = signal_price - current    # positive = price dropped away
+
+            filled = False
+            reason = ""
+
+            if pullback >= atr * 0.1:
+                # Good pullback - enter now at better price
+                filled = True
+                reason = f"pullback ${pullback:+,.1f} ({pullback/atr:.1f}R)"
+            elif self.state.intent_fills >= 15:
+                # Timeout after 15 minutes - enter at market
+                filled = True
+                reason = f"timeout 15min (price ${current:,.2f})"
+            elif adverse > atr * 1.0:
+                # Price moved too far against us - cancel
+                self._log("INTENT_CANCEL", {
+                    "intent": intent,
+                    "signal_price": signal_price,
+                    "current": current,
+                    "adverse": round(adverse, 2),
+                    "reason": "price moved >1R against signal",
+                })
+                self.state.pending_intent = ""
+                self._save_state()
+                return
+
+            if filled:
+                action = 1 if intent == "LONG" else 2
+                self.execute_action(action, current, atr)
+                self._log("INTENT_FILL", {
+                    "intent": intent,
+                    "signal_price": signal_price,
+                    "fill_price": current,
+                    "improvement": round(pullback, 2),
+                    "reason": reason,
+                    "position": self.state.position,
+                    "balance": round(self.state.balance, 2),
+                })
+                self.state.pending_intent = ""
+                self._save_state()
+            return  # don't run stop checks when not in position
+
+        if self.state.position == 0:
             return
 
         entry = self.state.entry_price
@@ -655,7 +823,14 @@ class PaperTrader:
             pass
 
     def run_once(self) -> bool:
-        """Run one evaluation cycle. Returns True if action was taken."""
+        """Run one 30m evaluation cycle.
+
+        Signal-execution separation:
+        - Model generates intent (LONG/SHORT/CLOSE/REVERSE/HOLD)
+        - Intent is recorded but NOT immediately executed
+        - fast_check() executes at optimal timing within the next 30 minutes
+        - HOLD and CLOSE are still executed immediately (no benefit in delaying)
+        """
         obs = self.build_observation()
         if obs is None:
             return False
@@ -674,25 +849,56 @@ class PaperTrader:
         self.check_stop_loss(high, low, current)
 
         # Get agent action
-        action, _ = self.model.predict(obs, deterministic=True)
+        if self._is_lstm:
+            action, self._lstm_states = self.model.predict(
+                obs, state=self._lstm_states,
+                episode_start=self._episode_start, deterministic=True)
+            self._episode_start = np.zeros((1,), dtype=bool)
+        else:
+            action, _ = self.model.predict(obs, deterministic=True)
         action = int(action)
 
-        # Execute
-        prev_pos = self.state.position
-        self.execute_action(action, current, atr_approx)
-
-        # Save state
-        self._save_state()
-
         ACTION_NAMES = {0: "HOLD", 1: "LONG", 2: "SHORT", 3: "CLOSE", 4: "REVERSE"}
-        if action != 0 or self.state.position != 0:
+        action_name = ACTION_NAMES[action]
+
+        # CLOSE/REVERSE on existing position: execute immediately (exit timing matters less)
+        if action in (3, 4) and self.state.position != 0:
+            self.execute_action(action, current, atr_approx)
+            self.state.pending_intent = ""
+            self._save_state()
             self._log("CYCLE", {
-                "action": ACTION_NAMES[action],
-                "price": current,
+                "action": action_name, "price": current,
+                "position": self.state.position,
+                "balance": round(self.state.balance, 2),
+                "execution": "immediate",
+            })
+            return True
+
+        # LONG/SHORT entry: record as pending intent, execute via fast_check
+        if action in (1, 2) and self.state.position == 0:
+            self.state.pending_intent = action_name
+            self.state.intent_price = current
+            self.state.intent_atr = atr_approx
+            self.state.intent_time = self._now().isoformat()
+            self.state.intent_fills = 0
+            self._save_state()
+            self._log("INTENT", {
+                "action": action_name, "signal_price": current,
+                "atr": round(atr_approx, 2),
+                "message": f"Waiting for better entry (target: pullback within {atr_approx:.0f})",
                 "position": self.state.position,
                 "balance": round(self.state.balance, 2),
             })
+            return True
 
+        # HOLD or no-op
+        if action != 0 or self.state.position != 0:
+            self._log("CYCLE", {
+                "action": action_name, "price": current,
+                "position": self.state.position,
+                "balance": round(self.state.balance, 2),
+            })
+        self._save_state()
         return True
 
     def run_loop(self):
@@ -712,7 +918,7 @@ class PaperTrader:
 
         while True:
             try:
-                now = datetime.now(tz=timezone.utc)
+                now = self._now()
 
                 # --- 30m evaluation: at :00 and :30 ---
                 bar_slot = now.minute // 30  # 0 or 1

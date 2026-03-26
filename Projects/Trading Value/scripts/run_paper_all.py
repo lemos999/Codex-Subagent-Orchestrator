@@ -99,6 +99,7 @@ def _display_name(coin_short: str, model_name: str) -> str:
 def _clone_trader(src: PaperTrader, symbol: str, state_file: str, log_file: str) -> PaperTrader:
     """Create a PaperTrader sharing model weights with src, for a different coin."""
     t = PaperTrader.__new__(PaperTrader)
+    t._now = src._now
     t.model = src.model
     t._is_lstm = src._is_lstm
     if t._is_lstm:
@@ -320,14 +321,14 @@ class MultiPaperTrader:
         """1-minute fast check: stop loss + trailing + circuit breaker for all models."""
         triggered = False
         for name, trader in self.traders:
-            if trader.state.position != 0:
-                prev_pos = trader.state.position
-                prev_bal = trader.state.balance
-                try:
-                    trader.fast_check()
-                    trader._save_state()
-                except Exception:
-                    pass
+            prev_pos = trader.state.position
+            prev_bal = trader.state.balance
+            try:
+                trader.fast_check()
+                trader._save_state()
+            except Exception:
+                pass
+            if prev_pos != 0:
                 if trader.state.position == 0 and prev_pos != 0:
                     delta = trader.state.balance - prev_bal
                     ts = datetime.now(tz=timezone.utc)

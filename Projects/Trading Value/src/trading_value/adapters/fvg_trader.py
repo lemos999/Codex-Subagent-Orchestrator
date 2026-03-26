@@ -87,7 +87,9 @@ class FVGTrader:
         commission_rate: float = 0.0004,
         state_file: str = "data/paper_state_fvg.json",
         log_file: str = "data/paper_log_fvg.jsonl",
+        time_func=None,
     ):
+        self._now = time_func or (lambda: self._now())
         self.anchor_hour = anchor_hour_utc
         self.anchor_minute = anchor_minute_utc
         self.symbol = symbol
@@ -164,7 +166,7 @@ class FVGTrader:
 
     def _log(self, event: str, details: dict):
         self.log_file.parent.mkdir(parents=True, exist_ok=True)
-        entry = {"time": datetime.now(tz=timezone.utc).isoformat(),
+        entry = {"time": self._now().isoformat(),
                  "event": event, **details}
         with open(self.log_file, "a") as f:
             f.write(json.dumps(entry) + "\n")
@@ -260,7 +262,7 @@ class FVGTrader:
 
     def run_once(self):
         """Called every 30 minutes. Advance state machine by ONE phase only."""
-        now = datetime.now(tz=timezone.utc)
+        now = self._now()
         anchor_dt = self._get_anchor_datetime(now)
         anchor_key = self._anchor_key(anchor_dt)
         anchor_end = anchor_dt + timedelta(minutes=15)
@@ -464,7 +466,7 @@ class FVGTrader:
         self.state.stop_price = stop
         self.state.position_qty = qty
         self.state.bars_held = 0
-        self.state.entry_time = datetime.now(tz=timezone.utc).isoformat()
+        self.state.entry_time = self._now().isoformat()
 
         self._fvg["phase"] = PHASE_POSITION
 
@@ -527,7 +529,7 @@ class FVGTrader:
         # Record trade
         trade = FVGTrade(
             entry_time=self.state.entry_time,
-            exit_time=datetime.now(tz=timezone.utc).isoformat(),
+            exit_time=self._now().isoformat(),
             side="LONG" if side == 1 else "SHORT",
             entry_price=entry,
             exit_price=exit_price,
