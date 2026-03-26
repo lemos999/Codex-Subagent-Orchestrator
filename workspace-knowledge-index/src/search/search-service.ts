@@ -115,7 +115,9 @@ export class SearchService {
         throw new Error('Vector search requested but vector backend is not configured');
       }
 
-      const embedding = await this.embeddingProvider.embed(normalizedQuery);
+      // Use vectorQuery (original + English expansion) for richer embedding
+      const vectorSearchQuery = hasKorean && vectorQuery !== normalizedQuery ? vectorQuery : normalizedQuery;
+      const embedding = await this.embeddingProvider.embed(vectorSearchQuery);
       vectorResults = await this.vectorStore.search(embedding, candidateLimit, options.filter);
 
       // For Korean queries: also search with English-expanded query and merge results.
@@ -191,19 +193,23 @@ export class SearchService {
     }
 
     // Merge path boost results for mixed path+content queries
+    // Aggressive boost: filename in query means user explicitly wants that file
     if (pathBoostResults.length > 0) {
       const pathBoostFiles = new Set(pathBoostResults.map(r => r.chunk.filePath));
+      // Force-include all chunks from matched files into results
       for (const pr of pathBoostResults) {
-        const existing = results.find(r => r.chunk.filePath === pr.chunk.filePath);
+        const existing = results.find(r => r.chunk.id === pr.chunk.id);
         if (!existing) {
+          pr.score = Math.max(pr.score, 0.8); // Floor score for explicit path match
           results.push(pr);
         } else {
-          existing.score = Math.min(existing.score * 1.5, 1);
+          existing.score = Math.min(existing.score * 2.0, 1); // Strong boost
         }
       }
+      // Also boost same-file chunks already in results
       for (const r of results) {
-        if (pathBoostFiles.has(r.chunk.filePath) && !pathBoostResults.some(pr => pr.chunk.filePath === r.chunk.filePath && pr.chunk.heading === r.chunk.heading)) {
-          r.score = Math.min(r.score * 1.3, 1);
+        if (pathBoostFiles.has(r.chunk.filePath) && !pathBoostResults.some(pr => pr.chunk.id === r.chunk.id)) {
+          r.score = Math.min(r.score * 1.5, 1);
         }
       }
     }
