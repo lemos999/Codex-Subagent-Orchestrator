@@ -236,7 +236,19 @@ export class Indexer {
         // Clear existing vectors for this project before re-inserting
         await this.vectorStore.rebuild();
 
-        const contents = allChunks.map(c => buildEmbeddingText(c));
+        // Build file-level summaries for Contextual Flat Indexing
+        const fileSummaryMap = new Map<string, string>();
+        const chunksByFile = new Map<string, Chunk[]>();
+        for (const c of allChunks) {
+          const existing = chunksByFile.get(c.filePath) ?? [];
+          existing.push(c);
+          chunksByFile.set(c.filePath, existing);
+        }
+        for (const [fp, fileChunks] of chunksByFile) {
+          fileSummaryMap.set(fp, buildFileSummary(fileChunks));
+        }
+
+        const contents = allChunks.map(c => buildEmbeddingText(c, fileSummaryMap.get(c.filePath)));
         const embeddings = await this.embeddingProvider.batchEmbed(contents);
 
         const chunksWithEmbedding: ChunkWithEmbedding[] = allChunks.map((chunk, i) => ({
@@ -500,7 +512,19 @@ export class Indexer {
     // Embedding generation + vector storage (optional)
     if (this.embeddingProvider && this.vectorStore && allNewChunks.length > 0) {
       try {
-        const contents = allNewChunks.map(c => buildEmbeddingText(c));
+        // Build file summaries for new chunks
+        const incFileSummaryMap = new Map<string, string>();
+        const incChunksByFile = new Map<string, Chunk[]>();
+        for (const c of allNewChunks) {
+          const existing = incChunksByFile.get(c.filePath) ?? [];
+          existing.push(c);
+          incChunksByFile.set(c.filePath, existing);
+        }
+        for (const [fp, fileChunks] of incChunksByFile) {
+          incFileSummaryMap.set(fp, buildFileSummary(fileChunks));
+        }
+
+        const contents = allNewChunks.map(c => buildEmbeddingText(c, incFileSummaryMap.get(c.filePath)));
         const embeddings = await this.embeddingProvider.batchEmbed(contents);
 
         const chunksWithEmbedding: ChunkWithEmbedding[] = allNewChunks.map((chunk, i) => ({
@@ -597,13 +621,46 @@ export class Indexer {
 
 /**
  * Build embedding text with structural context prepended.
- * Format: "file: <path> | section: <heading>\n<content>"
- * This helps the embedding model associate chunks with their file/section context.
+ * Contextual Flat Indexing: enrich each chunk with file-level summary
+ * so the embedding captures both file context and chunk content.
  */
-function buildEmbeddingText(chunk: Chunk): string {
+function buildEmbeddingText(chunk: Chunk, fileSummary?: string): string {
   const parts: string[] = [];
   if (chunk.filePath) parts.push(`file: ${chunk.filePath}`);
+  if (fileSummary) parts.push(fileSummary);
   if (chunk.heading) parts.push(`section: ${chunk.heading}`);
   const prefix = parts.length > 0 ? parts.join(' | ') + '\n' : '';
   return prefix + chunk.content;
+}
+
+/**
+ * Build a file-level summary string from chunks belonging to the same file.
+ * Used as context prefix for Contextual Flat Indexing.
+ */
+function buildFileSummary(chunks: Chunk[]): string {
+  if (chunks.length === 0) return '';
+
+  const exports: string[] = [];
+  const headings: string[] = [];
+
+  for (const c of chunks) {
+    if (c.chunkType === 'function' || c.chunkType === 'class' ||
+        c.chunkType === 'interface' || c.chunkType === 'type' ||
+        c.chunkType === 'enum') {
+      if (c.heading && c.heading !== '<anonymous>') {
+        exports.push(c.heading);
+      }
+    }
+    if (c.chunkType === 'markdown-section' && c.heading) {
+      headings.push(c.heading);
+    }
+  }
+
+  if (exports.length > 0) {
+    return `exports: ${exports.slice(0, 8).join(', ')}`;
+  }
+  if (headings.length > 0) {
+    return `sections: ${headings.slice(0, 6).join(', ')}`;
+  }
+  return '';
 }
