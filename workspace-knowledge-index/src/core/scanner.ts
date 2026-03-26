@@ -21,7 +21,8 @@ const DEFAULT_EXCLUDES = [
   '**/subagent-runs/**',
   '**/subagent-records/**',
   '**/tests/artifacts/**',
-  // Discussion artifacts (keep only .md summaries, exclude raw logs)
+  // Discussion artifacts
+  '**/discussions/**',
   '**/*.prompt.txt',
   '**/*.stdout.log',
   '**/*.stderr.log',
@@ -29,6 +30,18 @@ const DEFAULT_EXCLUDES = [
   '**/wki-context-snapshot.md',
   '**/personas.json',
   '**/auto-personas.md',
+  // Archive/data (not source)
+  '**/Projects/archive/**',
+  '**/Projects/Trading Value/data/**',
+  '**/Projects/vibe-web/node_modules/**',
+  '**/Projects/vibe-web/.next/**',
+  // Generated reports
+  '**/game-design-director/reports/**',
+  // Eval gold sets (self-reference)
+  '**/eval/gold-set-*.json',
+  // Large generated files
+  '**/*.html',
+  '**/package-lock.json',
   // Security: secrets and credentials
   '**/.env',
   '**/.env.*',
