@@ -1,0 +1,40 @@
+# Telegram Digest 설정
+# 이 파일을 config.yaml로 복사한 뒤 api_id, api_hash를 입력하세요.
+# api_id/api_hash는 https://my.telegram.org 에서 발급
+
+telegram:
+  api_id: 0
+  api_hash: ""
+  session_name: "digest_session"
+  deliver_to: "me"  # "me" = 저장된 메시지, 또는 chat_id (정수)
+
+ollama:
+  base_url: "http://localhost:11434"
+  model: "gemma3:4b"
+
+schedule:
+  interval_minutes: 30
+
+# 모니터링할 그룹/채널 (빈 리스트 = 참여한 모든 그룹)
+monitor:
+  include: []   # 예: ["코인 시그널", "주식 토론방"]
+  exclude: []   # 예: ["가족방", "회사"]
+
+# 요약에서 제외할 토픽 키워드
+filter:
+  exclude_topics:
+    - "지진"
+    - "earthquake"
+    - "쇼핑"
+    - "shopping"
+    - "쿠폰"
+    - "coupon"
+    - "할인"
+    - "discount"
+    - "세일"
+    - "sale"
+    - "재난"
+    - "disaster"
+    - "tsunami"
+    - "flood"
+    - "홍수"

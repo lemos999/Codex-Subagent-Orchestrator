@@ -1,0 +1,5 @@
+config.yaml
+*.session
+*.session-journal
+state.json
+__pycache__/
