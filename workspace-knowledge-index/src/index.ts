@@ -21,7 +21,7 @@ import { LanceVectorStore } from './store/vector-store.js';
 import { SearchService } from './search/search-service.js';
 import { createEmbeddingProvider } from './embedding/factory.js';
 
-const COMMANDS = ['init', 'scan', 'index', 'search', 'status', 'rebuild', 'eval', 'mcp'] as const;
+const COMMANDS = ['init', 'scan', 'index', 'search', 'symbols', 'unused-exports', 'chunk-map', 'stale', 'status', 'rebuild', 'eval', 'mcp'] as const;
 type Command = (typeof COMMANDS)[number];
 
 function printUsage(): void {
@@ -33,6 +33,10 @@ Commands:
   scan      Scan files and update file-map.json
   index     Build or update the search index
   search    Search the knowledge index
+  symbols   Search the symbol index (functions, classes, types, etc.)
+  unused-exports  Find exported symbols with no importers (Step 0 dead code check)
+  chunk-map Search chunk boundaries for a file (for precise offset/limit reads)
+  stale     List files changed since last indexing (staleness check)
   status    Show index health and freshness
   rebuild   Rebuild index from scratch
   eval      Evaluate search quality against a gold set
@@ -42,20 +46,36 @@ Run "wki <command> --help" for more information on a command.
 `);
 }
 
-function cmdInit(args: string[]): void {
-  const projectRoot = args[0] ? path.resolve(args[0]) : process.cwd();
+/**
+ * Bootstrap .knowledge/ directory if it does not exist.
+ * Idempotent: returns immediately when the directory is already present.
+ * Creates the directory, generates file-map.json, and captures freshness state.
+ */
+function ensureKnowledgeDir(
+  projectRoot: string,
+  config: ReturnType<typeof loadConfig>,
+  knowledgeDir: string,
+): boolean {
+  if (fs.existsSync(knowledgeDir)) return false; // already exists — no-op
 
-  // 1. Load config
-  const config = loadConfig(projectRoot);
-  const indexRoot = config.storage.index_root; // default: '.knowledge'
-  const knowledgeDir = path.resolve(projectRoot, indexRoot);
-
-  // 2. Create .knowledge/ directory
-  if (!fs.existsSync(knowledgeDir)) {
-    fs.mkdirSync(knowledgeDir, { recursive: true });
+  // Guard: warn if cwd looks wrong (no package.json, no wki config, no .git)
+  const hasProjectMarker =
+    fs.existsSync(path.join(projectRoot, 'package.json')) ||
+    fs.existsSync(path.join(projectRoot, 'wki.config.yaml')) ||
+    fs.existsSync(path.join(projectRoot, 'wki.config.json')) ||
+    fs.existsSync(path.join(projectRoot, '.git'));
+  if (!hasProjectMarker) {
+    console.warn(
+      `[wki] Warning: "${projectRoot}" does not look like a project root (no package.json, wki.config.*, or .git found).\n` +
+      `[wki] Make sure you are running this command from the workspace root directory.`,
+    );
   }
 
-  // 3. Determine exclude patterns from config
+  const indexRoot = config.storage.index_root;
+  console.log(`[wki] ${indexRoot}/ not found — auto-bootstrapping...`);
+
+  fs.mkdirSync(knowledgeDir, { recursive: true });
+
   const excludePatterns: string[] = [];
   for (const proj of config.projects) {
     if (proj.exclude) {
@@ -63,21 +83,44 @@ function cmdInit(args: string[]): void {
     }
   }
 
-  // 4. Generate file map
   const fileMap = new FileMap();
   fileMap.generate(projectRoot, excludePatterns);
+  fileMap.save(path.join(knowledgeDir, 'file-map.json'));
 
-  // 5. Save file-map.json
-  const fileMapPath = path.join(knowledgeDir, 'file-map.json');
-  fileMap.save(fileMapPath);
-
-  // 6. Capture and save freshness state
   const freshness = new FreshnessManager();
   const state = freshness.captureState(projectRoot);
-  const freshnessPath = path.join(knowledgeDir, 'freshness.lock');
-  freshness.save(freshnessPath, state);
+  freshness.save(path.join(knowledgeDir, 'freshness.lock'), state);
 
-  console.log(`Initialized ${indexRoot}/ with ${fileMap.size} files`);
+  console.log(`[wki] Bootstrapped ${indexRoot}/ with ${fileMap.size} files`);
+  return true;
+}
+
+function cmdInit(args: string[]): void {
+  const projectRoot = args[0] ? path.resolve(args[0]) : process.cwd();
+  const config = loadConfig(projectRoot);
+  const indexRoot = config.storage.index_root;
+  const knowledgeDir = path.resolve(projectRoot, indexRoot);
+
+  const wasCreated = ensureKnowledgeDir(projectRoot, config, knowledgeDir);
+  if (!wasCreated) {
+    // Already exists — re-run bootstrap logic to refresh file map
+    const excludePatterns: string[] = [];
+    for (const proj of config.projects) {
+      if (proj.exclude) {
+        excludePatterns.push(...proj.exclude);
+      }
+    }
+
+    const fileMap = new FileMap();
+    fileMap.generate(projectRoot, excludePatterns);
+    fileMap.save(path.join(knowledgeDir, 'file-map.json'));
+
+    const freshness = new FreshnessManager();
+    const state = freshness.captureState(projectRoot);
+    freshness.save(path.join(knowledgeDir, 'freshness.lock'), state);
+
+    console.log(`Reinitialized ${indexRoot}/ with ${fileMap.size} files`);
+  }
 }
 
 function cmdScan(args: string[]): void {
@@ -88,10 +131,7 @@ function cmdScan(args: string[]): void {
   const indexRoot = config.storage.index_root;
   const knowledgeDir = path.resolve(projectRoot, indexRoot);
 
-  if (!fs.existsSync(knowledgeDir)) {
-    console.error(`Error: ${indexRoot}/ does not exist. Run "wki init" first.`);
-    process.exit(1);
-  }
+  ensureKnowledgeDir(projectRoot, config, knowledgeDir);
 
   const lock = new IndexLock(knowledgeDir);
   lock.acquire('scan');
@@ -162,11 +202,8 @@ async function cmdIndex(args: string[]): Promise<void> {
   const indexRoot = config.storage.index_root;
   const knowledgeDir = path.resolve(projectRoot, indexRoot);
 
-  // 2. Check .knowledge/ exists
-  if (!fs.existsSync(knowledgeDir)) {
-    console.error(`Error: ${indexRoot}/ does not exist. Run "wki init" first.`);
-    process.exit(1);
-  }
+  // 2. Ensure .knowledge/ exists (auto-bootstrap if missing)
+  ensureKnowledgeDir(projectRoot, config, knowledgeDir);
 
   const lock = new IndexLock(knowledgeDir);
   lock.acquire('index');
@@ -361,10 +398,7 @@ async function cmdSearch(args: string[]): Promise<void> {
   const indexRoot = config.storage.index_root;
   const knowledgeDir = path.resolve(projectRoot, indexRoot);
 
-  if (!fs.existsSync(knowledgeDir)) {
-    console.error(`Error: ${indexRoot}/ does not exist. Run "wki init" first.`);
-    process.exit(1);
-  }
+  ensureKnowledgeDir(projectRoot, config, knowledgeDir);
 
   const projectId = projectName || (config.projects.length > 0 ? config.projects[0].name : path.basename(projectRoot));
 
@@ -439,6 +473,249 @@ async function cmdSearch(args: string[]): Promise<void> {
 
   // Cleanup
   if (vectorStore) await vectorStore.close();
+  await ftsStore.close();
+}
+
+async function cmdSymbols(args: string[]): Promise<void> {
+  const symbolFlags = ['--top', '--kind', '--file', '--mode', '--output'];
+  const query = firstPositional(args, symbolFlags);
+  if (!query && !args.includes('--kind') && !args.includes('--file')) {
+    console.error('Usage: wki symbols "name" [--top N] [--kind function|class|interface|...] [--file path] [--mode exact|prefix|contains|regex] [--output json|text]');
+    process.exit(1);
+  }
+
+  const topK = parseInt(parseFlag(args, '--top', '20'), 10) || 20;
+  const kind = parseFlag(args, '--kind', '');
+  const filePath = parseFlag(args, '--file', '');
+  const nameMode = parseFlag(args, '--mode', 'contains') as 'exact' | 'prefix' | 'contains' | 'regex';
+  const outputFormat = parseFlag(args, '--output', 'text') as 'json' | 'text';
+  const exportedOnly = args.includes('--exported');
+
+  const projectRoot = process.cwd();
+  const config = loadConfig(projectRoot);
+  const knowledgeDir = path.resolve(projectRoot, config.storage.index_root);
+  const symbolsPath = path.join(knowledgeDir, 'symbols.idx');
+
+  if (!fs.existsSync(symbolsPath)) {
+    console.error('Error: symbols.idx not found. Run "wki index" first.');
+    process.exit(1);
+  }
+
+  const { SymbolSearch } = await import('./search/symbol-search.js');
+  const symbolSearch = new SymbolSearch(symbolsPath);
+
+  const startTime = Date.now();
+  const results = symbolSearch.search({
+    name: query || undefined,
+    nameMode,
+    kind: kind || undefined,
+    exportedOnly,
+    filePath: filePath || undefined,
+    topK,
+  });
+  const durationMs = Date.now() - startTime;
+
+  if (outputFormat === 'json') {
+    const jsonResults = results.map(r => ({
+      name: r.symbol.name,
+      kind: r.symbol.kind,
+      filePath: r.symbol.filePath,
+      startLine: r.symbol.startLine,
+      endLine: r.symbol.endLine,
+      exported: r.symbol.exported,
+      signature: r.symbol.signature,
+      score: r.score,
+    }));
+    console.log(JSON.stringify(jsonResults, null, 2));
+  } else {
+    console.log(`\nSymbol search${query ? ` for "${query}"` : ''} (${results.length} results, ${durationMs}ms):\n`);
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
+      const exp = r.symbol.exported ? 'exported' : 'internal';
+      const sig = r.symbol.signature ? ` ${r.symbol.signature}` : '';
+      console.log(`${(i + 1).toString().padStart(3)}. [${r.score.toFixed(2)}] ${r.symbol.kind} ${r.symbol.name}${sig}  (${exp})`);
+      console.log(`     ${r.symbol.filePath}:${r.symbol.startLine}-${r.symbol.endLine}`);
+    }
+  }
+}
+
+async function cmdUnusedExports(args: string[]): Promise<void> {
+  const ueFlags = ['--file', '--min-loc', '--output'];
+  const filePath = parseFlag(args, '--file', '');
+  const minLoc = parseInt(parseFlag(args, '--min-loc', '0'), 10) || 0;
+  const outputFormat = parseFlag(args, '--output', 'text') as 'json' | 'text';
+
+  const projectRoot = process.cwd();
+  const config = loadConfig(projectRoot);
+  const knowledgeDir = path.resolve(projectRoot, config.storage.index_root);
+  const symbolsPath = path.join(knowledgeDir, 'symbols.idx');
+  const depsPath = path.join(knowledgeDir, 'deps.graph');
+
+  if (!fs.existsSync(symbolsPath)) {
+    console.error('Error: symbols.idx not found. Run "wki index" first.');
+    process.exit(1);
+  }
+
+  const { analyzeUnusedExports } = await import('./analysis/unused-exports.js');
+  const report = analyzeUnusedExports(symbolsPath, depsPath, {
+    filePath: filePath || undefined,
+    minLoc: minLoc || undefined,
+  });
+
+  if (outputFormat === 'json') {
+    console.log(JSON.stringify(report, null, 2));
+  } else {
+    console.log(`\nUnused Exports Report (${report.durationMs}ms)`);
+    console.log(`  Total exported symbols: ${report.totalExported}`);
+    console.log(`  Orphan files (no importers): ${report.orphanFiles.length}`);
+    console.log(`  Unused exports: ${report.unused.length}\n`);
+
+    if (report.orphanFiles.length > 0) {
+      console.log('Orphan files:');
+      for (const f of report.orphanFiles.slice(0, 30)) {
+        console.log(`  ${f}`);
+      }
+      if (report.orphanFiles.length > 30) {
+        console.log(`  ... and ${report.orphanFiles.length - 30} more`);
+      }
+      console.log();
+    }
+
+    if (report.unused.length > 0) {
+      console.log('Unused exports:');
+      for (const entry of report.unused.slice(0, 50)) {
+        const s = entry.symbol;
+        console.log(`  ${s.kind} ${s.name}  ${s.filePath}:${s.startLine}  [${entry.reason}]`);
+      }
+      if (report.unused.length > 50) {
+        console.log(`  ... and ${report.unused.length - 50} more`);
+      }
+    }
+  }
+}
+
+function cmdStale(args: string[]): void {
+  const outputFormat = parseFlag(args, '--output', 'text') as 'json' | 'text';
+
+  const projectRoot = process.cwd();
+  const config = loadConfig(projectRoot);
+  const knowledgeDir = path.resolve(projectRoot, config.storage.index_root);
+  const freshnessPath = path.join(knowledgeDir, 'freshness.lock');
+
+  if (!fs.existsSync(freshnessPath)) {
+    console.error('Error: freshness.lock not found. Run "wki index" first.');
+    process.exit(1);
+  }
+
+  const freshness = new FreshnessManager();
+  const prevState = freshness.load(freshnessPath);
+  if (!prevState) {
+    console.error('Error: Could not load freshness state.');
+    process.exit(1);
+  }
+
+  const changes = freshness.detectChanges(prevState, projectRoot);
+  const totalChanges =
+    changes.added.length +
+    changes.modified.length +
+    changes.deleted.length +
+    changes.renamed.length;
+
+  if (outputFormat === 'json') {
+    console.log(JSON.stringify({
+      stale: totalChanges > 0,
+      lastIndexed: prevState.indexed_at,
+      changes: {
+        added: changes.added,
+        modified: changes.modified,
+        deleted: changes.deleted,
+        renamed: changes.renamed,
+      },
+      totalChanges,
+    }, null, 2));
+  } else {
+    if (totalChanges === 0) {
+      console.log(`Index is fresh. Last indexed: ${prevState.indexed_at}`);
+    } else {
+      console.log(`\nIndex is STALE (${totalChanges} changes since ${prevState.indexed_at}):\n`);
+      if (changes.added.length > 0) {
+        console.log(`  Added (${changes.added.length}):`);
+        for (const f of changes.added.slice(0, 20)) console.log(`    + ${f}`);
+        if (changes.added.length > 20) console.log(`    ... and ${changes.added.length - 20} more`);
+      }
+      if (changes.modified.length > 0) {
+        console.log(`  Modified (${changes.modified.length}):`);
+        for (const f of changes.modified.slice(0, 20)) console.log(`    ~ ${f}`);
+        if (changes.modified.length > 20) console.log(`    ... and ${changes.modified.length - 20} more`);
+      }
+      if (changes.deleted.length > 0) {
+        console.log(`  Deleted (${changes.deleted.length}):`);
+        for (const f of changes.deleted.slice(0, 20)) console.log(`    - ${f}`);
+        if (changes.deleted.length > 20) console.log(`    ... and ${changes.deleted.length - 20} more`);
+      }
+      if (changes.renamed.length > 0) {
+        console.log(`  Renamed (${changes.renamed.length}):`);
+        for (const r of changes.renamed.slice(0, 10)) console.log(`    ${r.from} → ${r.to}`);
+      }
+      console.log('\nRun "wki index" to update.');
+    }
+  }
+}
+
+async function cmdChunkMap(args: string[]): Promise<void> {
+  const cmFlags = ['--output'];
+  const fileQuery = firstPositional(args, cmFlags);
+  if (!fileQuery) {
+    console.error('Usage: wki chunk-map "file-path-substring" [--output json|text]');
+    process.exit(1);
+  }
+
+  const outputFormat = parseFlag(args, '--output', 'text') as 'json' | 'text';
+
+  const projectRoot = process.cwd();
+  const config = loadConfig(projectRoot);
+  const knowledgeDir = path.resolve(projectRoot, config.storage.index_root);
+  const projectId = config.projects.length > 0 ? config.projects[0].name : path.basename(projectRoot);
+  const ftsDbPath = resolveFtsDbPath(config, knowledgeDir, projectId);
+
+  if (!fs.existsSync(ftsDbPath)) {
+    console.error('Error: FTS database not found. Run "wki index" first.');
+    process.exit(1);
+  }
+
+  const ftsStore = new FtsStore(ftsDbPath);
+  const chunkStore = new ChunkStore(ftsStore.getDatabase());
+
+  const results = chunkStore.getChunkMapByPathLike(fileQuery);
+
+  if (outputFormat === 'json') {
+    console.log(JSON.stringify(results, null, 2));
+  } else {
+    if (results.length === 0) {
+      console.log(`No chunks found for "${fileQuery}".`);
+    } else {
+      // Group by file
+      const grouped = new Map<string, typeof results>();
+      for (const r of results) {
+        let group = grouped.get(r.filePath);
+        if (!group) {
+          group = [];
+          grouped.set(r.filePath, group);
+        }
+        group.push(r);
+      }
+
+      for (const [fp, chunks] of grouped) {
+        const totalLines = chunks.length > 0 ? chunks[chunks.length - 1].endLine : 0;
+        console.log(`\n${fp} (${chunks.length} chunks, ~${totalLines} lines):`);
+        for (const c of chunks) {
+          const heading = c.heading ? ` "${c.heading}"` : '';
+          console.log(`  #${c.ordinal}  L${c.startLine}-${c.endLine}  ${c.chunkType}${heading}  (~${c.tokenCount} tokens)`);
+        }
+      }
+    }
+  }
+
   await ftsStore.close();
 }
 
@@ -544,10 +821,7 @@ async function cmdRebuild(args: string[]): Promise<void> {
   const indexRoot = config.storage.index_root;
   const knowledgeDir = path.resolve(projectRoot, indexRoot);
 
-  if (!fs.existsSync(knowledgeDir)) {
-    console.error(`Error: ${indexRoot}/ does not exist. Run "wki init" first.`);
-    process.exit(1);
-  }
+  ensureKnowledgeDir(projectRoot, config, knowledgeDir);
 
   const lock = new IndexLock(knowledgeDir);
   lock.acquire('rebuild');
@@ -714,6 +988,18 @@ async function handleCommand(command: Command, args: string[]): Promise<void> {
       break;
     case 'search':
       await cmdSearch(args);
+      break;
+    case 'symbols':
+      await cmdSymbols(args);
+      break;
+    case 'unused-exports':
+      await cmdUnusedExports(args);
+      break;
+    case 'chunk-map':
+      await cmdChunkMap(args);
+      break;
+    case 'stale':
+      cmdStale(args);
       break;
     case 'status':
       await cmdStatus(args);
