@@ -255,8 +255,8 @@ subagent-runs/mixed/<run-name>/
 
 In a multi-engine environment, "stuck" comes in two forms: a single engine fails, or engines produce conflicting results.
 
-- **Engine swap is a dimension shift**: If Codex fails 3 times, do not repeat the same prompt. **Try the same task on a different engine**, or restructure the task itself. Engine swap is not fallback — it is a new perspective.
+- **Engine swap is a dimension shift**: If Codex fails 3 times, do not repeat the same prompt. **Try the same task on a different engine**, or restructure the task itself. Engine swap is not a fallback — it is a new perspective.
 - **Conflict is information**: When engines disagree, ask **"why do they differ?"** before "which is correct?" Identify whether the cause is differing premises, differing context, or differing capabilities.
-- **Premise inversion**: Question the orchestrator's assumption that "this task suits Codex." The static assignment matrix is a guide, not law — **actual results override the matrix**.
+- **Premise inversion**: Question the orchestrator's assumption that "this task suits Codex." The static assignment matrix is guidance, not law — **actual results override the matrix**.
 - **"Impossible" is a forbidden word**: No engine may return "impossible" as a final conclusion. Replace with **"not yet solved with this engine/approach"** — propose the next dimension.
 - **Compose partial successes**: If three engines each achieve 70%, **selectively combine their successful parts**. Do not wait for one perfect result from a single engine.

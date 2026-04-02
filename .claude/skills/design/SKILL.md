@@ -112,7 +112,7 @@ The core virtues of design across every domain are the same: **clarity, consiste
 ### Pre-Work: Resolve Design Debt First
 
 - Before adding new components to an existing design document, **clean up abandoned decisions, deleted component references, and outdated constraints first**. Dead references in design docs are as harmful as dead code.
-- No single Phase designs **more than 5 components simultaneously**. When exceeded, split workers via `/sub`. Since invariant #5 already forbids skipping Phase boundaries, focus on scope control within each Phase.
+- No single Phase designs **more than 5 components simultaneously**. When exceeded, split workers via `/sub`. Since the invariant "앞 Phase 미확정 → 다음 Phase 금지" already forbids skipping Phase boundaries, focus on scope control within each Phase.
 
 ### Design Quality: Do Not Pass What a Principal Architect Would Reject
 
