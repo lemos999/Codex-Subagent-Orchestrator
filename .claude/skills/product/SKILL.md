@@ -102,7 +102,7 @@ Stage 0~8 순차 진행. 각 게이트에서 사용자 승인. Solo Lite는 4단
 4. 베타 먼저 — 최소 기반에서 빠르게 검증
 5. Codex 결과는 반드시 `git diff` 검증
 6. 깊이 > 길이 — 핵심 판단, 장문 억제
-5. Evidence 필수
+7. Evidence 필수
 
 ## Production Engineering Discipline
 
