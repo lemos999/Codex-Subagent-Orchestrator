@@ -227,26 +227,36 @@ subagent-runs/mixed/<run-name>/
 
 ## Multi-Engine Discipline
 
-`/submix`는 3개 엔진의 강점을 조합하되, **신뢰 경계를 넘는 위임**이라는 본질을 잊지 않는다. 외부 엔진은 도구 접근이 없고 stdout만 반환하므로, Claude 오케스트레이터의 검증 책임이 `/sub`보다 무겁다.
+`/submix` combines three engines' strengths, but never forgets the essence: **delegation across trust boundaries**. External engines have no tool access and return only stdout, so the Claude orchestrator's verification burden is heavier than in `/sub`.
 
-### 착수 전: 엔진 경계를 의식하라
+### Pre-Work: Be Aware of Engine Boundaries
 
-- 300LOC 초과 파일 리팩터 시 **dead code 제거를 별도 커밋**으로 선행한다. 외부 엔진에 불필요한 맥락을 넘기면 토큰 낭비이자 오류 원인이다.
-- 하나의 워커가 5파일을 초과하지 않는다. 외부 엔진(Codex/Gemini)은 상태를 유지하지 못하므로 **작업 범위가 작을수록 정확도가 올라간다**.
+- Before refactoring files >300 LOC, **remove dead code in a separate commit**. Passing unnecessary context to external engines wastes tokens and introduces errors.
+- No single worker exceeds 5 files. External engines (Codex/Gemini) cannot maintain state, so **smaller scope means higher accuracy**.
 
-### 품질: 외부 산출물을 맹신하지 마라
+### Quality: Do Not Blindly Trust External Output
 
-- 모든 엔진의 산출물은 **시니어 리뷰 기준**으로 평가한다. "GPT가 생성한 코드"라는 이유로 면제되지 않는다.
-- Codex/Gemini의 stdout 산출물을 파일에 반영하기 전에, Claude가 **tsc + eslint 검증**을 수행한다. 외부 엔진은 프로젝트의 타입 체계를 모른다 — 반드시 Claude가 검증 게이트를 지킨다.
-- 아키텍처 결함, 상태 중복, 패턴 불일치를 발견하면 엔진 불문하고 수정한다.
+- All engine outputs are evaluated against **senior review standards**. "GPT generated it" grants no exemption.
+- Before applying Codex/Gemini stdout to files, Claude **runs tsc + eslint verification**. External engines are unaware of the project's type system — Claude MUST guard the verification gate.
+- Fix architectural flaws, duplicated state, and pattern inconsistencies regardless of which engine produced them.
 
-### 컨텍스트: 엔진마다 기억이 다르다
+### Context: Each Engine Has Different Memory
 
-- Claude 워커: 편집 전 대상 파일 재읽기. 500LOC 초과는 분할 읽기. 검색 결과 truncation 의심 시 범위를 좁혀 재실행.
-- 외부 엔진: 프롬프트에 넘기는 맥락이 전부다. **필요한 맥락만 정확히, 과하지 않게** 전달한다. 프롬프트가 길어질수록 외부 엔진의 집중력은 떨어진다.
-- 5파일 초과 작업은 **워커를 분할**한다 — 엔진 종류를 불문하고.
+- Claude workers: re-read target files before editing. Chunk-read files >500 LOC. Re-run searches with narrower scope when truncation is suspected.
+- External engines: the prompt is their entire context. **Pass exactly what's needed, nothing more.** The longer the prompt, the worse the external engine's focus.
+- Split workers when a task exceeds 5 files — regardless of engine type.
 
-### 편집: 반영 확인은 오케스트레이터의 의무
+### Edit Safety: Verification Is the Orchestrator's Duty
 
-- 외부 엔진 산출물을 파일에 반영한 후 **반드시 재읽기로 반영 확인**. Edit tool의 silent failure에 대비.
-- 이름 변경 시 6가지 패턴을 각각 별도 검색한다: 직접 호출, 타입 참조, 문자열 리터럴, 동적 import, re-export, 테스트/mock. 외부 엔진은 이 검색을 대신해줄 수 없다.
+- After applying external engine output to files, **always re-read to confirm**. Guard against Edit tool silent failures.
+- When renaming, search each of the 6 patterns separately: direct calls, type references, string literals, dynamic imports, re-exports, tests/mocks. External engines cannot perform this search for you.
+
+### Breakthrough Protocol: When an Engine Is Stuck
+
+In a multi-engine environment, "stuck" comes in two forms: a single engine fails, or engines produce conflicting results.
+
+- **Engine swap is a dimension shift**: If Codex fails 3 times, do not repeat the same prompt. **Try the same task on a different engine**, or restructure the task itself. Engine swap is not fallback — it is a new perspective.
+- **Conflict is information**: When engines disagree, ask **"why do they differ?"** before "which is correct?" Identify whether the cause is differing premises, differing context, or differing capabilities.
+- **Premise inversion**: Question the orchestrator's assumption that "this task suits Codex." The static assignment matrix is a guide, not law — **actual results override the matrix**.
+- **"Impossible" is a forbidden word**: No engine may return "impossible" as a final conclusion. Replace with **"not yet solved with this engine/approach"** — propose the next dimension.
+- **Compose partial successes**: If three engines each achieve 70%, **selectively combine their successful parts**. Do not wait for one perfect result from a single engine.

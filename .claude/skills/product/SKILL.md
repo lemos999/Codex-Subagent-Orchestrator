@@ -106,26 +106,36 @@ Stage 0~8 순차 진행. 각 게이트에서 사용자 승인. Solo Lite는 4단
 
 ## Production Engineering Discipline
 
-`/product`는 실제 사용자에게 배포되는 소프트웨어를 만든다. "돌아가면 됐다"가 아니라 **"프로덕션에 올려도 되는가"**가 기준이다.
+The standard is not "does it run?" but **"is it production-ready?"** Every worker and every Stage operates under this bar.
 
-### Stage 진입 전: 기반 정리
+### Pre-Work: Clean the Foundation
 
-- 기존 코드 위에 구현할 때, 300LOC 초과 파일은 **dead code 정리를 별도 커밋**으로 선행한다. 기술 부채 위에 기능을 쌓으면 Stage 5(Verify)에서 돌아온다.
-- 각 Stage 내 구현은 **5파일 이내의 Phase 단위**로 쪼갠다. Phase 완료 → 검증 → 승인 후 다음 Phase. Stage 자체가 이미 phased이므로, Stage 안에서 또 한 번에 다 하려는 유혹을 경계한다.
+- When building on existing code, **remove dead code from files >300 LOC in a separate commit first**. Stacking features on tech debt means returning from Stage 5 (Verify).
+- Within each Stage, break implementation into **phases of ≤5 files**. Complete a phase → verify → approve → next phase. Stages are already phased, so resist the temptation to do everything at once within a Stage.
 
-### 코드 품질: Gate가 곧 검증이다
+### Quality: The Gate Is the Verification
 
-- DEVELOPMENT-BIBLE 준수는 선택이 아니다. 아키텍처 결함, 상태 중복, 패턴 불일치 — **시니어 리뷰에서 리젝트될 코드는 Gate를 통과시키지 않는다**.
-- 모든 구현 완료 보고 전 `tsc --noEmit` + `eslint` 실행. Gate G4(리뷰 통과)는 이 검증을 전제한다. 타입체커 미설정 프로젝트는 그 사실을 Stage 0(Preflight)에서 명시한다.
-- Codex가 생성한 코드도 예외 없다 — 반드시 `git diff` + 타입/린트 검증.
+- DEVELOPMENT-BIBLE compliance is not optional. Architectural flaws, duplicated state, inconsistent patterns — **code that a senior reviewer would reject does not pass the Gate**.
+- Run `tsc --noEmit` + `eslint` before reporting any implementation complete. Gate G4 (review pass) presupposes this verification. If no type-checker is configured, state that fact in Stage 0 (Preflight).
+- Codex-generated code gets no exemption — always `git diff` + type/lint verify.
 
-### 컨텍스트: Stage를 넘으면 기억이 흐려진다
+### Context: Memory Fades Across Stages
 
-- Stage 전환 시 또는 10+ 메시지 후, **편집 대상 파일을 반드시 재읽기**한다. Stage 3에서 읽은 파일이 Stage 4에서도 같다고 가정하지 않는다.
-- 500LOC 초과 파일은 분할 읽기. 검색 결과가 의심스럽게 적으면 범위를 좁혀 재실행.
-- 5파일 초과 구현은 **병렬 워커로 분산** — `/submix`가 이를 자동으로 처리하되, 단일 워커에 과적하지 않는다.
+- On Stage transitions or after 10+ messages, **re-read target files before editing**. Do not assume a file read in Stage 3 is unchanged in Stage 4.
+- Chunk-read files >500 LOC. Re-run searches with narrower scope when results look suspiciously sparse.
+- Distribute implementations across **parallel workers** when >5 files — `/submix` handles this automatically, but never overload a single worker.
 
-### 편집 안전: 배포될 코드에 silent failure는 없어야 한다
+### Edit Safety: No Silent Failures in Shipped Code
 
-- Edit 후 **재읽기로 반영 확인**. 3회 편집마다 검증 읽기. 프로덕션 코드에서 "편집이 적용된 줄 알았다"는 사고다.
-- 리네이밍 시 6가지 패턴 별도 검색: 직접 호출, 타입 참조, 문자열 리터럴, 동적 import, re-export, 테스트/mock. 하나라도 빠지면 런타임에 터진다.
+- **Re-read after every edit** to confirm it applied. Verification read every 3 edits. "I thought the edit landed" is a production incident.
+- When renaming, search 6 patterns separately: direct calls, type references, string literals, dynamic imports, re-exports, tests/mocks. Missing even one means a runtime crash.
+
+### Breakthrough Protocol: When a Stage Is Stuck
+
+In production software, "this can't be done" is the most expensive sentence. The moment it appears is where real engineering begins.
+
+- **Gate failure is data**: If a Gate fails, record **"This Gate tells us:"** instead of "FAIL." The failing check points precisely to the weakness in the design.
+- **Stage repetition is a limit signal**: If the same Stage fails 3+ times, do not retry the implementation — **re-examine the previous Stage's design**. Repeated failures in Stage 4 mean suspecting Stage 1's design. Shift one level up.
+- **Invert your tech-choice premises**: If "this library can't do it" appears 3 times, list 3 premises behind the library choice and try the opposite of each. The framework may be the constraint.
+- **"Impossible" is a forbidden word**: In production there is no impossible — only **"not yet solved with this architecture/stack/approach."** Propose the next dimension and execute.
+- **Partial deploy beats no deploy**: Waiting for 100% completion and never reaching Stage 6 is worse than beta-deploying core features only — this aligns with invariant #4 (beta first).

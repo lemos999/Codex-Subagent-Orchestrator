@@ -103,25 +103,35 @@ description: "게임 기획 디렉터 — 새 게임 기획 / 기획서 분석 /
 
 ## Design Craft Discipline
 
-`/gdd`는 게임의 재미를 설계한다. 기획서는 코드가 아니지만, **설계의 내적 일관성**은 코드의 타입 안전성만큼 중요하다.
+Game design documents are not code, but **internal consistency of design** is as critical as type safety in code.
 
-### 착수 전: 기존 설계를 먼저 정리하라
+### Pre-Work: Clean Existing Design First
 
-- 기존 기획서에 새 시스템을 추가하기 전에, **사용하지 않는 시스템 참조, 삭제된 메커닉 언급, 오래된 수치**를 먼저 정리한다. Dead design은 dead code와 같다.
-- Phase를 뛰어넘지 않는다. Phase 1~3은 대화형이고, 3.5~5는 자동화 가능하지만, **하나의 Phase에서 5개를 초과하는 시스템을 동시에 설계하지 않는다**. 초과 시 `/sub`로 워커를 분할한다.
+- Before adding a new system to an existing GDD, **clean up unused system references, deleted mechanic mentions, and outdated numbers first**. Dead design is dead code.
+- Never skip Phases. Phases 1–3 are interactive, 3.5–5 can be automated, but **no single Phase designs more than 5 systems simultaneously**. When exceeded, split workers via `/sub`.
 
-### 기획 품질: 리드 디자이너가 리젝트할 기획을 통과시키지 마라
+### Design Quality: Do Not Pass What a Lead Designer Would Reject
 
-- "일단 넣어보자"는 기획이 아니다. 모든 시스템은 **DNA(핵심 재미)와의 연결고리**가 명확해야 한다. 연결이 약하면 제거하거나 강화한다.
-- Phase 4(재귀 검증)는 형식적 통과가 아니다. 수치 모순, 시스템 간 충돌, 플레이어 경험 단절 — **내적 불일치를 모두 잡아낸다**. 검증 없이 Phase 5(문서 생성)로 넘어가지 않는다.
+- "Let's just add it and see" is not design. Every system MUST have a **clear link to the DNA (core fun)**. If the link is weak, remove or strengthen it.
+- Phase 4 (recursive verification) is not a rubber stamp. Numeric contradictions, inter-system conflicts, player experience gaps — **catch all internal inconsistencies**. Do not proceed to Phase 5 (document generation) without verification.
 
-### 맥락: 프레임워크 문서는 크다
+### Context: The Framework Document Is Large
 
-- 프레임워크 원본은 2269줄이다. **필요한 섹션만 offset/limit으로 읽는다**. 전체를 한 번에 읽었다고 가정하지 않는다.
-- 10+ 메시지 후 기획서 수정 시, **반드시 해당 섹션을 재읽기**한다. Phase 1에서 확정한 DNA가 Phase 3에서 흐려지는 것은 컨텍스트 붕괴의 전형이다.
-- 교차 검증(`/sub`)에 5개 초과 시스템이 관련되면 **워커를 분할**한다.
+- The framework source is 2,269 lines. **Read only the needed sections with offset/limit**. Never assume a single read captured the whole thing.
+- After 10+ messages, **re-read the relevant section before editing the GDD**. DNA confirmed in Phase 1 fading by Phase 3 is the textbook case of context decay.
+- When cross-validation (`/sub`) involves >5 systems, **split workers**.
 
-### 편집 안전: 기획서 수정도 검증한다
+### Edit Safety: GDD Edits Require Verification Too
 
-- 기획서 파일 편집 후 **재읽기로 변경 반영 확인**. Edit tool은 기획서든 코드든 동일하게 silent failure한다.
-- 시스템명, 스탯명, 메커닉명 변경 시 — 기획서 내 모든 참조를 빠짐없이 수정한다. **수치 테이블, 시스템 간 참조, 예시 시나리오, 밸런스 시트** 각각을 별도 검색한다.
+- **Re-read after editing** GDD files to confirm changes applied. Edit tool fails silently on design docs just as on code.
+- When renaming system names, stat names, or mechanic names — update all references exhaustively. **Search numeric tables, inter-system references, example scenarios, and balance sheets separately**.
+
+### Breakthrough Protocol: When the Design Is Stuck
+
+The most common block in game design is "it's not fun and I don't know how to fix it." Tweaking numbers is repeating the same dimension — you must change the structure of fun.
+
+- **Repetition detection**: If you've tuned the same system's numbers (damage, cooldown, probability) 3+ times, stop. **The structure, not the numbers, is the problem.** Ask again: "What choice does this system give the player?"
+- **Return to DNA**: When stuck, re-read Phase 1's DNA (core fun). Check how strongly the stuck system connects to it. **If the link is weak, don't fix the system — redesign its connection to DNA.**
+- **Premise inversion**: "Combat must be real-time." "Inventory must be limited." — List 3 design premises and imagine the opposite. The premise itself may be the wall caging the fun.
+- **Failed systems are data**: Annotate every cut system with **"This system taught us:"** Why it wasn't fun is the design clue for the next system.
+- **"Can't work in this genre" is a forbidden phrase**: Genre conventions are starting points, not constraints. Replace with "a combination not yet tried in this genre" and explore the possibility space.

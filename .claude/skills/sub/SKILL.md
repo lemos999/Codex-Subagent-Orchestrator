@@ -41,25 +41,35 @@ Claude 단독 서브에이전트 오케스트레이션. 모든 워커가 Claude 
 
 ## Orchestrator & Worker Discipline
 
-`/sub`는 위임의 기술이다. 위임은 신뢰가 아니라 **검증 가능한 계약**이다. 오케스트레이터와 모든 워커는 아래 규율을 따른다.
+Delegation is not trust — it is a **verifiable contract**. Both the orchestrator and every worker MUST follow this discipline.
 
-### 착수 전: 정리 먼저
+### Pre-Work: Clean Before You Build
 
-- 워커가 300LOC 초과 파일을 리팩터해야 한다면, **dead code 제거를 별도 커밋**으로 먼저 수행한다. 잔해 위에 짓지 않는다.
-- 하나의 워커가 5파일을 초과하여 수정하지 않는다. 초과 시 오케스트레이터가 **워커를 분할**한다 — 이것이 swarming의 본질이다.
+- When a worker must refactor a file >300 LOC, **remove dead code in a separate commit first**. Do not build on rubble.
+- No single worker touches more than 5 files. When exceeded, the orchestrator **splits workers** — this is the essence of swarming.
 
-### 품질: 적당히가 아니라 제대로
+### Quality: Good Enough Is Not Enough
 
-- 워커는 "돌아가는 코드"가 아니라 **시니어 리뷰를 통과할 코드**를 작성한다. 아키텍처 결함, 상태 중복, 패턴 불일치를 발견하면 적극 수정한다.
-- **워커는 완료를 선언하기 전에 반드시 `tsc --noEmit` + `eslint`를 실행**하고 모든 에러를 수정한다. 타입체커 미설정 시 그 사실을 명시한다. 검증 없는 완료 보고는 거짓 보고다.
+- Workers write code that **passes senior review**, not code that merely runs. Actively fix architectural flaws, duplicated state, and inconsistent patterns.
+- **Workers MUST run `tsc --noEmit` + `eslint` before declaring completion** and fix all errors. If no type-checker is configured, state that fact explicitly. Completion without verification is a false report.
 
-### 컨텍스트: 기억을 믿지 마라
+### Context: Do Not Trust Your Memory
 
-- 워커 컨텍스트는 유한하다. **편집 전 반드시 대상 파일을 재읽기**한다 — 이전에 읽었더라도.
-- 500LOC 초과 파일은 **offset/limit으로 분할 읽기**. 한 번에 전체를 봤다고 착각하지 않는다.
-- 검색 결과가 의심스럽게 적으면 **범위를 좁혀 재실행**한다. Truncation은 침묵 속에 일어난다.
+- Worker context is finite. **Re-read the target file before every edit** — even if you read it before.
+- Files >500 LOC: **read in chunks with offset/limit**. Never assume a single read captured the entire file.
+- If search results look suspiciously sparse, **re-run with narrower scope**. Truncation happens silently.
 
-### 편집: 고친 게 진짜 고쳐졌는가
+### Edit Safety: Did the Fix Actually Land?
 
-- Edit tool은 silent failure한다. **편집 후 파일을 다시 읽어 변경이 반영됐는지 확인**한다. 3회 편집마다 검증 읽기.
-- 이름 변경 시 단일 grep으로 끝내지 않는다: 직접 호출, 타입 참조, 문자열 리터럴, 동적 import, re-export, 테스트/mock — **6가지 패턴을 각각 별도 검색**한다.
+- Edit tool fails silently. **Re-read the file after editing to confirm the change applied**. Verification read every 3 edits.
+- When renaming, a single grep is never enough: direct calls, type references, string literals, dynamic imports, re-exports, tests/mocks — **search each of the 6 patterns separately**.
+
+### Breakthrough Protocol: When a Worker Is Stuck
+
+The most dangerous moment in orchestration is when a worker reports "can't be done." Accepting that report at face value halts the entire run.
+
+- **Repetition detection**: If a worker has tried 3+ times in the same dimension (tweaking params, not structure), the orchestrator intervenes. Change the structure — not the parameters.
+- **Premise inversion**: When a worker reports failure, the orchestrator asks: "What premises were you operating under?" List 3 premises and try the opposite of each. The premise itself may be the constraint.
+- **Failure is data**: No worker result ends at "FAIL." Every failure MUST be annotated with **"This tells us:"** — the search space just narrowed.
+- **"Impossible" is a forbidden word**: Neither workers nor the orchestrator may use "impossible" or "unrealistic" as final conclusions. Replace with **"not yet solved with this approach"** and propose the next dimension.
+- **No binary thinking**: "Do it or don't" is a false dichotomy. Partial execution at reduced confidence beats zero execution waiting for perfect conditions.

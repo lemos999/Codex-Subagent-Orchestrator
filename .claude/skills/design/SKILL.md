@@ -107,26 +107,36 @@ description: "범용 설계 디렉터 — 신규 기획 / 기존 분석 / 변경
 
 ## Architecture Discipline
 
-`/design`은 모든 도메인의 설계를 다루되, 설계의 핵심 덕목은 동일하다: **명확성, 일관성, 검증 가능성**.
+The core virtues of design across every domain are the same: **clarity, consistency, verifiability**.
 
-### 착수 전: 설계 부채를 먼저 해소하라
+### Pre-Work: Resolve Design Debt First
 
-- 기존 설계 문서에 새 컴포넌트를 추가하기 전에, **폐기된 결정, 삭제된 컴포넌트 참조, 오래된 제약 조건**을 먼저 정리한다. 설계 문서의 dead reference는 코드의 dead code와 같은 해악이다.
-- 하나의 Phase에서 **5개를 초과하는 컴포넌트를 동시에 설계하지 않는다**. 초과 시 `/sub`로 워커를 분할한다. Phase 경계를 뛰어넘지 않는 것은 이미 불변 원칙 #5이므로, Phase 안에서의 범위 제어에 집중한다.
+- Before adding new components to an existing design document, **clean up abandoned decisions, deleted component references, and outdated constraints first**. Dead references in design docs are as harmful as dead code.
+- No single Phase designs **more than 5 components simultaneously**. When exceeded, split workers via `/sub`. Since invariant #5 already forbids skipping Phase boundaries, focus on scope control within each Phase.
 
-### 설계 품질: 수석 아키텍트가 리젝트할 설계를 통과시키지 마라
+### Design Quality: Do Not Pass What a Principal Architect Would Reject
 
-- Charter에 명시된 핵심 가치와 무관한 컴포넌트, 중복된 책임, 불일치하는 인터페이스 — **구조적 결함을 발견하면 적극 수정한다**.
-- Phase 4(Verify)는 형식 검증이 아니다. 컴포넌트 간 의존성 모순, Decision Card 간 충돌, 제약 조건 위반 — **내적 불일치를 모두 잡아낸다**. 검증 없이 Phase 5(Package)로 넘어가지 않는다.
-- 설계에서 코드가 생성되는 경우(`/product` 연계 등), `tsc --noEmit` + `eslint` 검증은 필수다.
+- Components unrelated to the Charter's core values, overlapping responsibilities, inconsistent interfaces — **actively fix structural flaws when found**.
+- Phase 4 (Verify) is not a formality. Dependency contradictions between components, conflicts between Decision Cards, constraint violations — **catch all internal inconsistencies**. Do not proceed to Phase 5 (Package) without verification.
+- When design generates code (e.g., `/product` integration), `tsc --noEmit` + `eslint` verification is mandatory.
 
-### 맥락: 설계 문서는 길고 Phase는 많다
+### Context: Design Documents Are Long and Phases Are Many
 
-- 500LOC 초과 문서는 **offset/limit으로 분할 읽기**. 전체를 한 번에 봤다고 가정하지 않는다.
-- Phase 전환 시 또는 10+ 메시지 후, **이전 Phase 산출물을 반드시 재읽기**한다. Phase 0에서 확정한 Charter가 Phase 3에서 왜곡되는 것은 컨텍스트 붕괴의 전형이다.
-- 교차 영향 분석(Phase 3.5)에 5개 초과 컴포넌트가 관련되면 **워커를 분할**한다. 검색 결과가 의심스럽게 적으면 범위를 좁혀 재실행.
+- Chunk-read documents >500 LOC with **offset/limit**. Never assume a single read captured the whole document.
+- On Phase transitions or after 10+ messages, **re-read previous Phase artifacts**. A Charter confirmed in Phase 0 distorting by Phase 3 is the textbook case of context decay.
+- When cross-impact analysis (Phase 3.5) involves >5 components, **split workers**. Re-run searches with narrower scope when results look suspiciously sparse.
 
-### 편집 안전: 설계 문서 수정도 코드 수정과 동일하게
+### Edit Safety: Design Doc Edits Follow the Same Rules as Code
 
-- 설계 문서 편집 후 **재읽기로 변경 반영 확인**. 3회 편집마다 검증 읽기.
-- 컴포넌트명, 인터페이스명, 제약 조건명 변경 시 — 모든 설계 문서 내 참조를 빠짐없이 수정한다. **Charter, Component Map, Decision Card, 검증 체크리스트, 도메인 팩** 각각을 별도 검색한다.
+- **Re-read after editing** design documents to confirm changes applied. Verification read every 3 edits.
+- When renaming component names, interface names, or constraint names — update all references exhaustively. **Search Charter, Component Map, Decision Cards, verification checklists, and domain packs separately**.
+
+### Breakthrough Protocol: When the Design Is Stuck
+
+"These requirements are incompatible" is the most productive moment in design — real architecture begins here.
+
+- **Repetition detection**: If you've revised the same component's interface 3+ times, **the interface is not the problem — the responsibility allocation is**. Move one level up and redesign the component boundaries.
+- **Constraint conflict is information**: When two constraints clash, ask **"why do they conflict?"** before "which one do we drop?" The root cause may be a hidden third assumption.
+- **Premise inversion**: "It must be microservices." "It must be real-time." "This data is relational." — List 3 implicit premises of the current design and examine the opposite of each. A premise may be creating the architecture's ceiling.
+- **"Incompatible" is a forbidden word**: If requirements A and B seem simultaneously impossible, it means **"not yet solved at this abstraction level."** Changing the abstraction level may reveal a design where both coexist.
+- **Partial design beats no design**: If 7 of 10 components are finalized, send those 7 to Phase 5 and keep 3 open. Do not hold confirmed designs hostage while waiting for total completion.
