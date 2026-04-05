@@ -1,0 +1,63 @@
+﻿## Watchdog Verdict
+
+**The evidence set is insufficient.** Evidence A was cut off mid-sentence, no other evidence items were included, and `project-status/current.md` — one of the primary documents under review — was not analyzed at all. I read the documents directly and can give you the real assessment.
+
+---
+
+## Document-by-Document Findings
+
+### `CLAUDE.md` — Purpose: Claude-specific entry point
+
+**Core problem: it's mostly a duplicate of `AGENTS.md`.**
+
+The 3-line header correctly points to `project-status/current.md` and `AGENTS.md`. But the rest of the file is a verbatim copy-paste of the Agent Directives section that already lives in `AGENTS.md` — with worse formatting (stray blank lines between every item). This creates drift risk: if the directives are updated in one file, the other gets out of sync.
+
+**Fix needed:** Strip CLAUDE.md down to the 3-line header + any Claude-*specific* overrides that genuinely differ from AGENTS.md. Let AGENTS.md be the single source of truth for the directives.
+
+---
+
+### `AGENTS.md` — Purpose: Shared contract for all engines
+
+**Core problem: mixed concerns, no clear structure.**
+
+The document opens with a dense 7-sentence role/persona paragraph (a system prompt style blob). Then it transitions to skills, WKI, user preferences, and coding directives — with no section dividers between those very different concern levels.
+
+Minor issues:
+- Directive numbering skips 9, 10 inside the Breakthrough Protocol section (they appear later under Edit Safety). A reader scanning by number will be confused.
+- The opening persona paragraph reads like it belongs in a system prompt, not an operational contract that Codex and Gemini agents also read.
+
+**Fix needed:** Add a top-level section outline (e.g., `## Skill Routing`, `## Project Status`, `## User Preferences`, `## Coding Directives`). Move or trim the opening persona paragraph.
+
+---
+
+### `project-status/current.md` — Purpose: Operational source-of-truth / handoff
+
+**Core problem: no fast snapshot at the top.**
+
+The file is 100+ lines of dense reverse-chronological prose with zero headers. The very first thing a follow-up worker sees is a paragraph about Hall curation Phase A from 2026-04-01. There's no visible answer to "what project is this?", "what's the current state?", or "what's next?" without reading through everything.
+
+For a handoff document, the reader needs the ground truth in the first screen, not buried in the log.
+
+**Fix needed:** Add a pinned header block before the log entries:
+
+```markdown
+## Current State (2026-04-05)
+- **Active project:** mostria.com (vibe-web)  
+- **Status:** Hall Curation Phase A closed; Phase B (repository integration + UI) pending  
+- **Next tasks:** [list them here]
+
+---
+## Session Log
+```
+
+The log entries themselves are well-written — the problem is purely structural.
+
+---
+
+## Summary
+
+| Document | Gap vs Purpose | Priority |
+|---|---|---|
+| `CLAUDE.md` | Duplicates AGENTS.md directives verbatim — drift risk | High |
+| `AGENTS.md` | Mixed concerns, no section structure, numbering gap | Medium |
+| `project-status/current.md` | No fast snapshot header — forces full read to orient | High |

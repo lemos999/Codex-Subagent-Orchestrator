@@ -1,0 +1,12 @@
+﻿[Observed stdout excerpt from Codex attempt 1]
+
+Attempt 1 drifted into unrelated workspace docs and returned findings about `Projects/vibe-web/docs/COMPLETION-ROADMAP.md` and `HOW-TO-READ.md` instead of the requested novel documents.
+
+Visible leading finding excerpt:
+- High: COMPLETION-ROADMAP.md presents the project as of March 25, 2026 as still waiting on Preview hookup...
+
+Visible trailing note:
+- Review only; no code or tests were run.
+
+Evidence note:
+The host wrapper truncated the full stdout stream, so only the visible excerpt could be preserved here. This attempt was discarded.
