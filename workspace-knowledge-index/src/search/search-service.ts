@@ -9,6 +9,9 @@ import type { Chunk, SearchFilter, SearchResult, VectorSearchResult } from '../t
 import { QueryRouter, type RouteDecision, type SearchMode } from './query-router.js';
 import { expandKoreanQuery } from './korean-expansion.js';
 import { crossEncoderRerank } from './cross-encoder-reranker.js';
+import { SymbolSearch } from './symbol-search.js';
+import { DepsGraphImpl } from '../core/deps-graph.js';
+import fs from 'node:fs';
 
 const CHUNK_ID_BATCH_SIZE = 300;
 const FTS_NORMALIZATION_WINDOW = 50;
@@ -36,6 +39,8 @@ export interface SearchOptions {
 export class SearchService {
   private readonly router: QueryRouter;
   private readonly isQuantizedIndex: boolean;
+  private symbolSearch: SymbolSearch | null = null;
+  private depsGraph: DepsGraphImpl | null = null;
 
   constructor(
     private ftsStore: FtsStore,
@@ -43,9 +48,22 @@ export class SearchService {
     private chunkStore: ChunkStore,
     private embeddingProvider: EmbeddingProvider | null,
     private config: SearchConfig,
+    symbolsIdxPath?: string,
+    depsGraphPath?: string,
   ) {
     this.router = new QueryRouter(config);
     this.isQuantizedIndex = config.indexDtype === 'q8' || config.indexDtype === 'q4';
+    if (symbolsIdxPath && fs.existsSync(symbolsIdxPath)) {
+      try {
+        this.symbolSearch = new SymbolSearch(symbolsIdxPath);
+      } catch { /* fail-soft */ }
+    }
+    if (depsGraphPath && fs.existsSync(depsGraphPath)) {
+      try {
+        this.depsGraph = new DepsGraphImpl();
+        this.depsGraph.load(fs.readFileSync(depsGraphPath, 'utf-8'));
+      } catch { /* fail-soft */ }
+    }
   }
 
   async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
@@ -214,6 +232,54 @@ export class SearchService {
       }
     }
 
+    // Re-ranking stage 0: symbol-fused file boost
+    // If query matches known symbols, boost all chunks from those files
+    if (this.symbolSearch && this.symbolSearch.count > 0) {
+      const symbolNameQuery = normalizedQuery.split(/\s+/).filter(t => /^[A-Za-z_$]/.test(t)).join('|');
+      const symbolResults = symbolNameQuery ? this.symbolSearch.search({
+        name: symbolNameQuery,
+        nameMode: 'regex',
+        topK: 10,
+      }) : [];
+      if (symbolResults.length > 0) {
+        const symbolFileBoost = new Map<string, number>();
+        for (const sr of symbolResults) {
+          const fp = sr.symbol.filePath;
+          const existing = symbolFileBoost.get(fp) ?? 0;
+          symbolFileBoost.set(fp, Math.max(existing, sr.score));
+        }
+        for (const r of results) {
+          const boost = symbolFileBoost.get(r.chunk.filePath);
+          if (boost) {
+            r.score = Math.min(1.0, r.score * (1 + boost * 0.3));
+          }
+        }
+      }
+    }
+
+    // Re-ranking stage 0.5: graph-boosted rerank
+    // Files related via import graph to top-scoring files get a relevance boost
+    if (this.depsGraph) {
+      // Identify top-scoring file paths
+      const sortedByScore = [...results].sort((a, b) => b.score - a.score);
+      const topFiles = new Set(sortedByScore.slice(0, 5).map(r => r.chunk.filePath));
+      const relatedFiles = new Set<string>();
+      for (const fp of topFiles) {
+        for (const imp of this.depsGraph.getImports(fp)) relatedFiles.add(imp);
+        for (const importer of this.depsGraph.getImporters(fp)) relatedFiles.add(importer);
+      }
+      // Remove top files themselves (already high-scored)
+      for (const fp of topFiles) relatedFiles.delete(fp);
+      // Boost related files
+      if (relatedFiles.size > 0) {
+        for (const r of results) {
+          if (relatedFiles.has(r.chunk.filePath)) {
+            r.score = Math.min(1.0, r.score * 1.15);
+          }
+        }
+      }
+    }
+
     // Re-ranking stage 1: rule-based keyword/structural boost
     const reranked = this.rerank(results, normalizedQuery, ftsQuery);
 
@@ -275,15 +341,21 @@ export class SearchService {
       }
       structuralBoost = Math.min(structuralBoost, 0.6);
 
-      // Heading diversity bonus: chunks whose heading matches 3+ query terms
-      // are very likely the target section (e.g., "Stage 9: EVIDENCE + RECOVER")
-      const headingDiversityBonus = headingMatchCount >= 3 ? 0.15 : 0;
+      // Heading coverage: fraction of keywords in the heading
+      const headingCoverage = keywords.size > 0 ? headingMatchCount / keywords.size : 0;
+
+      // Heading bonus: only when heading is highly specific to the query
+      // Conservative: only strong coverage triggers bonus, to avoid noise chunks
+      const headingDiversityBonus =
+        (headingMatchCount >= 3 && headingCoverage >= 0.4) ? 0.20 :
+        (headingMatchCount >= 2 && headingCoverage >= 0.5) ? 0.15 :
+        headingMatchCount >= 3 ? 0.10 : 0;
 
       const noisePenalty = isNoisePath(filePath) ? 0.3 : 0;
 
       // Blend: 55% original + 25% keyword overlap + 20% structural + heading bonus - noise
       const rerankScore = r.score * (0.55 + overlapRatio * 0.25 + structuralBoost * 0.20 + headingDiversityBonus - noisePenalty);
-      return { ...r, score: rerankScore };
+      return { ...r, score: clamp01(rerankScore) };
     });
 
     scored.sort((a, b) => b.score - a.score);

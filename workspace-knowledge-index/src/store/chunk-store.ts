@@ -165,6 +165,89 @@ export class ChunkStore {
     this.db.prepare('DELETE FROM chunks_meta WHERE project_id = ?').run(projectId);
   }
 
+  /**
+   * Get chunk boundaries for a file (no content — lightweight).
+   * Useful for Rule #7 (File Read Budget): agents can see where chunks start/end
+   * to plan precise offset/limit reads.
+   */
+  getChunkMap(filePath: string): Array<{
+    ordinal: number;
+    heading: string | null;
+    chunkType: string;
+    startLine: number;
+    endLine: number;
+    tokenCount: number;
+  }> {
+    const rows = this.db
+      .prepare(
+        `
+          SELECT ordinal, heading, chunk_type, start_line, end_line, token_count
+          FROM chunks_meta
+          WHERE file_path = ?
+          ORDER BY ordinal ASC
+        `,
+      )
+      .all(filePath) as Array<{
+        ordinal: number;
+        heading: string | null;
+        chunk_type: string;
+        start_line: number;
+        end_line: number;
+        token_count: number;
+      }>;
+
+    return rows.map(r => ({
+      ordinal: r.ordinal,
+      heading: r.heading,
+      chunkType: r.chunk_type,
+      startLine: r.start_line,
+      endLine: r.end_line,
+      tokenCount: r.token_count,
+    }));
+  }
+
+  /**
+   * Get chunk boundaries matching a file path substring.
+   */
+  getChunkMapByPathLike(pathSubstring: string): Array<{
+    filePath: string;
+    ordinal: number;
+    heading: string | null;
+    chunkType: string;
+    startLine: number;
+    endLine: number;
+    tokenCount: number;
+  }> {
+    const rows = this.db
+      .prepare(
+        `
+          SELECT file_path, ordinal, heading, chunk_type, start_line, end_line, token_count
+          FROM chunks_meta
+          WHERE file_path LIKE ?
+          ORDER BY file_path ASC, ordinal ASC
+        `,
+      )
+      .all(`%${pathSubstring}%`) as Array<{
+        file_path: string;
+        ordinal: number;
+        heading: string | null;
+        chunk_type: string;
+        start_line: number;
+        end_line: number;
+        token_count: number;
+      }>;
+
+    return rows.map(r => ({
+      filePath: r.file_path,
+      ordinal: r.ordinal,
+      heading: r.heading,
+      chunkType: r.chunk_type,
+      startLine: r.start_line,
+      endLine: r.end_line,
+      tokenCount: r.token_count,
+    }));
+  }
+
   count(): number {
     const row = this.db.prepare('SELECT COUNT(*) AS count FROM chunks_meta').get() as
       | { count: number }

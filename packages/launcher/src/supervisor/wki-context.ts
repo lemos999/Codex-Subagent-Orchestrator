@@ -29,6 +29,8 @@ export interface WkiContextConfig {
   topK?: number;              // default 5
   maxContentLines?: number;   // default 5
   minScore?: number;          // minimum relevance score to include (default 0.3)
+  /** Restrict context to chunks from these file paths (scope-aware injection for sub-agents). */
+  filePaths?: string[];
 }
 
 export interface WkiContextResult {
@@ -282,6 +284,7 @@ export async function generateContext(
         topK: config.topK ?? 5,
         maxContentLines: config.maxContentLines ?? 5,
       },
+      filePaths: config.filePaths,
     });
 
     // Filter low-score results to prevent irrelevant context injection

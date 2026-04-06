@@ -436,7 +436,9 @@ async function cmdSearch(args: string[]): Promise<void> {
   }
 
   const searchCfg = { ...config.search, indexDtype: config.embedding.local?.indexDtype ?? config.embedding.local?.dtype };
-  const searchService = new SearchService(ftsStore, vectorStore, chunkStore, embeddingProvider, searchCfg);
+  const symbolsIdxPath = path.join(knowledgeDir, 'symbols.idx');
+  const depsGraphPath = path.join(knowledgeDir, 'deps.graph');
+  const searchService = new SearchService(ftsStore, vectorStore, chunkStore, embeddingProvider, searchCfg, symbolsIdxPath, depsGraphPath);
 
   const startTime = Date.now();
   const results = await searchService.search(query, {
@@ -928,12 +930,16 @@ async function cmdEval(args: string[]): Promise<void> {
   }
 
   const evalSearchCfg = { ...config.search, indexDtype: config.embedding.local?.indexDtype ?? config.embedding.local?.dtype };
+  const evalSymbolsPath = path.join(knowledgeDir, 'symbols.idx');
+  const evalDepsPath = path.join(knowledgeDir, 'deps.graph');
   const searchService = new SearchService(
     ftsStore,
     vectorStore,
     chunkStore,
     embeddingProvider,
     evalSearchCfg,
+    evalSymbolsPath,
+    evalDepsPath,
   );
 
   // Run evaluation

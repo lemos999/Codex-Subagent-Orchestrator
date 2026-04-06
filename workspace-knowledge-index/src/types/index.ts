@@ -58,6 +58,8 @@ export interface SearchFilter {
   projectId?: string;
   fileType?: string;
   symbolKind?: string;
+  /** Restrict results to chunks from these file paths (substring match). */
+  filePaths?: string[];
 }
 
 /** Symbol information extracted by ProgramParser. */
@@ -109,3 +111,30 @@ export interface FileMapEntry {
 
 /** Query classification types for the Query Router. */
 export type QueryType = 'identifier' | 'path' | 'natural' | 'deps' | 'mixed';
+
+// ============================================================
+// Symbol Search Types
+// ============================================================
+
+/** Options for symbol search queries. */
+export interface SymbolSearchOptions {
+  /** Symbol name pattern (exact, prefix, or regex). */
+  name?: string;
+  /** Match mode for the name field. */
+  nameMode?: 'exact' | 'prefix' | 'contains' | 'regex';
+  /** Filter by symbol kind (function, class, interface, etc.). */
+  kind?: string;
+  /** Filter to only exported symbols. */
+  exportedOnly?: boolean;
+  /** Filter by file path pattern (substring match). */
+  filePath?: string;
+  /** Maximum results to return. */
+  topK?: number;
+}
+
+/** A single symbol search result. */
+export interface SymbolSearchResult {
+  symbol: SymbolInfo;
+  /** How well this result matched the query (0-1). */
+  score: number;
+}

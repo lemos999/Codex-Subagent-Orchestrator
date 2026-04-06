@@ -270,6 +270,12 @@ export class FtsStore implements FtsBackend {
         params.push(...fileTypeFilter.params);
       }
 
+      if (filter?.filePaths && filter.filePaths.length > 0) {
+        const pathClauses = filter.filePaths.map(() => 'chunks_meta.file_path LIKE ?');
+        whereClauses.push(`(${pathClauses.join(' OR ')})`);
+        params.push(...filter.filePaths.map(p => `%${p}%`));
+      }
+
       params.push(safeTopK);
 
       const sql = `

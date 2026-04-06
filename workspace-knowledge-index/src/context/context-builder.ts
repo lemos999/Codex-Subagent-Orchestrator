@@ -1,5 +1,5 @@
 import type { SearchService } from '../search/search-service.js';
-import type { SearchResult } from '../types/index.js';
+import type { SearchFilter, SearchResult } from '../types/index.js';
 
 // ============================================================
 // Context Block Builder
@@ -27,6 +27,7 @@ export async function buildContextBlock(
   searchService: SearchService,
   query: string,
   options?: ContextBlockOptions,
+  filePaths?: string[],
 ): Promise<ContextBlock> {
   const topK = options?.topK ?? 10;
   const maxContentLines = options?.maxContentLines ?? 5;
@@ -34,8 +35,13 @@ export async function buildContextBlock(
 
   const startTime = Date.now();
 
+  const filter: SearchFilter | undefined = filePaths?.length
+    ? { filePaths }
+    : undefined;
+
   const results = await searchService.search(query, {
     topK,
+    filter,
     includeContent: true,
   });
 

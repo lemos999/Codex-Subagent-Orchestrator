@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WKI — 3D Interactive Dimension Map</title>
+<title>WKI — 3D Interactive Dimension Map (v2)</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#08080e;color:#ddd;overflow:hidden}
@@ -12,7 +12,7 @@ canvas:active{cursor:grabbing}
 #info{position:fixed;top:16px;left:16px;z-index:10;pointer-events:none}
 #info h1{font-size:20px;color:#fff}
 #info p{font-size:11px;color:#666;margin-top:2px}
-#detail{position:fixed;right:16px;top:16px;width:300px;background:rgba(8,8,16,0.95);border:1px solid #2a2a4a;border-radius:12px;padding:20px;z-index:10;display:none;font-size:12px;line-height:1.7;max-height:80vh;overflow-y:auto}
+#detail{position:fixed;right:16px;top:16px;width:320px;background:rgba(8,8,16,0.95);border:1px solid #2a2a4a;border-radius:12px;padding:20px;z-index:10;display:none;font-size:12px;line-height:1.7;max-height:80vh;overflow-y:auto}
 #detail h2{font-size:16px;margin-bottom:10px}
 #detail .close{position:absolute;top:10px;right:14px;cursor:pointer;color:#888;font-size:18px}
 #detail .close:hover{color:#fff}
@@ -24,22 +24,22 @@ canvas:active{cursor:grabbing}
 .tag-h{background:#dc262622;color:#f87171;border:1px solid #dc262644}
 .tag-m{background:#f59e0b22;color:#fbbf24;border:1px solid #f59e0b44}
 .tag-l{background:#10b98122;color:#34d399;border:1px solid #10b98144}
-#controls{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:6px}
+.tag-new{background:#6366f122;color:#a5b4fc;border:1px solid #6366f144}
+#controls{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 #controls button{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#aaa;padding:7px 14px;font-size:11px;cursor:pointer;transition:all 0.2s}
 #controls button:hover{background:rgba(255,255,255,0.1);color:#fff}
 #controls button.on{border-color:#818cf8;color:#818cf8;background:rgba(99,102,241,0.12)}
 #legend{position:fixed;bottom:16px;left:16px;z-index:10;font-size:10px;color:#888}
 #legend div{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 #legend .d{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-#help{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:10;font-size:10px;color:#555;text-align:center}
 </style>
 </head>
 <body>
 
-<div id="info"><h1>WKI 3D Dimension Map</h1><p>X=Data · Y=Process · Z=Score</p></div>
+<div id="info"><h1>WKI 3D Dimension Map v2</h1><p>X=Data · Y=Process · Z=Score · New: Symbol/Graph/Heading rerank, Gap repair, APIs</p></div>
 
 <div id="detail">
-  <div class="close" onclick="document.getElementById('detail').style.display='none';selectedNode=null">✕</div>
+  <div class="close" onclick="document.getElementById('detail').style.display='none';selectedNode=null">&#x2715;</div>
   <div id="detailContent"></div>
 </div>
 
@@ -49,6 +49,7 @@ canvas:active{cursor:grabbing}
   <button onclick="setFilter('data')" id="f-data">Data</button>
   <button onclick="setFilter('process')" id="f-process">Process</button>
   <button onclick="setFilter('score')" id="f-score">Score</button>
+  <button onclick="setFilter('new')" id="f-new">New (v2)</button>
   <button onclick="setFilter('critical')" id="f-critical">Critical</button>
 </div>
 
@@ -56,7 +57,8 @@ canvas:active{cursor:grabbing}
   <div><div class="d" style="background:#f59e0b"></div>Data (X axis)</div>
   <div><div class="d" style="background:#a78bfa"></div>Process (Y axis)</div>
   <div><div class="d" style="background:#4ade80"></div>Score (Z = size)</div>
-  <div style="margin-top:4px;color:#555">Left-drag: move · Right-drag: rotate · Scroll: zoom · Click: inspect</div>
+  <div><div class="d" style="background:#a5b4fc"></div>New in v2</div>
+  <div style="margin-top:4px;color:#555">Left-drag: move &middot; Right-drag: rotate &middot; Scroll: zoom &middot; Click: inspect</div>
 </div>
 
 <canvas id="c"></canvas>
@@ -76,67 +78,40 @@ let selectedNode = null, filter = 'all';
 
 function stopAnim() { targetZoom = zoom; targetPanX = panX; targetPanY = panY; }
 
-canvas.addEventListener('mousedown', e => { dragging = true; dragBtn = e.button; lastX = e.clientX; lastY = e.clientY; stopAnim(); e.preventDefault(); });
+let didDrag = false, mouseDownX = 0, mouseDownY = 0;
+canvas.addEventListener('mousedown', e => { dragging = true; didDrag = false; dragBtn = e.button; lastX = e.clientX; lastY = e.clientY; mouseDownX = e.clientX; mouseDownY = e.clientY; stopAnim(); e.preventDefault(); });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
-addEventListener('mouseup', () => dragging = false);
+addEventListener('mouseup', () => { dragging = false; });
 addEventListener('mousemove', e => {
   if (!dragging) return;
   const dx = e.clientX - lastX, dy = e.clientY - lastY;
-  if (dragBtn === 0) {
-    // Left-drag: pan (move)
-    panX += dx; panY += dy; stopAnim();
-  } else if (dragBtn === 2) {
-    // Right-drag: rotate
-    rotY += dx * 0.006;
-    rotX += dy * 0.006;
-    rotX = Math.max(-1.4, Math.min(1.4, rotX));
-  }
+  if (Math.abs(e.clientX - mouseDownX) > 3 || Math.abs(e.clientY - mouseDownY) > 3) didDrag = true;
+  if (dragBtn === 0) { panX += dx; panY += dy; stopAnim(); }
+  else if (dragBtn === 2) { rotY += dx * 0.006; rotX += dy * 0.006; rotX = Math.max(-1.4, Math.min(1.4, rotX)); }
   lastX = e.clientX; lastY = e.clientY;
 });
 canvas.addEventListener('wheel', e => { zoom *= e.deltaY > 0 ? 0.95 : 1.05; zoom = Math.max(0.3, Math.min(3, zoom)); stopAnim(); e.preventDefault(); }, {passive:false});
 
-// Animation state
 let targetZoom = 1.0, targetPanX = 0, targetPanY = 0;
-let animating = false;
-const EASE = 0.06; // lower = smoother/slower
-
+const EASE = 0.06;
 function lerp(a, b, t) { return a + (b - a) * t; }
 
 function animateCamera() {
-  const dz = Math.abs(zoom - targetZoom);
-  const dx = Math.abs(panX - targetPanX);
-  const dy = Math.abs(panY - targetPanY);
-  if (dz > 0.001 || dx > 0.5 || dy > 0.5) {
-    zoom = lerp(zoom, targetZoom, EASE);
-    panX = lerp(panX, targetPanX, EASE);
-    panY = lerp(panY, targetPanY, EASE);
-    animating = true;
-  } else {
-    animating = false;
-  }
+  const dz = Math.abs(zoom - targetZoom), dx = Math.abs(panX - targetPanX), dy = Math.abs(panY - targetPanY);
+  if (dz > 0.001 || dx > 0.5 || dy > 0.5) { zoom = lerp(zoom, targetZoom, EASE); panX = lerp(panX, targetPanX, EASE); panY = lerp(panY, targetPanY, EASE); }
 }
 
 function focusNode(n) {
-  // Calculate where the node would be at targetZoom with zero pan
   targetZoom = 2.2;
   const r = rot3d(n.x, n.y, n.z);
-  const d = 8;
-  const scale = d / (d + r.z) * 120 * targetZoom;
-  const nodeScreenX = W/2 + r.x * scale;
-  const nodeScreenY = H/2 + r.y * scale;
-  // Pan to bring the node to screen center
-  targetPanX = W/2 - nodeScreenX;
-  targetPanY = H/2 - nodeScreenY;
+  const d = 8, scale = d / (d + r.z) * 120 * targetZoom;
+  targetPanX = W/2 - (W/2 + r.x * scale);
+  targetPanY = H/2 - (H/2 + r.y * scale);
 }
-
-function unfocus() {
-  targetZoom = 1.0;
-  targetPanX = 0;
-  targetPanY = 0;
-}
+function unfocus() { targetZoom = 1.0; targetPanX = 0; targetPanY = 0; }
 
 canvas.addEventListener('click', e => {
-  if (dragging) return; // ignore drag-end clicks
+  if (didDrag) return; // ignore click after drag
   const mx = e.clientX, my = e.clientY;
   let best = null, bestD = 25;
   for (const n of projected) {
@@ -144,94 +119,143 @@ canvas.addEventListener('click', e => {
     const d = Math.hypot(n.sx - mx, n.sy - my);
     if (d < n.sr + 8 && d < bestD) { best = n; bestD = d; }
   }
-  if (best) {
-    selectNode(best);
-    focusNode(best);
-  } else {
-    document.getElementById('detail').style.display='none';
-    selectedNode = null;
-    unfocus();
-  }
+  if (best) { selectNode(best); focusNode(best); }
+  else { document.getElementById('detail').style.display='none'; selectedNode = null; }
 });
 
 function resetCam() { rotX = -0.35; rotY = 0.6; zoom = 1.0; panX = 0; panY = 0; targetZoom = 1.0; targetPanX = 0; targetPanY = 0; }
 function setFilter(f) { filter = f; document.querySelectorAll('#controls button').forEach(b=>b.classList.remove('on')); document.getElementById('f-'+f).classList.add('on'); }
 
-// 3D math
 function rot3d(x, y, z) {
-  // Rotate Y
   let x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
   let z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
-  // Rotate X
   let y1 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
   let z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
   return { x: x1, y: y1, z: z2 };
 }
 function proj(x, y, z) {
-  const r = rot3d(x, y, z);
-  const d = 8;
+  const r = rot3d(x, y, z), d = 8;
   const scale = d / (d + r.z) * 120 * zoom;
   return { sx: W/2 + r.x * scale + panX, sy: H/2 + r.y * scale + panY, scale, depth: r.z };
 }
 
-// Nodes
+// ============================================================
+// NODES
+// ============================================================
 const nodes = [
-  {id:'chunk',l:'Chunk',desc:'문서 분할 단위',x:-3,y:2.5,z:0,r:0.25,c:'#f59e0b',dim:'data',
-    det:'<h2 style="color:#f59e0b">Chunk</h2><table><tr><td>id</td><td>{project}:{path}:{ordinal}</td></tr><tr><td>content</td><td>max 100 lines</td></tr><tr><td>filePath</td><td>relative posix</td></tr><tr><td>heading</td><td>section heading</td></tr><tr><td>chunkType</td><td>function|class|md-section</td></tr><tr><td>hash</td><td>SHA256</td></tr></table><span class="tag tag-m">Data origin</span>'},
-  {id:'embed',l:'Embedding\n384d fp32',desc:'텍스트→벡터 변환',x:-3,y:1,z:1,r:0.35,c:'#60a5fa',dim:'data',
-    det:'<h2 style="color:#60a5fa">Embedding Vector</h2><table><tr><td>Model</td><td>MiniLM-L12-v2</td></tr><tr><td>Dims</td><td>384</td></tr><tr><td>Precision</td><td>fp32</td></tr><tr><td>Pooling</td><td>mean + L2 norm</td></tr><tr><td>Max tokens</td><td>256</td></tr><tr><td>Prefix</td><td>file:{path}|section:{heading}</td></tr></table><span class="tag tag-h">High impact</span>'},
-  {id:'ftsdb',l:'FTS DB',desc:'키워드 인덱스 저장소',x:-3.5,y:-0.5,z:0.5,r:0.2,c:'#f59e0b',dim:'data',
-    det:'<h2 style="color:#f59e0b">FTS5 Database</h2><table><tr><td>Engine</td><td>SQLite FTS5</td></tr><tr><td>Tokenizer</td><td>unicode61</td></tr></table>'},
-  {id:'lancedb',l:'LanceDB',desc:'벡터 인덱스 저장소',x:-2.5,y:-0.5,z:1.5,r:0.2,c:'#60a5fa',dim:'data',
+  // === Data Layer ===
+  {id:'chunk',l:'Chunk',desc:'max 100 lines, overlap 30',x:-3,y:2.5,z:0,r:0.25,c:'#f59e0b',dim:'data',
+    det:'<h2 style="color:#f59e0b">Chunk</h2><table><tr><td>id</td><td>{project}:{path}:{ordinal}</td></tr><tr><td>content</td><td>max 100 lines</td></tr><tr><td>overlap</td><td>30 lines</td></tr><tr><td>chunkType</td><td>function|class|md-section|...</td></tr><tr><td>hash</td><td>SHA256</td></tr></table><span class="tag tag-m">Data origin</span>'},
+  {id:'embed',l:'Embedding\n384d fp32',desc:'MiniLM-L12-v2 multilingual',x:-3,y:1,z:1,r:0.35,c:'#60a5fa',dim:'data',
+    det:'<h2 style="color:#60a5fa">Embedding Vector</h2><table><tr><td>Model</td><td>MiniLM-L12-v2</td></tr><tr><td>Dims</td><td>384</td></tr><tr><td>Precision</td><td>fp32 (search) / q8 (index)</td></tr><tr><td>Prefix</td><td>file:{path}|section:{heading}</td></tr></table><span class="tag tag-h">High impact</span>'},
+  {id:'ftsdb',l:'FTS DB',desc:'SQLite FTS5 + chunks_meta',x:-3.5,y:-0.5,z:0.5,r:0.2,c:'#f59e0b',dim:'data',
+    det:'<h2 style="color:#f59e0b">FTS5 Database</h2><table><tr><td>Engine</td><td>SQLite FTS5</td></tr><tr><td>Tokenizer</td><td>unicode61</td></tr><tr><td>Filter</td><td>projectId, fileType, symbolKind, filePaths[]</td></tr></table><span class="tag tag-new">filePaths filter (v2)</span>'},
+  {id:'lancedb',l:'LanceDB',desc:'벡터 인덱스 (cosine)',x:-2.5,y:-0.5,z:1.5,r:0.2,c:'#60a5fa',dim:'data',
     det:'<h2 style="color:#60a5fa">LanceDB</h2><table><tr><td>Schema</td><td>Float32[384]</td></tr><tr><td>Metric</td><td>cosine distance</td></tr></table>'},
-  {id:'classify',l:'Classify\nRoute',desc:'쿼리 유형 분류 및 라우팅',x:0,y:3,z:1,r:0.25,c:'#818cf8',dim:'process',
-    det:'<h2 style="color:#818cf8">Query Classification</h2><table><tr><td>classify()</td><td>path|identifier|natural|deps|mixed</td></tr></table><b>Weights:</b><table><tr><td>natural</td><td>F=0.3 V=0.7</td></tr><tr><td>path</td><td>F=0.8 V=0.2</td></tr><tr><td>identifier</td><td>F=0.7 V=0.3</td></tr></table>'},
-  {id:'korean',l:'Korean\nExpansion',desc:'한글→영어 키워드 확장',x:-1.5,y:3,z:0,r:0.18,c:'#f472b6',dim:'process',
-    det:'<h2 style="color:#f472b6">Korean Expansion</h2>59 KO→EN mappings<br>ftsQuery = primary EN<br>vectorQuery = KO + all EN'},
+
+  // === NEW: Symbol Index ===
+  {id:'symbolidx',l:'Symbol\nIndex',desc:'symbols.idx JSONL (dedup)',x:-4,y:1.5,z:-0.5,r:0.28,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Symbol Index <span class="tag tag-new">NEW v2</span></h2><table><tr><td>Format</td><td>JSONL (deduped)</td></tr><tr><td>Fields</td><td>name, kind, filePath, startLine, endLine, signature, exported, modifiers</td></tr><tr><td>Search</td><td>exact / prefix / contains / regex</td></tr><tr><td>CLI</td><td><code>wki symbols</code></td></tr><tr><td>MCP</td><td>knowledge_symbol_search</td></tr></table>Rename 시 6가지 패턴 검색 지원 (Rule #10)'},
+
+  // === NEW: Deps Graph ===
+  {id:'depsgraph',l:'Deps\nGraph',desc:'import 관계 그래프',x:-4.5,y:0,z:-0.5,r:0.22,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Deps Graph <span class="tag tag-new">NEW v2</span></h2><table><tr><td>Format</td><td>JSON adjacency list</td></tr><tr><td>Edges</td><td>file imports file</td></tr><tr><td>Queries</td><td>getImports(), getImporters(), walk()</td></tr><tr><td>Use</td><td>Graph-boosted rerank + unused export detection</td></tr></table>'},
+
+  // === Process Layer ===
+  {id:'classify',l:'Classify\nRoute',desc:'쿼리 유형 분류 + 라우팅',x:0,y:3,z:1,r:0.25,c:'#818cf8',dim:'process',
+    det:'<h2 style="color:#818cf8">Query Classification</h2><table><tr><td>Types</td><td>path | identifier | natural | deps | mixed</td></tr></table><b>Weights:</b><table><tr><td>natural</td><td>F=0.3 V=0.7</td></tr><tr><td>path</td><td>F=0.8 V=0.2</td></tr><tr><td>identifier</td><td>F=0.7 V=0.3</td></tr></table>'},
+  {id:'korean',l:'Korean\nExpansion',desc:'한글 &rarr; 영어 키워드 확장',x:-1.5,y:3,z:0,r:0.18,c:'#f472b6',dim:'process',
+    det:'<h2 style="color:#f472b6">Korean Expansion</h2>59 KO&rarr;EN mappings<br>ftsQuery = primary EN<br>vectorQuery = KO + all EN'},
   {id:'decompose',l:'Path\nDecompose',desc:'경로+내용 혼합쿼리 분리',x:1.5,y:3,z:0,r:0.15,c:'#fbbf24',dim:'process',
-    det:'<h2 style="color:#fbbf24">Path Decomposition</h2>path + content split<br>pathBoostResults → ×1.5'},
-  {id:'fts',l:'FTS5\nSearch',desc:'키워드 기반 텍스트 검색',x:-1,y:1.5,z:-0.5,r:0.28,c:'#f59e0b',dim:'process',
-    det:'<h2 style="color:#f59e0b">FTS5 Search</h2><table><tr><td>Query</td><td>"t1" AND "t2"</td></tr><tr><td>Scoring</td><td>bm25()</td></tr></table><span class="tag tag-h">⚠ 4+kw → recall 0</span>'},
-  {id:'vector',l:'Vector\nSearch',desc:'의미 기반 벡터 유사도 검색',x:1,y:1.5,z:2,r:0.35,c:'#60a5fa',dim:'process',
-    det:'<h2 style="color:#60a5fa">Vector Search</h2><table><tr><td>Similarity</td><td>1-dist/2 → [0.5,1.0]</td></tr><tr><td>Limit</td><td>topK×5</td></tr></table>'},
-  {id:'multivec',l:'Multi-Vec\nSliding Win',desc:'다각도 분해 검색 (버그수정 +0.026)',x:2,y:2,z:2.5,r:0.28,c:'#c084fc',dim:'process',
-    det:'<h2 style="color:#c084fc">Multi-Vector</h2>Korean expanded<br>Key phrases<br><b>Sliding window</b> (5+kw)<br><span class="tag tag-l">★ Bug fix → +0.026</span>'},
-  {id:'fusion',l:'Weighted\nSum Fusion',desc:'FTS+Vector 점수 통합 (가장 민감)',x:0,y:0,z:1,r:0.4,c:'#a78bfa',dim:'process',
-    det:'<h2 style="color:#a78bfa">Hybrid Fusion</h2><code>score = fts×w_f + vec×w_v</code><br>FTS: log1p norm<br>Vec: clamp [0,1]<br>Path boost: ×1.5/×1.3<br><span class="tag tag-h">CRITICAL — most sensitive</span>'},
-  {id:'rerank',l:'Rule-based\nRerank',desc:'키워드/구조 기반 순위 재조정',x:-1,y:-1.5,z:0.5,r:0.3,c:'#fbbf24',dim:'process',
-    det:'<h2 style="color:#fbbf24">Rule Rerank</h2><code>×(0.60+kw×0.25+st×0.15-noise)</code><br>keyword overlap<br>structural boost (cap 0.5)<br>noise: -0.30'},
-  {id:'ce',l:'Cross-Enc\n45:55',desc:'AI 모델 기반 정밀 재순위',x:1,y:-1.5,z:2,r:0.32,c:'#34d399',dim:'process',
-    det:'<h2 style="color:#34d399">Cross-Encoder</h2><table><tr><td>Model</td><td>ms-marco-MiniLM</td></tr><tr><td>Blend</td><td>45% orig + 55% CE</td></tr><tr><td>Korean</td><td>skip</td></tr><tr><td>Top-N</td><td>20</td></tr></table>'},
-  {id:'output',l:'Top-K\nOutput',desc:'최종 결과 반환',x:0,y:-3,z:1,r:0.22,c:'#f43f5e',dim:'process',
-    det:'<h2 style="color:#f43f5e">Output</h2>topK=10<br>Content hydration'},
+    det:'<h2 style="color:#fbbf24">Path Decomposition</h2>path + content split<br>pathBoostResults &rarr; &times;1.5'},
+  {id:'fts',l:'FTS5\nSearch',desc:'BM25 기반 키워드 검색',x:-1,y:1.5,z:-0.5,r:0.28,c:'#f59e0b',dim:'process',
+    det:'<h2 style="color:#f59e0b">FTS5 Search</h2><table><tr><td>Query</td><td>"t1" AND "t2"</td></tr><tr><td>Scoring</td><td>bm25()</td></tr><tr><td>Filter</td><td>projectId, fileType, filePaths[]</td></tr></table><span class="tag tag-new">filePaths scope filter (v2)</span>'},
+  {id:'vector',l:'Vector\nSearch',desc:'의미 기반 벡터 유사도',x:1,y:1.5,z:2,r:0.35,c:'#60a5fa',dim:'process',
+    det:'<h2 style="color:#60a5fa">Vector Search</h2><table><tr><td>Similarity</td><td>1-dist/2 &rarr; [0.5,1.0]</td></tr><tr><td>Limit</td><td>topK&times;5</td></tr></table>'},
+  {id:'multivec',l:'Multi-Vec\nSliding Win',desc:'다각도 분해 검색',x:2,y:2,z:2.5,r:0.28,c:'#c084fc',dim:'process',
+    det:'<h2 style="color:#c084fc">Multi-Vector</h2>Korean expanded<br>Key phrases<br><b>Sliding window</b> (5+kw)'},
+  {id:'fusion',l:'Weighted\nSum Fusion',desc:'FTS+Vector 점수 통합',x:0,y:0,z:1,r:0.4,c:'#a78bfa',dim:'process',
+    det:'<h2 style="color:#a78bfa">Hybrid Fusion</h2><code>score = fts&times;w_f + vec&times;w_v</code><br>FTS: log1p norm<br>Vec: clamp [0,1]<br>Path boost: &times;1.5/&times;1.3<br><span class="tag tag-h">CRITICAL &mdash; most sensitive</span>'},
+
+  // === NEW: Symbol-fused Rerank ===
+  {id:'symrerank',l:'Symbol\nFused',desc:'심볼 매칭 &rarr; 파일 부스트',x:-2,y:-0.8,z:0,r:0.25,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Symbol-fused Rerank <span class="tag tag-new">NEW v2</span></h2><table><tr><td>Input</td><td>Query tokens &rarr; regex symbol search</td></tr><tr><td>Boost</td><td>&times;(1 + score&times;0.3) per file</td></tr><tr><td>Impact</td><td>#5 engine-adapters +0.094</td></tr></table>identifier/mixed 쿼리에서 정확한 파일 식별'},
+
+  // === NEW: Graph-boosted Rerank ===
+  {id:'graphrerank',l:'Graph\nBoost',desc:'import 관계 파일 부스트',x:-1.5,y:-1,z:-0.5,r:0.2,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Graph-boosted Rerank <span class="tag tag-new">NEW v2</span></h2><table><tr><td>Input</td><td>Top-5 files &rarr; deps-graph neighbors</td></tr><tr><td>Boost</td><td>&times;1.15 for related files</td></tr><tr><td>Status</td><td>Active (scales with graph density)</td></tr></table>멀티파일 개념 검색 지원'},
+
+  // === Existing Rerank (updated) ===
+  {id:'rerank',l:'Rule-based\nRerank',desc:'키워드/구조/heading 재조정',x:-0.5,y:-1.5,z:0.5,r:0.3,c:'#fbbf24',dim:'process',
+    det:'<h2 style="color:#fbbf24">Rule Rerank <span class="tag tag-new">Updated v2</span></h2><code>&times;(0.55+kw&times;0.25+st&times;0.20+heading-noise)</code><br><table><tr><td>structural cap</td><td>0.6</td></tr><tr><td>heading per kw</td><td>+0.15</td></tr><tr><td>headingCoverage</td><td>3+kw &amp;&amp; 40%+ &rarr; +0.20</td></tr><tr><td>noise penalty</td><td>-0.30</td></tr><tr><td>clamp</td><td>[0, 1] (v2 fix)</td></tr></table><span class="tag tag-new">headingCoverage + clamp01 (v2)</span>'},
+  {id:'ce',l:'Cross-Enc\n45:55',desc:'ms-marco-MiniLM reranker',x:1,y:-1.5,z:2,r:0.32,c:'#34d399',dim:'process',
+    det:'<h2 style="color:#34d399">Cross-Encoder</h2><table><tr><td>Model</td><td>ms-marco-MiniLM</td></tr><tr><td>Blend</td><td>45% orig + 55% CE</td></tr><tr><td>Korean</td><td>skip</td></tr><tr><td>Top-N</td><td>topK&times;3</td></tr></table>'},
+  {id:'dedup',l:'Dedup\nDiversify',desc:'파일당 3개, 파일명당 4개',x:0.5,y:-2.5,z:1.5,r:0.18,c:'#fbbf24',dim:'process',
+    det:'<h2 style="color:#fbbf24">Deduplication</h2><table><tr><td>Per file path</td><td>max 3 chunks</td></tr><tr><td>Per filename</td><td>max 4 across dirs</td></tr></table>'},
+  {id:'output',l:'Top-K\nOutput',desc:'최종 결과 (default 10)',x:0,y:-3.5,z:1,r:0.22,c:'#f43f5e',dim:'process',
+    det:'<h2 style="color:#f43f5e">Output</h2>topK=10<br>Content hydration<br>matchType: fts|vector|hybrid|graph'},
+
+  // === NEW: Context Injection ===
+  {id:'ctxinject',l:'Context\nInjection',desc:'서브에이전트 맞춤 컨텍스트',x:2,y:-3,z:0,r:0.25,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Scope-aware Context Injection <span class="tag tag-new">NEW v2</span></h2><table><tr><td>API</td><td>generateAgentContext()</td></tr><tr><td>Scope</td><td>config.filePaths[] filter</td></tr><tr><td>Refresh</td><td>refreshContext() for stale files</td></tr><tr><td>Format</td><td>## Relevant Context (auto-injected)</td></tr></table>서브에이전트별 담당 파일 기반 맞춤 컨텍스트'},
+
+  // === NEW: APIs & Tools ===
+  {id:'chunkmap',l:'Chunk\nMap API',desc:'파일 청크 경계 조회',x:3,y:-1,z:-0.5,r:0.2,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Chunk-map API <span class="tag tag-new">NEW v2</span></h2><table><tr><td>CLI</td><td><code>wki chunk-map "file"</code></td></tr><tr><td>MCP</td><td>knowledge_chunk_map</td></tr><tr><td>Use</td><td>Rule #7: File Read Budget</td></tr></table>큰 파일의 offset/limit 계획에 사용'},
+  {id:'stalecheck',l:'Staleness\nCheck',desc:'인덱싱 이후 변경 감지',x:3.5,y:0,z:-0.5,r:0.18,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Staleness Check <span class="tag tag-new">NEW v2</span></h2><table><tr><td>CLI</td><td><code>wki stale</code></td></tr><tr><td>MCP</td><td>knowledge_stale_check</td></tr><tr><td>Use</td><td>Rule #9: Edit Integrity</td></tr></table>freshness.lock 기반 변경 파일 목록 제공'},
+  {id:'unusedexp',l:'Unused\nExports',desc:'미사용 export 탐지',x:-4,y:-1.5,z:-1,r:0.2,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Unused Exports <span class="tag tag-new">NEW v2</span></h2><table><tr><td>CLI</td><td><code>wki unused-exports</code></td></tr><tr><td>Source</td><td>symbols.idx + deps.graph</td></tr><tr><td>Use</td><td>Rule #1: Step 0 dead code check</td></tr></table>리팩터 전 데드코드 식별 자동화'},
+
+  // === NEW: Gap Repair ===
+  {id:'gaprepair',l:'Gap\nRepair',desc:'누락 파일 자동 보정',x:-3.5,y:-2.5,z:0,r:0.22,c:'#a5b4fc',dim:'new',
+    det:'<h2 style="color:#a5b4fc">Gap Repair <span class="tag tag-new">NEW v2</span></h2><table><tr><td>Trigger</td><td>incremental indexing 시작 시</td></tr><tr><td>Logic</td><td>scanner 결과 vs FTS 비교</td></tr><tr><td>Action</td><td>누락 파일을 added에 자동 추가</td></tr></table>--full 리빌드 없이도 인덱스 자가 치유'},
+
+  // === Score Layer ===
   {id:'bm25',l:'BM25\nScore',desc:'키워드 매칭 점수',x:2.5,y:1.5,z:3,r:0.18,c:'#f59e0b',dim:'score',
-    det:'<h2 style="color:#f59e0b">BM25 Score</h2>Raw: (-∞,0]<br>Norm: log1p → [0,1]'},
-  {id:'cosine',l:'Cosine\nSim',desc:'벡터 유사도 점수 [0.5~1.0]',x:3,y:1,z:3.5,r:0.2,c:'#60a5fa',dim:'score',
-    det:'<h2 style="color:#60a5fa">Cosine Similarity</h2>1-dist/2 → [0.5,1.0]<br><span class="tag tag-m">Compressed range</span>'},
+    det:'<h2 style="color:#f59e0b">BM25 Score</h2>Raw: (-&infin;,0]<br>Norm: log1p &rarr; [0,1]'},
+  {id:'cosine',l:'Cosine\nSim',desc:'벡터 유사도 [0.5~1.0]',x:3,y:1,z:3.5,r:0.2,c:'#60a5fa',dim:'score',
+    det:'<h2 style="color:#60a5fa">Cosine Similarity</h2>1-dist/2 &rarr; [0.5,1.0]<br><span class="tag tag-m">Compressed range</span>'},
   {id:'wmatrix',l:'Weight\nMatrix',desc:'쿼리 유형별 FTS/Vector 비율',x:2.5,y:0,z:3,r:0.25,c:'#818cf8',dim:'score',
-    det:'<h2 style="color:#818cf8">Weight Matrix</h2><table><tr><td>natural</td><td>F=0.3 V=0.7</td></tr><tr><td>path</td><td>F=0.8 V=0.2</td></tr></table>'},
-  {id:'ndcg',l:'nDCG\n0.744',desc:'최종 검색 품질 지표',x:3,y:-2,z:3,r:0.45,c:'#4ade80',dim:'score',
-    det:'<h2 style="color:#4ade80">Mean nDCG@10 = 0.744</h2>Min: 0.506 · Max: 1.000<br>Baseline: 0.686 → <b>+8.5%</b><br><br>0.731 evidence recording<br>0.727 Stage 9<br>0.527 orchestration workflow<br>0.721 WKI injection<br>0.506 engine-adapters<br>0.630 증거 기록 규칙<br>0.860 오케스트레이션<br>1.000 spawnWorker<br>0.826 orchestrator.ts<br>0.886 manifest builder'},
+    det:'<h2 style="color:#818cf8">Weight Matrix</h2><table><tr><td>natural</td><td>F=0.3 V=0.7</td></tr><tr><td>path</td><td>F=0.8 V=0.2</td></tr><tr><td>identifier</td><td>F=0.7 V=0.3</td></tr></table>'},
+  {id:'ndcg',l:'nDCG\n0.792',desc:'Mean nDCG@10 (13 queries)',x:3,y:-2.5,z:3,r:0.45,c:'#4ade80',dim:'score',
+    det:'<h2 style="color:#4ade80">Mean nDCG@10 = 0.792</h2>File-only: 0.911 &middot; Line-scoped: 0.600<br>Min: 0.518 &middot; Max: 1.000<br><br><b>v2 improvements:</b><br>Symbol-fused: +0.013<br>Graph-boosted: ready (scales w/ data)<br>Heading coverage: clamp01 fix<br><br><b>Per-query:</b><br>0.625 evidence recording<br>0.518 Stage 9 evidence<br>0.629 orchestration workflow<br>0.794 WKI injection<br>0.543 engine-adapters (+0.094)<br>0.685 &#xD5D5;&#xAE30; &#xAE30;&#xB85D; &#xADDC;&#xCE59;<br>0.922 &#xC624;&#xCF00;&#xC2A4;&#xD2B8;&#xB808;&#xC774;&#xC158;<br>0.906 spawnWorker<br>0.826 orchestrator.ts<br>0.929 manifest builder<br>0.914 design director<br>1.000 trust-registry<br>1.000 DTR &#xD488;&#xC9C8;'},
 ];
 
+// ============================================================
+// EDGES
+// ============================================================
 const edges = [
+  // Data flow
   {a:'chunk',b:'embed',s:4,t:'data'},{a:'chunk',b:'ftsdb',s:3,t:'data'},{a:'embed',b:'lancedb',s:4,t:'data'},
   {a:'ftsdb',b:'fts',s:4,t:'data'},{a:'lancedb',b:'vector',s:4,t:'data'},
   {a:'chunk',b:'rerank',s:2,t:'data'},{a:'chunk',b:'ce',s:3,t:'data'},
+  // Process flow
   {a:'classify',b:'fts',s:3,t:'process'},{a:'classify',b:'vector',s:3,t:'process'},
   {a:'korean',b:'fts',s:2,t:'process'},{a:'korean',b:'vector',s:2,t:'process'},
   {a:'decompose',b:'fusion',s:2,t:'process'},
   {a:'vector',b:'multivec',s:4,t:'process'},{a:'multivec',b:'fusion',s:3,t:'process'},
   {a:'fts',b:'fusion',s:4,t:'process'},{a:'vector',b:'fusion',s:5,t:'process'},
-  {a:'fusion',b:'rerank',s:5,t:'process'},{a:'rerank',b:'ce',s:5,t:'process'},{a:'ce',b:'output',s:5,t:'process'},
+  {a:'fusion',b:'symrerank',s:4,t:'process'},{a:'symrerank',b:'graphrerank',s:3,t:'process'},
+  {a:'graphrerank',b:'rerank',s:4,t:'process'},{a:'rerank',b:'ce',s:5,t:'process'},
+  {a:'ce',b:'dedup',s:4,t:'process'},{a:'dedup',b:'output',s:4,t:'process'},
+  {a:'output',b:'ctxinject',s:3,t:'process'},
+  // Score flow
   {a:'fts',b:'bm25',s:3,t:'score'},{a:'vector',b:'cosine',s:3,t:'score'},
   {a:'classify',b:'wmatrix',s:4,t:'score'},{a:'bm25',b:'wmatrix',s:3,t:'score'},{a:'cosine',b:'wmatrix',s:3,t:'score'},
   {a:'wmatrix',b:'fusion',s:5,t:'score'},{a:'rerank',b:'ndcg',s:4,t:'score'},{a:'ce',b:'ndcg',s:4,t:'score'},
   {a:'output',b:'ndcg',s:5,t:'score'},
+  // NEW v2 edges
+  {a:'symbolidx',b:'symrerank',s:4,t:'new'},{a:'depsgraph',b:'graphrerank',s:3,t:'new'},
+  {a:'depsgraph',b:'unusedexp',s:3,t:'new'},{a:'symbolidx',b:'unusedexp',s:3,t:'new'},
+  {a:'ftsdb',b:'chunkmap',s:2,t:'new'},{a:'ftsdb',b:'stalecheck',s:2,t:'new'},
+  {a:'ftsdb',b:'gaprepair',s:3,t:'new'},{a:'gaprepair',b:'ftsdb',s:3,t:'new'},
+  {a:'ctxinject',b:'ndcg',s:2,t:'new'},
+  // Critical paths
   {a:'embed',b:'vector',s:5,t:'critical'},{a:'fusion',b:'ndcg',s:5,t:'critical'},
 ];
 
-const edgeColors = {data:'#f59e0b',process:'#a78bfa',score:'#4ade80',critical:'#f43f5e'};
+const edgeColors = {data:'#f59e0b',process:'#a78bfa',score:'#4ade80',critical:'#f43f5e',new:'#a5b4fc'};
 
 // Particles
 const particles = [];
@@ -243,14 +267,13 @@ function selectNode(n) {
   selectedNode = n;
   const el = document.getElementById('detail');
   document.getElementById('detailContent').innerHTML = n.det +
-    `<br><br><table><tr><td>3D Coord</td><td>(${n.x}, ${n.y}, ${n.z})</td></tr><tr><td>Dimension</td><td>${n.dim}</td></tr><tr><td>Impact</td><td>${n.r}</td></tr></table>`;
+    '<br><br><table><tr><td>3D Coord</td><td>('+n.x+', '+n.y+', '+n.z+')</td></tr><tr><td>Dimension</td><td>'+n.dim+'</td></tr><tr><td>Impact</td><td>'+n.r+'</td></tr></table>';
   el.style.display = 'block';
   el.style.borderColor = n.c + '88';
 }
 
 function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return {r,g,b};
+  return {r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};
 }
 
 function frame() {
@@ -259,23 +282,20 @@ function frame() {
   ctx.fillStyle = '#08080e';
   ctx.fillRect(0, 0, W, H);
 
-  // Grid on XZ plane (y=-3.5)
+  // Grid
   ctx.strokeStyle = 'rgba(255,255,255,0.03)';
   ctx.lineWidth = 0.5;
-  for (let i = -4; i <= 4; i++) {
-    let p1 = proj(i, -3.5, -1), p2 = proj(i, -3.5, 4);
+  for (let i = -5; i <= 5; i++) {
+    let p1 = proj(i, -4, -2), p2 = proj(i, -4, 4);
     ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke();
-    p1 = proj(-4, -3.5, i); p2 = proj(4, -3.5, i);
+    p1 = proj(-5, -4, i); p2 = proj(5, -4, i);
     ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke();
   }
 
   // Axes
-  const axes = [
-    {f:[-4,-3.5,-1],t:[4,-3.5,-1],l:'X: Data',c:'#f59e0b'},
-    {f:[-4,-3.5,-1],t:[-4,3.5,-1],l:'Y: Process',c:'#a78bfa'},
-    {f:[-4,-3.5,-1],t:[-4,-3.5,4],l:'Z: Score',c:'#4ade80'},
-  ];
-  axes.forEach(a => {
+  [{f:[-5,-4,-2],t:[5,-4,-2],l:'X: Data',c:'#f59e0b'},
+   {f:[-5,-4,-2],t:[-5,4,-2],l:'Y: Process',c:'#a78bfa'},
+   {f:[-5,-4,-2],t:[-5,-4,4],l:'Z: Score',c:'#4ade80'}].forEach(a => {
     const p1 = proj(...a.f), p2 = proj(...a.t);
     ctx.strokeStyle = a.c + '55'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke();
@@ -283,14 +303,15 @@ function frame() {
     ctx.fillText(a.l, p2.sx + 6, p2.sy - 4);
   });
 
-  // Project nodes
+  // Project
   projected = nodes.map(n => {
     const p = proj(n.x, n.y, n.z);
-    return {...n, sx: p.sx, sy: p.sy, sr: Math.max(6, n.r * p.scale * 0.35), depth: p.depth, vis: true};
+    const vis = filter === 'all' || filter === n.dim || (filter === 'critical');
+    return {...n, sx: p.sx, sy: p.sy, sr: Math.max(6, n.r * p.scale * 0.35), depth: p.depth, vis};
   });
-  projected.sort((a,b) => b.depth - a.depth); // far first
+  projected.sort((a,b) => b.depth - a.depth);
 
-  // Draw edges
+  // Edges
   edges.forEach(e => {
     if (filter !== 'all' && filter !== e.t) return;
     const na = nodes.find(n=>n.id===e.a), nb = nodes.find(n=>n.id===e.b);
@@ -305,7 +326,7 @@ function frame() {
     ctx.setLineDash([]); ctx.globalAlpha = 1;
   });
 
-  // Draw particles
+  // Particles
   particles.forEach(p => {
     p.t += p.sp; if (p.t>1) p.t -= 1;
     if (filter!=='all' && filter!==p.e.t) return;
@@ -313,62 +334,60 @@ function frame() {
     if (!na||!nb) return;
     const x = na.x+(nb.x-na.x)*p.t, y = na.y+(nb.y-na.y)*p.t, z = na.z+(nb.z-na.z)*p.t;
     const pp = proj(x,y,z);
-    const ec = edgeColors[p.e.t]||'#888';
-    ctx.fillStyle = ec; ctx.globalAlpha = 0.8;
+    ctx.fillStyle = edgeColors[p.e.t]||'#888'; ctx.globalAlpha = 0.8;
     ctx.beginPath(); ctx.arc(pp.sx, pp.sy, Math.max(1.5, 2/pp.scale*20), 0, Math.PI*2); ctx.fill();
     ctx.globalAlpha = 1;
   });
 
-  // Draw nodes
+  // Nodes
   for (const n of projected) {
+    if (!n.vis && filter !== 'all') continue;
     const isSel = selectedNode && selectedNode.id === n.id;
     const rgb = hexToRgb(n.c);
+    const dimmed = !n.vis ? 0.15 : 1;
 
     // Glow
     const grd = ctx.createRadialGradient(n.sx, n.sy, 0, n.sx, n.sy, n.sr*2.5);
-    grd.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b},${isSel?0.2:0.08})`);
+    grd.addColorStop(0, 'rgba('+rgb.r+','+rgb.g+','+rgb.b+','+(isSel?0.2:0.08)*dimmed+')');
     grd.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = grd;
     ctx.fillRect(n.sx-n.sr*3, n.sy-n.sr*3, n.sr*6, n.sr*6);
 
-    // Sphere gradient
+    // Sphere
     const sg = ctx.createRadialGradient(n.sx-n.sr*0.25, n.sy-n.sr*0.25, n.sr*0.1, n.sx, n.sy, n.sr);
-    sg.addColorStop(0, `rgba(${Math.min(255,rgb.r+80)},${Math.min(255,rgb.g+80)},${Math.min(255,rgb.b+80)},${isSel?0.6:0.35})`);
-    sg.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b},${isSel?0.3:0.12})`);
+    sg.addColorStop(0, 'rgba('+Math.min(255,rgb.r+80)+','+Math.min(255,rgb.g+80)+','+Math.min(255,rgb.b+80)+','+(isSel?0.6:0.35)*dimmed+')');
+    sg.addColorStop(1, 'rgba('+rgb.r+','+rgb.g+','+rgb.b+','+(isSel?0.3:0.12)*dimmed+')');
     ctx.fillStyle = sg;
     ctx.beginPath(); ctx.arc(n.sx, n.sy, n.sr, 0, Math.PI*2); ctx.fill();
 
-    // Border
-    ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${isSel?0.9:0.5})`;
+    ctx.strokeStyle = 'rgba('+rgb.r+','+rgb.g+','+rgb.b+','+(isSel?0.9:0.5)*dimmed+')';
     ctx.lineWidth = isSel ? 2.5 : 1;
     ctx.stroke();
+
+    // "NEW" ring for v2 nodes
+    if (n.dim === 'new') {
+      ctx.strokeStyle = 'rgba(165,180,252,0.4)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3,3]);
+      ctx.beginPath(); ctx.arc(n.sx, n.sy, n.sr + 4, 0, Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     // Label
     if (n.sr > 8) {
       const lines = n.l.split('\n');
       ctx.fillStyle = n.c;
-      ctx.font = `${Math.max(8, Math.min(12, n.sr*0.45))}px 'Segoe UI',sans-serif`;
+      ctx.font = Math.max(8, Math.min(12, n.sr*0.45))+'px "Segoe UI",sans-serif';
       ctx.textAlign = 'center';
       lines.forEach((line, i) => {
         ctx.fillText(line, n.sx, n.sy + (i-(lines.length-1)/2) * (n.sr*0.4) + 3);
       });
-
-      // Description + Coord
       if (n.sr > 14 && n.desc) {
-        ctx.fillStyle = 'rgba(255,255,255,0.35)';
-        ctx.font = '9px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '9px sans-serif';
         ctx.fillText(n.desc, n.sx, n.sy + n.sr + 12);
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        ctx.font = '7px monospace';
-        ctx.fillText(`(${n.x},${n.y},${n.z})`, n.sx, n.sy + n.sr + 22);
-      } else if (n.sr > 14) {
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        ctx.font = '7px monospace';
-        ctx.fillText(`(${n.x},${n.y},${n.z})`, n.sx, n.sy + n.sr + 10);
       }
     }
   }
-
   ctx.textAlign = 'left';
 }
 

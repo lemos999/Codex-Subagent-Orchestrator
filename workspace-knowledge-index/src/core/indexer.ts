@@ -297,6 +297,36 @@ export class Indexer {
     const ftsStore = new FtsStore(ftsDbPath);
     const db = ftsStore.getDatabase();
 
+    // Detect files present on disk but missing from FTS index (gap repair).
+    // This happens when previous incremental runs didn't cover all scanner output
+    // (e.g., first-time full index was incomplete or FTS was rebuilt from partial state).
+    const scanner = new Scanner(this.excludePatterns);
+    const allDiskFiles = scanner.scan(this.projectRoot);
+    const indexedFilesRows = db.prepare(
+      'SELECT DISTINCT file_path FROM chunks_meta WHERE project_id = ?',
+    ).all(this.projectId) as Array<{ file_path: string }>;
+    const indexedFileSet = new Set(indexedFilesRows.map(r => r.file_path));
+
+    const missingFiles: string[] = [];
+    for (const entry of allDiskFiles) {
+      const normalized = normalizePath(entry.path);
+      if (!indexedFileSet.has(normalized)) {
+        missingFiles.push(entry.path);
+      }
+    }
+
+    if (missingFiles.length > 0) {
+      // Merge missing files into changedFiles.added (dedupe)
+      const addedSet = new Set(changedFiles.added);
+      for (const f of missingFiles) {
+        if (!addedSet.has(f)) {
+          changedFiles.added.push(f);
+          addedSet.add(f);
+        }
+      }
+      console.log(`[indexer] Gap repair: ${missingFiles.length} files on disk but missing from index — adding to incremental batch.`);
+    }
+
     // Load existing symbols and deps
     const symbolsPath = path.join(this.knowledgeDir, 'symbols.idx');
     const existingSymbols = this.loadSymbolsIdx(symbolsPath);
