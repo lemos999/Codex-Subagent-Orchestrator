@@ -15,7 +15,7 @@ There are two working modes.
 
 #### 1. Default mode: one session
 
-If the user does not explicitly ask for `/sub`, work stays inside the current Codex session.
+If the user does not explicitly ask for `/sub` or otherwise explicitly request subagents, work stays inside the current Codex session.
 
 The usual flow is:
 
@@ -34,7 +34,7 @@ If the task is better handled by splitting work, `/sub` can be used to supervise
 Before launch, the parent session decides:
 
 - whether one worker is enough
-- whether the run should be serial or parallel
+- whether the run should be serial, parallel, or mixed
 - where review belongs
 - which files or scopes each worker owns
 - which rules are actually needed for the task
@@ -108,7 +108,7 @@ For Agent Skills routing:
 ### Core rules
 
 - default to one-session work
-- use `/sub` only when delegation is justified
+- use `/sub` or another explicit subagent request only when delegation is justified
 - do not attach a reviewer after every writer
 - use bounded repairs when review finds a problem
 - do not load all Agent Skills by habit
@@ -131,7 +131,7 @@ For Agent Skills routing:
 
 #### 1. 기본 방식: 한 세션 안에서 작업
 
-사용자가 `/sub`를 명시하지 않으면 작업은 현재 Codex 대화 세션 안에서 진행됩니다.
+사용자가 `/sub`를 명시하지 않고, 별도로 서브에이전트를 명시적으로 요청하지도 않으면 작업은 현재 Codex 대화 세션 안에서 진행됩니다.
 
 기본 흐름은 아래와 같습니다.
 
@@ -224,7 +224,7 @@ Agent Skills 연결 규칙:
 ### 핵심 원칙
 
 - 기본은 한 세션 작업
-- `/sub`는 필요할 때만 사용
+- `/sub` 또는 명시적 서브에이전트 요청은 필요할 때만 사용
 - 구현자마다 검토자를 붙이지 않음
 - 검토에서 문제를 찾으면 필요한 범위만 고친 뒤 다시 확인
 - Agent Skills를 습관처럼 전부 붙이지 않음
