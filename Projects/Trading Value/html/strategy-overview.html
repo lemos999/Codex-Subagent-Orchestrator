@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Trading Value - Strategy Overview</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;padding:24px;max-width:1200px;margin:0 auto}
+h1{font-size:22px;color:#ff9800;margin-bottom:8px}
+h2{font-size:16px;color:#ff9800;margin:32px 0 16px;border-bottom:1px solid #2a3040;padding-bottom:8px}
+h3{font-size:13px;color:#4dabf7;margin:20px 0 8px}
+.sub{font-size:12px;color:#555;margin-bottom:24px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:24px}
+.card{background:#141926;border:1px solid #2a3040;border-radius:10px;padding:18px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.card-trend::before{background:linear-gradient(90deg,#00d4aa,#00d4aa88)}
+.card-revert::before{background:linear-gradient(90deg,#ff9800,#ff980088)}
+.card-break::before{background:linear-gradient(90deg,#4dabf7,#4dabf788)}
+.card-grid-s::before{background:linear-gradient(90deg,#ffd700,#ffd70088)}
+.card-mom::before{background:linear-gradient(90deg,#ff4d6a,#ff4d6a88)}
+.card-pair::before{background:linear-gradient(90deg,#b35cff,#b35cff88)}
+.card h4{font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.tag{font-size:9px;padding:2px 7px;border-radius:10px;font-weight:bold}
+.tag-long{background:#00d4aa22;color:#00d4aa}
+.tag-both{background:#ffd70022;color:#ffd700}
+.tag-neutral{background:#b35cff22;color:#b35cff}
+.card p{font-size:11px;color:#888;line-height:1.6;margin-bottom:10px}
+.formula{background:#0a0e17;border:1px solid #2a3040;border-radius:6px;padding:10px;font-family:'Cascadia Code',monospace;font-size:11px;color:#4dabf7;margin:8px 0;white-space:pre-wrap}
+.flow{display:flex;align-items:center;gap:6px;margin:10px 0;font-size:11px;flex-wrap:wrap}
+.flow-step{background:#0a0e17;border:1px solid #2a3040;padding:4px 10px;border-radius:4px;color:#ddd}
+.flow-arrow{color:#555}
+
+table{width:100%;border-collapse:collapse;font-size:11px;margin:12px 0}
+th{text-align:left;color:#555;padding:6px 8px;border-bottom:1px solid #2a3040;font-size:10px;text-transform:uppercase}
+td{padding:6px 8px;border-bottom:1px solid #1a2030}
+.gn{color:#00d4aa}.rd{color:#ff4d6a}.yl{color:#ffd700}.bl{color:#4dabf7}
+
+.timeline{position:relative;padding-left:24px;margin:16px 0}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:#2a3040}
+.tl-item{position:relative;padding:10px 0 10px 20px;font-size:11px}
+.tl-item::before{content:'';position:absolute;left:-19px;top:14px;width:10px;height:10px;border-radius:50%;border:2px solid #2a3040;background:#0a0e17}
+.tl-item.done::before{background:#00d4aa;border-color:#00d4aa}
+.tl-item.active::before{background:#ffd700;border-color:#ffd700;animation:pulse 1.5s infinite}
+.tl-item .tl-title{color:#ddd;font-weight:bold}
+.tl-item .tl-desc{color:#666;margin-top:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.metric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}
+.metric{background:#0a0e17;border:1px solid #2a3040;border-radius:6px;padding:12px;text-align:center}
+.metric .label{font-size:9px;color:#555;margin-bottom:4px}
+.metric .value{font-size:18px;font-weight:bold}
+
+.chart-bar-h{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:10px}
+.chart-bar-h .bar{height:14px;border-radius:3px;transition:width 0.5s}
+.chart-bar-h .label{min-width:50px;color:#888}
+.chart-bar-h .val{min-width:40px;text-align:right;color:#ddd}
+
+.section{background:#141926;border:1px solid #2a3040;border-radius:10px;padding:20px;margin-bottom:20px}
+</style>
+</head>
+<body>
+
+<h1>Trading Value - Strategy Overview</h1>
+<div class="sub">5,000 variants competing on 9 assets x 7 strategies x 6 timeframes | Live Tournament</div>
+
+<!-- ===== TOURNAMENT SUMMARY ===== -->
+<div class="section">
+<h3>Tournament Architecture</h3>
+<div class="flow">
+  <span class="flow-step">5,000 Variants</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Real-time Market Data</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Vectorized Evaluation</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Virtual P&L Tracking</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step" style="border-color:#ffd700;color:#ffd700">Biweekly Tournament</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step" style="border-color:#00d4aa;color:#00d4aa">Top 20 Ensemble</span>
+</div>
+
+<div class="metric-grid">
+  <div class="metric"><div class="label">Variants</div><div class="value bl">5,000</div></div>
+  <div class="metric"><div class="label">Assets</div><div class="value yl">9</div></div>
+  <div class="metric"><div class="label">Strategies</div><div class="value gn">7</div></div>
+  <div class="metric"><div class="label">Timeframes</div><div class="value" style="color:#ff9800">6</div></div>
+  <div class="metric"><div class="label">Tournament</div><div class="value rd">14d cycle</div></div>
+</div>
+</div>
+
+<!-- ===== 7 STRATEGIES ===== -->
+<h2>7 Strategies</h2>
+
+<div class="card-grid">
+
+<!-- Strategy 0: Trend Long -->
+<div class="card card-trend">
+<h4><span class="tag tag-long">LONG ONLY</span> Trend Following</h4>
+<p>MA 정렬 + 모멘텀 확인 후 롱 진입. 가장 기본적이고 검증된 전략. ETH에서 +26.7% OOS 달성.</p>
+<div class="formula">conviction = trend_w * MA_align + rsi_w * RSI_pullback
+           + vol_w * Volume_confirm + mom_w * Momentum
+if conviction > threshold: LONG (size = conviction * leverage)</div>
+<p><b>Best for:</b> 강한 추세장 (BTC/ETH bull run)<br>
+<b>Weakness:</b> 횡보/하락장에서 손실<br>
+<b>Timeframe:</b> 15m ~ 4h</p>
+</div>
+
+<!-- Strategy 1: Trend Both -->
+<div class="card card-trend">
+<h4><span class="tag tag-both">LONG & SHORT</span> Trend Both</h4>
+<p>추세추종이지만 하락 추세에서 숏도 허용. Conviction이 음수면 숏 포지션.</p>
+<div class="formula">conviction = weights @ signals  (range: -1 to +1)
+if conviction > 0: LONG
+if conviction < 0: SHORT
+size = |conviction| * leverage</div>
+<p><b>Best for:</b> 명확한 방향성 있는 시장<br>
+<b>Weakness:</b> 횡보장에서 양쪽 손절<br>
+<b>Timeframe:</b> 15m ~ 1h</p>
+</div>
+
+<!-- Strategy 2: Mean Reversion -->
+<div class="card card-revert">
+<h4><span class="tag tag-long">LONG ONLY</span> Mean Reversion</h4>
+<p>과매도 시 매수, 평균으로 회귀 기대. RSI/볼린저 밴드 이탈 활용.</p>
+<div class="formula">signals_inverted = signals * [1, -1, 1, -1, 1]
+  (RSI와 Momentum 반전: 과매도 = bullish)
+conviction = weights @ signals_inverted
+Entry: RSI < 30 AND price < BB_lower</div>
+<p><b>Best for:</b> 횡보장, 과매도 반등<br>
+<b>Weakness:</b> 강한 하락 추세에서 "떨어지는 칼" 잡기<br>
+<b>Timeframe:</b> 5m ~ 15m</p>
+</div>
+
+<!-- Strategy 3: Breakout -->
+<div class="card card-break">
+<h4><span class="tag tag-long">LONG ONLY</span> Breakout</h4>
+<p>가격이 저항선을 돌파할 때 추세 시작을 포착. 거래량 급증 확인.</p>
+<div class="formula">signals_boosted = signals * [1.5, 0.5, 1.5, 1.5, 0.5]
+  (Trend + Volume + Momentum 강화, RSI + Volatility 약화)
+conviction = weights @ signals_boosted
+Entry: price > Donchian_high AND volume_spike</div>
+<p><b>Best for:</b> 레인지 탈출, 신고가 돌파<br>
+<b>Weakness:</b> 거짓 돌파(fakeout)<br>
+<b>Timeframe:</b> 15m ~ 4h</p>
+</div>
+
+<!-- Strategy 4: Grid -->
+<div class="card card-grid-s">
+<h4><span class="tag tag-both">LONG & SHORT</span> Grid Trading</h4>
+<p>현재 가격 주위에 일정 간격으로 매수/매도. 횡보장의 왕.</p>
+<div class="formula">sideways_score = 1.0 - |trend| - |momentum|
+distance = (price - entry) / entry
+if |distance| > grid_spacing:
+  conviction = -sign(distance) * sideways * 0.5
+  (가격 올라가면 매도, 내려가면 매수)</div>
+<p><b>Best for:</b> 횡보장, 레인지 바운드<br>
+<b>Weakness:</b> 강한 추세에서 재고 리스크<br>
+<b>Timeframe:</b> 1m ~ 15m</p>
+</div>
+
+<!-- Strategy 5: Momentum Rotation -->
+<div class="card card-mom">
+<h4><span class="tag tag-long">LONG ONLY</span> Momentum Rotation</h4>
+<p>9종목 중 최근 수익률 상위 3개만 투자. 약한 종목은 자동 청산.</p>
+<div class="formula">for each asset:
+  momentum_rank = sort(all_9_assets, by=ROC_24h)
+if this_asset in top_3:
+  conviction = 1.0 - rank * 0.15  (1st=1.0, 2nd=0.85, 3rd=0.70)
+else:
+  conviction = 0.0  (FLAT)</div>
+<p><b>Best for:</b> 섹터 로테이션, 강한 종목 집중<br>
+<b>Weakness:</b> 급격한 로테이션 시 지연<br>
+<b>Timeframe:</b> 1h ~ 1d</p>
+</div>
+
+<!-- Strategy 6: Pair Trading -->
+<div class="card card-pair">
+<h4><span class="tag tag-neutral">MARKET NEUTRAL</span> Pair Trading</h4>
+<p>두 종목의 가격 비율이 평균에서 이탈하면 되돌림에 베팅. 시장 방향 무관.</p>
+<div class="formula">ratio = price_A / price_B
+z_score = (ratio - mean_100) / std_100
+if z > 2.0: SHORT A (overvalued)
+if z < -2.0: LONG A (undervalued)
+conviction = min(|z| / 4, 1.0)</div>
+<p><b>Best for:</b> 상관관계 높은 종목 (BTC/ETH, NVDA/QQQ)<br>
+<b>Weakness:</b> 비율이 비정상(non-stationary)이면 실패<br>
+<b>Timeframe:</b> 1h ~ 4h</p>
+</div>
+
+</div>
+
+<!-- ===== ASSETS ===== -->
+<h2>9 Assets</h2>
+
+<div class="section">
+<table>
+<thead><tr><th>Asset</th><th>Type</th><th>Market Hours</th><th>Timeframes</th><th>Variants</th><th>Max Leverage</th></tr></thead>
+<tbody>
+<tr><td class="yl">BTC</td><td>Crypto</td><td>24/7</td><td>1m ~ 1d</td><td>~830</td><td>1.5x</td></tr>
+<tr><td class="yl">ETH</td><td>Crypto</td><td>24/7</td><td>1m ~ 1d</td><td>~720</td><td>2.0x</td></tr>
+<tr><td class="yl">SOL</td><td>Crypto</td><td>24/7</td><td>1m ~ 1d</td><td>~555</td><td>2.0x</td></tr>
+<tr><td class="yl">XRP</td><td>Crypto</td><td>24/7</td><td>1m ~ 1d</td><td>~445</td><td>1.5x</td></tr>
+<tr><td class="bl">NVDA</td><td>Stock</td><td>9:30-16:00 ET</td><td>Daily</td><td>~665</td><td>3.0x</td></tr>
+<tr><td class="bl">TSLA</td><td>Stock</td><td>9:30-16:00 ET</td><td>Daily</td><td>~555</td><td>2.5x</td></tr>
+<tr><td class="bl">AMZN</td><td>Stock</td><td>9:30-16:00 ET</td><td>Daily</td><td>~445</td><td>2.0x</td></tr>
+<tr><td class="bl">GOOGL</td><td>Stock</td><td>9:30-16:00 ET</td><td>Daily</td><td>~390</td><td>2.0x</td></tr>
+<tr><td class="gn">QQQ</td><td>ETF</td><td>9:30-16:00 ET</td><td>Daily</td><td>~395</td><td>2.0x</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ===== TIMEFRAMES ===== -->
+<h2>6 Timeframes</h2>
+
+<div class="section">
+<div class="chart-bar-h"><span class="label">1 min</span><div class="bar" style="width:10%;background:#ff4d6a"></div><span class="val">10%</span><span style="color:#555;margin-left:8px">Scalping / Canary</span></div>
+<div class="chart-bar-h"><span class="label">5 min</span><div class="bar" style="width:20%;background:#ff9800"></div><span class="val">20%</span><span style="color:#555;margin-left:8px">Short-term Core</span></div>
+<div class="chart-bar-h"><span class="label">15 min</span><div class="bar" style="width:30%;background:#ffd700"></div><span class="val">30%</span><span style="color:#555;margin-left:8px">Sweet Spot (proven)</span></div>
+<div class="chart-bar-h"><span class="label">1 hour</span><div class="bar" style="width:20%;background:#00d4aa"></div><span class="val">20%</span><span style="color:#555;margin-left:8px">Swing Trading</span></div>
+<div class="chart-bar-h"><span class="label">4 hour</span><div class="bar" style="width:10%;background:#4dabf7"></div><span class="val">10%</span><span style="color:#555;margin-left:8px">Medium-term Trend</span></div>
+<div class="chart-bar-h"><span class="label">Daily</span><div class="bar" style="width:10%;background:#b35cff"></div><span class="val">10%</span><span style="color:#555;margin-left:8px">Long-term / Stocks</span></div>
+</div>
+
+<!-- ===== TOURNAMENT CYCLE ===== -->
+<h2>Tournament Cycle</h2>
+
+<div class="section">
+<div class="timeline">
+<div class="tl-item active"><div class="tl-title">Week 1-4: Exploration Phase</div><div class="tl-desc">5,000 variants run freely. No elimination. Collecting data. Minimum 30 trades per variant needed.</div></div>
+<div class="tl-item"><div class="tl-title">Week 5: First Tournament Round</div><div class="tl-desc">Rank by CTS (Calmar 35% + Sortino 25% + Consistency 20% + DSR 10% + Frequency 10%). Bottom 20% eliminated.</div></div>
+<div class="tl-item"><div class="tl-title">Every 2 Weeks: Evolution</div><div class="tl-desc">Bottom 20% replaced: 70% CMA-ES mutations from top 20%, 30% pure random for diversity.</div></div>
+<div class="tl-item"><div class="tl-title">Ongoing: Ensemble Production</div><div class="tl-desc">Top 20 variants form weighted ensemble. Inverse-variance weighting. Correlation filter (max 3 with rho > 0.7).</div></div>
+</div>
+</div>
+
+<!-- ===== RANKING METRIC ===== -->
+<h2>Ranking Metric: CTS (Composite Tournament Score)</h2>
+
+<div class="section">
+<div class="formula" style="font-size:13px;color:#ff9800">CTS = 0.35 * Calmar + 0.25 * Sortino + 0.20 * Consistency + 0.10 * DSR + 0.10 * Frequency</div>
+
+<table>
+<thead><tr><th>Component</th><th>Weight</th><th>Formula</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td class="gn">Calmar Ratio</td><td>35%</td><td>Annual Return / Max Drawdown</td><td>Consistent growth with controlled risk</td></tr>
+<tr><td class="bl">Sortino Ratio</td><td>25%</td><td>Return / Downside Deviation</td><td>Penalize losses only, not upside volatility</td></tr>
+<tr><td class="yl">Consistency</td><td>20%</td><td>Recent WR * 0.6 + Total WR * 0.4</td><td>Stable win rate over time</td></tr>
+<tr><td>DSR</td><td>10%</td><td>Sharpe - multiple testing correction</td><td>Filter lucky variants</td></tr>
+<tr><td>Frequency</td><td>10%</td><td>min(trades / 100, 1.0)</td><td>Enough data for significance</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ===== EVOLUTION ===== -->
+<h2>Limits Broken</h2>
+
+<div class="section">
+<table>
+<thead><tr><th>#</th><th>Limit</th><th>How We Broke It</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>"RL is the only way"</td><td class="gn">CMA-ES + XGBoost hybrid</td></tr>
+<tr><td>2</td><td>"Enter or don't enter" (binary)</td><td class="gn">Continuous conviction positioning</td></tr>
+<tr><td>3</td><td>"One strategy fits all"</td><td class="gn">7 strategies competing</td></tr>
+<tr><td>4</td><td>"15-min is the best timeframe"</td><td class="gn">6 timeframes (1m to daily)</td></tr>
+<tr><td>5</td><td>"One asset at a time"</td><td class="gn">9 assets simultaneously</td></tr>
+<tr><td>6</td><td>"Backtest then deploy"</td><td class="gn">Live tournament: market decides</td></tr>
+<tr><td>7</td><td>"Optimize manually"</td><td class="gn">5,000 variants self-evolving</td></tr>
+<tr><td>8</td><td>"DL architecture is the bottleneck"</td><td class="gn">Features + labeling, not architecture</td></tr>
+</tbody>
+</table>
+</div>
+
+<div style="text-align:center;color:#333;font-size:10px;margin-top:40px;padding:20px">
+  Trading Value | Conviction Engine + Tournament System | No Limits
+</div>
+
+</body>
+</html>
