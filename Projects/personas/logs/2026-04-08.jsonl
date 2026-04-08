@@ -1,1 +1,5 @@
 {"timestamp":"2026-04-08T00:00:00Z","type":"persona_created","persona_id":"persona_016","name":"Kael Arden","class":1,"region":"gemini","note":"World Ontology 합의안 검증 FAIL 3건 발견 공로"}
+{"timestamp":"2026-04-08T01:00:00Z","type":"daemon_created","daemon_id":"daemon_001","name":"Physis","note":"자연 정령. 기후 물리 엔진. 불멸."}
+{"timestamp":"2026-04-08T01:00:00Z","type":"daemon_created","daemon_id":"daemon_002","name":"Lachesis","note":"시간의 배분자. 틱 클럭. 불멸."}
+{"timestamp":"2026-04-08T01:00:00Z","type":"daemon_created","daemon_id":"daemon_003","name":"Anima","note":"숨결을 불어넣는 자. 영혼. 불멸."}
+{"timestamp":"2026-04-08T01:00:00Z","type":"daemon_created","daemon_id":"daemon_004","name":"Nomos","note":"법을 세우는 자. 질서. 불멸."}

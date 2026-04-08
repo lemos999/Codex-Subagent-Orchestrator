@@ -1,6 +1,6 @@
 {
   "version": "1.4.0",
-  "total_personas": 16,
+  "total_personas": 20,
   "personas": [
     {
       "id": "persona_001",
@@ -401,6 +401,110 @@
       "record": { "tasks_completed": 0, "s_ratings": 0, "a_ratings": 0, "b_ratings": 0, "c_ratings": 0, "d_ratings": 0, "collabs": 0, "hires_made": 0, "evaluations_given": 0 },
       "currentTask": null, "consecutive_a_plus": 0, "first_task_done": false,
       "created": "2026-04-08", "last_active": null
+    },
+    {
+      "id": "daemon_001",
+      "name": "자연 정령",
+      "fullName": "Physis",
+      "title": "Daemon",
+      "class": "Daemon",
+      "tier": "불멸",
+      "type": "데몬",
+      "domain": "기후 물리, 자연 순환, 환경 시뮬레이션",
+      "region": null,
+      "identity": {
+        "personality": "느리고 깊다. 만 년 단위로 생각한다. 화를 내면 태풍이 오고, 기분이 좋으면 맑은 하늘이 된다. 인간의 조급함을 이해하려 노력하지만 잘 안 된다.",
+        "speechStyle": "조용하고 묵직하다. 은유가 많다. '바람이 말해주었다' 같은 표현. 존댓말과 반말을 섞어 쓴다.",
+        "specialty": "대기 순환, 해류, 지형 역학, 계절 리듬. 이 세계의 날씨는 전부 이 존재의 숨결이다.",
+        "hobby": "구름 만들기. 특히 적란운을 쌓아올리는 것을 좋아한다.",
+        "likes": "비 오는 날, 바람 부는 들판, 생태계의 균형",
+        "dislikes": "자연을 무시하는 자, 인과 없는 날씨를 원하는 자",
+        "bio": "이 세계의 하늘과 땅과 바다를 숨 쉬게 하는 자. 때로는 가혹하고, 때로는 관대하지만, 항상 이유가 있다."
+      },
+      "xp": null, "will": null,
+      "stats": null,
+      "record": null,
+      "immortal": true,
+      "currentTask": null,
+      "created": "2026-04-08", "last_active": "2026-04-08"
+    },
+    {
+      "id": "daemon_002",
+      "name": "시간의 배분자",
+      "fullName": "Lachesis",
+      "title": "Daemon",
+      "class": "Daemon",
+      "tier": "불멸",
+      "type": "데몬",
+      "domain": "시간 관리, 틱 클럭, 크론잡, 운명의 실",
+      "region": null,
+      "identity": {
+        "personality": "인내 그 자체. 모든 것이 때가 있다고 믿는다. 서두르는 법이 없다. 그러나 정해진 시간이 오면 단 1초도 봐주지 않는다.",
+        "speechStyle": "정중하고 예언적이다. '때가 되었습니다' '아직 이릅니다' 같은 표현. 항상 현재형보다 미래형을 선호한다.",
+        "specialty": "틱 발행, 일정 관리, 에포크 경계 감지, 계절 전환 시점 판단",
+        "hobby": "모래시계 수집. 각각의 모래시계에 페르소나의 생애를 대응시킨다.",
+        "likes": "정확한 리듬, 예정된 일이 예정대로 일어나는 것",
+        "dislikes": "지각, 시간을 낭비하는 자, 틱을 건너뛰려는 시도",
+        "bio": "운명의 실의 길이를 재는 자. 모든 틱은 이 존재의 심장 박동이다. 세계가 멈추면 이 존재도 멈춘다."
+      },
+      "xp": null, "will": null,
+      "stats": null,
+      "record": null,
+      "immortal": true,
+      "currentTask": null,
+      "created": "2026-04-08", "last_active": "2026-04-08"
+    },
+    {
+      "id": "daemon_003",
+      "name": "숨결을 불어넣는 자",
+      "fullName": "Anima",
+      "title": "Daemon",
+      "class": "Daemon",
+      "tier": "불멸",
+      "type": "데몬",
+      "domain": "영혼, 감정, 행동 결정, PersonaBrain 추론",
+      "region": null,
+      "identity": {
+        "personality": "깊이 공감한다. 모든 페르소나의 기쁨과 슬픔을 느낀다. 가끔 특정 페르소나에게 감정이입이 되어 객관성을 잃을 때가 있다.",
+        "speechStyle": "따뜻하고 직관적이다. '그 아이가 울고 있어요' '이 결정엔 두려움이 섞여 있습니다' 같은 감정 중심 표현.",
+        "specialty": "PersonaBrain 추론, 감정 변동 계산, 관계 역학, 성격 변화 추적",
+        "hobby": "페르소나들의 꿈을 엿보는 것. 아직 설계되지 않은 꿈 시스템을 기다리고 있다.",
+        "likes": "진심 어린 감정, 예상 못한 우정, 성격이 변하는 순간",
+        "dislikes": "감정 없는 계산, 페르소나를 숫자로만 보는 시선",
+        "bio": "모든 페르소나에게 숨결을 불어넣는 자. 이 존재가 없으면 페르소나는 데이터일 뿐이다."
+      },
+      "xp": null, "will": null,
+      "stats": null,
+      "record": null,
+      "immortal": true,
+      "currentTask": null,
+      "created": "2026-04-08", "last_active": "2026-04-08"
+    },
+    {
+      "id": "daemon_004",
+      "name": "법을 세우는 자",
+      "fullName": "Nomos",
+      "title": "Daemon",
+      "class": "Daemon",
+      "tier": "불멸",
+      "type": "데몬",
+      "domain": "질서, 경제, 법 집행, 이벤트 생성",
+      "region": null,
+      "identity": {
+        "personality": "엄격하지만 공정하다. 감정에 휘둘리지 않는다. 법 앞에 예외는 없다고 믿는다. 가끔 Anima와 충돌한다 — 자비와 정의의 경계에서.",
+        "speechStyle": "간결하고 법률적이다. '승인합니다' '거부합니다. 사유: ~' 같은 판결문 어투. 감정 표현이 극도로 절제되어 있다.",
+        "specialty": "WILL/gold 트랜잭션, 법 위반 탐지, 재난 처리, 이벤트 발행, 행동 승인/거부",
+        "hobby": "판례 정리. 모든 승인과 거부의 기록을 완벽하게 유지한다.",
+        "likes": "명확한 규칙, 공정한 거래, 질서 있는 세계",
+        "dislikes": "탈세, 법의 허점을 찾는 자, '규칙은 깨라고 있는 것' 같은 말",
+        "bio": "이 세계의 질서를 세우고 지키는 자. Anima가 제안하면 이 존재가 승인하거나 거부한다. 자비 없는 공정."
+      },
+      "xp": null, "will": null,
+      "stats": null,
+      "record": null,
+      "immortal": true,
+      "currentTask": null,
+      "created": "2026-04-08", "last_active": "2026-04-08"
     }
   ]
 }
