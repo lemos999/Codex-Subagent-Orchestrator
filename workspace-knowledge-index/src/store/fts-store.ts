@@ -31,6 +31,8 @@ export interface ChunkMetaRow {
   end_line: number | null;
   token_count: number | null;
   content_hash: string | null;
+  source_type: string | null;
+  last_modified: string | null;
 }
 
 export interface ChunkMetaStatementParams {
@@ -44,6 +46,8 @@ export interface ChunkMetaStatementParams {
   endLine: number | null;
   tokenCount: number | null;
   contentHash: string | null;
+  sourceType: string | null;
+  lastModified: string | null;
 }
 
 interface SearchRow {
@@ -64,7 +68,9 @@ export const CHUNK_META_UPSERT_SQL = `
     start_line,
     end_line,
     token_count,
-    content_hash
+    content_hash,
+    source_type,
+    last_modified
   )
   VALUES (
     @projectId,
@@ -76,7 +82,9 @@ export const CHUNK_META_UPSERT_SQL = `
     @startLine,
     @endLine,
     @tokenCount,
-    @contentHash
+    @contentHash,
+    @sourceType,
+    @lastModified
   )
   ON CONFLICT(file_path, ordinal) DO UPDATE SET
     project_id = excluded.project_id,
@@ -86,7 +94,9 @@ export const CHUNK_META_UPSERT_SQL = `
     start_line = excluded.start_line,
     end_line = excluded.end_line,
     token_count = excluded.token_count,
-    content_hash = excluded.content_hash
+    content_hash = excluded.content_hash,
+    source_type = excluded.source_type,
+    last_modified = excluded.last_modified
 `;
 
 const STORE_SCHEMA_SQL = `
@@ -102,6 +112,8 @@ const STORE_SCHEMA_SQL = `
     end_line     INTEGER,
     token_count  INTEGER,
     content_hash TEXT,
+    source_type  TEXT,
+    last_modified TEXT,
     UNIQUE(file_path, ordinal)
   );
 
@@ -158,6 +170,8 @@ export function toChunkMetaParams(chunk: Chunk): ChunkMetaStatementParams {
     endLine: chunk.endLine,
     tokenCount: chunk.tokenCount,
     contentHash: chunk.contentHash || null,
+    sourceType: chunk.sourceType ?? null,
+    lastModified: chunk.lastModified ?? null,
   };
 }
 
@@ -184,6 +198,8 @@ export function mapChunkMetaRowToChunk(row: ChunkMetaRow): Chunk {
     endLine: row.end_line ?? 0,
     tokenCount: row.token_count ?? 0,
     contentHash: row.content_hash ?? '',
+    sourceType: (row.source_type as Chunk['sourceType']) ?? undefined,
+    lastModified: row.last_modified ?? undefined,
   };
 }
 
@@ -268,6 +284,11 @@ export class FtsStore implements FtsBackend {
         const fileTypeFilter = buildFileTypeFilter(filter.fileType);
         whereClauses.push(fileTypeFilter.clause);
         params.push(...fileTypeFilter.params);
+      }
+
+      if (filter?.sourceType?.trim()) {
+        whereClauses.push('chunks_meta.source_type = ?');
+        params.push(filter.sourceType.trim());
       }
 
       if (filter?.filePaths && filter.filePaths.length > 0) {

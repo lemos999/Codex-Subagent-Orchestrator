@@ -12,6 +12,7 @@ import { LineParser } from '../parsers/line-parser.js';
 import { FtsStore, CHUNK_META_UPSERT_SQL, toChunkMetaParams } from '../store/fts-store.js';
 import { DepsGraphImpl } from './deps-graph.js';
 import { normalizePath, toRelativePosix } from '../utils/path.js';
+import { classifySourceType } from '../utils/file-types.js';
 import type { ChangedFiles } from './freshness.js';
 import type { ChunkingConfig, IndexingConfig } from '../config/schema.js';
 
@@ -597,12 +598,24 @@ export class Indexer {
 
   /** Convert RawChunk to enriched Chunk. */
   private enrichChunk(raw: RawChunk, projectId: string): Chunk {
+    const sourceType = classifySourceType(raw.filePath);
+
+    let lastModified: string | undefined;
+    try {
+      const fullPath = path.resolve(this.projectRoot, raw.filePath);
+      lastModified = fs.statSync(fullPath).mtime.toISOString();
+    } catch {
+      // File may have been deleted or inaccessible; leave undefined
+    }
+
     return {
       ...raw,
       id: `${projectId}:${raw.filePath}:${raw.ordinal}`,
       projectId,
       tokenCount: Math.ceil(raw.content.length / 4),
       contentHash: createHash('sha256').update(raw.content).digest('hex'),
+      sourceType,
+      lastModified,
     };
   }
 

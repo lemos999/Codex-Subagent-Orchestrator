@@ -1,5 +1,16 @@
 {
   "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"newCustomInstructions\": \"코드 블록 생략. 의사결정, 파일명:라인번호, 다음 작업만 보존. 반복 내용 압축.\"}'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [

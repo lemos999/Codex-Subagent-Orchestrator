@@ -1,0 +1,82 @@
+[
+  {
+    "query": "현재 프로젝트 상태",
+    "relevant": [
+      { "file": "project-status/current.md", "section": "Project: Subagent Orchestrator" },
+      { "file": "AGENTS.md", "section": "Project Status" }
+    ],
+    "type": "status"
+  },
+  {
+    "query": "다음 작업 우선순위",
+    "relevant": [
+      { "file": "project-status/current.md", "section": "다음 작업" }
+    ],
+    "type": "status"
+  },
+  {
+    "query": "WKI 검색 명령어",
+    "relevant": [
+      { "file": "project-status/current.md", "section": "주요 명령어" },
+      { "file": "AGENTS.md", "section": "WKI" }
+    ],
+    "type": "command"
+  },
+  {
+    "query": "토론 실행 방법",
+    "relevant": [
+      { "file": "project-status/current.md", "section": "주요 명령어" },
+      { "file": ".claude/skills/discuss/SKILL.md" }
+    ],
+    "type": "command"
+  },
+  {
+    "query": "세션 시작 규칙",
+    "relevant": [
+      { "file": "CLAUDE.md" },
+      { "file": "AGENTS.md" }
+    ],
+    "type": "rule"
+  },
+  {
+    "query": "최근 완료된 작업",
+    "relevant": [
+      { "file": "project-status/current.md", "section": "최근 완료" },
+      { "file": "project-status/2026-Q1.md", "section": "완료된 작업" }
+    ],
+    "type": "status"
+  },
+  {
+    "query": "큐 러너 사용법",
+    "relevant": [
+      { "file": "project-status/current.md", "section": "주요 명령어" }
+    ],
+    "type": "command"
+  },
+  {
+    "query": "WKI nDCG 현재 수준",
+    "relevant": [
+      { "file": "project-status/current.md", "section": "다음 작업" }
+    ],
+    "type": "status"
+  },
+  {
+    "query": "sub submix 차이",
+    "relevant": [
+      { "file": "AGENTS.md" },
+      { "file": ".claude/skills/sub/SKILL.md" },
+      { "file": ".claude/skills/submix/SKILL.md" }
+    ],
+    "type": "concept"
+  },
+  {
+    "query": "증거 기록 필수 규칙",
+    "relevant": [
+      { "file": "project-status/current.md", "section": "규칙" },
+      { "file": "AGENTS.md" },
+      { "file": "skills/claude-subagent-orchestrator/references/evidence-format.md" },
+      { "file": "skills/claude-subagent-orchestrator/references/orchestration-workflow.md", "section": "Evidence Writing Mechanism" }
+    ],
+    "type": "rule"
+  }
+]

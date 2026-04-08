@@ -20,8 +20,9 @@ import { ChunkStore } from './store/chunk-store.js';
 import { LanceVectorStore } from './store/vector-store.js';
 import { SearchService } from './search/search-service.js';
 import { createEmbeddingProvider } from './embedding/factory.js';
+import { VerificationService } from './verify/verification-service.js';
 
-const COMMANDS = ['init', 'scan', 'index', 'search', 'symbols', 'unused-exports', 'chunk-map', 'stale', 'status', 'rebuild', 'eval', 'mcp'] as const;
+const COMMANDS = ['init', 'scan', 'index', 'search', 'symbols', 'unused-exports', 'chunk-map', 'stale', 'status', 'rebuild', 'eval', 'eval-context', 'mcp', 'verify'] as const;
 type Command = (typeof COMMANDS)[number];
 
 function printUsage(): void {
@@ -40,7 +41,9 @@ Commands:
   status    Show index health and freshness
   rebuild   Rebuild index from scratch
   eval      Evaluate search quality against a gold set
+  eval-context  Evaluate project-context search quality (MRR@3)
   mcp       Start MCP server (long-running, communicates via stdio)
+  verify    Verify entity existence (file, symbol, or path)
 
 Run "wki <command> --help" for more information on a command.
 `);
@@ -975,10 +978,152 @@ async function cmdEval(args: string[]): Promise<void> {
   await ftsStore.close();
 }
 
+async function cmdEvalContext(_args: string[]): Promise<void> {
+  const projectRoot = process.cwd();
+  const config = loadConfig(projectRoot);
+  const indexRoot = config.storage.index_root;
+  const knowledgeDir = path.resolve(projectRoot, indexRoot);
+
+  if (!fs.existsSync(knowledgeDir)) {
+    console.error(`Error: ${indexRoot}/ does not exist. Run "wki init && wki index" first.`);
+    process.exit(1);
+  }
+
+  // Load context queries
+  const evalSetPath = path.resolve(projectRoot, 'workspace-knowledge-index/eval/context-queries-v1.json');
+  if (!fs.existsSync(evalSetPath)) {
+    console.error(`Error: ${evalSetPath} not found.`);
+    process.exit(1);
+  }
+  const queries = JSON.parse(fs.readFileSync(evalSetPath, 'utf-8')) as import('./eval/context-eval.js').ContextQuery[];
+
+  const projectId =
+    config.projects.length > 0
+      ? config.projects[0].name
+      : path.basename(projectRoot);
+
+  // Set up search service
+  const ftsStore = new FtsStore(resolveFtsDbPath(config, knowledgeDir, projectId));
+  const chunkStore = new ChunkStore(ftsStore.getDatabase());
+
+  let vectorStore: LanceVectorStore | null = null;
+  let embeddingProvider: EmbeddingProvider | null = null;
+
+  if (config.storage.vector_backend !== 'none') {
+    try {
+      embeddingProvider = await createEmbeddingProvider(config.embedding, 'search');
+    } catch {
+      console.warn('[wki] No embedding API key. Evaluating FTS-only.');
+    }
+
+    if (embeddingProvider && config.storage.vector_backend === 'lancedb') {
+      const dims = embeddingProvider.dimensions;
+      const lanceDbPath = config.storage.lancedb?.path
+        ? path.resolve(
+            knowledgeDir,
+            config.storage.lancedb.path.replace('{project}', projectId),
+          )
+        : path.join(knowledgeDir, 'vectors.lance');
+      if (fs.existsSync(lanceDbPath)) {
+        vectorStore = new LanceVectorStore(lanceDbPath, dims);
+        await vectorStore.init();
+      }
+    }
+  }
+
+  const evalSearchCfg = { ...config.search, indexDtype: config.embedding.local?.indexDtype ?? config.embedding.local?.dtype };
+  const evalSymbolsPath = path.join(knowledgeDir, 'symbols.idx');
+  const evalDepsPath = path.join(knowledgeDir, 'deps.graph');
+  const searchService = new SearchService(
+    ftsStore,
+    vectorStore,
+    chunkStore,
+    embeddingProvider,
+    evalSearchCfg,
+    evalSymbolsPath,
+    evalDepsPath,
+  );
+
+  // Run context evaluation
+  const { evaluateContext, printContextEvalSummary } = await import('./eval/context-eval.js');
+  const summary = await evaluateContext(searchService, queries);
+  printContextEvalSummary(summary);
+
+  // Cleanup
+  if (vectorStore) await vectorStore.close();
+  await ftsStore.close();
+}
+
 async function cmdMcp(args: string[]): Promise<void> {
   const projectRoot = args[0] ? path.resolve(args[0]) : process.cwd();
   const { startServer } = await import('./mcp/server.js');
   await startServer(projectRoot);
+}
+
+function cmdVerify(args: string[]): void {
+  // Parse flags: --file, --symbol, --path, or auto-detect
+  let mode: 'file' | 'symbol' | 'path' | 'auto' = 'auto';
+  const remaining: string[] = [];
+
+  for (const arg of args) {
+    if (arg === '--file') { mode = 'file'; continue; }
+    if (arg === '--symbol') { mode = 'symbol'; continue; }
+    if (arg === '--path') { mode = 'path'; continue; }
+    if (arg.startsWith('--')) continue; // skip unknown flags
+    remaining.push(arg);
+  }
+
+  const query = remaining[0];
+  if (!query) {
+    console.error('Usage: wki verify [--file|--symbol|--path] <query>');
+    process.exit(1);
+  }
+
+  // Resolve FTS DB path
+  const projectRoot = process.cwd();
+  const config = loadConfig(projectRoot);
+  const indexRoot = config.storage.index_root;
+  const knowledgeDir = path.resolve(projectRoot, indexRoot);
+  const projectId = config.projects.length > 0 ? config.projects[0].name : path.basename(projectRoot);
+  const ftsDbPath = resolveFtsDbPath(config, knowledgeDir, projectId);
+
+  const svc = new VerificationService(ftsDbPath);
+
+  try {
+    let result;
+    switch (mode) {
+      case 'file':   result = svc.verifyFile(query); break;
+      case 'symbol': result = svc.verifySymbol(query); break;
+      case 'path':   result = svc.verifyPath(query); break;
+      case 'auto':   result = svc.autoVerify(query); break;
+    }
+
+    // Format output
+    const icon = result.exists ? '\u2713' : '\u2717';
+    if (!result.exists) {
+      console.log(`${icon} ${query} [${result.type}] \u2192 not found`);
+      return;
+    }
+
+    if (result.type === 'path') {
+      const fileNames = result.matches.map((m) => {
+        const parts = m.filePath.replace(/\\/g, '/').split('/');
+        return parts[parts.length - 1];
+      });
+      console.log(`${icon} ${query} [${result.type}] \u2192 ${result.matches.length} files (${fileNames.join(', ')})`);
+    } else if (result.type === 'symbol') {
+      for (const m of result.matches) {
+        const loc = m.line != null ? `:${m.line}` : '';
+        console.log(`${icon} ${query} [${result.type}] \u2192 ${m.filePath}${loc}`);
+      }
+    } else {
+      for (const m of result.matches) {
+        console.log(`${icon} ${query} [${result.type}] \u2192 ${m.filePath}`);
+      }
+    }
+  } finally {
+    svc.close();
+  }
 }
 
 async function handleCommand(command: Command, args: string[]): Promise<void> {
@@ -1016,8 +1161,14 @@ async function handleCommand(command: Command, args: string[]): Promise<void> {
     case 'eval':
       await cmdEval(args);
       break;
+    case 'eval-context':
+      await cmdEvalContext(args);
+      break;
     case 'mcp':
       await cmdMcp(args);
+      break;
+    case 'verify':
+      cmdVerify(args);
       break;
   }
 }

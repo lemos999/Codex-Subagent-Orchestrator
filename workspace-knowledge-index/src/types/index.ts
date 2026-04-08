@@ -15,6 +15,9 @@ export type ChunkType =
   | 'line-block'
   | 'other';
 
+/** Source type classification for search quality enhancement. */
+export type SourceType = 'code' | 'doc' | 'status' | 'config' | 'other';
+
 /** A raw chunk output from a Parser (before ID/token assignment). */
 export interface RawChunk {
   filePath: string;
@@ -24,6 +27,8 @@ export interface RawChunk {
   chunkType: ChunkType;
   startLine: number;
   endLine: number;
+  sourceType?: SourceType;
+  lastModified?: string; // ISO 8601 datetime
 }
 
 /** A fully enriched chunk ready for storage. */
@@ -60,6 +65,8 @@ export interface SearchFilter {
   symbolKind?: string;
   /** Restrict results to chunks from these file paths (substring match). */
   filePaths?: string[];
+  /** Filter by source type (code, doc, status, config, other). */
+  sourceType?: SourceType;
 }
 
 /** Symbol information extracted by ProgramParser. */

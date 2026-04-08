@@ -16,6 +16,8 @@ interface LanceChunkRow {
   project_id: string;
   chunk_type: string;
   file_type: string;
+  source_type: string;
+  last_modified: string;
   _distance?: number;
 }
 
@@ -57,6 +59,8 @@ export class LanceVectorStore implements VectorBackend {
       project_id: chunk.projectId,
       chunk_type: chunk.chunkType,
       file_type: detectFileType(chunk.filePath),
+      source_type: chunk.sourceType ?? '',
+      last_modified: chunk.lastModified ?? '',
     }));
 
     await table.add(rows);
@@ -168,6 +172,8 @@ function createChunkSchema(dimensions: number): Schema {
     new Field('project_id', new Utf8(), false),
     new Field('chunk_type', new Utf8(), false),
     new Field('file_type', new Utf8(), false),
+    new Field('source_type', new Utf8(), false),
+    new Field('last_modified', new Utf8(), false),
   ]);
 }
 
@@ -238,6 +244,11 @@ function buildFilterPredicate(filter?: SearchFilter): string | null {
   const symbolKind = filter.symbolKind?.trim();
   if (symbolKind) {
     predicates.push(`chunk_type = ${toSqlString(symbolKind)}`);
+  }
+
+  const sourceType = filter.sourceType?.trim();
+  if (sourceType) {
+    predicates.push(`source_type = ${toSqlString(sourceType)}`);
   }
 
   return predicates.length > 0 ? predicates.join(' AND ') : null;
