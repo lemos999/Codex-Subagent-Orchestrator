@@ -1,0 +1,672 @@
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:382: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+  raw = sobol.random(N_VARIANTS)  # (N, 7) in [0,1]
+  [DL] Loaded BTC (lstm) from dl_btc_lstm.pt
+  [DL] Loaded NVDA (transformer) from dl_nvda_transformer.pt
+  [DL] Loaded AMZN (cnn) from dl_amzn_cnn.pt
+  [DL] 3 model(s) ready on cpu
+  [DL] Models loaded: ['BTC', 'NVDA', 'AMZN']
+[Tournament] Fresh start: 5000 variants
+[Dashboard] http://localhost:8895
+[Tournament] 5000 variants | Dashboard: http://localhost:8895
+[Tournament] Gen=0, avg_ret=0.0%
+  [ETH] price=$2,234.55
+  [BTC] price=$71,334.80
+  [SOL] price=$84.53
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.94
+  [BTC] price=$71,305.40
+  [SOL] price=$84.52
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.18
+  [BTC] price=$71,306.20
+  [SOL] price=$84.53
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.95
+  [BTC] price=$71,300.00
+  [SOL] price=$84.51
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.72
+  [BTC] price=$71,309.10
+  [SOL] price=$84.51
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,232.73
+  [BTC] price=$71,269.00
+  [SOL] price=$84.49
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.16
+  [BTC] price=$71,289.80
+  [SOL] price=$84.48
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.75
+  [BTC] price=$71,301.40
+  [SOL] price=$84.53
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.76
+  [BTC] price=$71,300.20
+  [SOL] price=$84.50
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.09
+  [BTC] price=$71,298.10
+  [SOL] price=$84.51
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,231.77
+  [BTC] price=$71,252.30
+  [SOL] price=$84.40
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,232.83
+  [BTC] price=$71,266.70
+  [SOL] price=$84.47
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.50
+  [BTC] price=$71,279.80
+  [SOL] price=$84.53
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,232.44
+  [BTC] price=$71,273.90
+  [SOL] price=$84.53
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,232.07
+  [BTC] price=$71,262.80
+  [SOL] price=$84.51
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,231.94
+  [BTC] price=$71,264.50
+  [SOL] price=$84.49
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,232.54
+  [BTC] price=$71,267.50
+  [SOL] price=$84.50
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.37
+  [BTC] price=$71,282.30
+  [SOL] price=$84.50
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,235.69
+  [BTC] price=$71,348.00
+  [SOL] price=$84.53
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,237.44
+  [BTC] price=$71,397.20
+  [SOL] price=$84.58
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,237.14
+  [BTC] price=$71,418.70
+  [SOL] price=$84.55
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,237.77
+  [BTC] price=$71,424.20
+  [SOL] price=$84.59
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.73
+  [BTC] price=$71,359.90
+  [SOL] price=$84.50
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,235.28
+  [BTC] price=$71,365.60
+  [SOL] price=$84.56
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.73
+  [BTC] price=$71,385.40
+  [SOL] price=$84.59
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.65
+  [BTC] price=$71,358.70
+  [SOL] price=$84.54
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.38
+  [BTC] price=$71,377.60
+  [SOL] price=$84.58
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,235.69
+  [BTC] price=$71,357.50
+  [SOL] price=$84.56
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,235.27
+  [BTC] price=$71,343.40
+  [SOL] price=$84.55
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.85
+  [BTC] price=$71,343.90
+  [SOL] price=$84.53
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.95
+  [BTC] price=$71,325.60
+  [SOL] price=$84.51
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.33
+  [BTC] price=$71,345.00
+  [SOL] price=$84.55
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.26
+  [BTC] price=$71,352.10
+  [SOL] price=$84.58
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.88
+  [BTC] price=$71,370.10
+  [SOL] price=$84.61
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.73
+  [BTC] price=$71,353.50
+  [SOL] price=$84.60
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.30
+  [BTC] price=$71,325.00
+  [SOL] price=$84.58
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,236.20
+  [BTC] price=$71,316.90
+  [SOL] price=$84.56
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,235.41
+  [BTC] price=$71,324.70
+  [SOL] price=$84.52
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.51
+  [BTC] price=$71,282.80
+  [SOL] price=$84.50
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.08
+  [BTC] price=$71,285.70
+  [SOL] price=$84.49
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.24
+  [BTC] price=$71,265.60
+  [SOL] price=$84.47
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.87
+  [BTC] price=$71,278.80
+  [SOL] price=$84.47
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.56
+  [BTC] price=$71,284.60
+  [SOL] price=$84.46
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.30
+  [BTC] price=$71,296.50
+  [SOL] price=$84.48
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.24
+  [BTC] price=$71,283.00
+  [SOL] price=$84.48
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.32
+  [BTC] price=$71,291.10
+  [SOL] price=$84.50
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.80
+  [BTC] price=$71,280.00
+  [SOL] price=$84.52
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.77
+  [BTC] price=$71,270.00
+  [SOL] price=$84.54
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.98
+  [BTC] price=$71,266.60
+  [SOL] price=$84.52
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,233.80
+  [BTC] price=$71,258.10
+  [SOL] price=$84.50
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,234.28
+  [BTC] price=$71,259.90
+  [SOL] price=$84.53
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,238.04
+  [BTC] price=$71,300.00
+  [SOL] price=$84.60
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,238.21
+  [BTC] price=$71,307.80
+  [SOL] price=$84.60
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,237.03
+  [BTC] price=$71,299.40
+  [SOL] price=$84.59
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,237.13
+  [BTC] price=$71,307.60
+  [SOL] price=$84.63
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,238.73
+  [BTC] price=$71,364.90
+  [SOL] price=$84.69
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,246.09
+  [BTC] price=$71,493.10
+  [SOL] price=$84.98
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.10
+  [BTC] price=$71,454.10
+  [SOL] price=$84.86
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.84
+  [BTC] price=$71,450.20
+  [SOL] price=$84.90
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.99
+  [BTC] price=$71,448.90
+  [SOL] price=$84.89
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,245.11
+  [BTC] price=$71,489.60
+  [SOL] price=$84.91
+  [XRP] price=$1.37
+[Tournament] State saved (gen=0)
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.90
+  [BTC] price=$71,500.10
+  [SOL] price=$84.89
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.43
+  [BTC] price=$71,486.20
+  [SOL] price=$84.91
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,242.43
+  [BTC] price=$71,470.00
+  [SOL] price=$84.75
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,242.61
+  [BTC] price=$71,479.60
+  [SOL] price=$84.75
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.33
+  [BTC] price=$71,500.40
+  [SOL] price=$84.82
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.89
+  [BTC] price=$71,522.10
+  [SOL] price=$84.83
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.60
+  [BTC] price=$71,526.70
+  [SOL] price=$84.82
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,242.30
+  [BTC] price=$71,486.90
+  [SOL] price=$84.77
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,242.63
+  [BTC] price=$71,483.10
+  [SOL] price=$84.80
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,242.35
+  [BTC] price=$71,465.20
+  [SOL] price=$84.76
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,244.48
+  [BTC] price=$71,500.80
+  [SOL] price=$84.84
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.30
+  [BTC] price=$71,498.40
+  [SOL] price=$84.80
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,241.71
+  [BTC] price=$71,445.20
+  [SOL] price=$84.73
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,241.72
+  [BTC] price=$71,466.00
+  [SOL] price=$84.73
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,241.99
+  [BTC] price=$71,478.50
+  [SOL] price=$84.75
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,242.73
+  [BTC] price=$71,476.60
+  [SOL] price=$84.78
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.76
+  [BTC] price=$71,501.20
+  [SOL] price=$84.79
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,244.38
+  [BTC] price=$71,528.40
+  [SOL] price=$84.79
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,245.06
+  [BTC] price=$71,553.40
+  [SOL] price=$84.88
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,244.33
+  [BTC] price=$71,513.60
+  [SOL] price=$84.82
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.81
+  [BTC] price=$71,509.80
+  [SOL] price=$84.79
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.40
+  [BTC] price=$71,499.10
+  [SOL] price=$84.74
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,244.31
+  [BTC] price=$71,544.30
+  [SOL] price=$84.79
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,242.94
+  [BTC] price=$71,493.30
+  [SOL] price=$84.74
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,244.08
+  [BTC] price=$71,503.10
+  [SOL] price=$84.78
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,244.53
+  [BTC] price=$71,499.90
+  [SOL] price=$84.79
+  [XRP] price=$1.37
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,247.50
+  [BTC] price=$71,550.00
+  [SOL] price=$84.88
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,249.64
+  [BTC] price=$71,572.30
+  [SOL] price=$84.87
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,248.35
+  [BTC] price=$71,577.20
+  [SOL] price=$84.82
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,250.68
+  [BTC] price=$71,600.30
+  [SOL] price=$84.87
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,250.16
+  [BTC] price=$71,610.90
+  [SOL] price=$84.92
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,249.78
+  [BTC] price=$71,618.70
+  [SOL] price=$84.94
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,248.81
+  [BTC] price=$71,567.70
+  [SOL] price=$84.94
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,248.70
+  [BTC] price=$71,584.00
+  [SOL] price=$84.93
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,248.29
+  [BTC] price=$71,573.00
+  [SOL] price=$84.89
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,249.10
+  [BTC] price=$71,602.90
+  [SOL] price=$84.84
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,248.50
+  [BTC] price=$71,608.10
+  [SOL] price=$84.75
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,247.34
+  [BTC] price=$71,608.00
+  [SOL] price=$84.76
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,248.15
+  [BTC] price=$71,605.90
+  [SOL] price=$84.74
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,245.54
+  [BTC] price=$71,566.20
+  [SOL] price=$84.68
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,246.07
+  [BTC] price=$71,563.90
+  [SOL] price=$84.59
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,245.03
+  [BTC] price=$71,532.20
+  [SOL] price=$84.52
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,244.84
+  [BTC] price=$71,522.20
+  [SOL] price=$84.49
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,244.76
+  [BTC] price=$71,543.50
+  [SOL] price=$84.55
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,245.22
+  [BTC] price=$71,569.20
+  [SOL] price=$84.58
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,245.51
+  [BTC] price=$71,595.40
+  [SOL] price=$84.58
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.62
+  [BTC] price=$71,576.70
+  [SOL] price=$84.52
+  [XRP] price=$1.38
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [ETH] price=$2,243.19
+  [BTC] price=$71,550.30
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [SOL] price=$84.52
+  [XRP] price=$1.38
+  [ETH] price=$2,241.42
+C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\tournament.py:513: RuntimeWarning: invalid value encountered in divide
+  self.win_counts / self.trade_counts * 100, 0.0)
+  [BTC] price=$71,541.80
+  [SOL] price=$84.50
+  [XRP] price=$1.38
