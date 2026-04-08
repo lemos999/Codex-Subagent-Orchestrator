@@ -1,0 +1,13 @@
+{
+  "asset": "NVDA",
+  "strategy": "regime_leveraged",
+  "ma_fast": 30,
+  "ma_slow": 50,
+  "lev_bull": 3.0,
+  "lev_mild": 0.5,
+  "stop_pct": 0.05,
+  "passed": true,
+  "test_ret": 75.64,
+  "monthly_est": 6.33,
+  "bh_ret": 58.37
+}

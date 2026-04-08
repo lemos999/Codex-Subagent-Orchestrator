@@ -1,0 +1,12 @@
+============================================================
+  Multi-Asset Paper Trading
+  Assets: BTC, NVDA, AMZN
+  Dashboard: http://localhost:8896
+============================================================
+  [BTC] Bal=$10,000 | Trades=0 | Crypto 24/7
+  [NVDA] Bal=$10,000 | Trades=0 | Stock US hours
+  [AMZN] Bal=$10,000 | Trades=0 | Stock US hours
+
+  Dashboard: http://localhost:8896
+  Running... (Ctrl+C to stop)
+

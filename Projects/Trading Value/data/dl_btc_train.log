@@ -1,0 +1,143 @@
+=================================================================
+  BTC 4H Direction LSTM Predictor  (Walk-Forward)
+=================================================================
+[Data] 4H candles: 10951  (2021-03-28 ~ 2026-03-27)
+[Features] 17 dims, 10752 valid bars
+[Sequences] 10692 samples, seq_len=60, features=17
+
+[Target distribution] up=0.509  down=0.491
+
+[Device] cpu
+[Walk-Forward] Total months: 59
+  Fold 1 Epoch  5  train_loss=0.6917  val_loss=0.6916
+  Fold 1 Epoch 10  train_loss=0.6847  val_loss=0.6931
+Fold  1 | 2021-11 | Acc=0.478  AUC=0.508  HC_Acc=nan (0%) | train=1045 test=180
+  Fold 2 Epoch  5  train_loss=0.6894  val_loss=0.6872
+  Fold 2 Epoch 10  train_loss=0.6850  val_loss=0.6882
+Fold  2 | 2021-12 | Acc=0.495  AUC=0.573  HC_Acc=0.500 (3%) | train=1098 test=186
+  Fold 3 Epoch  5  train_loss=0.6891  val_loss=0.6860
+  Fold 3 Epoch 10  train_loss=0.6856  val_loss=0.6852
+  Fold 3 Epoch 15  train_loss=0.6652  val_loss=0.7032
+Fold  3 | 2022-01 | Acc=0.484  AUC=0.487  HC_Acc=0.714 (4%) | train=1104 test=186
+Fold  4 | 2022-02 | Acc=0.548  AUC=0.557  HC_Acc=nan (0%) | train=1104 test=168
+Fold  5 | 2022-03 | Acc=0.478  AUC=0.484  HC_Acc=0.455 (12%) | train=1086 test=186
+Fold  6 | 2022-04 | Acc=0.494  AUC=0.529  HC_Acc=nan (0%) | train=1092 test=180
+Fold  7 | 2022-05 | Acc=0.495  AUC=0.475  HC_Acc=0.538 (7%) | train=1086 test=186
+Fold  8 | 2022-06 | Acc=0.433  AUC=0.457  HC_Acc=nan (0%) | train=1092 test=180
+Fold  9 | 2022-07 | Acc=0.441  AUC=0.470  HC_Acc=nan (0%) | train=1086 test=186
+Fold 10 | 2022-08 | Acc=0.511  AUC=0.546  HC_Acc=nan (0%) | train=1086 test=186
+Fold 11 | 2022-09 | Acc=0.544  AUC=0.530  HC_Acc=nan (0%) | train=1104 test=180
+Fold 12 | 2022-10 | Acc=0.495  AUC=0.488  HC_Acc=nan (0%) | train=1098 test=186
+Fold 13 | 2022-11 | Acc=0.544  AUC=0.492  HC_Acc=nan (0%) | train=1104 test=180
+Fold 14 | 2022-12 | Acc=0.511  AUC=0.526  HC_Acc=nan (0%) | train=1098 test=186
+Fold 15 | 2023-01 | Acc=0.425  AUC=0.496  HC_Acc=nan (0%) | train=1104 test=186
+Fold 16 | 2023-02 | Acc=0.435  AUC=0.479  HC_Acc=nan (0%) | train=1104 test=168
+Fold 17 | 2023-03 | Acc=0.473  AUC=0.437  HC_Acc=nan (0%) | train=1086 test=186
+Fold 18 | 2023-04 | Acc=0.500  AUC=0.497  HC_Acc=nan (0%) | train=1092 test=180
+Fold 19 | 2023-05 | Acc=0.495  AUC=0.475  HC_Acc=nan (0%) | train=1086 test=186
+Fold 20 | 2023-06 | Acc=0.550  AUC=0.516  HC_Acc=nan (0%) | train=1092 test=180
+Fold 21 | 2023-07 | Acc=0.543  AUC=0.464  HC_Acc=nan (0%) | train=1086 test=186
+Fold 22 | 2023-08 | Acc=0.452  AUC=0.434  HC_Acc=nan (0%) | train=1086 test=186
+Fold 23 | 2023-09 | Acc=0.517  AUC=0.522  HC_Acc=nan (0%) | train=1104 test=180
+Fold 24 | 2023-10 | Acc=0.543  AUC=0.506  HC_Acc=nan (0%) | train=1098 test=186
+Fold 25 | 2023-11 | Acc=0.522  AUC=0.564  HC_Acc=nan (0%) | train=1104 test=180
+Fold 26 | 2023-12 | Acc=0.495  AUC=0.537  HC_Acc=0.575 (39%) | train=1098 test=186
+Fold 27 | 2024-01 | Acc=0.516  AUC=0.549  HC_Acc=nan (0%) | train=1104 test=186
+Fold 28 | 2024-02 | Acc=0.477  AUC=0.453  HC_Acc=nan (2%) | train=1104 test=174
+Fold 29 | 2024-03 | Acc=0.457  AUC=0.488  HC_Acc=nan (1%) | train=1092 test=186
+Fold 30 | 2024-04 | Acc=0.483  AUC=0.542  HC_Acc=nan (0%) | train=1098 test=180
+Fold 31 | 2024-05 | Acc=0.538  AUC=0.504  HC_Acc=nan (0%) | train=1092 test=186
+Fold 32 | 2024-06 | Acc=0.528  AUC=0.521  HC_Acc=nan (0%) | train=1098 test=180
+Fold 33 | 2024-07 | Acc=0.489  AUC=0.567  HC_Acc=nan (1%) | train=1092 test=186
+Fold 34 | 2024-08 | Acc=0.532  AUC=0.561  HC_Acc=nan (0%) | train=1092 test=186
+Fold 35 | 2024-09 | Acc=0.483  AUC=0.564  HC_Acc=nan (0%) | train=1104 test=180
+Fold 36 | 2024-10 | Acc=0.516  AUC=0.540  HC_Acc=nan (0%) | train=1098 test=186
+Fold 37 | 2024-11 | Acc=0.483  AUC=0.482  HC_Acc=nan (0%) | train=1104 test=180
+Fold 38 | 2024-12 | Acc=0.591  AUC=0.519  HC_Acc=nan (0%) | train=1098 test=186
+Fold 39 | 2025-01 | Acc=0.548  AUC=0.508  HC_Acc=nan (0%) | train=1104 test=186
+Fold 40 | 2025-02 | Acc=0.470  AUC=0.519  HC_Acc=nan (2%) | train=1104 test=168
+Fold 41 | 2025-03 | Acc=0.505  AUC=0.514  HC_Acc=0.632 (10%) | train=1086 test=186
+Fold 42 | 2025-04 | Acc=0.544  AUC=0.511  HC_Acc=nan (0%) | train=1092 test=180
+Fold 43 | 2025-05 | Acc=0.495  AUC=0.542  HC_Acc=nan (0%) | train=1086 test=186
+Fold 44 | 2025-06 | Acc=0.472  AUC=0.460  HC_Acc=nan (0%) | train=1092 test=180
+Fold 45 | 2025-07 | Acc=0.527  AUC=0.532  HC_Acc=nan (0%) | train=1086 test=186
+Fold 46 | 2025-08 | Acc=0.500  AUC=0.527  HC_Acc=nan (0%) | train=1086 test=186
+Fold 47 | 2025-09 | Acc=0.511  AUC=0.529  HC_Acc=nan (0%) | train=1104 test=180
+Fold 48 | 2025-10 | Acc=0.452  AUC=0.486  HC_Acc=nan (0%) | train=1098 test=186
+Fold 49 | 2025-11 | Acc=0.450  AUC=0.510  HC_Acc=nan (0%) | train=1104 test=180
+Fold 50 | 2025-12 | Acc=0.575  AUC=0.559  HC_Acc=nan (0%) | train=1098 test=186
+Fold 51 | 2026-01 | Acc=0.511  AUC=0.495  HC_Acc=nan (0%) | train=1104 test=186
+Fold 52 | 2026-02 | Acc=0.548  AUC=0.541  HC_Acc=nan (0%) | train=1104 test=168
+Fold 53 | 2026-03 | Acc=0.534  AUC=0.514  HC_Acc=0.545 (14%) | train=1086 test=161
+
+=================================================================
+  Walk-Forward Results Summary
+=================================================================
+ fold test_period  n_train  n_test  accuracy   auc  hc_accuracy  hc_ratio
+    1     2021-11     1045     180     0.478 0.508          NaN     0.000
+    2     2021-12     1098     186     0.495 0.573        0.500     0.032
+    3     2022-01     1104     186     0.484 0.487        0.714     0.038
+    4     2022-02     1104     168     0.548 0.557          NaN     0.000
+    5     2022-03     1086     186     0.478 0.484        0.455     0.118
+    6     2022-04     1092     180     0.494 0.529          NaN     0.000
+    7     2022-05     1086     186     0.495 0.475        0.538     0.070
+    8     2022-06     1092     180     0.433 0.457          NaN     0.000
+    9     2022-07     1086     186     0.441 0.470          NaN     0.000
+   10     2022-08     1086     186     0.511 0.546          NaN     0.000
+   11     2022-09     1104     180     0.544 0.530          NaN     0.000
+   12     2022-10     1098     186     0.495 0.488          NaN     0.000
+   13     2022-11     1104     180     0.544 0.492          NaN     0.000
+   14     2022-12     1098     186     0.511 0.526          NaN     0.000
+   15     2023-01     1104     186     0.425 0.496          NaN     0.000
+   16     2023-02     1104     168     0.435 0.479          NaN     0.000
+   17     2023-03     1086     186     0.473 0.437          NaN     0.000
+   18     2023-04     1092     180     0.500 0.497          NaN     0.000
+   19     2023-05     1086     186     0.495 0.475          NaN     0.000
+   20     2023-06     1092     180     0.550 0.516          NaN     0.000
+   21     2023-07     1086     186     0.543 0.464          NaN     0.000
+   22     2023-08     1086     186     0.452 0.434          NaN     0.000
+   23     2023-09     1104     180     0.517 0.522          NaN     0.000
+   24     2023-10     1098     186     0.543 0.506          NaN     0.000
+   25     2023-11     1104     180     0.522 0.564          NaN     0.000
+   26     2023-12     1098     186     0.495 0.537        0.575     0.392
+   27     2024-01     1104     186     0.516 0.549          NaN     0.000
+   28     2024-02     1104     174     0.477 0.453          NaN     0.023
+   29     2024-03     1092     186     0.457 0.488          NaN     0.005
+   30     2024-04     1098     180     0.483 0.542          NaN     0.000
+   31     2024-05     1092     186     0.538 0.504          NaN     0.000
+   32     2024-06     1098     180     0.528 0.521          NaN     0.000
+   33     2024-07     1092     186     0.489 0.567          NaN     0.011
+   34     2024-08     1092     186     0.532 0.561          NaN     0.000
+   35     2024-09     1104     180     0.483 0.564          NaN     0.000
+   36     2024-10     1098     186     0.516 0.540          NaN     0.000
+   37     2024-11     1104     180     0.483 0.482          NaN     0.000
+   38     2024-12     1098     186     0.591 0.519          NaN     0.000
+   39     2025-01     1104     186     0.548 0.508          NaN     0.000
+   40     2025-02     1104     168     0.470 0.519          NaN     0.024
+   41     2025-03     1086     186     0.505 0.514        0.632     0.102
+   42     2025-04     1092     180     0.544 0.511          NaN     0.000
+   43     2025-05     1086     186     0.495 0.542          NaN     0.000
+   44     2025-06     1092     180     0.472 0.460          NaN     0.000
+   45     2025-07     1086     186     0.527 0.532          NaN     0.000
+   46     2025-08     1086     186     0.500 0.527          NaN     0.000
+   47     2025-09     1104     180     0.511 0.529          NaN     0.000
+   48     2025-10     1098     186     0.452 0.486          NaN     0.000
+   49     2025-11     1104     180     0.450 0.510          NaN     0.000
+   50     2025-12     1098     186     0.575 0.559          NaN     0.000
+   51     2026-01     1104     186     0.511 0.495          NaN     0.000
+   52     2026-02     1104     168     0.548 0.541          NaN     0.000
+   53     2026-03     1086     161     0.534 0.514        0.545     0.137
+
+Metric                    Value
+--------------------------------
+Avg Accuracy              0.503
+Avg AUC                   0.511
+Avg HC Accuracy           0.566
+Avg HC Ratio               1.8%
+Best AUC                  0.573
+Worst AUC                 0.434
+Total Folds                  53
+
+[Saved] Best model -> C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\data\dl_btc_lstm.pt
+
+Done.

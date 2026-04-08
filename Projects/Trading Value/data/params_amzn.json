@@ -1,0 +1,20 @@
+{
+  "asset": "AMZN",
+  "params": {
+    "ma_fast": 16,
+    "ma_slow": 80,
+    "rsi_entry": 38.03276872248044,
+    "vol_filter": 1.7792038072191463,
+    "stop_atr": 2.644860949666905,
+    "tp_atr": 3.561854448277752,
+    "trail_start": 2.640260359482877,
+    "trail_step": 0.25768442359112964,
+    "cooldown": 5,
+    "leverage": 1.7814569301010246
+  },
+  "passed": false,
+  "val_ret": 0,
+  "test_ret": -14.64,
+  "val_sharpe": -10,
+  "test_sharpe": -232446594.96
+}

@@ -1,0 +1,231 @@
+============================================================
+  Conviction Engine - No Binary Limits
+  Continuous positioning based on signal strength
+  ETH | BTC | NVDA | AMZN
+  Dashboard: http://localhost:8895
+============================================================
+  [DL] Loaded BTC (lstm) from dl_btc_lstm.pt
+  [DL] Loaded NVDA (transformer) from dl_nvda_transformer.pt
+  [DL] Loaded AMZN (cnn) from dl_amzn_cnn.pt
+  [DL] 3 model(s) ready on cpu
+  [DL] Models loaded: ['BTC', 'NVDA', 'AMZN']
+  [ETH ] $10,000 | conv=0.00 | size=0.00
+  [BTC ] $10,000 | conv=0.00 | size=0.00
+  [NVDA] $10,000 | conv=0.00 | size=0.00
+  [AMZN] $10,000 | conv=0.00 | size=0.00
+
+  Dashboard: http://localhost:8895
+  Running...
+
+  [ETH] REBALANCE 0.10->0.40 | Conv=0.20 | PnL=-0.1% | Bal=$9,992
+  [BTC] REBALANCE 0.10->0.50 | Conv=0.34 | PnL=-0.0% | Bal=$9,996
+  [BTC] REBALANCE 0.50->0.33 | Conv=0.22 | PnL=+0.0% | Bal=$10,000
+  [BTC] REBALANCE 0.33->0.47 | Conv=0.31 | PnL=-0.0% | Bal=$9,996
+  [BTC] REBALANCE 0.47->0.30 | Conv=0.20 | PnL=+0.0% | Bal=$10,000
+  [ETH] REBALANCE 0.40->0.26 | Conv=0.13 | PnL=+0.2% | Bal=$10,017
+  [BTC] REBALANCE 0.30->0.22 | Conv=0.14 | PnL=+0.0% | Bal=$10,001
+  [BTC] EVOLVE: CONTINUE | Ret=+0.0% WR=60%
+  [ETH] REBALANCE 0.26->0.42 | Conv=0.21 | PnL=+0.0% | Bal=$10,019
+  [BTC] REBALANCE 0.22->0.28 | Conv=0.19 | PnL=+0.0% | Bal=$10,001
+  [ETH] REBALANCE 0.42->0.47 | Conv=0.24 | PnL=+0.4% | Bal=$10,056
+  [BTC] REBALANCE 0.28->0.15 | Conv=0.10 | PnL=+0.2% | Bal=$10,020
+  [BTC] REBALANCE 0.15->0.42 | Conv=0.28 | PnL=-0.0% | Bal=$10,019
+  [ETH] REBALANCE 0.47->0.27 | Conv=0.13 | PnL=-0.1% | Bal=$10,045
+  [ETH] EVOLVE: CONTINUE | Ret=+0.4% WR=60%
+  [BTC] REBALANCE 0.42->0.64 | Conv=0.43 | PnL=-0.1% | Bal=$10,005
+  [ETH] REBALANCE 0.27->0.57 | Conv=0.28 | PnL=-0.0% | Bal=$10,044
+  [BTC] REBALANCE 0.64->0.42 | Conv=0.28 | PnL=+0.1% | Bal=$10,014
+  [BTC] EVOLVE: CONTINUE | Ret=+0.1% WR=60%
+  [BTC] REBALANCE 0.42->0.54 | Conv=0.36 | PnL=-0.0% | Bal=$10,013
+  [ETH] REBALANCE 0.57->0.75 | Conv=0.38 | PnL=+0.1% | Bal=$10,049
+  [ETH] REBALANCE 0.75->0.89 | Conv=0.44 | PnL=+0.2% | Bal=$10,070
+  [BTC] REBALANCE 0.54->0.70 | Conv=0.47 | PnL=+0.0% | Bal=$10,015
+  [ETH] REBALANCE 0.89->0.78 | Conv=0.39 | PnL=-0.2% | Bal=$10,054
+  [BTC] REBALANCE 0.70->0.60 | Conv=0.40 | PnL=-0.1% | Bal=$10,008
+  [BTC] REBALANCE 0.60->0.67 | Conv=0.45 | PnL=+0.0% | Bal=$10,012
+  [ETH] REBALANCE 0.78->0.85 | Conv=0.43 | PnL=-0.2% | Bal=$10,036
+  [ETH] EVOLVE: CONTINUE | Ret=+0.4% WR=50%
+  [BTC] REBALANCE 0.67->0.62 | Conv=0.42 | PnL=-0.2% | Bal=$9,993
+  [BTC] EVOLVE: CONTINUE | Ret=-0.1% WR=53%
+  [BTC] REBALANCE 0.62->0.77 | Conv=0.51 | PnL=+0.0% | Bal=$9,996
+  [ETH] REBALANCE 0.85->0.76 | Conv=0.38 | PnL=+0.1% | Bal=$10,049
+  [BTC] REBALANCE 0.77->0.70 | Conv=0.46 | PnL=-0.0% | Bal=$9,992
+  [ETH] REBALANCE 0.76->0.96 | Conv=0.48 | PnL=-0.1% | Bal=$10,040
+  [BTC] REBALANCE 0.70->0.77 | Conv=0.51 | PnL=+0.1% | Bal=$10,005
+  [ETH] REBALANCE 0.96->0.53 | Conv=0.27 | PnL=-0.1% | Bal=$10,029
+  [BTC] REBALANCE 0.77->0.71 | Conv=0.48 | PnL=-0.1% | Bal=$9,998
+  [ETH] REBALANCE 0.53->0.77 | Conv=0.38 | PnL=-0.1% | Bal=$10,019
+  [BTC] REBALANCE 0.71->0.90 | Conv=0.60 | PnL=-0.0% | Bal=$9,995
+  [BTC] EVOLVE: CONTINUE | Ret=-0.1% WR=50%
+  [BTC] REBALANCE 0.90->0.68 | Conv=0.45 | PnL=-0.2% | Bal=$9,979
+  [ETH] REBALANCE 0.77->1.00 | Conv=0.50 | PnL=+0.7% | Bal=$10,086
+  [ETH] EVOLVE: CONTINUE | Ret=+0.9% WR=47%
+  [ETH] REBALANCE 1.00->0.77 | Conv=0.38 | PnL=+0.5% | Bal=$10,140
+  [BTC] REBALANCE 0.68->0.62 | Conv=0.41 | PnL=+0.9% | Bal=$10,073
+  [ETH] REBALANCE 0.77->1.20 | Conv=0.60 | PnL=+0.8% | Bal=$10,225
+  [BTC] REBALANCE 0.62->0.69 | Conv=0.46 | PnL=+0.4% | Bal=$10,111
+  [ETH] REBALANCE 1.20->1.00 | Conv=0.50 | PnL=+0.1% | Bal=$10,232
+  [ETH] REBALANCE 1.00->1.20 | Conv=0.60 | PnL=-0.2% | Bal=$10,208
+  [BTC] REBALANCE 0.69->0.78 | Conv=0.52 | PnL=+0.1% | Bal=$10,116
+  [ETH] REBALANCE 1.20->0.97 | Conv=0.48 | PnL=+0.5% | Bal=$10,255
+  [ETH] EVOLVE: CONTINUE | Ret=+2.5% WR=55%
+  [BTC] REBALANCE 0.78->0.68 | Conv=0.45 | PnL=+0.3% | Bal=$10,147
+  [BTC] EVOLVE: CONTINUE | Ret=+1.5% WR=56%
+  [BTC] REBALANCE 0.68->0.81 | Conv=0.54 | PnL=-0.4% | Bal=$10,111
+  [ETH] REBALANCE 0.97->0.90 | Conv=0.45 | PnL=-0.1% | Bal=$10,240
+  [BTC] REBALANCE 0.81->0.92 | Conv=0.61 | PnL=-0.1% | Bal=$10,100
+  [ETH] REBALANCE 0.90->0.95 | Conv=0.48 | PnL=+0.8% | Bal=$10,318
+  [BTC] REBALANCE 0.92->0.83 | Conv=0.55 | PnL=+0.5% | Bal=$10,151
+  [ETH] REBALANCE 0.95->1.15 | Conv=0.57 | PnL=-0.2% | Bal=$10,300
+  [BTC] REBALANCE 0.83->0.90 | Conv=0.60 | PnL=-0.1% | Bal=$10,136
+  [ETH] REBALANCE 1.15->1.20 | Conv=0.60 | PnL=-0.2% | Bal=$10,281
+  [BTC] REBALANCE 0.90->0.78 | Conv=0.52 | PnL=-0.2% | Bal=$10,114
+  [BTC] EVOLVE: CONTINUE | Ret=+1.1% WR=50%
+  [ETH] REBALANCE 1.20->1.11 | Conv=0.55 | PnL=-0.3% | Bal=$10,246
+  [ETH] EVOLVE: CONTINUE | Ret=+2.5% WR=48%
+  [BTC] REBALANCE 0.78->0.72 | Conv=0.48 | PnL=-0.1% | Bal=$10,106
+  [BTC] REBALANCE 0.72->0.92 | Conv=0.61 | PnL=+0.2% | Bal=$10,122
+  [BTC] REBALANCE 0.92->0.85 | Conv=0.57 | PnL=-0.1% | Bal=$10,110
+  [ETH] REBALANCE 1.11->1.20 | Conv=0.60 | PnL=+0.2% | Bal=$10,268
+  [BTC] REBALANCE 0.85->0.91 | Conv=0.60 | PnL=+0.1% | Bal=$10,117
+  [BTC] REBALANCE 0.91->1.00 | Conv=0.66 | PnL=-0.5% | Bal=$10,062
+  [BTC] EVOLVE: CONTINUE | Ret=+0.6% WR=49%
+  [ETH] REBALANCE 1.20->1.11 | Conv=0.56 | PnL=-0.5% | Bal=$10,213
+  [BTC] REBALANCE 1.00->0.93 | Conv=0.62 | PnL=+0.2% | Bal=$10,078
+  [ETH] REBALANCE 1.11->1.20 | Conv=0.60 | PnL=+0.5% | Bal=$10,267
+  [BTC] REBALANCE 0.93->0.83 | Conv=0.55 | PnL=-0.1% | Bal=$10,073
+  [BTC] REBALANCE 0.83->1.02 | Conv=0.68 | PnL=+0.1% | Bal=$10,085
+  [NVDA] HEALTH: 0 checks after 20h. Resetting dedup.
+  [AMZN] HEALTH: 0 checks after 20h. Resetting dedup.
+  [BTC] REBALANCE 1.02->0.97 | Conv=0.64 | PnL=+0.1% | Bal=$10,096
+  [NVDA] HEALTH: 0 checks after 21h. Resetting dedup.
+  [AMZN] HEALTH: 0 checks after 21h. Resetting dedup.
+  [ETH] REBALANCE 1.20->0.96 | Conv=0.48 | PnL=+0.9% | Bal=$10,362
+  [BTC] REBALANCE 0.97->0.69 | Conv=0.46 | PnL=+0.7% | Bal=$10,165
+  [BTC] EVOLVE: CONTINUE | Ret=+1.6% WR=52%
+  [NVDA] HEALTH: 0 checks after 22h. Resetting dedup.
+  [AMZN] HEALTH: 0 checks after 22h. Resetting dedup.
+  [NVDA] HEALTH: 0 checks after 23h. Resetting dedup.
+  [AMZN] HEALTH: 0 checks after 23h. Resetting dedup.
+  [ETH] REBALANCE 0.96->1.09 | Conv=0.54 | PnL=-0.2% | Bal=$10,343
+  [ETH] EVOLVE: CONTINUE | Ret=+3.4% WR=50%
+  [BTC] REBALANCE 0.69->0.86 | Conv=0.57 | PnL=-0.1% | Bal=$10,153
+  [BTC] REBALANCE 0.86->0.95 | Conv=0.63 | PnL=-0.1% | Bal=$10,143
+  [BTC] REBALANCE 0.95->0.88 | Conv=0.58 | PnL=-0.0% | Bal=$10,141
+  [BTC] REBALANCE 0.88->0.94 | Conv=0.63 | PnL=-0.1% | Bal=$10,132
+  [NVDA] HEALTH: 0 checks after 24h. Resetting dedup.
+  [AMZN] HEALTH: 0 checks after 24h. Resetting dedup.
+  [BTC] REBALANCE 0.94->0.75 | Conv=0.50 | PnL=-0.2% | Bal=$10,110
+  [BTC] EVOLVE: CONTINUE | Ret=+1.1% WR=47%
+  [ETH] REBALANCE 1.09->1.20 | Conv=0.60 | PnL=-0.1% | Bal=$10,335
+  [BTC] REBALANCE 0.75->0.83 | Conv=0.55 | PnL=-0.1% | Bal=$10,104
+  [BTC] REBALANCE 0.83->1.03 | Conv=0.68 | PnL=-0.0% | Bal=$10,104
+  [ETH] REBALANCE 1.20->1.09 | Conv=0.54 | PnL=-0.3% | Bal=$10,304
+  [BTC] REBALANCE 1.03->0.94 | Conv=0.63 | PnL=-0.2% | Bal=$10,085
+  [ETH] REBALANCE 1.09->1.20 | Conv=0.60 | PnL=-0.2% | Bal=$10,284
+  [BTC] REBALANCE 0.94->1.08 | Conv=0.72 | PnL=-0.2% | Bal=$10,064
+  [ETH] REBALANCE 1.20->1.11 | Conv=0.56 | PnL=+0.2% | Bal=$10,306
+  [NVDA] REBALANCE 0.82->0.38 | Conv=0.13 | PnL=-0.3% | Bal=$9,969
+  [ETH] REBALANCE 1.11->1.20 | Conv=0.60 | PnL=+0.4% | Bal=$10,349
+  [ETH] EVOLVE: CONTINUE | Ret=+3.5% WR=49%
+  [BTC] REBALANCE 1.08->0.83 | Conv=0.55 | PnL=+0.4% | Bal=$10,100
+  [BTC] EVOLVE: CONTINUE | Ret=+1.0% WR=44%
+  [ETH] REBALANCE 1.20->0.94 | Conv=0.47 | PnL=-0.6% | Bal=$10,282
+  [ETH] REBALANCE 0.94->1.20 | Conv=0.60 | PnL=+0.5% | Bal=$10,331
+  [BTC] REBALANCE 0.83->1.00 | Conv=0.67 | PnL=+0.1% | Bal=$10,105
+  [NVDA] REBALANCE 0.38->0.61 | Conv=0.20 | PnL=-0.1% | Bal=$9,958
+  [ETH] REBALANCE 1.20->1.12 | Conv=0.56 | PnL=+0.5% | Bal=$10,380
+  [BTC] REBALANCE 1.00->0.94 | Conv=0.63 | PnL=+0.1% | Bal=$10,111
+  [BTC] REBALANCE 0.94->0.83 | Conv=0.55 | PnL=+0.0% | Bal=$10,113
+  [NVDA] REBALANCE 0.61->0.71 | Conv=0.24 | PnL=+0.2% | Bal=$9,982
+  [BTC] REBALANCE 0.83->0.62 | Conv=0.41 | PnL=+0.3% | Bal=$10,143
+  [BTC] REBALANCE 0.62->0.80 | Conv=0.53 | PnL=-0.1% | Bal=$10,128
+  [BTC] EVOLVE: CONTINUE | Ret=+1.3% WR=47%
+  [ETH] REBALANCE 1.12->0.93 | Conv=0.46 | PnL=-1.4% | Bal=$10,232
+  [BTC] REBALANCE 0.80->0.94 | Conv=0.63 | PnL=-0.2% | Bal=$10,109
+  [ETH] REBALANCE 0.93->1.02 | Conv=0.51 | PnL=-0.7% | Bal=$10,165
+  [ETH] EVOLVE: CONTINUE | Ret=+1.6% WR=48%
+  [ETH] REBALANCE 1.02->0.91 | Conv=0.46 | PnL=+0.3% | Bal=$10,197
+  [ETH] REBALANCE 0.91->1.05 | Conv=0.53 | PnL=-0.0% | Bal=$10,194
+  [ETH] REBALANCE 1.05->0.91 | Conv=0.46 | PnL=-0.0% | Bal=$10,193
+  [BTC] REBALANCE 0.94->0.82 | Conv=0.54 | PnL=-0.3% | Bal=$10,076
+  [BTC] REBALANCE 0.82->0.95 | Conv=0.63 | PnL=+0.1% | Bal=$10,091
+  [ETH] REBALANCE 0.91->1.09 | Conv=0.55 | PnL=+0.5% | Bal=$10,239
+  [BTC] REBALANCE 0.95->0.89 | Conv=0.59 | PnL=+0.1% | Bal=$10,105
+  [NVDA] REBALANCE 0.71->0.83 | Conv=0.28 | PnL=-0.2% | Bal=$9,964
+  [BTC] REBALANCE 0.89->0.96 | Conv=0.64 | PnL=-0.2% | Bal=$10,085
+  [BTC] EVOLVE: CONTINUE | Ret=+0.8% WR=47%
+  [BTC] REBALANCE 0.96->0.76 | Conv=0.51 | PnL=-0.1% | Bal=$10,079
+  [ETH] REBALANCE 1.09->0.80 | Conv=0.40 | PnL=-0.3% | Bal=$10,205
+  [ETH] EVOLVE: CONTINUE | Ret=+2.1% WR=47%
+  [BTC] REBALANCE 0.76->0.90 | Conv=0.60 | PnL=-0.1% | Bal=$10,066
+  [ETH] REBALANCE 0.80->0.87 | Conv=0.43 | PnL=+0.2% | Bal=$10,226
+  [ETH] REBALANCE 0.87->0.58 | Conv=0.29 | PnL=+0.1% | Bal=$10,240
+  [BTC] REBALANCE 0.90->0.64 | Conv=0.43 | PnL=+0.3% | Bal=$10,099
+  [ETH] REBALANCE 0.58->0.77 | Conv=0.39 | PnL=-0.1% | Bal=$10,233
+  [BTC] REBALANCE 0.64->0.78 | Conv=0.52 | PnL=-0.1% | Bal=$10,093
+  [ETH] REBALANCE 0.77->0.70 | Conv=0.35 | PnL=-0.2% | Bal=$10,213
+  [BTC] REBALANCE 0.78->0.65 | Conv=0.43 | PnL=-0.3% | Bal=$10,067
+  [BTC] EVOLVE: CONTINUE | Ret=+0.7% WR=45%
+  [ETH] REBALANCE 0.70->0.82 | Conv=0.41 | PnL=-0.1% | Bal=$10,205
+  [ETH] EVOLVE: CONTINUE | Ret=+2.0% WR=46%
+  [BTC] REBALANCE 0.65->0.77 | Conv=0.51 | PnL=-0.1% | Bal=$10,055
+  [ETH] REBALANCE 0.82->0.59 | Conv=0.29 | PnL=-0.3% | Bal=$10,177
+  [BTC] REBALANCE 0.77->0.95 | Conv=0.63 | PnL=-0.2% | Bal=$10,032
+  [ETH] REBALANCE 0.59->0.70 | Conv=0.35 | PnL=-0.3% | Bal=$10,143
+  [BTC] REBALANCE 0.95->1.10 | Conv=0.73 | PnL=-0.4% | Bal=$9,991
+  [ETH] REBALANCE 0.70->0.79 | Conv=0.40 | PnL=-1.0% | Bal=$10,046
+  [BTC] REBALANCE 1.10->1.00 | Conv=0.67 | PnL=-0.7% | Bal=$9,917
+  [ETH] REBALANCE 0.79->0.68 | Conv=0.34 | PnL=-0.2% | Bal=$10,030
+  [BTC] REBALANCE 1.00->0.92 | Conv=0.61 | PnL=-0.3% | Bal=$9,886
+  [BTC] EVOLVE: CONTINUE | Ret=-1.1% WR=41%
+  [ETH] REBALANCE 0.68->0.48 | Conv=0.24 | PnL=-0.2% | Bal=$10,008
+  [ETH] EVOLVE: CONTINUE | Ret=+0.1% WR=42%
+  [ETH] REBALANCE 0.48->0.78 | Conv=0.39 | PnL=+0.3% | Bal=$10,041
+  [ETH] REBALANCE 0.78->0.84 | Conv=0.42 | PnL=-0.0% | Bal=$10,039
+  [BTC] REBALANCE 0.92->0.85 | Conv=0.57 | PnL=+0.3% | Bal=$9,915
+  [ETH] REBALANCE 0.84->0.70 | Conv=0.35 | PnL=+0.4% | Bal=$10,076
+  [BTC] REBALANCE 0.85->0.72 | Conv=0.48 | PnL=-0.3% | Bal=$9,888
+  [BTC] REBALANCE 0.72->0.87 | Conv=0.58 | PnL=-0.3% | Bal=$9,857
+  [ETH] REBALANCE 0.70->0.46 | Conv=0.23 | PnL=-0.6% | Bal=$10,012
+  [BTC] REBALANCE 0.87->0.72 | Conv=0.48 | PnL=+0.0% | Bal=$9,861
+  [BTC] REBALANCE 0.72->0.55 | Conv=0.36 | PnL=+0.1% | Bal=$9,872
+  [BTC] EVOLVE: CONTINUE | Ret=-1.3% WR=43%
+  [ETH] REBALANCE 0.46->0.28 | Conv=0.14 | PnL=+0.1% | Bal=$10,025
+  [ETH] EVOLVE: CONTINUE | Ret=+0.3% WR=43%
+  [BTC] REBALANCE 0.55->0.43 | Conv=0.29 | PnL=+0.0% | Bal=$9,874
+  [ETH] REBALANCE 0.28->0.38 | Conv=0.19 | PnL=-0.0% | Bal=$10,025
+  [ETH] REBALANCE 0.38->0.78 | Conv=0.39 | PnL=+0.0% | Bal=$10,026
+  [BTC] REBALANCE 0.43->0.62 | Conv=0.41 | PnL=+0.1% | Bal=$9,879
+  [ETH] REBALANCE 0.78->0.45 | Conv=0.23 | PnL=-0.2% | Bal=$10,009
+  [BTC] REBALANCE 0.62->0.37 | Conv=0.25 | PnL=-0.1% | Bal=$9,866
+  [BTC] REBALANCE 0.37->0.29 | Conv=0.19 | PnL=-0.0% | Bal=$9,864
+  [ETH] REBALANCE 0.45->0.77 | Conv=0.38 | PnL=+0.1% | Bal=$10,024
+  [BTC] REBALANCE 0.29->0.55 | Conv=0.37 | PnL=+0.1% | Bal=$9,871
+  [BTC] EVOLVE: CONTINUE | Ret=-1.3% WR=44%
+  [ETH] REBALANCE 0.77->0.46 | Conv=0.23 | PnL=-0.1% | Bal=$10,009
+  [ETH] EVOLVE: CONTINUE | Ret=+0.1% WR=43%
+  [BTC] REBALANCE 0.55->0.31 | Conv=0.20 | PnL=-0.1% | Bal=$9,863
+  [ETH] REBALANCE 0.46->0.31 | Conv=0.16 | PnL=-0.1% | Bal=$9,998
+  [BTC] REBALANCE 0.31->0.23 | Conv=0.15 | PnL=-0.1% | Bal=$9,857
+  [ETH] REBALANCE 0.31->0.51 | Conv=0.25 | PnL=-0.0% | Bal=$9,995
+  [BTC] REBALANCE 0.23->0.30 | Conv=0.20 | PnL=-0.0% | Bal=$9,855
+  [ETH] REBALANCE 0.51->0.38 | Conv=0.19 | PnL=-0.1% | Bal=$9,981
+  [BTC] REBALANCE 0.30->0.42 | Conv=0.28 | PnL=-0.1% | Bal=$9,848
+  [ETH] REBALANCE 0.38->0.30 | Conv=0.15 | PnL=-0.0% | Bal=$9,980
+  [ETH] REBALANCE 0.30->0.58 | Conv=0.29 | PnL=-0.0% | Bal=$9,980
+  [ETH] EVOLVE: CONTINUE | Ret=-0.2% WR=40%
+  [BTC] REBALANCE 0.42->0.49 | Conv=0.33 | PnL=-0.0% | Bal=$9,848
+  [BTC] EVOLVE: CONTINUE | Ret=-1.5% WR=41%
+  [ETH] REBALANCE 0.58->0.52 | Conv=0.26 | PnL=+0.0% | Bal=$9,980
+  [ETH] REBALANCE 0.52->0.32 | Conv=0.16 | PnL=-0.0% | Bal=$9,975
+  [BTC] REBALANCE 0.49->0.37 | Conv=0.25 | PnL=+0.0% | Bal=$9,849
+  [ETH] REBALANCE 0.32->0.50 | Conv=0.25 | PnL=+0.0% | Bal=$9,976
+  [BTC] REBALANCE 0.37->0.51 | Conv=0.34 | PnL=+0.0% | Bal=$9,852
+  [ETH] REBALANCE 0.50->0.66 | Conv=0.33 | PnL=-0.0% | Bal=$9,974
+  [ETH] REBALANCE 0.66->0.93 | Conv=0.46 | PnL=+0.1% | Bal=$9,985
+  [ETH] EVOLVE: CONTINUE | Ret=-0.2% WR=41%
+  [BTC] REBALANCE 0.51->0.58 | Conv=0.39 | PnL=-0.0% | Bal=$9,850
+  [ETH] REBALANCE 0.93->0.85 | Conv=0.43 | PnL=+0.1% | Bal=$9,991
+  [ETH] REBALANCE 0.85->0.66 | Conv=0.33 | PnL=+0.2% | Bal=$10,010
+  [BTC] REBALANCE 0.58->0.42 | Conv=0.28 | PnL=+0.2% | Bal=$9,868

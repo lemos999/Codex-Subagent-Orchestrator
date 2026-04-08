@@ -1,0 +1,13 @@
+{
+  "asset": "BTC_ETH_PAIR",
+  "strategy": "pairs_mean_reversion",
+  "lookback": 100,
+  "entry_z": 2.5,
+  "exit_z": 0.5,
+  "stop_z": 3.0,
+  "leverage": 2.0,
+  "passed": false,
+  "test_ret": -36.36,
+  "test_sharpe": -14.55,
+  "test_trades": 15
+}

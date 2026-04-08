@@ -1,0 +1,18 @@
+============================================================
+  AMZN V2 Optimization (momentum_breakout)
+============================================================
+  Data: 1255 bars (2021-04-01 00:00:00-04:00 ~ 2026-03-31 00:00:00-04:00)
+  Train: 753 | Val: 251 | Test: 251
+    Gen  30 | Sharpe: 10.07 | Ret: +61.4% | Trades: 13 | WR: 92%
+    Gen  60 | Sharpe: 10.07 | Ret: +61.4% | Trades: 13 | WR: 92%
+    Gen  90 | Sharpe: 10.07 | Ret: +61.4% | Trades: 13 | WR: 92%
+    Gen 120 | Sharpe: 10.07 | Ret: +61.4% | Trades: 13 | WR: 92%
+    Gen 150 | Sharpe: 10.07 | Ret: +61.4% | Trades: 13 | WR: 92%
+
+  Best params: {'breakout_period': 18, 'vol_mult': np.float64(0.9666034839943968), 'stop_atr': np.float64(3.8585058980688065), 'trail_atr': np.float64(1.6143407553488491), 'cooldown': 3, 'leverage': np.float64(1.2855294722324513)}
+  [Train] Ret=+61.4% | Sharpe=10.07 | DD=-9.2% | Trades=13 | WR=92% | PF=6.58
+  [Val  ] Ret=+17.9% | Sharpe=19.65 | DD=-0.0% | Trades=5 | WR=100% | PF=16891447.59
+  [Test ] Ret=-9.8% | Sharpe=-4.09 | DD=-13.0% | Trades=5 | WR=60% | PF=0.55
+
+  VERDICT: FAIL
+  Saved: C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\data\params_amzn_v2.json (18s)

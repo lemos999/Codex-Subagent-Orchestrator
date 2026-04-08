@@ -1,0 +1,16 @@
+============================================================
+  Hybrid Strategy Paper Trading
+  Symbol: ETH/USDT:USDT
+  Strategy: CMA-ES (MA 21/95) + XGBoost (>55%)
+  Dashboard: http://localhost:8895
+============================================================
+  [init] XGBoost model loaded: C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\data\xgb_direction_model.json
+  [init] Balance: $10,000.00
+  [init] Position: FLAT
+  [init] Started: 2026-04-01T03:07:33
+  Dashboard: http://localhost:8895
+
+  Running... (Ctrl+C to stop)
+  Checks every 60s, acts on 15m bar close
+
+  [16:00] $2,133.28 | FLAT | Bal=$10,000 | Conf=0.380 | No entry: RSI=44.4 not oversold (<28.3); XGB=0.380 below thr

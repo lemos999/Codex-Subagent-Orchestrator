@@ -1,0 +1,10 @@
+{
+  "asset": "BTC",
+  "strategy": "4h_trend_pullback",
+  "ma": 200,
+  "rsi": 30,
+  "passed": false,
+  "test_ret": -15.99,
+  "test_sharpe": -27.19,
+  "bh_ret": -24.29
+}

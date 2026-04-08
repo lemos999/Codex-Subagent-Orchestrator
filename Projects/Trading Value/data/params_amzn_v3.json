@@ -1,0 +1,10 @@
+{
+  "asset": "AMZN",
+  "strategy": "golden_cross_trail",
+  "ma_fast": 40,
+  "ma_slow": 50,
+  "passed": false,
+  "test_ret": -1.55,
+  "test_sharpe": -4.28,
+  "bh_ret": 8.38
+}

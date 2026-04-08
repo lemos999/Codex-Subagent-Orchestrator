@@ -1,0 +1,107 @@
+Device: cpu
+Downloading NVDA 5-year daily data...
+[*********************100%***********************]  1 of 1 completed
+Bars: 1255  (2021-04-06 ~ 2026-04-02)
+Features: 16 dims  |  Usable bars: 1206
+
+======================================================================
+Walk-Forward:  train=252d  test=63d  seq=40
+======================================================================
+
+--- Fold 1: train 2021-06-15..  test ..2022-11-08  (train=252, test=63) ---
+    epoch  10  train_loss=0.6289  val_loss=0.6526
+    epoch  20  train_loss=0.5644  val_loss=0.7153
+    early stop at epoch 21
+    Accuracy: 0.6984  (baseline: 0.5079)
+
+--- Fold 2: train 2021-09-14..  test ..2023-02-09  (train=252, test=63) ---
+    epoch  10  train_loss=0.5953  val_loss=1.0551
+    early stop at epoch 13
+    Accuracy: 0.3016  (baseline: 0.6984)
+
+--- Fold 3: train 2021-12-13..  test ..2023-05-11  (train=252, test=63) ---
+    epoch  10  train_loss=0.6690  val_loss=0.6764
+    early stop at epoch 17
+    Accuracy: 0.7460  (baseline: 0.7302)
+
+--- Fold 4: train 2022-03-15..  test ..2023-08-11  (train=252, test=63) ---
+    epoch  10  train_loss=0.6535  val_loss=0.7828
+    early stop at epoch 11
+    Accuracy: 0.5714  (baseline: 0.5873)
+
+--- Fold 5: train 2022-06-14..  test ..2023-11-09  (train=252, test=63) ---
+    epoch  10  train_loss=0.6208  val_loss=0.7385
+    early stop at epoch 14
+    Accuracy: 0.5556  (baseline: 0.5556)
+
+--- Fold 6: train 2022-09-14..  test ..2024-02-12  (train=252, test=63) ---
+    epoch  10  train_loss=0.5899  val_loss=0.6156
+    epoch  20  train_loss=0.3992  val_loss=0.5195
+    epoch  30  train_loss=0.3318  val_loss=0.5445
+    epoch  40  train_loss=0.2966  val_loss=0.5760
+    early stop at epoch 41
+    Accuracy: 0.8254  (baseline: 0.6984)
+
+--- Fold 7: train 2022-12-13..  test ..2024-05-13  (train=252, test=63) ---
+    epoch  10  train_loss=0.5619  val_loss=0.6693
+    early stop at epoch 13
+    Accuracy: 0.6349  (baseline: 0.6349)
+
+--- Fold 8: train 2023-03-16..  test ..2024-08-13  (train=252, test=63) ---
+    epoch  10  train_loss=0.5275  val_loss=0.8753
+    early stop at epoch 12
+    Accuracy: 0.6032  (baseline: 0.6032)
+
+--- Fold 9: train 2023-06-15..  test ..2024-11-11  (train=252, test=63) ---
+    epoch  10  train_loss=0.5982  val_loss=0.8030
+    early stop at epoch 11
+    Accuracy: 0.5714  (baseline: 0.5714)
+
+--- Fold 10: train 2023-09-15..  test ..2025-02-13  (train=252, test=63) ---
+    epoch  10  train_loss=0.6120  val_loss=0.7648
+    early stop at epoch 14
+    Accuracy: 0.4921  (baseline: 0.5079)
+
+--- Fold 11: train 2023-12-14..  test ..2025-05-15  (train=252, test=63) ---
+    epoch  10  train_loss=0.6205  val_loss=0.8632
+    early stop at epoch 12
+    Accuracy: 0.5079  (baseline: 0.5079)
+
+--- Fold 12: train 2024-03-18..  test ..2025-08-15  (train=252, test=63) ---
+    epoch  10  train_loss=0.6243  val_loss=0.7155
+    early stop at epoch 11
+    Accuracy: 0.8254  (baseline: 0.8254)
+
+--- Fold 13: train 2024-06-17..  test ..2025-11-13  (train=252, test=63) ---
+    epoch  10  train_loss=0.5923  val_loss=0.6942
+    early stop at epoch 16
+    Accuracy: 0.5397  (baseline: 0.5238)
+
+--- Fold 14: train 2024-09-17..  test ..2026-02-17  (train=252, test=63) ---
+    epoch  10  train_loss=0.6018  val_loss=0.7680
+    early stop at epoch 13
+    Accuracy: 0.5238  (baseline: 0.5079)
+
+======================================================================
+ FOLD PERIOD                          TRAIN  TEST     ACC    BASE  BEAT
+----------------------------------------------------------------------
+    1 2021-06-15 ~ 2022-11-08           252    63  0.6984  0.5079     Y
+    2 2021-09-14 ~ 2023-02-09           252    63  0.3016  0.6984     N
+    3 2021-12-13 ~ 2023-05-11           252    63  0.7460  0.7302     Y
+    4 2022-03-15 ~ 2023-08-11           252    63  0.5714  0.5873     N
+    5 2022-06-14 ~ 2023-11-09           252    63  0.5556  0.5556     N
+    6 2022-09-14 ~ 2024-02-12           252    63  0.8254  0.6984     Y
+    7 2022-12-13 ~ 2024-05-13           252    63  0.6349  0.6349     N
+    8 2023-03-16 ~ 2024-08-13           252    63  0.6032  0.6032     N
+    9 2023-06-15 ~ 2024-11-11           252    63  0.5714  0.5714     N
+   10 2023-09-15 ~ 2025-02-13           252    63  0.4921  0.5079     N
+   11 2023-12-14 ~ 2025-05-15           252    63  0.5079  0.5079     N
+   12 2024-03-18 ~ 2025-08-15           252    63  0.8254  0.8254     N
+   13 2024-06-17 ~ 2025-11-13           252    63  0.5397  0.5238     Y
+   14 2024-09-17 ~ 2026-02-17           252    63  0.5238  0.5079     Y
+----------------------------------------------------------------------
+Mean accuracy: 0.5998  |  Std: 0.1352
+Beat baseline: 5/14 folds
+Best fold acc: 0.8254
+
+Model saved -> C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\data\dl_nvda_transformer.pt

@@ -1,0 +1,18 @@
+============================================================
+  BTC V2 Optimization (mean_reversion)
+============================================================
+  Data: 175201 bars (2021-03-28 17:15:00 ~ 2026-03-27 17:15:00)
+  Train: 105120 | Val: 35040 | Test: 35041
+    Gen  30 | Sharpe: 0.51 | Ret: +23.3% | Trades: 1654 | WR: 57%
+    Gen  60 | Sharpe: 0.80 | Ret: +59.0% | Trades: 1694 | WR: 58%
+    Gen  90 | Sharpe: 0.89 | Ret: +71.9% | Trades: 1683 | WR: 58%
+    Gen 120 | Sharpe: 0.89 | Ret: +71.9% | Trades: 1683 | WR: 58%
+    Gen 150 | Sharpe: 0.89 | Ret: +71.9% | Trades: 1683 | WR: 58%
+
+  Best params: {'rsi_buy': np.float64(31.409958985514336), 'rsi_exit': np.float64(68.97847706440223), 'stop_atr': np.float64(3.405176820858235), 'tp_atr': np.float64(5.455720379653277), 'cooldown': 7, 'leverage': np.float64(2.391669136951947)}
+  [Train] Ret=+71.9% | Sharpe=0.89 | DD=-41.5% | Trades=1683 | WR=58% | PF=1.09
+  [Val  ] Ret=-22.8% | Sharpe=-0.82 | DD=-38.2% | Trades=545 | WR=53% | PF=0.93
+  [Test ] Ret=-29.0% | Sharpe=-1.51 | DD=-44.6% | Trades=536 | WR=49% | PF=0.87
+
+  VERDICT: FAIL
+  Saved: C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\data\params_btc_v2.json (599s)

@@ -1,0 +1,177 @@
+{
+  "timestamp": "2026-04-01 20:51",
+  "monthly_stats": {
+    "NVDA": {
+      "months": 326,
+      "avg": 4.06,
+      "std": 17.37,
+      "gt10_pct": 31.9,
+      "lt_neg10_pct": 18.4,
+      "best": 82.62,
+      "worst": -48.65,
+      "dd": 87.2
+    },
+    "NVDL": {
+      "months": 39,
+      "avg": 11.13,
+      "std": 23.77,
+      "gt10_pct": 46.15,
+      "lt_neg10_pct": 20.51,
+      "best": 59.13,
+      "worst": -27.29,
+      "dd": 51.73
+    },
+    "NVDU": {
+      "months": 30,
+      "avg": 7.74,
+      "std": 22.28,
+      "gt10_pct": 40.0,
+      "lt_neg10_pct": 23.33,
+      "best": 56.62,
+      "worst": -27.07,
+      "dd": 51.53
+    },
+    "TQQQ": {
+      "months": 193,
+      "avg": 3.94,
+      "std": 15.5,
+      "gt10_pct": 35.75,
+      "lt_neg10_pct": 15.54,
+      "best": 46.45,
+      "worst": -38.13,
+      "dd": 79.09
+    },
+    "SOXL": {
+      "months": 192,
+      "avg": 4.63,
+      "std": 21.82,
+      "gt10_pct": 41.15,
+      "lt_neg10_pct": 26.56,
+      "best": 63.07,
+      "worst": -53.73,
+      "dd": 86.91
+    },
+    "QQQ": {
+      "months": 324,
+      "avg": 1.02,
+      "std": 6.69,
+      "gt10_pct": 7.1,
+      "lt_neg10_pct": 5.86,
+      "best": 24.32,
+      "worst": -26.21,
+      "dd": 81.08
+    },
+    "AMZN": {
+      "months": 346,
+      "avg": 3.44,
+      "std": 16.13,
+      "gt10_pct": 23.7,
+      "lt_neg10_pct": 13.29,
+      "best": 126.38,
+      "worst": -41.16,
+      "dd": 93.07
+    },
+    "UPRO": {
+      "months": 201,
+      "avg": 3.08,
+      "std": 12.79,
+      "gt10_pct": 27.36,
+      "lt_neg10_pct": 13.93,
+      "best": 37.17,
+      "worst": -48.12,
+      "dd": 62.73
+    }
+  },
+  "regime_results": [
+    {
+      "label": "NVDA 2x regime",
+      "total_ret": 298073.02,
+      "monthly_avg": 3.54,
+      "max_dd": 62.04,
+      "trades": 551,
+      "win_rate": 42.6,
+      "months_gt10": 63,
+      "total_months": 324
+    },
+    {
+      "label": "NVDA 3x aggressive",
+      "total_ret": 697377.05,
+      "monthly_avg": 5.32,
+      "max_dd": 82.47,
+      "trades": 378,
+      "win_rate": 44.4,
+      "months_gt10": 66,
+      "total_months": 324
+    },
+    {
+      "label": "NVDA 2x fast",
+      "total_ret": 48260.15,
+      "monthly_avg": 2.75,
+      "max_dd": 70.83,
+      "trades": 698,
+      "win_rate": 41.3,
+      "months_gt10": 61,
+      "total_months": 324
+    },
+    {
+      "label": "TQQQ B&H-ish (already 3x)",
+      "total_ret": 201.18,
+      "monthly_avg": 0.86,
+      "max_dd": 55.27,
+      "trades": 223,
+      "win_rate": 40.8,
+      "months_gt10": 18,
+      "total_months": 191
+    },
+    {
+      "label": "TQQQ regime on/off",
+      "total_ret": 320.37,
+      "monthly_avg": 1.04,
+      "max_dd": 43.82,
+      "trades": 166,
+      "win_rate": 15.7,
+      "months_gt10": 12,
+      "total_months": 191
+    },
+    {
+      "label": "SOXL regime on/off",
+      "total_ret": 6.68,
+      "monthly_avg": 0.49,
+      "max_dd": 71.55,
+      "trades": 256,
+      "win_rate": 16.0,
+      "months_gt10": 19,
+      "total_months": 190
+    },
+    {
+      "label": "QQQ synthetic 3x",
+      "total_ret": 1542.42,
+      "monthly_avg": 1.29,
+      "max_dd": 86.95,
+      "trades": 207,
+      "win_rate": 44.0,
+      "months_gt10": 30,
+      "total_months": 322
+    },
+    {
+      "label": "AMZN 2x regime",
+      "total_ret": 90630.48,
+      "monthly_avg": 3.27,
+      "max_dd": 77.32,
+      "trades": 498,
+      "win_rate": 38.4,
+      "months_gt10": 60,
+      "total_months": 344
+    },
+    {
+      "label": "AMZN 3x aggressive",
+      "total_ret": 73664.56,
+      "monthly_avg": 4.89,
+      "max_dd": 94.33,
+      "trades": 352,
+      "win_rate": 39.8,
+      "months_gt10": 58,
+      "total_months": 344
+    }
+  ]
+}

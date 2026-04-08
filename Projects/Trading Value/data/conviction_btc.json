@@ -1,0 +1,1700 @@
+{
+  "symbol": "BTC",
+  "asset_type": "crypto",
+  "balance": 9868.01429492749,
+  "position": "LONG",
+  "conviction": 0.2832523394396354,
+  "target_size": 0.425,
+  "current_size": 0.42487850915945313,
+  "entry_price": 68913.7,
+  "current_price": 68913.7,
+  "current_pnl_pct": 0.207471457025282,
+  "total_trades": 89,
+  "wins": 38,
+  "losses": 51,
+  "peak_balance": 10164.981849017577,
+  "max_drawdown_pct": 3.121491453322416,
+  "max_leverage": 1.5,
+  "last_update": "2026-04-07T08:45:52.915104+00:00",
+  "started_at": "2026-04-05T12:09:32.554555+00:00",
+  "total_checks": 178,
+  "conviction_details": {
+    "trend": 0.361,
+    "rsi": -0.05,
+    "volume": -0.05,
+    "momentum": 0.02,
+    "volatility": 0.05,
+    "raw": 0.331,
+    "conviction": 0.331,
+    "rsi_value": 65.4,
+    "ma20": 68658.01,
+    "ma50": 68820.36,
+    "ma200": 68520.88,
+    "dl_boost": -0.048
+  },
+  "trades": [
+    {
+      "time": "2026-04-05T12:45:40.927908+00:00",
+      "entry": 66881.8,
+      "exit": 66679.0,
+      "old_size": 0.102,
+      "new_size": 0.505,
+      "pnl_pct": -0.04,
+      "balance": 9996.38,
+      "conviction": 0.336,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T13:00:41.944366+00:00",
+      "entry": 66679.0,
+      "exit": 66757.9,
+      "old_size": 0.505,
+      "new_size": 0.332,
+      "pnl_pct": 0.03,
+      "balance": 9999.83,
+      "conviction": 0.221,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T13:15:42.509942+00:00",
+      "entry": 66757.9,
+      "exit": 66720.0,
+      "old_size": 0.332,
+      "new_size": 0.472,
+      "pnl_pct": -0.04,
+      "balance": 9996.28,
+      "conviction": 0.315,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T13:45:43.489939+00:00",
+      "entry": 66720.0,
+      "exit": 66806.6,
+      "old_size": 0.472,
+      "new_size": 0.297,
+      "pnl_pct": 0.04,
+      "balance": 10000.05,
+      "conviction": 0.198,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T14:00:43.940019+00:00",
+      "entry": 66806.6,
+      "exit": 66852.6,
+      "old_size": 0.297,
+      "new_size": 0.216,
+      "pnl_pct": 0.01,
+      "balance": 10000.61,
+      "conviction": 0.144,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T14:45:45.401509+00:00",
+      "entry": 66852.6,
+      "exit": 66896.2,
+      "old_size": 0.216,
+      "new_size": 0.28,
+      "pnl_pct": 0.0,
+      "balance": 10000.94,
+      "conviction": 0.187,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T15:30:46.850153+00:00",
+      "entry": 66896.2,
+      "exit": 67385.8,
+      "old_size": 0.28,
+      "new_size": 0.153,
+      "pnl_pct": 0.19,
+      "balance": 10020.05,
+      "conviction": 0.102,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T15:45:47.222393+00:00",
+      "entry": 67385.8,
+      "exit": 67381.0,
+      "old_size": 0.153,
+      "new_size": 0.421,
+      "pnl_pct": -0.01,
+      "balance": 10019.18,
+      "conviction": 0.281,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T17:00:49.425700+00:00",
+      "entry": 67381.0,
+      "exit": 67193.7,
+      "old_size": 0.421,
+      "new_size": 0.641,
+      "pnl_pct": -0.14,
+      "balance": 10005.35,
+      "conviction": 0.427,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T17:30:50.212265+00:00",
+      "entry": 67193.7,
+      "exit": 67314.1,
+      "old_size": 0.641,
+      "new_size": 0.424,
+      "pnl_pct": 0.08,
+      "balance": 10013.63,
+      "conviction": 0.283,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T18:00:51.004227+00:00",
+      "entry": 67314.1,
+      "exit": 67338.2,
+      "old_size": 0.424,
+      "new_size": 0.539,
+      "pnl_pct": -0.01,
+      "balance": 10013.03,
+      "conviction": 0.359,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T18:45:52.162342+00:00",
+      "entry": 67338.2,
+      "exit": 67390.4,
+      "old_size": 0.539,
+      "new_size": 0.698,
+      "pnl_pct": 0.01,
+      "balance": 10014.51,
+      "conviction": 0.465,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T19:15:53.251823+00:00",
+      "entry": 67390.4,
+      "exit": 67363.8,
+      "old_size": 0.698,
+      "new_size": 0.601,
+      "pnl_pct": -0.06,
+      "balance": 10008.26,
+      "conviction": 0.401,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T19:30:53.650855+00:00",
+      "entry": 67363.8,
+      "exit": 67438.1,
+      "old_size": 0.601,
+      "new_size": 0.675,
+      "pnl_pct": 0.04,
+      "balance": 10011.89,
+      "conviction": 0.45,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T19:45:54.047685+00:00",
+      "entry": 67438.1,
+      "exit": 67279.0,
+      "old_size": 0.675,
+      "new_size": 0.625,
+      "pnl_pct": -0.19,
+      "balance": 9992.57,
+      "conviction": 0.417,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T20:00:54.447609+00:00",
+      "entry": 67279.0,
+      "exit": 67347.8,
+      "old_size": 0.625,
+      "new_size": 0.772,
+      "pnl_pct": 0.03,
+      "balance": 9995.83,
+      "conviction": 0.515,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T20:15:54.862097+00:00",
+      "entry": 67347.8,
+      "exit": 67349.8,
+      "old_size": 0.772,
+      "new_size": 0.696,
+      "pnl_pct": -0.04,
+      "balance": 9992.2,
+      "conviction": 0.464,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T21:15:56.546513+00:00",
+      "entry": 67349.8,
+      "exit": 67511.3,
+      "old_size": 0.696,
+      "new_size": 0.768,
+      "pnl_pct": 0.13,
+      "balance": 10005.4,
+      "conviction": 0.512,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T21:45:57.348054+00:00",
+      "entry": 67511.3,
+      "exit": 67478.1,
+      "old_size": 0.768,
+      "new_size": 0.713,
+      "pnl_pct": -0.08,
+      "balance": 9997.78,
+      "conviction": 0.475,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T22:00:57.737130+00:00",
+      "entry": 67478.1,
+      "exit": 67484.0,
+      "old_size": 0.713,
+      "new_size": 0.898,
+      "pnl_pct": -0.03,
+      "balance": 9994.84,
+      "conviction": 0.599,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T22:30:58.668329+00:00",
+      "entry": 67484.0,
+      "exit": 67401.9,
+      "old_size": 0.898,
+      "new_size": 0.682,
+      "pnl_pct": -0.15,
+      "balance": 9979.43,
+      "conviction": 0.455,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T23:00:59.474281+00:00",
+      "entry": 67401.9,
+      "exit": 68357.5,
+      "old_size": 0.682,
+      "new_size": 0.618,
+      "pnl_pct": 0.93,
+      "balance": 10072.57,
+      "conviction": 0.412,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-05T23:15:59.865638+00:00",
+      "entry": 68357.5,
+      "exit": 68810.2,
+      "old_size": 0.618,
+      "new_size": 0.687,
+      "pnl_pct": 0.38,
+      "balance": 10110.66,
+      "conviction": 0.458,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-05T23:45:00.744545+00:00",
+      "entry": 68810.2,
+      "exit": 68894.8,
+      "old_size": 0.687,
+      "new_size": 0.784,
+      "pnl_pct": 0.05,
+      "balance": 10115.73,
+      "conviction": 0.523,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T00:00:49.093546+00:00",
+      "entry": 68894.8,
+      "exit": 69204.4,
+      "old_size": 0.784,
+      "new_size": 0.679,
+      "pnl_pct": 0.31,
+      "balance": 10147.42,
+      "conviction": 0.452,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T01:15:51.418343+00:00",
+      "entry": 69204.4,
+      "exit": 68868.3,
+      "old_size": 0.679,
+      "new_size": 0.815,
+      "pnl_pct": -0.36,
+      "balance": 10110.54,
+      "conviction": 0.543,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T02:00:52.738264+00:00",
+      "entry": 68868.3,
+      "exit": 68817.8,
+      "old_size": 0.815,
+      "new_size": 0.918,
+      "pnl_pct": -0.1,
+      "balance": 10100.38,
+      "conviction": 0.612,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T02:30:53.561757+00:00",
+      "entry": 68817.8,
+      "exit": 69228.6,
+      "old_size": 0.918,
+      "new_size": 0.825,
+      "pnl_pct": 0.5,
+      "balance": 10151.11,
+      "conviction": 0.55,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T03:30:55.264155+00:00",
+      "entry": 69228.6,
+      "exit": 69138.1,
+      "old_size": 0.825,
+      "new_size": 0.9,
+      "pnl_pct": -0.15,
+      "balance": 10135.97,
+      "conviction": 0.6,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T04:15:56.603538+00:00",
+      "entry": 69138.1,
+      "exit": 69009.7,
+      "old_size": 0.9,
+      "new_size": 0.783,
+      "pnl_pct": -0.21,
+      "balance": 10114.47,
+      "conviction": 0.522,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T04:30:57.013687+00:00",
+      "entry": 69009.7,
+      "exit": 68970.0,
+      "old_size": 0.783,
+      "new_size": 0.716,
+      "pnl_pct": -0.08,
+      "balance": 10105.95,
+      "conviction": 0.477,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T04:45:57.416958+00:00",
+      "entry": 68970.0,
+      "exit": 69154.1,
+      "old_size": 0.716,
+      "new_size": 0.921,
+      "pnl_pct": 0.16,
+      "balance": 10121.64,
+      "conviction": 0.614,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T05:00:57.919085+00:00",
+      "entry": 69154.1,
+      "exit": 69104.9,
+      "old_size": 0.921,
+      "new_size": 0.851,
+      "pnl_pct": -0.11,
+      "balance": 10110.34,
+      "conviction": 0.567,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T05:45:03.148152+00:00",
+      "entry": 69104.9,
+      "exit": 69192.5,
+      "old_size": 0.851,
+      "new_size": 0.907,
+      "pnl_pct": 0.07,
+      "balance": 10116.95,
+      "conviction": 0.605,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T06:30:04.527254+00:00",
+      "entry": 69192.5,
+      "exit": 68813.8,
+      "old_size": 0.907,
+      "new_size": 0.995,
+      "pnl_pct": -0.54,
+      "balance": 10062.11,
+      "conviction": 0.664,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T07:00:05.373276+00:00",
+      "entry": 68813.8,
+      "exit": 68958.7,
+      "old_size": 0.995,
+      "new_size": 0.933,
+      "pnl_pct": 0.16,
+      "balance": 10078.19,
+      "conviction": 0.622,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T07:45:06.664692+00:00",
+      "entry": 68958.7,
+      "exit": 68955.5,
+      "old_size": 0.933,
+      "new_size": 0.827,
+      "pnl_pct": -0.05,
+      "balance": 10073.06,
+      "conviction": 0.551,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T08:00:07.085295+00:00",
+      "entry": 68955.5,
+      "exit": 69086.4,
+      "old_size": 0.827,
+      "new_size": 1.016,
+      "pnl_pct": 0.12,
+      "balance": 10084.7,
+      "conviction": 0.677,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T08:30:07.974320+00:00",
+      "entry": 69086.4,
+      "exit": 69199.9,
+      "old_size": 1.016,
+      "new_size": 0.965,
+      "pnl_pct": 0.12,
+      "balance": 10096.41,
+      "conviction": 0.643,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T10:00:10.516613+00:00",
+      "entry": 69199.9,
+      "exit": 69721.5,
+      "old_size": 0.965,
+      "new_size": 0.693,
+      "pnl_pct": 0.68,
+      "balance": 10164.98,
+      "conviction": 0.462,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T11:15:12.622807+00:00",
+      "entry": 69721.5,
+      "exit": 69640.0,
+      "old_size": 0.693,
+      "new_size": 0.858,
+      "pnl_pct": -0.12,
+      "balance": 10153.22,
+      "conviction": 0.572,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T11:30:13.035493+00:00",
+      "entry": 69640.0,
+      "exit": 69591.8,
+      "old_size": 0.858,
+      "new_size": 0.952,
+      "pnl_pct": -0.1,
+      "balance": 10142.83,
+      "conviction": 0.635,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T11:45:13.425488+00:00",
+      "entry": 69591.8,
+      "exit": 69612.1,
+      "old_size": 0.952,
+      "new_size": 0.876,
+      "pnl_pct": -0.02,
+      "balance": 10140.82,
+      "conviction": 0.584,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T12:00:13.980007+00:00",
+      "entry": 69612.1,
+      "exit": 69578.0,
+      "old_size": 0.876,
+      "new_size": 0.941,
+      "pnl_pct": -0.09,
+      "balance": 10132.03,
+      "conviction": 0.627,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T12:15:14.427831+00:00",
+      "entry": 69578.0,
+      "exit": 69450.0,
+      "old_size": 0.941,
+      "new_size": 0.75,
+      "pnl_pct": -0.22,
+      "balance": 10109.72,
+      "conviction": 0.5,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T12:30:14.864427+00:00",
+      "entry": 69450.0,
+      "exit": 69433.4,
+      "old_size": 0.75,
+      "new_size": 0.828,
+      "pnl_pct": -0.06,
+      "balance": 10104.12,
+      "conviction": 0.552,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T12:45:15.286155+00:00",
+      "entry": 69433.4,
+      "exit": 69467.9,
+      "old_size": 0.828,
+      "new_size": 1.025,
+      "pnl_pct": -0.0,
+      "balance": 10104.09,
+      "conviction": 0.684,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T13:15:18.383142+00:00",
+      "entry": 69467.9,
+      "exit": 69373.5,
+      "old_size": 1.025,
+      "new_size": 0.941,
+      "pnl_pct": -0.19,
+      "balance": 10084.83,
+      "conviction": 0.627,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T13:45:19.318649+00:00",
+      "entry": 69373.5,
+      "exit": 69252.7,
+      "old_size": 0.941,
+      "new_size": 1.077,
+      "pnl_pct": -0.21,
+      "balance": 10063.56,
+      "conviction": 0.718,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T14:30:22.471642+00:00",
+      "entry": 69252.7,
+      "exit": 69520.6,
+      "old_size": 1.077,
+      "new_size": 0.832,
+      "pnl_pct": 0.36,
+      "balance": 10100.06,
+      "conviction": 0.555,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T15:00:17.921525+00:00",
+      "entry": 69520.6,
+      "exit": 69599.0,
+      "old_size": 0.832,
+      "new_size": 1.001,
+      "pnl_pct": 0.05,
+      "balance": 10105.33,
+      "conviction": 0.668,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T15:15:19.060134+00:00",
+      "entry": 69599.0,
+      "exit": 69676.1,
+      "old_size": 1.001,
+      "new_size": 0.94,
+      "pnl_pct": 0.06,
+      "balance": 10111.48,
+      "conviction": 0.627,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T15:30:19.474463+00:00",
+      "entry": 69676.1,
+      "exit": 69723.6,
+      "old_size": 0.94,
+      "new_size": 0.828,
+      "pnl_pct": 0.02,
+      "balance": 10113.21,
+      "conviction": 0.552,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T16:15:22.259771+00:00",
+      "entry": 69723.6,
+      "exit": 70010.4,
+      "old_size": 0.828,
+      "new_size": 0.619,
+      "pnl_pct": 0.3,
+      "balance": 10143.46,
+      "conviction": 0.413,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T16:30:22.686893+00:00",
+      "entry": 70010.4,
+      "exit": 69876.8,
+      "old_size": 0.619,
+      "new_size": 0.796,
+      "pnl_pct": -0.15,
+      "balance": 10128.33,
+      "conviction": 0.531,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T17:00:23.492501+00:00",
+      "entry": 69876.8,
+      "exit": 69747.4,
+      "old_size": 0.796,
+      "new_size": 0.945,
+      "pnl_pct": -0.19,
+      "balance": 10109.36,
+      "conviction": 0.63,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T18:00:26.004799+00:00",
+      "entry": 69747.4,
+      "exit": 69536.9,
+      "old_size": 0.945,
+      "new_size": 0.817,
+      "pnl_pct": -0.33,
+      "balance": 10075.77,
+      "conviction": 0.545,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T18:15:27.083436+00:00",
+      "entry": 69536.9,
+      "exit": 69697.0,
+      "old_size": 0.817,
+      "new_size": 0.948,
+      "pnl_pct": 0.15,
+      "balance": 10090.6,
+      "conviction": 0.632,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T18:30:27.498808+00:00",
+      "entry": 69697.0,
+      "exit": 69837.5,
+      "old_size": 0.948,
+      "new_size": 0.892,
+      "pnl_pct": 0.14,
+      "balance": 10105.11,
+      "conviction": 0.595,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T19:15:29.343650+00:00",
+      "entry": 69837.5,
+      "exit": 69713.8,
+      "old_size": 0.892,
+      "new_size": 0.955,
+      "pnl_pct": -0.2,
+      "balance": 10084.63,
+      "conviction": 0.637,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T19:45:30.243363+00:00",
+      "entry": 69713.8,
+      "exit": 69707.3,
+      "old_size": 0.955,
+      "new_size": 0.764,
+      "pnl_pct": -0.06,
+      "balance": 10078.92,
+      "conviction": 0.509,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T20:00:30.618394+00:00",
+      "entry": 69707.3,
+      "exit": 69626.4,
+      "old_size": 0.764,
+      "new_size": 0.899,
+      "pnl_pct": -0.13,
+      "balance": 10066.13,
+      "conviction": 0.599,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T20:30:31.446146+00:00",
+      "entry": 69626.4,
+      "exit": 69912.6,
+      "old_size": 0.899,
+      "new_size": 0.639,
+      "pnl_pct": 0.32,
+      "balance": 10098.81,
+      "conviction": 0.426,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T20:45:31.862559+00:00",
+      "entry": 69912.6,
+      "exit": 69882.4,
+      "old_size": 0.639,
+      "new_size": 0.778,
+      "pnl_pct": -0.06,
+      "balance": 10092.8,
+      "conviction": 0.519,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T21:15:32.685855+00:00",
+      "entry": 69882.4,
+      "exit": 69690.6,
+      "old_size": 0.778,
+      "new_size": 0.646,
+      "pnl_pct": -0.25,
+      "balance": 10067.32,
+      "conviction": 0.431,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T21:30:33.138174+00:00",
+      "entry": 69690.6,
+      "exit": 69597.6,
+      "old_size": 0.646,
+      "new_size": 0.769,
+      "pnl_pct": -0.12,
+      "balance": 10055.39,
+      "conviction": 0.513,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T21:45:33.555450+00:00",
+      "entry": 69597.6,
+      "exit": 69420.3,
+      "old_size": 0.769,
+      "new_size": 0.947,
+      "pnl_pct": -0.23,
+      "balance": 10031.81,
+      "conviction": 0.631,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T22:45:35.282096+00:00",
+      "entry": 69420.3,
+      "exit": 69157.3,
+      "old_size": 0.947,
+      "new_size": 1.096,
+      "pnl_pct": -0.41,
+      "balance": 9991.09,
+      "conviction": 0.73,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T23:00:35.711816+00:00",
+      "entry": 69157.3,
+      "exit": 68725.5,
+      "old_size": 1.096,
+      "new_size": 1.001,
+      "pnl_pct": -0.74,
+      "balance": 9917.26,
+      "conviction": 0.667,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T23:15:36.130958+00:00",
+      "entry": 68725.5,
+      "exit": 68543.9,
+      "old_size": 1.001,
+      "new_size": 0.92,
+      "pnl_pct": -0.31,
+      "balance": 9886.08,
+      "conviction": 0.613,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T00:00:37.505510+00:00",
+      "entry": 68543.9,
+      "exit": 68796.4,
+      "old_size": 0.92,
+      "new_size": 0.851,
+      "pnl_pct": 0.29,
+      "balance": 9915.02,
+      "conviction": 0.567,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T01:45:40.533174+00:00",
+      "entry": 68796.4,
+      "exit": 68607.7,
+      "old_size": 0.851,
+      "new_size": 0.715,
+      "pnl_pct": -0.28,
+      "balance": 9887.67,
+      "conviction": 0.477,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T02:00:40.979510+00:00",
+      "entry": 68607.7,
+      "exit": 68344.7,
+      "old_size": 0.715,
+      "new_size": 0.869,
+      "pnl_pct": -0.31,
+      "balance": 9857.03,
+      "conviction": 0.579,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-07T02:15:41.410970+00:00",
+      "entry": 68344.7,
+      "exit": 68414.3,
+      "old_size": 0.869,
+      "new_size": 0.719,
+      "pnl_pct": 0.05,
+      "balance": 9861.47,
+      "conviction": 0.479,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T02:30:41.891756+00:00",
+      "entry": 68414.3,
+      "exit": 68550.9,
+      "old_size": 0.719,
+      "new_size": 0.546,
+      "pnl_pct": 0.11,
+      "balance": 9872.08,
+      "conviction": 0.364,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T02:45:42.341193+00:00",
+      "entry": 68550.9,
+      "exit": 68603.3,
+      "old_size": 0.546,
+      "new_size": 0.428,
+      "pnl_pct": 0.01,
+      "balance": 9873.51,
+      "conviction": 0.285,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T03:30:43.623326+00:00",
+      "entry": 68603.3,
+      "exit": 68728.1,
+      "old_size": 0.428,
+      "new_size": 0.617,
+      "pnl_pct": 0.06,
+      "balance": 9879.08,
+      "conviction": 0.411,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-07T04:15:44.909140+00:00",
+      "entry": 68728.1,
+      "exit": 68613.7,
+      "old_size": 0.617,
+      "new_size": 0.374,
+      "pnl_pct": -0.13,
+      "balance": 9865.9,
+      "conviction": 0.249,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T04:30:45.325866+00:00",
+      "entry": 68613.7,
+      "exit": 68610.4,
+      "old_size": 0.374,
+      "new_size": 0.287,
+      "pnl_pct": -0.02,
+      "balance": 9863.87,
+      "conviction": 0.192,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T04:45:45.793513+00:00",
+      "entry": 68610.4,
+      "exit": 68805.2,
+      "old_size": 0.287,
+      "new_size": 0.549,
+      "pnl_pct": 0.07,
+      "balance": 9870.5,
+      "conviction": 0.366,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-07T05:15:46.629915+00:00",
+      "entry": 68805.2,
+      "exit": 68750.6,
+      "old_size": 0.549,
+      "new_size": 0.307,
+      "pnl_pct": -0.07,
+      "balance": 9863.49,
+      "conviction": 0.205,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T05:30:47.165812+00:00",
+      "entry": 68750.6,
+      "exit": 68641.9,
+      "old_size": 0.307,
+      "new_size": 0.232,
+      "pnl_pct": -0.06,
+      "balance": 9857.19,
+      "conviction": 0.155,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T05:45:47.575332+00:00",
+      "entry": 68641.9,
+      "exit": 68615.9,
+      "old_size": 0.232,
+      "new_size": 0.303,
+      "pnl_pct": -0.02,
+      "balance": 9855.17,
+      "conviction": 0.202,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-07T06:15:48.438117+00:00",
+      "entry": 68615.9,
+      "exit": 68485.0,
+      "old_size": 0.303,
+      "new_size": 0.415,
+      "pnl_pct": -0.07,
+      "balance": 9847.98,
+      "conviction": 0.277,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-07T06:45:49.263518+00:00",
+      "entry": 68485.0,
+      "exit": 68514.2,
+      "old_size": 0.415,
+      "new_size": 0.492,
+      "pnl_pct": -0.0,
+      "balance": 9847.68,
+      "conviction": 0.328,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-07T07:30:50.577170+00:00",
+      "entry": 68514.2,
+      "exit": 68560.6,
+      "old_size": 0.492,
+      "new_size": 0.374,
+      "pnl_pct": 0.01,
+      "balance": 9848.54,
+      "conviction": 0.25,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-07T07:45:50.995337+00:00",
+      "entry": 68560.6,
+      "exit": 68650.0,
+      "old_size": 0.374,
+      "new_size": 0.51,
+      "pnl_pct": 0.03,
+      "balance": 9851.51,
+      "conviction": 0.34,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-07T08:15:51.924185+00:00",
+      "entry": 68650.0,
+      "exit": 68670.0,
+      "old_size": 0.51,
+      "new_size": 0.585,
+      "pnl_pct": -0.01,
+      "balance": 9850.46,
+      "conviction": 0.39,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-07T08:45:52.915104+00:00",
+      "entry": 68670.0,
+      "exit": 68913.7,
+      "old_size": 0.585,
+      "new_size": 0.425,
+      "pnl_pct": 0.18,
+      "balance": 9868.01,
+      "conviction": 0.283,
+      "reason": "Rebalance DOWN"
+    }
+  ],
+  "activity_log": [
+    {
+      "time": "04-06 13:00",
+      "price": 69341.3,
+      "conv": 0.704,
+      "size": 1.025,
+      "details": "T=0.40 R=0.20 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 13:15",
+      "price": 69373.5,
+      "conv": 0.627,
+      "size": 0.941,
+      "details": "T=0.40 R=0.12 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 13:30",
+      "price": 69502.5,
+      "conv": 0.62,
+      "size": 0.941,
+      "details": "T=0.40 R=0.12 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 13:45",
+      "price": 69252.7,
+      "conv": 0.718,
+      "size": 1.077,
+      "details": "T=0.39 R=0.20 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 14:00",
+      "price": 69375.1,
+      "conv": 0.695,
+      "size": 1.077,
+      "details": "T=0.40 R=0.20 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 14:15",
+      "price": 69348.7,
+      "conv": 0.719,
+      "size": 1.077,
+      "details": "T=0.40 R=0.20 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 14:30",
+      "price": 69520.6,
+      "conv": 0.555,
+      "size": 0.832,
+      "details": "T=0.40 R=0.05 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 14:45",
+      "price": 69368.7,
+      "conv": 0.581,
+      "size": 0.832,
+      "details": "T=0.40 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 15:00",
+      "price": 69599.0,
+      "conv": 0.668,
+      "size": 1.001,
+      "details": "T=0.55 R=0.05 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 15:15",
+      "price": 69676.1,
+      "conv": 0.627,
+      "size": 0.94,
+      "details": "T=0.55 R=0.00 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 15:30",
+      "price": 69723.6,
+      "conv": 0.552,
+      "size": 0.828,
+      "details": "T=0.56 R=-0.05 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 15:45",
+      "price": 69796.0,
+      "conv": 0.534,
+      "size": 0.828,
+      "details": "T=0.56 R=-0.05 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 16:00",
+      "price": 69916.0,
+      "conv": 0.522,
+      "size": 0.828,
+      "details": "T=0.56 R=-0.05 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 16:15",
+      "price": 70010.4,
+      "conv": 0.413,
+      "size": 0.619,
+      "details": "T=0.56 R=-0.15 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 16:30",
+      "price": 69876.8,
+      "conv": 0.531,
+      "size": 0.796,
+      "details": "T=0.56 R=-0.05 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 16:45",
+      "price": 70079.6,
+      "conv": 0.523,
+      "size": 0.796,
+      "details": "T=0.56 R=-0.05 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 17:00",
+      "price": 69747.4,
+      "conv": 0.63,
+      "size": 0.945,
+      "details": "T=0.55 R=-0.05 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 17:15",
+      "price": 69303.2,
+      "conv": 0.651,
+      "size": 0.945,
+      "details": "T=0.39 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 17:30",
+      "price": 69499.0,
+      "conv": 0.598,
+      "size": 0.945,
+      "details": "T=0.40 R=0.00 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 17:45",
+      "price": 69447.1,
+      "conv": 0.634,
+      "size": 0.945,
+      "details": "T=0.39 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 18:00",
+      "price": 69536.9,
+      "conv": 0.545,
+      "size": 0.817,
+      "details": "T=0.40 R=0.00 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 18:15",
+      "price": 69697.0,
+      "conv": 0.632,
+      "size": 0.948,
+      "details": "T=0.55 R=0.00 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 18:30",
+      "price": 69837.5,
+      "conv": 0.595,
+      "size": 0.892,
+      "details": "T=0.55 R=0.00 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 18:45",
+      "price": 69754.2,
+      "conv": 0.587,
+      "size": 0.892,
+      "details": "T=0.55 R=0.00 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 19:00",
+      "price": 69795.2,
+      "conv": 0.575,
+      "size": 0.892,
+      "details": "T=0.55 R=0.00 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 19:15",
+      "price": 69713.8,
+      "conv": 0.637,
+      "size": 0.955,
+      "details": "T=0.55 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 19:30",
+      "price": 69805.3,
+      "conv": 0.625,
+      "size": 0.955,
+      "details": "T=0.55 R=0.05 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 19:45",
+      "price": 69707.3,
+      "conv": 0.509,
+      "size": 0.764,
+      "details": "T=0.40 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-06 20:00",
+      "price": 69626.4,
+      "conv": 0.599,
+      "size": 0.899,
+      "details": "T=0.40 R=0.12 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 20:15",
+      "price": 69766.9,
+      "conv": 0.607,
+      "size": 0.899,
+      "details": "T=0.55 R=0.00 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-06 20:30",
+      "price": 69912.6,
+      "conv": 0.426,
+      "size": 0.639,
+      "details": "T=0.55 R=-0.15 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 20:45",
+      "price": 69882.4,
+      "conv": 0.519,
+      "size": 0.778,
+      "details": "T=0.55 R=-0.05 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 21:00",
+      "price": 69750.6,
+      "conv": 0.526,
+      "size": 0.778,
+      "details": "T=0.55 R=-0.05 V=-0.05 M=0.03"
+    },
+    {
+      "time": "04-06 21:15",
+      "price": 69690.6,
+      "conv": 0.431,
+      "size": 0.646,
+      "details": "T=0.40 R=0.00 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 21:30",
+      "price": 69597.6,
+      "conv": 0.513,
+      "size": 0.769,
+      "details": "T=0.39 R=0.05 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 21:45",
+      "price": 69420.3,
+      "conv": 0.631,
+      "size": 0.947,
+      "details": "T=0.39 R=0.12 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 22:00",
+      "price": 69384.4,
+      "conv": 0.639,
+      "size": 0.947,
+      "details": "T=0.39 R=0.12 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 22:15",
+      "price": 69475.7,
+      "conv": 0.617,
+      "size": 0.947,
+      "details": "T=0.39 R=0.12 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 22:30",
+      "price": 69308.1,
+      "conv": 0.634,
+      "size": 0.947,
+      "details": "T=0.38 R=0.12 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 22:45",
+      "price": 69157.3,
+      "conv": 0.73,
+      "size": 1.096,
+      "details": "T=0.38 R=0.20 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 23:00",
+      "price": 68725.5,
+      "conv": 0.667,
+      "size": 1.001,
+      "details": "T=0.21 R=0.20 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 23:15",
+      "price": 68543.9,
+      "conv": 0.613,
+      "size": 0.92,
+      "details": "T=0.21 R=0.20 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 23:30",
+      "price": 68498.2,
+      "conv": 0.611,
+      "size": 0.92,
+      "details": "T=0.21 R=0.20 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-06 23:45",
+      "price": 68818.8,
+      "conv": 0.592,
+      "size": 0.92,
+      "details": "T=0.22 R=0.20 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 00:00",
+      "price": 68796.4,
+      "conv": 0.567,
+      "size": 0.851,
+      "details": "T=0.22 R=0.20 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 00:15",
+      "price": 68965.4,
+      "conv": 0.538,
+      "size": 0.851,
+      "details": "T=0.22 R=0.20 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 00:30",
+      "price": 68914.8,
+      "conv": 0.536,
+      "size": 0.851,
+      "details": "T=0.22 R=0.20 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 00:45",
+      "price": 68743.0,
+      "conv": 0.553,
+      "size": 0.851,
+      "details": "T=0.21 R=0.20 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 01:00",
+      "price": 68655.9,
+      "conv": 0.563,
+      "size": 0.851,
+      "details": "T=0.21 R=0.20 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 01:15",
+      "price": 68600.0,
+      "conv": 0.572,
+      "size": 0.851,
+      "details": "T=0.21 R=0.20 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 01:30",
+      "price": 68708.9,
+      "conv": 0.559,
+      "size": 0.851,
+      "details": "T=0.21 R=0.20 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 01:45",
+      "price": 68607.7,
+      "conv": 0.477,
+      "size": 0.715,
+      "details": "T=0.21 R=0.12 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 02:00",
+      "price": 68344.7,
+      "conv": 0.579,
+      "size": 0.869,
+      "details": "T=0.20 R=0.20 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 02:15",
+      "price": 68414.3,
+      "conv": 0.479,
+      "size": 0.719,
+      "details": "T=0.20 R=0.12 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 02:30",
+      "price": 68550.9,
+      "conv": 0.364,
+      "size": 0.546,
+      "details": "T=0.21 R=0.05 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 02:45",
+      "price": 68603.3,
+      "conv": 0.285,
+      "size": 0.428,
+      "details": "T=0.21 R=0.00 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 03:00",
+      "price": 68639.2,
+      "conv": 0.297,
+      "size": 0.428,
+      "details": "T=0.21 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 03:15",
+      "price": 68679.9,
+      "conv": 0.275,
+      "size": 0.428,
+      "details": "T=0.21 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 03:30",
+      "price": 68728.1,
+      "conv": 0.411,
+      "size": 0.617,
+      "details": "T=0.36 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 03:45",
+      "price": 68757.7,
+      "conv": 0.413,
+      "size": 0.617,
+      "details": "T=0.36 R=0.05 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-07 04:00",
+      "price": 68731.6,
+      "conv": 0.409,
+      "size": 0.617,
+      "details": "T=0.36 R=0.05 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-07 04:15",
+      "price": 68613.7,
+      "conv": 0.249,
+      "size": 0.374,
+      "details": "T=0.21 R=0.05 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 04:30",
+      "price": 68610.4,
+      "conv": 0.192,
+      "size": 0.287,
+      "details": "T=0.21 R=0.00 V=-0.05 M=-0.02"
+    },
+    {
+      "time": "04-07 04:45",
+      "price": 68805.2,
+      "conv": 0.366,
+      "size": 0.549,
+      "details": "T=0.36 R=0.00 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-07 05:00",
+      "price": 68783.0,
+      "conv": 0.362,
+      "size": 0.549,
+      "details": "T=0.36 R=0.00 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-07 05:15",
+      "price": 68750.6,
+      "conv": 0.205,
+      "size": 0.307,
+      "details": "T=0.36 R=-0.15 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-07 05:30",
+      "price": 68641.9,
+      "conv": 0.155,
+      "size": 0.232,
+      "details": "T=0.21 R=-0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 05:45",
+      "price": 68615.9,
+      "conv": 0.202,
+      "size": 0.303,
+      "details": "T=0.21 R=0.00 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 06:00",
+      "price": 68595.9,
+      "conv": 0.204,
+      "size": 0.303,
+      "details": "T=0.20 R=0.00 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 06:15",
+      "price": 68485.0,
+      "conv": 0.277,
+      "size": 0.415,
+      "details": "T=0.20 R=0.05 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 06:30",
+      "price": 68533.6,
+      "conv": 0.265,
+      "size": 0.415,
+      "details": "T=0.20 R=0.05 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 06:45",
+      "price": 68514.2,
+      "conv": 0.328,
+      "size": 0.492,
+      "details": "T=0.20 R=0.12 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 07:00",
+      "price": 68495.0,
+      "conv": 0.328,
+      "size": 0.492,
+      "details": "T=0.20 R=0.12 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 07:15",
+      "price": 68526.8,
+      "conv": 0.313,
+      "size": 0.492,
+      "details": "T=0.20 R=0.12 V=-0.05 M=0.00"
+    },
+    {
+      "time": "04-07 07:30",
+      "price": 68560.6,
+      "conv": 0.25,
+      "size": 0.374,
+      "details": "T=0.20 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 07:45",
+      "price": 68650.0,
+      "conv": 0.34,
+      "size": 0.51,
+      "details": "T=0.35 R=0.00 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 08:00",
+      "price": 68570.7,
+      "conv": 0.313,
+      "size": 0.51,
+      "details": "T=0.20 R=0.12 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 08:15",
+      "price": 68670.0,
+      "conv": 0.39,
+      "size": 0.585,
+      "details": "T=0.35 R=0.05 V=-0.05 M=0.01"
+    },
+    {
+      "time": "04-07 08:30",
+      "price": 68740.0,
+      "conv": 0.398,
+      "size": 0.585,
+      "details": "T=0.36 R=0.05 V=-0.05 M=0.02"
+    },
+    {
+      "time": "04-07 08:45",
+      "price": 68913.7,
+      "conv": 0.283,
+      "size": 0.425,
+      "details": "T=0.36 R=-0.05 V=-0.05 M=0.02"
+    }
+  ],
+  "evolution_log": [
+    {
+      "time": "2026-04-05T14:00:43.940019+00:00",
+      "decision": "CONTINUE",
+      "ret": 0.01,
+      "trades": 5,
+      "wr": 60.0
+    },
+    {
+      "time": "2026-04-05T17:30:50.212265+00:00",
+      "decision": "CONTINUE",
+      "ret": 0.14,
+      "trades": 10,
+      "wr": 60.0
+    },
+    {
+      "time": "2026-04-05T19:45:54.047685+00:00",
+      "decision": "CONTINUE",
+      "ret": -0.07,
+      "trades": 15,
+      "wr": 53.3
+    },
+    {
+      "time": "2026-04-05T22:00:57.737130+00:00",
+      "decision": "CONTINUE",
+      "ret": -0.05,
+      "trades": 20,
+      "wr": 50.0
+    },
+    {
+      "time": "2026-04-06T00:00:49.093546+00:00",
+      "decision": "CONTINUE",
+      "ret": 1.47,
+      "trades": 25,
+      "wr": 56.0
+    },
+    {
+      "time": "2026-04-06T04:15:56.603538+00:00",
+      "decision": "CONTINUE",
+      "ret": 1.14,
+      "trades": 30,
+      "wr": 50.0
+    },
+    {
+      "time": "2026-04-06T06:30:04.527254+00:00",
+      "decision": "CONTINUE",
+      "ret": 0.62,
+      "trades": 35,
+      "wr": 48.6
+    },
+    {
+      "time": "2026-04-06T10:00:10.516613+00:00",
+      "decision": "CONTINUE",
+      "ret": 1.65,
+      "trades": 40,
+      "wr": 52.5
+    },
+    {
+      "time": "2026-04-06T12:15:14.427831+00:00",
+      "decision": "CONTINUE",
+      "ret": 1.1,
+      "trades": 45,
+      "wr": 46.7
+    },
+    {
+      "time": "2026-04-06T14:30:22.471642+00:00",
+      "decision": "CONTINUE",
+      "ret": 1.0,
+      "trades": 50,
+      "wr": 44.0
+    },
+    {
+      "time": "2026-04-06T16:30:22.686893+00:00",
+      "decision": "CONTINUE",
+      "ret": 1.28,
+      "trades": 55,
+      "wr": 47.3
+    },
+    {
+      "time": "2026-04-06T19:15:29.343650+00:00",
+      "decision": "CONTINUE",
+      "ret": 0.85,
+      "trades": 60,
+      "wr": 46.7
+    },
+    {
+      "time": "2026-04-06T21:15:32.685855+00:00",
+      "decision": "CONTINUE",
+      "ret": 0.67,
+      "trades": 65,
+      "wr": 44.6
+    },
+    {
+      "time": "2026-04-06T23:15:36.130958+00:00",
+      "decision": "CONTINUE",
+      "ret": -1.14,
+      "trades": 70,
+      "wr": 41.4
+    },
+    {
+      "time": "2026-04-07T02:30:41.891756+00:00",
+      "decision": "CONTINUE",
+      "ret": -1.28,
+      "trades": 75,
+      "wr": 42.7
+    },
+    {
+      "time": "2026-04-07T04:45:45.793513+00:00",
+      "decision": "CONTINUE",
+      "ret": -1.29,
+      "trades": 80,
+      "wr": 43.8
+    },
+    {
+      "time": "2026-04-07T06:45:49.263518+00:00",
+      "decision": "CONTINUE",
+      "ret": -1.52,
+      "trades": 85,
+      "wr": 41.2
+    }
+  ],
+  "last_analysis_at": 85
+}

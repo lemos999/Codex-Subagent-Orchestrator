@@ -1,0 +1,40 @@
+============================================================
+  BTC Per-Asset CMA-ES Optimization
+  Type: crypto | TF: 15m
+============================================================
+  Data: 175201 bars (2021-03-28 17:15:00 ~ 2026-03-27 17:15:00)
+  Train: 105120 | Val: 35040 | Test: 35041
+    Gen  30 | Sharpe: 1.69 | Ret: +130.5% | Trades: 920 | Lev: 2.0x
+    Gen  60 | Sharpe: 2.48 | Ret: +246.0% | Trades: 924 | Lev: 1.5x
+    Gen  90 | Sharpe: 2.60 | Ret: +202.4% | Trades: 901 | Lev: 1.3x
+    Gen 120 | Sharpe: 2.86 | Ret: +220.3% | Trades: 888 | Lev: 1.2x
+    Gen 150 | Sharpe: 3.02 | Ret: +277.6% | Trades: 895 | Lev: 1.3x
+
+  Best: MA 16/78, RSI<33.7, Vol>0.6x, Stop 2.5*ATR, TP 5.0*ATR, Lev 1.3x
+  [Train] Ret=+277.6% | Sharpe=3.02 | DD=-25.9% | Trades=895 | WR=40% | PF=1.27
+  [Val  ] Ret=-21.1% | Sharpe=-1.75 | DD=-25.6% | Trades=294 | WR=34% | PF=0.88
+  [Test ] Ret=-17.2% | Sharpe=-2.47 | DD=-28.3% | Trades=294 | WR=31% | PF=0.82
+
+  VERDICT: FAIL - needs more work
+Traceback (most recent call last):
+  File "C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\optimize_asset.py", line 239, in <module>
+    
+  File "C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\scripts\optimize_asset.py", line 233, in main
+    "val_ret": round(r_val["ret"], 2), "test_ret": round(r_test["ret"], 2),
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\haj\AppData\Local\Programs\Python\Python312\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "C:\Users\haj\AppData\Local\Programs\Python\Python312\Lib\json\encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "C:\Users\haj\AppData\Local\Programs\Python\Python312\Lib\json\encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "C:\Users\haj\AppData\Local\Programs\Python\Python312\Lib\json\encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "C:\Users\haj\AppData\Local\Programs\Python\Python312\Lib\json\encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "C:\Users\haj\AppData\Local\Programs\Python\Python312\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type bool is not JSON serializable

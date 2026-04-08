@@ -1,0 +1,17 @@
+{
+  "asset": "BTC",
+  "strategy": "mean_reversion",
+  "params": {
+    "rsi_buy": 31.409958985514336,
+    "rsi_exit": 68.97847706440223,
+    "stop_atr": 3.405176820858235,
+    "tp_atr": 5.455720379653277,
+    "cooldown": 7,
+    "leverage": 2.391669136951947
+  },
+  "passed": false,
+  "val_ret": -22.85,
+  "test_ret": -28.97,
+  "val_sharpe": -0.82,
+  "test_sharpe": -1.51
+}

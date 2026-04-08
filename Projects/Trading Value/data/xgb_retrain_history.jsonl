@@ -1,0 +1,1 @@
+{"timestamp": "2026-04-01T02:16:26.558634+00:00", "train_period": "2025-08-29~2026-02-25", "val_period": "2026-02-25~2026-03-27", "train_samples": 17279, "accuracy": 0.5146, "auc": 0.5261, "high_conf_acc": 0.5257, "high_conf_n": 835}

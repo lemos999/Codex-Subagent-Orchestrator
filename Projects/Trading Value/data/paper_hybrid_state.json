@@ -1,0 +1,401 @@
+{
+  "balance": 10000.0,
+  "position": "FLAT",
+  "entry_price": 0.0,
+  "stop_price": 0.0,
+  "tp_price": 0.0,
+  "position_size": 0.0,
+  "entry_time": "",
+  "total_trades": 0,
+  "wins": 0,
+  "losses": 0,
+  "peak_balance": 10000.0,
+  "max_drawdown_pct": 0.0,
+  "current_pnl_pct": 0.0,
+  "last_signal": {
+    "signal": "FLAT",
+    "confidence": 0.37969517707824707,
+    "stop_loss": 0.0,
+    "take_profit": 0.0,
+    "position_size": 0.0,
+    "reason": "No entry: RSI=44.4 not oversold (<28.3); XGB=0.380 below threshold (0.55); Volume filter failed"
+  },
+  "last_update": "2026-04-01T16:00:56.331453+00:00",
+  "started_at": "2026-04-01T03:07:33.773098+00:00",
+  "total_signals_checked": 52,
+  "last_analysis_at_trade": 0,
+  "last_retrain_date": "",
+  "evolution_log": [],
+  "paused": false,
+  "pause_reason": "",
+  "confidence_threshold": 0.55,
+  "leverage": 1.6,
+  "pause_count": 0,
+  "trades": [],
+  "activity_log": [
+    {
+      "time": "04-01 03:15",
+      "price": 2099.7,
+      "action": "FLAT",
+      "confidence": 0.4787,
+      "reason": "No entry: RSI=46.2 not oversold (<28.3); XGB=0.479 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 03:30",
+      "price": 2097.53,
+      "action": "FLAT",
+      "confidence": 0.4536,
+      "reason": "No entry: RSI=46.8 not oversold (<28.3); XGB=0.454 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 03:45",
+      "price": 2100.39,
+      "action": "FLAT",
+      "confidence": 0.3929,
+      "reason": "No entry: RSI=50.0 not oversold (<28.3); XGB=0.393 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 04:00",
+      "price": 2101.83,
+      "action": "FLAT",
+      "confidence": 0.4155,
+      "reason": "No entry: RSI=49.4 not oversold (<28.3); XGB=0.416 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 04:15",
+      "price": 2100.95,
+      "action": "FLAT",
+      "confidence": 0.5079,
+      "reason": "No entry: RSI=48.7 not oversold (<28.3); XGB=0.508 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 04:30",
+      "price": 2109.66,
+      "action": "FLAT",
+      "confidence": 0.3699,
+      "reason": "No entry: RSI=53.2 not oversold (<28.3); XGB=0.370 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 04:45",
+      "price": 2108.69,
+      "action": "FLAT",
+      "confidence": 0.439,
+      "reason": "No entry: RSI=60.8 not oversold (<28.3); XGB=0.439 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 05:00",
+      "price": 2109.76,
+      "action": "FLAT",
+      "confidence": 0.4072,
+      "reason": "No entry: RSI=65.2 not oversold (<28.3); XGB=0.407 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 05:15",
+      "price": 2111.83,
+      "action": "FLAT",
+      "confidence": 0.3531,
+      "reason": "No entry: RSI=72.1 not oversold (<28.3); XGB=0.353 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 05:30",
+      "price": 2128.24,
+      "action": "FLAT",
+      "confidence": 0.3417,
+      "reason": "No entry: RSI=81.0 not oversold (<28.3); XGB=0.342 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 05:45",
+      "price": 2125.2,
+      "action": "FLAT",
+      "confidence": 0.3734,
+      "reason": "No entry: RSI=88.5 not oversold (<28.3); XGB=0.373 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 06:00",
+      "price": 2121.95,
+      "action": "FLAT",
+      "confidence": 0.4286,
+      "reason": "No entry: RSI=82.9 not oversold (<28.3); XGB=0.429 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 06:15",
+      "price": 2138.99,
+      "action": "FLAT",
+      "confidence": 0.4579,
+      "reason": "No entry: RSI=87.0 not oversold (<28.3); XGB=0.458 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 06:30",
+      "price": 2143.35,
+      "action": "FLAT",
+      "confidence": 0.4587,
+      "reason": "No entry: RSI=85.3 not oversold (<28.3); XGB=0.459 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 06:45",
+      "price": 2152.07,
+      "action": "FLAT",
+      "confidence": 0.3751,
+      "reason": "No entry: RSI=88.2 not oversold (<28.3); XGB=0.375 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 07:00",
+      "price": 2152.21,
+      "action": "FLAT",
+      "confidence": 0.3355,
+      "reason": "No entry: RSI=86.0 not oversold (<28.3); XGB=0.336 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 07:15",
+      "price": 2148.76,
+      "action": "FLAT",
+      "confidence": 0.4789,
+      "reason": "No entry: RSI=83.4 not oversold (<28.3); XGB=0.479 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 07:30",
+      "price": 2138.59,
+      "action": "FLAT",
+      "confidence": 0.4629,
+      "reason": "No entry: RSI=73.7 not oversold (<28.3); XGB=0.463 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 07:45",
+      "price": 2138.34,
+      "action": "FLAT",
+      "confidence": 0.4942,
+      "reason": "No entry: RSI=73.5 not oversold (<28.3); XGB=0.494 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 08:00",
+      "price": 2130.18,
+      "action": "FLAT",
+      "confidence": 0.453,
+      "reason": "No entry: RSI=63.4 not oversold (<28.3); XGB=0.453 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 08:15",
+      "price": 2125.57,
+      "action": "FLAT",
+      "confidence": 0.5136,
+      "reason": "No entry: RSI=59.9 not oversold (<28.3); XGB=0.514 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 08:30",
+      "price": 2135.5,
+      "action": "FLAT",
+      "confidence": 0.4184,
+      "reason": "No entry: RSI=63.5 not oversold (<28.3); XGB=0.418 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 08:45",
+      "price": 2139.19,
+      "action": "FLAT",
+      "confidence": 0.4142,
+      "reason": "No entry: RSI=57.9 not oversold (<28.3); XGB=0.414 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 09:00",
+      "price": 2136.02,
+      "action": "FLAT",
+      "confidence": 0.4986,
+      "reason": "No entry: RSI=55.7 not oversold (<28.3); XGB=0.499 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 09:15",
+      "price": 2132.74,
+      "action": "FLAT",
+      "confidence": 0.4616,
+      "reason": "No entry: RSI=54.8 not oversold (<28.3); XGB=0.462 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 09:30",
+      "price": 2132.99,
+      "action": "FLAT",
+      "confidence": 0.4102,
+      "reason": "No entry: RSI=46.8 not oversold (<28.3); XGB=0.410 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 09:45",
+      "price": 2130.07,
+      "action": "FLAT",
+      "confidence": 0.4322,
+      "reason": "No entry: RSI=39.9 not oversold (<28.3); XGB=0.432 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 10:00",
+      "price": 2135.44,
+      "action": "FLAT",
+      "confidence": 0.423,
+      "reason": "No entry: RSI=34.1 not oversold (<28.3); XGB=0.423 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 10:15",
+      "price": 2130.16,
+      "action": "FLAT",
+      "confidence": 0.5247,
+      "reason": "No entry: RSI=33.3 not oversold (<28.3); XGB=0.525 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 10:30",
+      "price": 2129.87,
+      "action": "FLAT",
+      "confidence": 0.5381,
+      "reason": "No entry: RSI=33.9 not oversold (<28.3); XGB=0.538 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 10:45",
+      "price": 2130.66,
+      "action": "FLAT",
+      "confidence": 0.4996,
+      "reason": "No entry: RSI=42.1 not oversold (<28.3); XGB=0.500 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 11:00",
+      "price": 2131.58,
+      "action": "FLAT",
+      "confidence": 0.444,
+      "reason": "No entry: RSI=43.2 not oversold (<28.3); XGB=0.444 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 11:15",
+      "price": 2136.01,
+      "action": "FLAT",
+      "confidence": 0.4877,
+      "reason": "No entry: RSI=56.3 not oversold (<28.3); XGB=0.488 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 11:30",
+      "price": 2133.03,
+      "action": "FLAT",
+      "confidence": 0.592,
+      "reason": "No entry: RSI=52.9 not oversold (<28.3); Volume filter failed"
+    },
+    {
+      "time": "04-01 11:45",
+      "price": 2134.94,
+      "action": "FLAT",
+      "confidence": 0.5394,
+      "reason": "No entry: RSI=49.3 not oversold (<28.3); XGB=0.539 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 12:00",
+      "price": 2134.25,
+      "action": "FLAT",
+      "confidence": 0.5175,
+      "reason": "No entry: RSI=42.7 not oversold (<28.3); XGB=0.517 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 12:15",
+      "price": 2133.42,
+      "action": "FLAT",
+      "confidence": 0.4594,
+      "reason": "No entry: RSI=45.9 not oversold (<28.3); XGB=0.459 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 12:30",
+      "price": 2132.47,
+      "action": "FLAT",
+      "confidence": 0.3773,
+      "reason": "No entry: RSI=49.5 not oversold (<28.3); XGB=0.377 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 12:45",
+      "price": 2139.19,
+      "action": "FLAT",
+      "confidence": 0.5407,
+      "reason": "No entry: RSI=57.8 not oversold (<28.3); XGB=0.541 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 13:00",
+      "price": 2129.73,
+      "action": "FLAT",
+      "confidence": 0.4523,
+      "reason": "No entry: RSI=50.1 not oversold (<28.3); XGB=0.452 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 13:15",
+      "price": 2127.7,
+      "action": "FLAT",
+      "confidence": 0.3636,
+      "reason": "No entry: RSI=41.4 not oversold (<28.3); XGB=0.364 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 13:30",
+      "price": 2131.66,
+      "action": "FLAT",
+      "confidence": 0.388,
+      "reason": "No entry: RSI=51.7 not oversold (<28.3); XGB=0.388 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 13:45",
+      "price": 2116.41,
+      "action": "FLAT",
+      "confidence": 0.4803,
+      "reason": "No entry: RSI=39.2 not oversold (<28.3); XGB=0.480 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 14:00",
+      "price": 2117.92,
+      "action": "FLAT",
+      "confidence": 0.3606,
+      "reason": "No entry: RSI=40.4 not oversold (<28.3); XGB=0.361 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 14:15",
+      "price": 2122.02,
+      "action": "FLAT",
+      "confidence": 0.4965,
+      "reason": "No entry: RSI=42.8 not oversold (<28.3); XGB=0.496 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 14:30",
+      "price": 2124.79,
+      "action": "FLAT",
+      "confidence": 0.4725,
+      "reason": "No entry: RSI=40.8 not oversold (<28.3); XGB=0.472 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 14:45",
+      "price": 2120.21,
+      "action": "FLAT",
+      "confidence": 0.4836,
+      "reason": "No entry: RSI=40.0 not oversold (<28.3); XGB=0.484 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 15:00",
+      "price": 2125.71,
+      "action": "FLAT",
+      "confidence": 0.4671,
+      "reason": "No entry: RSI=43.2 not oversold (<28.3); XGB=0.467 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 15:15",
+      "price": 2124.1,
+      "action": "FLAT",
+      "confidence": 0.4519,
+      "reason": "No entry: RSI=42.8 not oversold (<28.3); XGB=0.452 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 15:30",
+      "price": 2128.52,
+      "action": "FLAT",
+      "confidence": 0.4037,
+      "reason": "No entry: RSI=46.8 not oversold (<28.3); XGB=0.404 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 15:45",
+      "price": 2132.37,
+      "action": "FLAT",
+      "confidence": 0.4061,
+      "reason": "No entry: RSI=50.3 not oversold (<28.3); XGB=0.406 below threshold (0.55); Volum"
+    },
+    {
+      "time": "04-01 16:00",
+      "price": 2133.28,
+      "action": "FLAT",
+      "confidence": 0.3797,
+      "reason": "No entry: RSI=44.4 not oversold (<28.3); XGB=0.380 below threshold (0.55); Volum"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "asset": "NVDA",
+  "params": {
+    "ma_fast": 15,
+    "ma_slow": 80,
+    "rsi_entry": 37.57399702584739,
+    "vol_filter": 1.469272838255898,
+    "stop_atr": 2.7199630674373654,
+    "tp_atr": 3.31942112345606,
+    "trail_start": 2.9011562376284057,
+    "trail_step": 0.21223574005067417,
+    "cooldown": 3,
+    "leverage": 1.000001370360617
+  },
+  "passed": false,
+  "val_ret": 16.61,
+  "test_ret": 0,
+  "val_sharpe": 263615139.77,
+  "test_sharpe": -10
+}

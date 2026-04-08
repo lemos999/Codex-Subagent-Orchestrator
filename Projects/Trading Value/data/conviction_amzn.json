@@ -1,0 +1,113 @@
+{
+  "symbol": "AMZN",
+  "asset_type": "stock",
+  "balance": 10000.0,
+  "position": "FLAT",
+  "conviction": 0.0,
+  "target_size": 0.0,
+  "current_size": 0.0,
+  "entry_price": 0.0,
+  "current_price": 212.39999389648438,
+  "current_pnl_pct": 0.0,
+  "total_trades": 0,
+  "wins": 0,
+  "losses": 0,
+  "peak_balance": 10000.0,
+  "max_drawdown_pct": 0.0,
+  "max_leverage": 2.0,
+  "last_update": "2026-04-06T19:00:28.856924+00:00",
+  "started_at": "2026-04-05T12:09:32.554555+00:00",
+  "total_checks": 7,
+  "conviction_details": {
+    "dl_boost": -0.2
+  },
+  "trades": [],
+  "activity_log": [
+    {
+      "time": "04-06 08:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 09:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 10:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 11:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 12:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 13:00",
+      "price": 209.77,
+      "conv": 0.0,
+      "size": 0.0,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 14:00",
+      "price": 212.55,
+      "conv": 0.0,
+      "size": 0.0,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 15:00",
+      "price": 212.18,
+      "conv": 0.0,
+      "size": 0.0,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 16:00",
+      "price": 212.51,
+      "conv": 0.0,
+      "size": 0.0,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 17:00",
+      "price": 212.15,
+      "conv": 0.0,
+      "size": 0.0,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 18:00",
+      "price": 211.49,
+      "conv": 0.0,
+      "size": 0.0,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 19:00",
+      "price": 212.4,
+      "conv": 0.0,
+      "size": 0.0,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    }
+  ],
+  "evolution_log": [],
+  "last_analysis_at": 0
+}

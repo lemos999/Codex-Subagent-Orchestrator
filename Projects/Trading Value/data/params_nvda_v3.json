@@ -1,0 +1,10 @@
+{
+  "asset": "NVDA",
+  "strategy": "golden_cross_trail",
+  "ma_fast": 20,
+  "ma_slow": 50,
+  "passed": false,
+  "test_ret": -2.26,
+  "test_sharpe": -3.49,
+  "bh_ret": 58.37
+}

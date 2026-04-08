@@ -1,0 +1,204 @@
+{
+  "symbol": "BTC",
+  "asset_type": "crypto",
+  "strategy_name": "4H MA200+RSI",
+  "balance": 10000.0,
+  "position": "FLAT",
+  "entry_price": 0.0,
+  "stop_price": 0.0,
+  "tp_price": 0.0,
+  "current_leverage": 0.0,
+  "total_trades": 0,
+  "wins": 0,
+  "losses": 0,
+  "peak_balance": 10000.0,
+  "max_drawdown_pct": 0.0,
+  "current_price": 68144.9,
+  "current_pnl_pct": 0,
+  "regime": "BEAR",
+  "last_update": "2026-04-01T23:15:25.832933+00:00",
+  "started_at": "2026-04-01T16:07:06.372427+00:00",
+  "total_checks": 29,
+  "last_analysis_at": 0,
+  "leverage": 1.5,
+  "confidence_threshold": 0.55,
+  "paused": false,
+  "evolution_log": [],
+  "trades": [],
+  "activity_log": [
+    {
+      "time": "04-01 16:15",
+      "price": 68625.1,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 16:30",
+      "price": 68826.4,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 16:45",
+      "price": 68906.1,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 17:00",
+      "price": 68783.9,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 17:15",
+      "price": 68698.5,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 17:30",
+      "price": 68463.0,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 17:45",
+      "price": 68399.9,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 18:00",
+      "price": 68239.7,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 18:15",
+      "price": 68055.0,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 18:30",
+      "price": 68060.3,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 18:45",
+      "price": 68190.6,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 19:00",
+      "price": 68054.2,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 19:15",
+      "price": 68034.9,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 19:30",
+      "price": 68248.8,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 19:45",
+      "price": 68121.0,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 20:00",
+      "price": 68126.2,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 20:15",
+      "price": 68053.5,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 20:30",
+      "price": 68021.6,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 20:45",
+      "price": 68139.3,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 21:00",
+      "price": 68159.7,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 21:15",
+      "price": 68253.7,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 21:30",
+      "price": 68413.1,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 21:45",
+      "price": 68313.5,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 22:00",
+      "price": 68305.4,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 22:15",
+      "price": 68177.7,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 22:30",
+      "price": 68148.8,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 22:45",
+      "price": 68208.5,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 23:00",
+      "price": 68108.8,
+      "action": "FLAT",
+      "regime": "BEAR"
+    },
+    {
+      "time": "04-01 23:15",
+      "price": 68144.9,
+      "action": "FLAT",
+      "regime": "BEAR"
+    }
+  ]
+}

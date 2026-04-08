@@ -1,0 +1,26 @@
+============================================================
+  BTC Funding Rate Strategy
+  New alpha source: funding rate + open interest
+============================================================
+  Price data: 10951 4H bars
+  Loading cached funding rates...
+  Funding rates: 5480
+  Funding rate stats: mean=0.40bp, std=0.51bp, min=-0.87bp, max=5.06bp
+
+  Grid search: funding thresholds x RSI x risk params
+
+  Top 5:
+  FR_buy=+0.0001 FR_sell=0.0003 RSI<30 Stop=2.0 TP=5.0 Lev=1.5 | Tr=-25.3% Va=+32.3% VaShp=9.74
+  FR_buy=+0.0001 FR_sell=0.0005 RSI<30 Stop=2.0 TP=5.0 Lev=1.5 | Tr=-25.3% Va=+32.3% VaShp=9.74
+  FR_buy=+0.0001 FR_sell=0.0008 RSI<30 Stop=2.0 TP=5.0 Lev=1.5 | Tr=-25.3% Va=+32.3% VaShp=9.74
+  FR_buy=+0.0001 FR_sell=0.0010 RSI<30 Stop=2.0 TP=5.0 Lev=1.5 | Tr=-25.3% Va=+32.3% VaShp=9.74
+  FR_buy=+0.0001 FR_sell=0.0003 RSI<30 Stop=2.0 TP=5.0 Lev=1.0 | Tr=-23.0% Va=+22.7% VaShp=9.74
+
+  Best: FR_buy=+0.0001 FR_sell=0.0003 RSI<30 Stop=2.0*ATR TP=5.0*ATR Lev=1.5x
+  [Train] Ret=-25.3% Sharpe=-6.91 DD=-29.1% Trades=47 WR=28%
+  [Val  ] Ret=+32.3% Sharpe=9.74 DD=-11.6% Trades=16 WR=31%
+  [Test ] Ret=-18.6% Sharpe=-8.44 DD=-22.8% Trades=23 WR=26%
+
+  Buy&Hold (test): -24.3%
+  VERDICT: FAIL
+  Saved: params_btc_funding.json (32s)

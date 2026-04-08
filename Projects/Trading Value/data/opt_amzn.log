@@ -1,0 +1,15 @@
+============================================================
+  AMZN Per-Asset CMA-ES Optimization
+  Type: stock | TF: 1d
+============================================================
+  Data: 1255 bars (2021-04-01 00:00:00-04:00 ~ 2026-03-31 00:00:00-04:00)
+  Train: 753 | Val: 251 | Test: 251
+
+  Best: MA 16/80, RSI<38.0, Vol>1.8x, Stop 2.6*ATR, TP 3.6*ATR, Lev 1.8x
+  [Train] Ret=+0.0% | Sharpe=-10.00 | DD=-0.0% | Trades=0 | WR=0% | PF=0.00
+  [Val  ] Ret=+0.0% | Sharpe=-10.00 | DD=-0.0% | Trades=0 | WR=0% | PF=0.00
+  [Test ] Ret=-14.6% | Sharpe=-232446594.96 | DD=-0.0% | Trades=1 | WR=0% | PF=0.00
+
+  VERDICT: FAIL - needs more work
+  Saved: C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\data\params_amzn.json
+  Time: 2s

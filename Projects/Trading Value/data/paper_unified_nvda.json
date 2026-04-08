@@ -1,0 +1,36 @@
+{
+  "symbol": "NVDA",
+  "asset_type": "stock",
+  "strategy_name": "Regime 3x",
+  "balance": 10000.0,
+  "position": "FLAT",
+  "entry_price": 0.0,
+  "stop_price": 0.0,
+  "tp_price": 0.0,
+  "current_leverage": 0.0,
+  "total_trades": 0,
+  "wins": 0,
+  "losses": 0,
+  "peak_balance": 10000.0,
+  "max_drawdown_pct": 0.0,
+  "current_price": 177.1699981689453,
+  "current_pnl_pct": 0,
+  "regime": "BEAR",
+  "last_update": "2026-04-01T16:15:06.829641+00:00",
+  "started_at": "2026-04-01T16:07:06.372427+00:00",
+  "total_checks": 1,
+  "last_analysis_at": 0,
+  "leverage": 3.0,
+  "confidence_threshold": 0.55,
+  "paused": false,
+  "evolution_log": [],
+  "trades": [],
+  "activity_log": [
+    {
+      "time": "04-01 16:15",
+      "price": 177.17,
+      "action": "FLAT (BEAR)",
+      "regime": "BEAR"
+    }
+  ]
+}

@@ -1286,60 +1286,53 @@ canvas{width:100%;height:200px}
 </style>
 </head><body>
 <div class="hdr">
-  <h1>Strategy Tournament &mdash; 5,000 Variants / Multi-TF / 7 Strategies</h1>
+  <h1>5,000 Strategy Tournament</h1>
   <div id="clock" class="gy"></div>
 </div>
 <div class="wrap">
   <div id="notification" style="display:none;margin-bottom:12px"></div>
-  <div class="section" id="progress" style="margin-bottom:12px">Loading progress...</div>
+
+  <div class="section" id="progress">로딩 중...</div>
+
   <div class="summary" id="summary"></div>
 
+  <div class="section">
+    <h2>토너먼트 현황</h2>
+    <div id="ensemble"></div>
+  </div>
+
   <div class="grid3" id="distributions">
-    <div class="section">
-      <h2>Asset Distribution</h2>
-      <div id="asset-dist"></div>
-    </div>
-    <div class="section">
-      <h2>Strategy Distribution</h2>
-      <div id="strategy-dist"></div>
-    </div>
-    <div class="section">
-      <h2>Timeframe Distribution</h2>
-      <div id="tf-dist"></div>
-    </div>
+    <div class="section"><h2>종목 분포</h2><div id="asset-dist"></div></div>
+    <div class="section"><h2>전략 분포</h2><div id="strategy-dist"></div></div>
+    <div class="section"><h2>시간축 분포</h2><div id="tf-dist"></div></div>
   </div>
 
   <div class="grid2">
-    <div class="section" id="histogram-section">
-      <h2>Return Distribution</h2>
-      <div id="histogram"></div>
-    </div>
-    <div class="section" id="heatmap-section">
-      <h2>Parameter Correlation Heatmap</h2>
-      <div id="heatmap"></div>
-    </div>
+    <div class="section"><h2>수익률 분포</h2><div id="histogram"></div></div>
+    <div class="section"><h2>파라미터 상관관계</h2><div id="heatmap"></div></div>
   </div>
+
   <div class="grid2">
     <div class="section">
-      <h2>Top 10 Variants</h2>
+      <h2>상위 10</h2>
       <table id="top10"><thead><tr>
-        <th>#</th><th>Ret%</th><th>WR%</th><th>CTS</th><th>Trades</th><th>DD%</th>
-        <th>Asset</th><th>Strategy</th><th>TF</th>
-        <th>Trend</th><th>RSI</th><th>Mom</th><th>Lev</th>
+        <th>#</th><th>수익%</th><th>승률%</th><th>CTS</th><th>거래</th><th>DD%</th>
+        <th>종목</th><th>전략</th><th>시간축</th>
+        <th>추세</th><th>RSI</th><th>모멘텀</th><th>레버리지</th>
       </tr></thead><tbody></tbody></table>
     </div>
     <div class="section">
-      <h2>Bottom 10 Variants</h2>
+      <h2>하위 10</h2>
       <table id="bot10"><thead><tr>
-        <th>#</th><th>Ret%</th><th>WR%</th><th>CTS</th><th>Trades</th><th>DD%</th>
-        <th>Asset</th><th>Strategy</th><th>TF</th>
-        <th>Trend</th><th>RSI</th><th>Mom</th><th>Lev</th>
+        <th>#</th><th>수익%</th><th>승률%</th><th>CTS</th><th>거래</th><th>DD%</th>
+        <th>종목</th><th>전략</th><th>시간축</th>
+        <th>추세</th><th>RSI</th><th>모멘텀</th><th>레버리지</th>
       </tr></thead><tbody></tbody></table>
     </div>
   </div>
-  <div class="section">
-    <h2>Ensemble Signal &amp; Tournament Status</h2>
-    <div id="ensemble"></div>
+
+  <div class="section" style="color:#555;font-size:10px;text-align:center;padding:10px">
+    READY 상태가 되면 녹색 배너가 표시됩니다. 그때 결과를 검토하고 다음 단계를 결정하세요.
   </div>
 </div>
 <script>
@@ -1366,12 +1359,12 @@ async function refresh(){
 
     const s = d.summary;
     document.getElementById('summary').innerHTML = [
-      ['Variants', s.n_variants, 'bl'],
-      ['Avg Return', fmt(s.avg_ret)+'%', cls(s.avg_ret)],
-      ['Best', fmt(s.best_ret)+'%', 'gn'],
-      ['Worst', fmt(s.worst_ret)+'%', 'rd'],
-      ['Generation', s.generation, 'yl'],
-      ['Ensemble', fmt(s.ensemble_signal, 2), 'bl'],
+      ['변형 수', s.n_variants, 'bl'],
+      ['평균 수익', fmt(s.avg_ret)+'%', cls(s.avg_ret)],
+      ['최고', fmt(s.best_ret)+'%', 'gn'],
+      ['최저', fmt(s.worst_ret)+'%', 'rd'],
+      ['세대', s.generation, 'yl'],
+      ['앙상블', fmt(s.ensemble_signal, 2), 'bl'],
     ].map(([l,v,c])=>`<div class="sum-card"><div class="label">${l}</div><div class="value ${c}">${v}</div></div>`).join('');
 
     // Distributions
@@ -1416,9 +1409,9 @@ async function refresh(){
     // Tournament status
     const e = d.tournament;
     document.getElementById('ensemble').innerHTML = `
-      <div style="margin:4px 0">Phase: <span class="yl">${e.phase}</span> | Generation: <span class="bl">${e.generation}</span></div>
-      <div style="margin:4px 0">Next tournament: <span class="gy">${e.next_round}</span></div>
-      <div style="margin:4px 0">Ensemble signal: <span class="bl">${fmt(s.ensemble_signal,3)}</span></div>
+      <div style="margin:4px 0">단계: <span class="yl">${e.phase}</span> | 세대: <span class="bl">${e.generation}</span></div>
+      <div style="margin:4px 0">다음 라운드: <span class="gy">${e.next_round}</span></div>
+      <div style="margin:4px 0">앙상블 시그널: <span class="bl">${fmt(s.ensemble_signal,3)}</span> (상위 10개 평균 포지션)</div>
     `;
 
     // Progress & ETA
@@ -1428,28 +1421,29 @@ async function refresh(){
     const rdColor = p.readiness==='READY'?'gn':p.readiness==='APPROACHING'?'yl':'gy';
     let progEl = document.getElementById('progress');
     if(progEl) progEl.innerHTML = `
+      <h2>진행 상황</h2>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div>
-          <div style="margin:4px 0;font-size:10px;color:#555">ELAPSED</div>
-          <div style="font-size:20px;font-weight:bold" class="bl">${(p.elapsed_days||0).toFixed(1)} days</div>
-          <div style="margin:4px 0">Total trades: <b>${(p.total_trades||0).toLocaleString()}</b> (${(p.trades_per_day||0).toFixed(0)}/day)</div>
-          <div style="margin:4px 0">Avg per variant: <b>${(p.avg_trades||0).toFixed(1)}</b> / 30 needed</div>
+          <div style="margin:4px 0;font-size:10px;color:#555">경과 시간</div>
+          <div style="font-size:20px;font-weight:bold" class="bl">${(p.elapsed_days||0).toFixed(1)}일</div>
+          <div style="margin:4px 0">총 거래: <b>${(p.total_trades||0).toLocaleString()}</b>건 (일 ${(p.trades_per_day||0).toFixed(0)}건)</div>
+          <div style="margin:4px 0">변형당 평균: <b>${(p.avg_trades||0).toFixed(1)}</b> / 30건 필요</div>
         </div>
         <div>
-          <div style="margin:4px 0;font-size:10px;color:#555">READINESS</div>
+          <div style="margin:4px 0;font-size:10px;color:#555">검증 상태</div>
           <div style="font-size:20px;font-weight:bold" class="${rdColor}">${p.readiness||'--'}</div>
           <div style="margin:4px 0">${p.readiness_msg||''}</div>
-          <div style="margin:4px 0">ETA to 30 trades: <b class="yl">${p.eta_to_30||'--'}</b></div>
+          <div style="margin:4px 0">30건 도달 예상: <b class="yl">${p.eta_to_30||'--'}</b></div>
         </div>
       </div>
       <div style="margin:10px 0">
-        <div style="font-size:9px;color:#555;margin-bottom:3px">Variants with 30+ trades: ${p.variants_30plus||0} / ${s.n_variants} (${pct30}%)</div>
+        <div style="font-size:9px;color:#555;margin-bottom:3px">30건+ 거래 변형: ${p.variants_30plus||0} / ${s.n_variants} (${pct30}%)</div>
         <div style="height:10px;background:#1a2030;border-radius:5px;overflow:hidden">
           <div style="height:100%;width:${pct30}%;background:linear-gradient(90deg,#ffd700,#ff9800);border-radius:5px;transition:width 2s"></div>
         </div>
       </div>
       <div style="margin:8px 0">
-        <div style="font-size:9px;color:#555;margin-bottom:3px">Variants with 100+ trades: ${p.variants_100plus||0} / ${s.n_variants} (${pct100}%)</div>
+        <div style="font-size:9px;color:#555;margin-bottom:3px">100건+ 거래 변형: ${p.variants_100plus||0} / ${s.n_variants} (${pct100}%)</div>
         <div style="height:10px;background:#1a2030;border-radius:5px;overflow:hidden">
           <div style="height:100%;width:${pct100}%;background:linear-gradient(90deg,#00d4aa,#00d4aa88);border-radius:5px;transition:width 2s"></div>
         </div>

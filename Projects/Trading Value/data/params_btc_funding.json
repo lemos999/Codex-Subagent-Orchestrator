@@ -1,0 +1,13 @@
+{
+  "asset": "BTC",
+  "strategy": "funding_rate",
+  "fr_buy": 0.0001,
+  "fr_sell": 0.0003,
+  "rsi_buy": 30,
+  "stop_mult": 2.0,
+  "tp_mult": 5.0,
+  "leverage": 1.5,
+  "passed": false,
+  "test_ret": -18.64,
+  "bh_ret": -24.29
+}

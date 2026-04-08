@@ -1,0 +1,158 @@
+{
+  "symbol": "NVDA",
+  "asset_type": "stock",
+  "balance": 9963.536874103922,
+  "position": "LONG",
+  "conviction": 0.2759623169898987,
+  "target_size": 0.828,
+  "current_size": 0.8278869509696961,
+  "entry_price": 177.14990234375,
+  "current_price": 177.14990234375,
+  "current_pnl_pct": -0.11634119195299097,
+  "total_trades": 4,
+  "wins": 1,
+  "losses": 3,
+  "peak_balance": 10000.0,
+  "max_drawdown_pct": 0.4203886130276442,
+  "max_leverage": 3.0,
+  "last_update": "2026-04-06T19:00:28.330853+00:00",
+  "started_at": "2026-04-05T12:09:32.554555+00:00",
+  "total_checks": 7,
+  "conviction_details": {
+    "dl_boost": 0.276
+  },
+  "trades": [
+    {
+      "time": "2026-04-06T14:00:20.182530+00:00",
+      "entry": 177.38999938964844,
+      "exit": 176.89999389648438,
+      "old_size": 0.822,
+      "new_size": 0.378,
+      "pnl_pct": -0.31,
+      "balance": 9969.09,
+      "conviction": 0.126,
+      "reason": "Rebalance DOWN"
+    },
+    {
+      "time": "2026-04-06T15:00:18.006942+00:00",
+      "entry": 176.89999389648438,
+      "exit": 176.55499267578125,
+      "old_size": 0.378,
+      "new_size": 0.608,
+      "pnl_pct": -0.11,
+      "balance": 9957.96,
+      "conviction": 0.203,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T16:00:20.503579+00:00",
+      "entry": 176.55499267578125,
+      "exit": 177.44000244140625,
+      "old_size": 0.608,
+      "new_size": 0.712,
+      "pnl_pct": 0.24,
+      "balance": 9982.25,
+      "conviction": 0.237,
+      "reason": "Rebalance UP"
+    },
+    {
+      "time": "2026-04-06T19:00:28.330853+00:00",
+      "entry": 177.44000244140625,
+      "exit": 177.14990234375,
+      "old_size": 0.712,
+      "new_size": 0.828,
+      "pnl_pct": -0.19,
+      "balance": 9963.54,
+      "conviction": 0.276,
+      "reason": "Rebalance UP"
+    }
+  ],
+  "activity_log": [
+    {
+      "time": "04-06 08:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 09:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 10:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 11:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 12:00",
+      "price": 0,
+      "conv": 0,
+      "size": 0,
+      "details": "HEALTH: reset dedup, 0 checks"
+    },
+    {
+      "time": "04-06 13:00",
+      "price": 177.39,
+      "conv": 0.274,
+      "size": 0.822,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 14:00",
+      "price": 176.9,
+      "conv": 0.126,
+      "size": 0.378,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 15:00",
+      "price": 176.55,
+      "conv": 0.203,
+      "size": 0.608,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 16:00",
+      "price": 177.44,
+      "conv": 0.237,
+      "size": 0.712,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 17:00",
+      "price": 176.96,
+      "conv": 0.243,
+      "size": 0.712,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 18:00",
+      "price": 176.55,
+      "conv": 0.252,
+      "size": 0.712,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    },
+    {
+      "time": "04-06 19:00",
+      "price": 177.15,
+      "conv": 0.276,
+      "size": 0.828,
+      "details": "T=0.00 R=0.00 V=0.00 M=0.00"
+    }
+  ],
+  "evolution_log": [],
+  "last_analysis_at": 0
+}

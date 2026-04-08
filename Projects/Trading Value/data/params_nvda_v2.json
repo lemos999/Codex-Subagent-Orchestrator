@@ -1,0 +1,17 @@
+{
+  "asset": "NVDA",
+  "strategy": "momentum_breakout",
+  "params": {
+    "breakout_period": 21,
+    "vol_mult": 1.770907551924125,
+    "stop_atr": 2.689820958345739,
+    "trail_atr": 1.7626778485280543,
+    "cooldown": 4,
+    "leverage": 1.278164803779354
+  },
+  "passed": false,
+  "val_ret": 5.01,
+  "test_ret": -11.1,
+  "val_sharpe": 79480817.05,
+  "test_sharpe": -176285167.84
+}

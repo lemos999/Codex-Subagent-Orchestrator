@@ -1,0 +1,37 @@
+{
+  "balance": 10000.0,
+  "position": "FLAT",
+  "entry_price": 0.0,
+  "stop_price": 0.0,
+  "current_leverage": 0.0,
+  "total_trades": 0,
+  "wins": 0,
+  "losses": 0,
+  "peak_balance": 10000.0,
+  "max_drawdown_pct": 0.0,
+  "current_price": 177.0449981689453,
+  "current_pnl_pct": 0.0,
+  "regime": "BEAR",
+  "last_update": "2026-04-01T15:53:50.448250+00:00",
+  "started_at": "2026-04-01T11:55:55.273785+00:00",
+  "total_checks": 2,
+  "trades": [],
+  "activity_log": [
+    {
+      "time": "2026-04-01",
+      "price": 174.4,
+      "action": "FLAT",
+      "regime": "BEAR",
+      "ma_f": 181.19,
+      "ma_s": 182.81
+    },
+    {
+      "time": "2026-04-01",
+      "price": 177.04,
+      "action": "FLAT",
+      "regime": "BEAR",
+      "ma_f": 180.83,
+      "ma_s": 182.79
+    }
+  ]
+}

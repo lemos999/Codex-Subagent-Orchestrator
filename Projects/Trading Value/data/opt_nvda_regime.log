@@ -1,0 +1,29 @@
+============================================================
+  NVDA Regime-Based Leveraged Strategy
+  Target: +10%/month
+============================================================
+  Data: 1255 daily bars (2021-04-01 ~ 2026-03-31)
+  Train: 753 | Val: 251 | Test: 251
+
+  Grid search: MA x Leverage x Stop%
+
+  Top 5:
+   MF  MS  Lev MLev  Stop |     Tr%     Va%  VaShp VaTr
+   30  50  3.0  0.5    5% |  +171.6   +39.2   5.14   16
+   15  30  1.5  1.0    3% |  +359.0   +89.4   5.02   28
+   30  50  3.0  1.0    5% |  +195.5   +36.5   4.73   16
+   30  50  2.5  0.5    5% |  +230.8   +29.6   4.71   16
+   15  30  2.0  1.0    3% |  +244.5   +97.8   4.49   28
+
+  Best: MA 30/50, Bull Lev=3.0x, Mild Lev=0.5x, Stop=5%
+  [Train] Ret=+171.6% | Sharpe=3.16 | DD=-36.6% | Trades=65 | WR=48%
+  [Val  ] Ret=+39.2% | Sharpe=5.14 | DD=-19.2% | Trades=16 | WR=50%
+  [Test ] Ret=+75.6% | Sharpe=4.56 | DD=-16.7% | Trades=14 | WR=36%
+
+  Buy&Hold (test): +58.4%
+  Test period: ~12 months
+  Est. monthly return: +6.3%
+  Target +10%/mo: NOT YET
+
+  VERDICT: PASS
+  Saved: params_nvda_regime.json (8s)

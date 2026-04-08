@@ -1,0 +1,14 @@
+============================================================
+  Trading Value - Unified Paper Trading
+  ETH | BTC | NVDA | AMZN
+  Dashboard: http://localhost:8895
+============================================================
+  [ETH] XGBoost model loaded
+  [ETH ] CMA-ES+XGB      | $10,000 | FLAT | 0 trades
+  [BTC ] 4H MA200+RSI    | $10,000 | FLAT | 0 trades
+  [NVDA] Regime 3x       | $10,000 | FLAT | 0 trades
+  [AMZN] Regime 2x       | $10,000 | FLAT | 0 trades
+
+  Dashboard: http://localhost:8895
+  Running... (Ctrl+C to stop)
+

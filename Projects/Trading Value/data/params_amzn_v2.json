@@ -1,0 +1,17 @@
+{
+  "asset": "AMZN",
+  "strategy": "momentum_breakout",
+  "params": {
+    "breakout_period": 18,
+    "vol_mult": 0.9666034839943968,
+    "stop_atr": 3.8585058980688065,
+    "trail_atr": 1.6143407553488491,
+    "cooldown": 3,
+    "leverage": 1.2855294722324513
+  },
+  "passed": false,
+  "val_ret": 17.87,
+  "test_ret": -9.76,
+  "val_sharpe": 19.65,
+  "test_sharpe": -4.09
+}
