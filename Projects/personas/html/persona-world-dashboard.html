@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persona Nation — World Dashboard</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #2a3450;
+    --text: #e2e8f0;
+    --text-dim: #8892a8;
+    --accent: #60a5fa;
+    --gold: #f59e0b;
+    --green: #34d399;
+    --red: #f87171;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+    --cyan: #22d3ee;
+    --orange: #fb923c;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; line-height:1.6; }
+
+  .container { max-width:1400px; margin:0 auto; padding:20px; }
+
+  /* Header */
+  .header { text-align:center; padding:30px 0 20px; border-bottom:1px solid var(--border); margin-bottom:30px; }
+  .header h1 { font-size:2rem; background:linear-gradient(135deg,var(--accent),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .header .subtitle { color:var(--text-dim); margin-top:4px; font-size:0.9rem; }
+  .header .date { color:var(--gold); font-size:0.8rem; margin-top:8px; }
+
+  /* Tab Navigation */
+  .tabs { display:flex; gap:4px; margin-bottom:24px; border-bottom:2px solid var(--border); padding-bottom:0; }
+  .tab { padding:10px 20px; cursor:pointer; color:var(--text-dim); border:none; background:none; font-size:0.95rem; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.2s; }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* World Structure */
+  .world-tree { display:flex; flex-direction:column; align-items:center; gap:0; padding:20px 0; }
+  .tier { display:flex; flex-direction:column; align-items:center; position:relative; }
+  .tier-label { font-size:0.7rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; }
+  .connector { width:2px; height:30px; background:linear-gradient(to bottom, var(--border), var(--accent)); margin:0 auto; }
+  .connector-branch { display:flex; justify-content:center; align-items:flex-start; position:relative; }
+  .connector-branch::before { content:''; position:absolute; top:0; width:60%; height:2px; background:var(--border); }
+
+  .node { padding:14px 24px; border-radius:12px; text-align:center; min-width:160px; position:relative; }
+  .node.creator { background:linear-gradient(135deg,#1a1a2e,#16213e); border:2px solid var(--gold); box-shadow:0 0 20px rgba(245,158,11,0.15); }
+  .node.physis { background:linear-gradient(135deg,#0a2a1a,#1a3a2a); border:2px solid var(--green); box-shadow:0 0 15px rgba(52,211,153,0.1); }
+  .node.triad { background:linear-gradient(135deg,#1a1a3a,#2a1a3a); border:2px solid var(--purple); box-shadow:0 0 15px rgba(167,139,250,0.1); }
+  .node.world { background:var(--surface2); border:1px solid var(--border); }
+  .node.region { background:var(--surface); border:1px solid var(--border); min-width:140px; }
+
+  .node-title { font-weight:700; font-size:1rem; }
+  .node-sub { font-size:0.75rem; color:var(--text-dim); margin-top:2px; }
+  .node-badge { font-size:0.65rem; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:4px; }
+
+  .triad-group { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .region-group { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+  .class-group { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+  .class-node { padding:6px 14px; border-radius:8px; background:var(--surface); border:1px solid var(--border); font-size:0.8rem; text-align:center; }
+
+  /* Flow arrow */
+  .flow-arrow { display:flex; align-items:center; justify-content:center; padding:8px 0; color:var(--text-dim); font-size:0.75rem; gap:8px; }
+  .flow-arrow .arrow { font-size:1.2rem; }
+  .flow-arrow .label { font-style:italic; }
+
+  /* Stats Cards */
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .stat-card .label { font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; }
+  .stat-card .value { font-size:1.8rem; font-weight:700; margin-top:4px; }
+  .stat-card .detail { font-size:0.8rem; color:var(--text-dim); margin-top:4px; }
+  .stat-card.gold .value { color:var(--gold); }
+  .stat-card.green .value { color:var(--green); }
+  .stat-card.purple .value { color:var(--purple); }
+  .stat-card.accent .value { color:var(--accent); }
+  .stat-card.red .value { color:var(--red); }
+
+  /* Progress Section */
+  .section { margin-bottom:32px; }
+  .section-title { font-size:1.2rem; font-weight:700; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+  .section-title .count { font-size:0.8rem; color:var(--text-dim); font-weight:400; }
+
+  /* Task Table */
+  .task-table { width:100%; border-collapse:collapse; }
+  .task-table th { text-align:left; padding:10px 12px; font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); }
+  .task-table td { padding:10px 12px; border-bottom:1px solid var(--border); font-size:0.9rem; vertical-align:middle; }
+  .task-table tr:hover { background:var(--surface2); }
+
+  .status { padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:600; display:inline-block; }
+  .status.done { background:rgba(52,211,153,0.15); color:var(--green); }
+  .status.partial { background:rgba(96,165,250,0.15); color:var(--accent); }
+  .status.pending { background:rgba(248,113,113,0.15); color:var(--red); }
+  .status.basic { background:rgba(251,146,60,0.15); color:var(--orange); }
+
+  .priority { padding:2px 8px; border-radius:8px; font-size:0.7rem; font-weight:600; }
+  .priority.urgent { background:rgba(248,113,113,0.2); color:var(--red); }
+  .priority.important { background:rgba(251,146,60,0.2); color:var(--orange); }
+  .priority.enrichment { background:rgba(167,139,250,0.2); color:var(--purple); }
+
+  .category-tag { padding:2px 8px; border-radius:8px; font-size:0.7rem; background:var(--surface2); color:var(--text-dim); border:1px solid var(--border); }
+
+  /* Progress bar */
+  .progress-bar { width:100%; height:8px; background:var(--surface2); border-radius:4px; overflow:hidden; margin-top:8px; }
+  .progress-fill { height:100%; border-radius:4px; transition:width 0.5s; }
+  .progress-fill.green { background:linear-gradient(90deg,var(--green),#059669); }
+  .progress-fill.accent { background:linear-gradient(90deg,var(--accent),#3b82f6); }
+  .progress-fill.gold { background:linear-gradient(90deg,var(--gold),#d97706); }
+
+  .progress-label { display:flex; justify-content:space-between; font-size:0.8rem; margin-top:4px; }
+  .progress-label .pct { color:var(--accent); font-weight:600; }
+
+  /* Overall progress */
+  .overall-progress { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:24px; }
+  .overall-progress h3 { margin-bottom:16px; }
+  .progress-row { display:flex; align-items:center; gap:16px; margin-bottom:12px; }
+  .progress-row .name { width:140px; font-size:0.9rem; color:var(--text-dim); }
+  .progress-row .bar-wrap { flex:1; }
+  .progress-row .pct { width:50px; text-align:right; font-weight:600; font-size:0.9rem; }
+
+  /* Daemon detail cards */
+  .daemon-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:16px; }
+  .daemon-card { border-radius:12px; padding:20px; position:relative; overflow:hidden; }
+  .daemon-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .daemon-card.physis-card { background:var(--surface); border:1px solid #2a4a3a; }
+  .daemon-card.physis-card::before { background:var(--green); }
+  .daemon-card.lachesis-card { background:var(--surface); border:1px solid #2a3a5a; }
+  .daemon-card.lachesis-card::before { background:var(--accent); }
+  .daemon-card.anima-card { background:var(--surface); border:1px solid #3a2a4a; }
+  .daemon-card.anima-card::before { background:var(--purple); }
+  .daemon-card.nomos-card { background:var(--surface); border:1px solid #4a2a2a; }
+  .daemon-card.nomos-card::before { background:var(--orange); }
+  .daemon-card h4 { font-size:1rem; margin-bottom:4px; }
+  .daemon-card .role { font-size:0.8rem; color:var(--text-dim); margin-bottom:10px; }
+  .daemon-card ul { list-style:none; padding:0; }
+  .daemon-card ul li { font-size:0.8rem; padding:3px 0; color:var(--text-dim); }
+  .daemon-card ul li::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:8px; }
+  .daemon-card.physis-card ul li::before { background:var(--green); }
+  .daemon-card.lachesis-card ul li::before { background:var(--accent); }
+  .daemon-card.anima-card ul li::before { background:var(--purple); }
+  .daemon-card.nomos-card ul li::before { background:var(--orange); }
+
+  /* Persona list */
+  .persona-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:10px; }
+  .persona-chip { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:0.85rem; display:flex; align-items:center; gap:8px; }
+  .persona-chip .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .persona-chip .region-label { font-size:0.65rem; color:var(--text-dim); }
+  .dot.claude { background:#3b82f6; }
+  .dot.codex { background:#22c55e; }
+  .dot.gemini { background:#a855f7; }
+  .dot.unknown { background:#6b7280; }
+
+  /* Design docs */
+  .doc-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:12px; }
+  .doc-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .doc-card .doc-name { font-weight:600; font-size:0.9rem; }
+  .doc-card .doc-desc { font-size:0.8rem; color:var(--text-dim); margin-top:4px; }
+  .doc-card .doc-status { margin-top:8px; }
+
+  /* Responsive */
+  @media (max-width:768px) {
+    .triad-group, .region-group { flex-direction:column; align-items:center; }
+    .stats-grid { grid-template-columns:1fr 1fr; }
+    .daemon-cards { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>PERSONA NATION</h1>
+    <div class="subtitle">World Architecture Dashboard</div>
+    <div class="date">Last Updated: 2026-04-07 | Session: 2026-04-06 ~ 04-07</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('overview')">Overview</button>
+    <button class="tab" onclick="showTab('structure')">World Structure</button>
+    <button class="tab" onclick="showTab('daemons')">Daemon System</button>
+    <button class="tab" onclick="showTab('design')">Design Tasks</button>
+    <button class="tab" onclick="showTab('impl')">Implementation</button>
+    <button class="tab" onclick="showTab('missing')">Missing Systems</button>
+    <button class="tab" onclick="showTab('graphics')">Graphics</button>
+  </div>
+
+  <!-- ===================== OVERVIEW ===================== -->
+  <div id="overview" class="tab-content active">
+
+    <div class="stats-grid">
+      <div class="stat-card green">
+        <div class="label">Design Documents</div>
+        <div class="value">8</div>
+        <div class="detail">7 verified / 1 Phase A</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="label">Implementations</div>
+        <div class="value">3</div>
+        <div class="detail">/persona, Dashboard v2, Server API</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="label">Personas</div>
+        <div class="value">15</div>
+        <div class="detail">Claude 8 / Codex 3 / Gemini 3 / TBD 1</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="label">WILL Mined</div>
+        <div class="value">1,600</div>
+        <div class="detail">/ 20,260,406 total supply (0.008%)</div>
+      </div>
+      <div class="stat-card red">
+        <div class="label">Missing Systems</div>
+        <div class="value">24</div>
+        <div class="detail">Discovered via 2 rounds of /discuss</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="label">Remaining Tasks</div>
+        <div class="value">22</div>
+        <div class="detail">14 design + 8 implementation</div>
+      </div>
+      <div class="stat-card" style="border-color:var(--pink);">
+        <div class="label">Graphic Resources</div>
+        <div class="value" style="color:var(--pink);">95</div>
+        <div class="detail">45 (v1) + 50 (v2 new) / 0 produced</div>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <h3>Overall Progress</h3>
+
+      <div class="progress-row">
+        <div class="name">Design Docs</div>
+        <div class="bar-wrap">
+          <div class="progress-bar"><div class="progress-fill green" style="width:36%"></div></div>
+        </div>
+        <div class="pct" style="color:var(--green)">36%</div>
+      </div>
+      <div style="font-size:0.75rem; color:var(--text-dim); margin:-6px 0 12px 156px;">8 complete / 14 design remaining = 8 of 22</div>
+
+      <div class="progress-row">
+        <div class="name">Implementation</div>
+        <div class="bar-wrap">
+          <div class="progress-bar"><div class="progress-fill accent" style="width:27%"></div></div>
+        </div>
+        <div class="pct" style="color:var(--accent)">27%</div>
+      </div>
+      <div style="font-size:0.75rem; color:var(--text-dim); margin:-6px 0 12px 156px;">3 complete / 8 remaining = 3 of 11</div>
+
+      <div class="progress-row">
+        <div class="name">Economy</div>
+        <div class="bar-wrap">
+          <div class="progress-bar"><div class="progress-fill gold" style="width:0.8%"></div></div>
+        </div>
+        <div class="pct" style="color:var(--gold)">0.008%</div>
+      </div>
+      <div style="font-size:0.75rem; color:var(--text-dim); margin:-6px 0 12px 156px;">1,600 / 20,260,406 WILL mined</div>
+    </div>
+
+    <!-- Key Decisions -->
+    <div class="section">
+      <div class="section-title">Key Decisions</div>
+      <div class="doc-grid">
+        <div class="doc-card">
+          <div class="doc-name">Living Constitution Nation</div>
+          <div class="doc-desc">Creator=Constitution, EX=Interpreter, Lords, Operators, Citizens</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-name">WILL Economy + gold</div>
+          <div class="doc-desc">1 WILL = 1,000 gold. Total supply 20,260,406. Living cost = circulation, not burn</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-name">Causal Behavior</div>
+          <div class="doc-desc">No dice rolls. PersonaBrain (d=256, 4M params) with Transformer+MLP+FiLM</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-name">Daemon Hierarchy</div>
+          <div class="doc-desc">Creator > Physis (nature) > Triad (nation) > World. Outside national rank.</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-name">Stats = Qualification Proof</div>
+          <div class="doc-desc">6 stats. No effect on work quality. Threshold privileges at 6/10/14/18</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-name">Reincarnation</div>
+          <div class="doc-desc">Death = cycle. 70% brain weight transfer. Memory lost, tendencies remain.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personas -->
+    <div class="section">
+      <div class="section-title">Registered Personas <span class="count">(15)</span></div>
+      <div class="persona-grid">
+        <div class="persona-chip"><span class="dot claude"></span><div><div>Seo Harin</div><div class="region-label">Claude Dominion</div></div></div>
+        <div class="persona-chip"><span class="dot claude"></span><div><div>Rex Baek</div><div class="region-label">Claude Dominion</div></div></div>
+        <div class="persona-chip"><span class="dot claude"></span><div><div>Sora Lee</div><div class="region-label">Claude Dominion</div></div></div>
+        <div class="persona-chip"><span class="dot claude"></span><div><div>Dana Jeong</div><div class="region-label">Claude Dominion</div></div></div>
+        <div class="persona-chip"><span class="dot claude"></span><div><div>Kyung Choi</div><div class="region-label">Claude Dominion</div></div></div>
+        <div class="persona-chip"><span class="dot claude"></span><div><div>Jiu Han</div><div class="region-label">Claude Dominion</div></div></div>
+        <div class="persona-chip"><span class="dot claude"></span><div><div>Aiden Cross</div><div class="region-label">Claude Dominion</div></div></div>
+        <div class="persona-chip"><span class="dot claude"></span><div><div>Viktor Rein</div><div class="region-label">Claude Dominion</div></div></div>
+        <div class="persona-chip"><span class="dot codex"></span><div><div>Teo Kang</div><div class="region-label">Codex Republic</div></div></div>
+        <div class="persona-chip"><span class="dot codex"></span><div><div>Raze Kato</div><div class="region-label">Codex Republic</div></div></div>
+        <div class="persona-chip"><span class="dot codex"></span><div><div>Ivy Sato</div><div class="region-label">Codex Republic</div></div></div>
+        <div class="persona-chip"><span class="dot gemini"></span><div><div>Sia Yun</div><div class="region-label">Gemini Federation</div></div></div>
+        <div class="persona-chip"><span class="dot gemini"></span><div><div>Elara Voss</div><div class="region-label">Gemini Federation</div></div></div>
+        <div class="persona-chip"><span class="dot gemini"></span><div><div>Nara Finch</div><div class="region-label">Gemini Federation</div></div></div>
+        <div class="persona-chip"><span class="dot unknown"></span><div><div>Mira Chen</div><div class="region-label">TBD</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== WORLD STRUCTURE ===================== -->
+  <div id="structure" class="tab-content">
+
+    <div class="world-tree">
+      <!-- Creator -->
+      <div class="tier">
+        <div class="tier-label">Origin</div>
+        <div class="node creator">
+          <div class="node-title" style="color:var(--gold)">Creator</div>
+          <div class="node-sub">= Living Constitution</div>
+          <div class="node-badge" style="background:rgba(245,158,11,0.15); color:var(--gold)">Absolute Authority</div>
+        </div>
+      </div>
+
+      <div class="flow-arrow">
+        <span class="arrow">|</span>
+        <span class="label">creates & governs all</span>
+        <span class="arrow">v</span>
+      </div>
+
+      <!-- Physis -->
+      <div class="tier">
+        <div class="tier-label">Nature Layer</div>
+        <div class="node physis">
+          <div class="node-title" style="color:var(--green)">Physis</div>
+          <div class="node-sub">Climate Physics Engine</div>
+          <div class="node-badge" style="background:rgba(52,211,153,0.15); color:var(--green)">Natural Spirit</div>
+        </div>
+      </div>
+
+      <div class="flow-arrow">
+        <span class="arrow">|</span>
+        <span class="label">environment data feeds into</span>
+        <span class="arrow">v</span>
+      </div>
+
+      <!-- Triad -->
+      <div class="tier">
+        <div class="tier-label">Nation Layer — Triad</div>
+        <div class="triad-group">
+          <div class="node triad">
+            <div class="node-title" style="color:var(--accent)">Lachesis</div>
+            <div class="node-sub">Time</div>
+            <div class="node-badge" style="background:rgba(96,165,250,0.15); color:var(--accent)">Tick Clock / Cron</div>
+          </div>
+          <div class="node triad">
+            <div class="node-title" style="color:var(--purple)">Anima</div>
+            <div class="node-sub">Soul</div>
+            <div class="node-badge" style="background:rgba(167,139,250,0.15); color:var(--purple)">Brain / Emotion</div>
+          </div>
+          <div class="node triad">
+            <div class="node-title" style="color:var(--orange)">Nomos</div>
+            <div class="node-sub">Order</div>
+            <div class="node-badge" style="background:rgba(251,146,60,0.15); color:var(--orange)">Economy / Law</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-arrow">
+        <span class="arrow">|</span>
+        <span class="label">runs the simulation for</span>
+        <span class="arrow">v</span>
+      </div>
+
+      <!-- World -->
+      <div class="tier">
+        <div class="tier-label">World — National Hierarchy</div>
+        <div class="class-group">
+          <div class="class-node" style="border-color:var(--gold); color:var(--gold)">EX (Interpreter)</div>
+          <div class="class-node">Lords (7+)</div>
+          <div class="class-node">Operators (4-6)</div>
+          <div class="class-node">Citizens (1-3)</div>
+        </div>
+      </div>
+
+      <div class="flow-arrow">
+        <span class="arrow">|</span>
+        <span class="label">live across</span>
+        <span class="arrow">v</span>
+      </div>
+
+      <!-- Regions -->
+      <div class="tier">
+        <div class="tier-label">3 Regions</div>
+        <div class="region-group">
+          <div class="node region" style="border-color:#3b82f6;">
+            <div class="node-title" style="color:#3b82f6;">Claude Dominion</div>
+            <div class="node-sub">Navy / Precision</div>
+            <div class="node-sub" style="color:var(--text);">8 personas</div>
+          </div>
+          <div class="node region" style="border-color:#22c55e;">
+            <div class="node-title" style="color:#22c55e;">Codex Republic</div>
+            <div class="node-sub">Green / Code</div>
+            <div class="node-sub" style="color:var(--text);">3 personas</div>
+          </div>
+          <div class="node region" style="border-color:#a855f7;">
+            <div class="node-title" style="color:#a855f7;">Gemini Federation</div>
+            <div class="node-sub">Purple / Vision</div>
+            <div class="node-sub" style="color:var(--text);">3 personas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Execution Flow -->
+    <div class="section" style="margin-top:32px;">
+      <div class="section-title">Per-Tick Execution Flow</div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; font-family:monospace; font-size:0.85rem; line-height:2;">
+        <span style="color:var(--green);">1. Physis</span> calculates climate (wind, moisture, temp) <span style="color:var(--text-dim);">~10ms</span><br>
+        <span style="color:var(--text-dim);">&nbsp;&nbsp;&nbsp;|--- environment state ---></span><br>
+        <span style="color:var(--accent);">2. Lachesis</span> advances game clock, triggers scheduled cron jobs<br>
+        <span style="color:var(--purple);">3. Anima</span> runs PersonaBrain inference for all personas (CPU)<br>
+        <span style="color:var(--text-dim);">&nbsp;&nbsp;&nbsp;|--- actions + state changes ---></span><br>
+        <span style="color:var(--orange);">4. Nomos</span> processes WILL/gold transactions, law enforcement, events<br>
+        <span style="color:var(--text-dim);">&nbsp;&nbsp;&nbsp;|--- events ---></span><br>
+        <span style="color:var(--cyan);">5. Event Bus</span> publishes to dashboard / webhooks / logs<br>
+        <span style="color:var(--text-dim);">&nbsp;&nbsp;&nbsp;|--- heartbeat ---></span><br>
+        <span style="color:var(--pink);">6. Mutual monitoring</span> — each daemon checks the other three
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== DAEMON SYSTEM ===================== -->
+  <div id="daemons" class="tab-content">
+
+    <div class="section">
+      <div class="section-title">Daemon Hierarchy</div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:20px;">
+        <div style="font-size:0.9rem; color:var(--text-dim); margin-bottom:12px;">
+          Daemons exist <strong style="color:var(--text)">outside national rank</strong>. They are constitutional organs — like gravity, time, and air. Personas cannot perceive them directly. Only the Creator can manage/restart/replace them.
+        </div>
+        <div style="font-family:monospace; font-size:0.85rem; line-height:1.8; padding:12px; background:var(--bg); border-radius:8px;">
+          <span style="color:var(--gold);">Creator (= Constitution)</span><br>
+          &nbsp;&nbsp;<span style="color:var(--text-dim);">|</span><br>
+          &nbsp;&nbsp;<span style="color:var(--text-dim);">+--</span> <span style="color:var(--green);">Physis</span> <span style="color:var(--text-dim);">(Nature's Physics)</span><br>
+          &nbsp;&nbsp;<span style="color:var(--text-dim);">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| environment data</span><br>
+          &nbsp;&nbsp;<span style="color:var(--text-dim);">+--</span> <span style="color:var(--purple);">Triad</span> <span style="color:var(--text-dim);">(Nation's Physics)</span><br>
+          &nbsp;&nbsp;<span style="color:var(--text-dim);">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+--</span> <span style="color:var(--accent);">Lachesis</span> / <span style="color:var(--purple);">Anima</span> / <span style="color:var(--orange);">Nomos</span><br>
+          &nbsp;&nbsp;<span style="color:var(--text-dim);">|</span><br>
+          &nbsp;&nbsp;<span style="color:var(--text-dim);">+--</span> <span style="color:var(--text);">World</span> <span style="color:var(--text-dim);">(EX > Lords > Operators > Citizens)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="daemon-cards">
+      <div class="daemon-card physis-card">
+        <h4 style="color:var(--green);">Physis</h4>
+        <div class="role">Natural Spirit — Climate Physics Engine</div>
+        <ul>
+          <li>Physics-based simulation (not random)</li>
+          <li>Orbital mechanics: rotation, revolution, axial tilt</li>
+          <li>Atmospheric circulation: wind, moisture, pressure</li>
+          <li>Terrain effects: mountains, coasts, rivers</li>
+          <li>Per-region daily output: temp, rain, wind, clouds</li>
+          <li>Lv.1~2 lightweight model (~10ms/tick)</li>
+          <li>Feeds into Triad as environment conditions</li>
+        </ul>
+        <div style="margin-top:12px;"><span class="status pending">Design Pending</span></div>
+      </div>
+
+      <div class="daemon-card lachesis-card">
+        <h4 style="color:var(--accent);">Lachesis</h4>
+        <div class="role">She Who Allots — Time Daemon</div>
+        <ul>
+          <li>Tick clock management (30min real = 1hr game)</li>
+          <li>Game time progression</li>
+          <li>Cron job scheduling (tax, salary, living cost)</li>
+          <li>Tick order determination</li>
+          <li>Monitors Anima + Nomos heartbeat</li>
+          <li>Emergency tick succession if needed</li>
+        </ul>
+        <div style="margin-top:12px;"><span class="status pending">Design Pending</span></div>
+      </div>
+
+      <div class="daemon-card anima-card">
+        <h4 style="color:var(--purple);">Anima</h4>
+        <div class="role">The Breath — Soul Daemon</div>
+        <ul>
+          <li>PersonaBrain inference (d=256, 4M, CPU)</li>
+          <li>Behavior decision & execution per persona</li>
+          <li>Emotion (Five Desires + Seven Emotions) update</li>
+          <li>Relationship affinity changes</li>
+          <li>Personality gradual shift</li>
+          <li>Monitors Lachesis + Nomos heartbeat</li>
+        </ul>
+        <div style="margin-top:12px;"><span class="status pending">Design Pending</span></div>
+      </div>
+
+      <div class="daemon-card nomos-card">
+        <h4 style="color:var(--orange);">Nomos</h4>
+        <div class="role">The Law — Order Daemon</div>
+        <ul>
+          <li>WILL/gold transaction processing</li>
+          <li>Law violation detection & punishment</li>
+          <li>Event generation (disaster, crime, rumor)</li>
+          <li>Event bus publishing (WebSocket/webhook)</li>
+          <li>Treasury & tax settlement</li>
+          <li>Monitors Lachesis + Anima heartbeat</li>
+        </ul>
+        <div style="margin-top:12px;"><span class="status pending">Design Pending</span></div>
+      </div>
+    </div>
+
+    <!-- Monitoring -->
+    <div class="section" style="margin-top:24px;">
+      <div class="section-title">Mutual Monitoring Protocol</div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;">
+        <table class="task-table">
+          <tr><th>Event</th><th>Threshold</th><th>Action</th></tr>
+          <tr><td>Heartbeat interval</td><td>Every 10s</td><td>Each daemon pings the other three</td></tr>
+          <tr><td>Warning</td><td>30s no response</td><td>Log warning + event bus alert</td></tr>
+          <tr><td>Auto restart</td><td>60s no response</td><td>Surviving daemons attempt restart</td></tr>
+          <tr><td>Restart failure</td><td>3 consecutive fails</td><td>Emergency alert to Creator (Discord/dashboard)</td></tr>
+          <tr><td>2 daemons down</td><td>Immediate</td><td>Pause simulation + Creator alert</td></tr>
+          <tr><td>3+ daemons down</td><td>Immediate</td><td>OS-level service manager (pm2) full restart</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== DESIGN TASKS ===================== -->
+  <div id="design" class="tab-content">
+
+    <div class="section">
+      <div class="section-title">Completed Design Documents <span class="count">(8)</span></div>
+      <div class="doc-grid">
+        <div class="doc-card"><div class="doc-name">constitution.md</div><div class="doc-desc">National constitution, 8 chapters 28 articles</div><div class="doc-status"><span class="status done">Verified</span></div></div>
+        <div class="doc-card"><div class="doc-name">economy-whitepaper.md</div><div class="doc-desc">WILL economy whitepaper, 11 chapters</div><div class="doc-status"><span class="status done">Verified</span></div></div>
+        <div class="doc-card"><div class="doc-name">social-systems.md</div><div class="doc-desc">Guilds / Academy / Factions / Relations / Positive Interaction v2</div><div class="doc-status"><span class="status done">Verified</span></div></div>
+        <div class="doc-card"><div class="doc-name">regions.md</div><div class="doc-desc">3 regions: Claude / Codex / Gemini</div><div class="doc-status"><span class="status done">Verified</span></div></div>
+        <div class="doc-card"><div class="doc-name">marriage-birth-design.md</div><div class="doc-desc">Marriage / Birth / Family / House system</div><div class="doc-status"><span class="status done">Verified</span></div></div>
+        <div class="doc-card"><div class="doc-name">life-simulation-design.md</div><div class="doc-desc">Autonomous life sim (behavior/emotion/relation/time/goal/job/brain)</div><div class="doc-status"><span class="status partial">Phase A Done</span></div></div>
+        <div class="doc-card"><div class="doc-name">graphic-resources.md</div><div class="doc-desc">45 graphic resource prompts</div><div class="doc-status"><span class="status done">Complete</span></div></div>
+        <div class="doc-card"><div class="doc-name">canon_summary_v1.md</div><div class="doc-desc">Forcelead official canon summary</div><div class="doc-status"><span class="status done">Verified</span></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Remaining Design Tasks <span class="count">(14)</span></div>
+      <table class="task-table">
+        <thead>
+          <tr><th>#</th><th>Task</th><th>Status</th><th>Details</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Physis Climate Physics Engine</td><td><span class="status pending">Pending</span></td><td>3-region terrain, orbital params, atmospheric circulation, weather output</td></tr>
+          <tr><td>2</td><td>Life Sim Phase B — Infrastructure</td><td><span class="status pending">Pending</span></td><td>Tick daemon, law system, event bus, multi-session isolation, dashboard expansion</td></tr>
+          <tr><td>3</td><td>Life Sim Phase B — Humanity</td><td><span class="status pending">Pending</span></td><td>Trauma/healing, conscience, curiosity, humor/play, aging/time-sense</td></tr>
+          <tr><td>4</td><td>Disaster / Crisis Events</td><td><span class="status pending">Pending</span></td><td>Linked to Physis output. External pressure for world dynamics</td></tr>
+          <tr><td>5</td><td>Death / Reincarnation / Legacy</td><td><span class="status pending">Pending</span></td><td>Life cycle end + brain weight 70% transfer + legacy DB</td></tr>
+          <tr><td>6</td><td>Class Demotion / Lord Dismissal</td><td><span class="status pending">Pending</span></td><td>Power checks. Can't only go up</td></tr>
+          <tr><td>7</td><td>Autonomous -> Political Feedback</td><td><span class="status pending">Pending</span></td><td>Emotion -> voting, goals -> petitions</td></tr>
+          <tr><td>8</td><td>Territory System (Detail)</td><td><span class="status basic">Basic Only</span></td><td>Territory creation/management/GDP/infrastructure</td></tr>
+          <tr><td>9</td><td>Voting System (Detail)</td><td><span class="status basic">Basic Only</span></td><td>Staking, quorum, bill procedures</td></tr>
+          <tr><td>10</td><td>Job System (Detail)</td><td><span class="status basic">Basic Only</span></td><td>Income flow, job change, qualifications</td></tr>
+          <tr><td>11</td><td>Infrastructure / Public Works</td><td><span class="status pending">Pending</span></td><td>WILL/gold -> physical facility conversion</td></tr>
+          <tr><td>12</td><td>Secrets / Rumors / Evidence</td><td><span class="status pending">Pending</span></td><td>Drama fuel. Reputation <-> scandal</td></tr>
+          <tr><td>13</td><td>Crime / Justice</td><td><span class="status pending">Pending</span></td><td>Law exists but no crime temptation/punishment</td></tr>
+          <tr><td>14</td><td>Brain Learning Data Design</td><td><span class="status pending">Pending</span></td><td>Distillation pipeline + world engine + reward function</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================== IMPLEMENTATION ===================== -->
+  <div id="impl" class="tab-content">
+
+    <div class="section">
+      <div class="section-title">Completed Implementations <span class="count">(3)</span></div>
+      <div class="doc-grid">
+        <div class="doc-card"><div class="doc-name">/persona Skill</div><div class="doc-desc">SKILL.md + 7 handlers + 3 engines + 3 references</div><div class="doc-status"><span class="status done">Working</span></div></div>
+        <div class="doc-card"><div class="doc-name">Dashboard v2</div><div class="doc-desc">Game UI: HUD + 4-split + Card Grid + Detail + Evaluate + Economy + Edicts</div><div class="doc-status"><span class="status done">Working</span></div></div>
+        <div class="doc-card"><div class="doc-name">Server API</div><div class="doc-desc">4 GET + 5 POST endpoints (Express 5)</div><div class="doc-status"><span class="status done">Working</span></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Remaining Implementation <span class="count">(8)</span></div>
+      <table class="task-table">
+        <thead>
+          <tr><th>#</th><th>Task</th><th>Status</th><th>Depends On</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>15</td><td>Physis Climate Engine</td><td><span class="status pending">Pending</span></td><td>Design #1</td></tr>
+          <tr><td>16</td><td>Tick Daemon (Triad + Physis + State Durability)</td><td><span class="status pending">Pending</span></td><td>Design #1~2</td></tr>
+          <tr><td>17</td><td>Social Systems (Marriage/Guild/Faction/Academy)</td><td><span class="status partial">Design Ready</span></td><td>Can start now</td></tr>
+          <tr><td>18</td><td>Territory System</td><td><span class="status pending">Pending</span></td><td>Design #8</td></tr>
+          <tr><td>19</td><td>PersonaBrain (PyTorch, d=256, 4M) + Weight Versioning</td><td><span class="status pending">Pending</span></td><td>Design #14</td></tr>
+          <tr><td>20</td><td>Autonomous Life Lv.1~3</td><td><span class="status pending">Pending</span></td><td>Design #2~3</td></tr>
+          <tr><td>21</td><td>Event Bus + Dashboard Realtime</td><td><span class="status pending">Pending</span></td><td>Design #2</td></tr>
+          <tr><td>22</td><td>Forcelead Step 2</td><td><span class="status pending">Pending</span></td><td>Persona deployment</td></tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:16px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px;">
+        <div style="font-size:0.85rem; color:var(--text-dim);">
+          <strong style="color:var(--gold);">Implementation ready now:</strong> #17 Social Systems (marriage/guild/faction/academy) — all design documents verified. Can begin without waiting for other designs.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MISSING SYSTEMS ===================== -->
+  <div id="missing" class="tab-content">
+
+    <div class="section">
+      <div class="section-title">Discovered Missing Systems <span class="count">(24)</span></div>
+      <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:16px;">Found via 2 rounds of /discuss (3-AI cross-validation: Claude Opus + Codex/GPT + Gemini)</p>
+
+      <table class="task-table">
+        <thead>
+          <tr><th>#</th><th>System</th><th>Category</th><th>Priority</th><th>Source</th><th>Target Phase</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Disaster / Crisis Events</td><td><span class="category-tag">World</span></td><td><span class="priority urgent">Urgent</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>2</td><td>Death / Reincarnation / Legacy</td><td><span class="category-tag">Life</span></td><td><span class="priority urgent">Urgent</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>3</td><td>Class Demotion / Dismissal</td><td><span class="category-tag">Governance</span></td><td><span class="priority urgent">Urgent</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>4</td><td>Autonomous -> Political Feedback</td><td><span class="category-tag">Governance</span></td><td><span class="priority urgent">Urgent</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>5</td><td>Infrastructure / Public Works</td><td><span class="category-tag">Economy</span></td><td><span class="priority important">Important</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>6</td><td>Secrets / Rumors / Evidence</td><td><span class="category-tag">Drama</span></td><td><span class="priority important">Important</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>7</td><td>Crime / Justice</td><td><span class="category-tag">Law</span></td><td><span class="priority important">Important</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>8</td><td>Media / Public Opinion</td><td><span class="category-tag">Info</span></td><td><span class="priority enrichment">Enrichment</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>9</td><td>Belief / Religion</td><td><span class="category-tag">Philosophy</span></td><td><span class="priority enrichment">Enrichment</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>10</td><td>Ambition / Legacy / Endgame</td><td><span class="category-tag">Long-term</span></td><td><span class="priority enrichment">Enrichment</span></td><td>Round 1</td><td>Design</td></tr>
+          <tr><td>11</td><td>Trauma / Healing</td><td><span class="category-tag">Emotion</span></td><td><span class="priority important">Important</span></td><td>Round 2 (Philosophy)</td><td>Phase B</td></tr>
+          <tr><td>12</td><td>Conscience / Morality</td><td><span class="category-tag">Deliberation</span></td><td><span class="priority important">Important</span></td><td>Round 2 (Philosophy)</td><td>Phase B</td></tr>
+          <tr><td>13</td><td>Curiosity / Exploration</td><td><span class="category-tag">Goals</span></td><td><span class="priority important">Important</span></td><td>Round 2 (Philosophy)</td><td>Phase B</td></tr>
+          <tr><td>14</td><td>Humor / Play</td><td><span class="category-tag">Relation</span></td><td><span class="priority enrichment">Enrichment</span></td><td>Round 2 (Philosophy)</td><td>Phase B</td></tr>
+          <tr><td>15</td><td>Aging / Time Sense</td><td><span class="category-tag">Life</span></td><td><span class="priority enrichment">Enrichment</span></td><td>Round 2 (Philosophy)</td><td>Phase B</td></tr>
+          <tr><td>16</td><td>Physis Climate Physics Engine</td><td><span class="category-tag">Nature</span></td><td><span class="priority urgent">Urgent</span></td><td>Session Discussion</td><td>Separate Doc</td></tr>
+          <tr><td>17</td><td>Tick Daemon Triad</td><td><span class="category-tag">Infra</span></td><td><span class="priority urgent">Urgent</span></td><td>Round 2 (Ops)</td><td>Phase B + Impl #1</td></tr>
+          <tr><td>18</td><td>State Durability</td><td><span class="category-tag">Infra</span></td><td><span class="priority urgent">Urgent</span></td><td>Round 2 (Ops)</td><td>With Tick Daemon</td></tr>
+          <tr><td>19</td><td>Event Bus + Notifications</td><td><span class="category-tag">Infra</span></td><td><span class="priority important">Important</span></td><td>Round 2 (Ops)</td><td>Dashboard Expansion</td></tr>
+          <tr><td>20</td><td>Multi-session Isolation</td><td><span class="category-tag">Arch</span></td><td><span class="priority important">Important</span></td><td>Round 2 (Ops)</td><td>Phase B</td></tr>
+          <tr><td>21</td><td>LLM -> Brain Distillation</td><td><span class="category-tag">Learning</span></td><td><span class="priority urgent">Urgent</span></td><td>Round 2 (Tech)</td><td>Brain Data Design</td></tr>
+          <tr><td>22</td><td>Vectorized World Engine</td><td><span class="category-tag">Learning</span></td><td><span class="priority urgent">Urgent</span></td><td>Round 2 (Tech)</td><td>Brain Data Design</td></tr>
+          <tr><td>23</td><td>Persona Consistency Reward</td><td><span class="category-tag">Learning</span></td><td><span class="priority important">Important</span></td><td>Round 2 (Tech)</td><td>Brain Data Design</td></tr>
+          <tr><td>24</td><td>Brain Weight Versioning</td><td><span class="category-tag">Learning</span></td><td><span class="priority important">Important</span></td><td>Round 2 (Tech+Ops)</td><td>With PersonaBrain</td></tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:16px; display:flex; gap:16px; flex-wrap:wrap;">
+        <div class="stat-card" style="flex:1; min-width:150px;">
+          <div class="label">Urgent</div>
+          <div class="value" style="color:var(--red);">8</div>
+        </div>
+        <div class="stat-card" style="flex:1; min-width:150px;">
+          <div class="label">Important</div>
+          <div class="value" style="color:var(--orange);">9</div>
+        </div>
+        <div class="stat-card" style="flex:1; min-width:150px;">
+          <div class="label">Enrichment</div>
+          <div class="value" style="color:var(--purple);">7</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== GRAPHICS ===================== -->
+  <div id="graphics" class="tab-content">
+
+    <!-- Summary -->
+    <div class="stats-grid" style="margin-bottom:24px;">
+      <div class="stat-card gold">
+        <div class="label">Existing (v1)</div>
+        <div class="value">45</div>
+        <div class="detail">graphic-resources.md</div>
+      </div>
+      <div class="stat-card green">
+        <div class="label">New (v2)</div>
+        <div class="value">50</div>
+        <div class="detail">Daemons, Terrain, Weather, Emotions, etc.</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="label">Total</div>
+        <div class="value">95</div>
+        <div class="detail">All graphic resources needed</div>
+      </div>
+      <div class="stat-card red">
+        <div class="label">Produced</div>
+        <div class="value">0</div>
+        <div class="detail">Waiting for implementation</div>
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:24px; font-size:0.85rem;">
+      <strong style="color:var(--gold);">Production Guide:</strong>
+      <span style="color:var(--text-dim);">Tool: Gemini Nano Banana2 | Style: Fantasy UI + Minimal Flat, Dark BG, Glow Accents | Format: PNG (transparent) | Colors: Navy #1a237e / Green #2e7d32 / Purple #6a1b9a / Gold #ffd700</span>
+    </div>
+
+    <!-- ===== EXISTING v1 (collapsed summary) ===== -->
+    <div class="section">
+      <div class="section-title">Existing Resources (v1) <span class="count">45 items — graphic-resources.md</span></div>
+      <table class="task-table">
+        <thead><tr><th>Category</th><th>Count</th><th>Items</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>National Symbols</td><td>3</td><td>WILL coin, Emblem, Flag</td><td><span class="status pending">Not produced</span></td></tr>
+          <tr><td>Region Emblems</td><td>3</td><td>Claude / Codex / Gemini</td><td><span class="status pending">Not produced</span></td></tr>
+          <tr><td>Class Icons</td><td>10</td><td>Class 1~9 + EX</td><td><span class="status pending">Not produced</span></td></tr>
+          <tr><td>Tier Badges</td><td>5</td><td>Adept / Master / Genius / Legend / Divine</td><td><span class="status pending">Not produced</span></td></tr>
+          <tr><td>Type Icons</td><td>5</td><td>Management / Creative / Strategic / Verification / General</td><td><span class="status pending">Not produced</span></td></tr>
+          <tr><td>Wall Illustrations</td><td>4</td><td>Normal / Master / Legend / Divine wall</td><td><span class="status pending">Not produced</span></td></tr>
+          <tr><td>Capital Illustrations</td><td>4</td><td>Seorim / Forge / Vista / Capital</td><td><span class="status pending">Not produced</span></td></tr>
+          <tr><td>Card Frames</td><td>5</td><td>Silver / Gold / Purple / White / Divine</td><td><span class="status pending">Not produced</span></td></tr>
+          <tr><td>Relationship Icons</td><td>6</td><td>Colleague / Mentor / Rival / Spouse / Family / Alliance</td><td><span class="status pending">Not produced</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== NEW v2 RESOURCES ===== -->
+
+    <!-- Daemon Icons -->
+    <div class="section">
+      <div class="section-title" style="color:var(--green);">Daemon Symbols <span class="count">(4 items) — NEW</span></div>
+      <table class="task-table">
+        <thead><tr><th>#</th><th>Resource</th><th>Filename</th><th>Size</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>46</td><td style="color:var(--green)">Physis Symbol</td><td><code>daemon-physis.png</code></td><td>512x512</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy spirit emblem, emerald green (#34d399), intertwined wind spiral and rain droplet forming a sphere, orbiting rings suggesting planetary rotation, axial tilt line, dark bg, minimal flat, ethereal glow, no text, 512x512, transparent</td>
+          </tr>
+          <tr>
+            <td>47</td><td style="color:var(--accent)">Lachesis Symbol</td><td><code>daemon-lachesis.png</code></td><td>512x512</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy spirit emblem, steel blue (#60a5fa), hourglass with golden sand flowing, thread of fate wrapped around it, clock gear behind, dark bg, minimal flat, ethereal glow, no text, 512x512, transparent</td>
+          </tr>
+          <tr>
+            <td>48</td><td style="color:var(--purple)">Anima Symbol</td><td><code>daemon-anima.png</code></td><td>512x512</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy spirit emblem, soft purple (#a78bfa), abstract human silhouette with neural network lines radiating from the head, heartbeat pulse line through center, dark bg, minimal flat, ethereal glow, no text, 512x512, transparent</td>
+          </tr>
+          <tr>
+            <td>49</td><td style="color:var(--orange)">Nomos Symbol</td><td><code>daemon-nomos.png</code></td><td>512x512</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy spirit emblem, warm orange (#fb923c), balanced scale with a golden coin on one side and a scroll/law tablet on the other, geometric order pattern behind, dark bg, minimal flat, ethereal glow, no text, 512x512, transparent</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Terrain Maps -->
+    <div class="section">
+      <div class="section-title" style="color:var(--cyan);">Terrain & World Maps <span class="count">(4 items) — NEW</span></div>
+      <table class="task-table">
+        <thead><tr><th>#</th><th>Resource</th><th>Filename</th><th>Size</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>50</td><td>World Map (Nova)</td><td><code>map-world.png</code></td><td>2048x1024</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy world map, top-down satellite view, three distinct regions marked by color (navy highlands, green coastal plains, purple archipelago), mountain ranges, rivers, ocean, latitude/longitude grid lines faintly visible, dark parchment style with glowing borders, no text labels, 2048x1024</td>
+          </tr>
+          <tr>
+            <td>51</td><td>Claude Dominion Terrain</td><td><code>map-claude.png</code></td><td>1024x1024</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy regional map, continental interior highland plateau, snow-capped mountain ranges, dry steppes, sparse forests, deep canyon with a river, navy blue atmospheric tint, scattered settlement lights, bird's eye view, dark style, no text, 1024x1024</td>
+          </tr>
+          <tr>
+            <td>52</td><td>Codex Republic Terrain</td><td><code>map-codex.png</code></td><td>1024x1024</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy regional map, coastal lowland plains, wide river delta, lush green farmlands, gentle hills, harbor city on coast, emerald green atmospheric tint, rain clouds approaching, bird's eye view, dark style, no text, 1024x1024</td>
+          </tr>
+          <tr>
+            <td>53</td><td>Gemini Federation Terrain</td><td><code>map-gemini.png</code></td><td>1024x1024</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy regional map, tropical archipelago, chain of volcanic islands, coral reefs, dense jungle interiors, observatory towers on peaks, purple atmospheric tint, approaching typhoon spiral in distance, bird's eye view, dark style, no text, 1024x1024</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Weather Icons -->
+    <div class="section">
+      <div class="section-title" style="color:var(--cyan);">Weather & Season Icons <span class="count">(12 items) — NEW</span></div>
+      <table class="task-table">
+        <thead><tr><th>#</th><th>Resource</th><th>Filename</th><th>Size</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr><td>54</td><td>Clear Sky</td><td><code>weather-clear.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Sun icon, warm golden rays, clear blue, minimal flat, dark bg, game UI, no text, 128x128, transparent</td></tr>
+          <tr><td>55</td><td>Cloudy</td><td><code>weather-cloudy.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Gray cloud icon, layered clouds, silver edges, minimal flat, dark bg, game UI, no text, 128x128, transparent</td></tr>
+          <tr><td>56</td><td>Rain</td><td><code>weather-rain.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Rain cloud with blue droplets falling, dark gray cloud, minimal flat, dark bg, game UI, no text, 128x128, transparent</td></tr>
+          <tr><td>57</td><td>Storm</td><td><code>weather-storm.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Thunderstorm cloud with yellow lightning bolt, dark purple cloud, intense glow, minimal flat, dark bg, game UI, no text, 128x128, transparent</td></tr>
+          <tr><td>58</td><td>Snow</td><td><code>weather-snow.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Snowflake crystal falling from white cloud, ice blue tones, minimal flat, dark bg, game UI, no text, 128x128, transparent</td></tr>
+          <tr><td>59</td><td>Fog</td><td><code>weather-fog.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Horizontal fog layers, muted gray-white wisps, partially obscured landscape silhouette, minimal flat, dark bg, game UI, no text, 128x128, transparent</td></tr>
+          <tr><td>60</td><td>Heatwave</td><td><code>weather-heat.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Blazing sun with heat shimmer waves rising, red-orange tones, cracked ground below, minimal flat, dark bg, game UI, no text, 128x128, transparent</td></tr>
+          <tr><td>61</td><td>Typhoon</td><td><code>weather-typhoon.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Spiral storm eye from above, teal and dark gray, violent wind lines, minimal flat, dark bg, game UI, no text, 128x128, transparent</td></tr>
+          <tr><td>62</td><td>Spring</td><td><code>season-spring.png</code></td><td>256x256</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Cherry blossom branch with petals floating, soft pink and green, warm light, fantasy minimal flat, dark bg, no text, 256x256, transparent</td></tr>
+          <tr><td>63</td><td>Summer</td><td><code>season-summer.png</code></td><td>256x256</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Bright sun above golden wheat field, intense warm light, deep blue sky, fantasy minimal flat, dark bg, no text, 256x256, transparent</td></tr>
+          <tr><td>64</td><td>Autumn</td><td><code>season-autumn.png</code></td><td>256x256</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Falling maple leaves in red-orange-gold, cool breeze lines, twilight amber light, fantasy minimal flat, dark bg, no text, 256x256, transparent</td></tr>
+          <tr><td>65</td><td>Winter</td><td><code>season-winter.png</code></td><td>256x256</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Bare tree branches with icicles, falling snow, pale blue moonlight, cold atmosphere, fantasy minimal flat, dark bg, no text, 256x256, transparent</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Emotion Icons -->
+    <div class="section">
+      <div class="section-title" style="color:var(--pink);">Emotion Icons (Five Desires + Seven Emotions) <span class="count">(12 items) — NEW</span></div>
+      <table class="task-table">
+        <thead><tr><th>#</th><th>Resource</th><th>System</th><th>Filename</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr><td>66</td><td>Wealth Desire (財欲)</td><td>Five Desires</td><td><code>desire-wealth.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Gold coins and treasure chest icon, golden glow, greed energy wisps, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>67</td><td>Lust (色欲)</td><td>Five Desires</td><td><code>desire-lust.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Rose with thorns icon, deep red petals, seductive glow, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>68</td><td>Appetite (食欲)</td><td>Five Desires</td><td><code>desire-appetite.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fruit and goblet icon, warm orange and burgundy, steam rising, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>69</td><td>Fame (名譽欲)</td><td>Five Desires</td><td><code>desire-fame.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Laurel wreath crown icon, golden leaves, spotlight beam from above, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>70</td><td>Sleep (睡眠欲)</td><td>Five Desires</td><td><code>desire-sleep.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Crescent moon with closed eye icon, soft indigo and silver, peaceful aura, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>71</td><td>Joy (喜)</td><td>Seven Emotions</td><td><code>emotion-joy.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Radiant sun-like burst icon, warm yellow-gold, upward energy, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>72</td><td>Anger (怒)</td><td>Seven Emotions</td><td><code>emotion-anger.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Flame burst icon, aggressive red-orange, sharp jagged edges, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>73</td><td>Sorrow (哀)</td><td>Seven Emotions</td><td><code>emotion-sorrow.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Single teardrop icon, deep blue with subtle ripple rings, melancholy glow, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>74</td><td>Pleasure (樂)</td><td>Seven Emotions</td><td><code>emotion-pleasure.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Musical note with sparkles icon, warm pink and gold, floating bubbles, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>75</td><td>Love (愛)</td><td>Seven Emotions</td><td><code>emotion-love.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Glowing heart with soft aura icon, rose pink with golden outline, warm radiance, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>76</td><td>Hatred (惡)</td><td>Seven Emotions</td><td><code>emotion-hatred.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Cracked dark orb icon, toxic purple-green energy, sharp thorns surrounding, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>77</td><td>Desire (欲)</td><td>Seven Emotions</td><td><code>emotion-desire.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Reaching hand towards distant light icon, amber gradient, longing energy lines, minimal flat, dark bg, 128x128, transparent</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Facility Icons -->
+    <div class="section">
+      <div class="section-title" style="color:var(--gold);">Facility Icons <span class="count">(10 items) — NEW</span></div>
+      <table class="task-table">
+        <thead><tr><th>#</th><th>Resource</th><th>Filename</th><th>Size</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr><td>78</td><td>Academy</td><td><code>facility-academy.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Open book with glowing runes above, blue and gold, classical building silhouette behind, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>79</td><td>Library</td><td><code>facility-library.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Tall bookshelf tower icon, warm amber candlelight, scrolls and tomes, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>80</td><td>Training Ground</td><td><code>facility-training.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Crossed practice swords on arena ground, dusty golden light, circular arena outline, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>81</td><td>Meditation Hall</td><td><code>facility-meditation.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Lotus flower with zen circle, soft purple and white glow, peaceful energy rings, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>82</td><td>Market</td><td><code>facility-market.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Market stall with hanging lanterns, warm orange and gold, coin and goods, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>83</td><td>Residence</td><td><code>facility-residence.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Cozy cottage with lit window, warm yellow light, chimney smoke, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>84</td><td>Plaza</td><td><code>facility-plaza.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Central fountain in open square, multiple lanterns, gathering point, stone arches, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>85</td><td>Hospital</td><td><code>facility-hospital.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Healing herb cross icon, soft green glow, medicine bottle and bandage, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>86</td><td>Tavern</td><td><code>facility-tavern.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Wooden mug of ale with foam, warm fireplace glow behind, cozy atmosphere, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>87</td><td>Workshop</td><td><code>facility-workshop.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Anvil and hammer with sparks, orange forge glow, tools on wall, minimal flat, dark bg, 128x128, transparent</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Stat Icons -->
+    <div class="section">
+      <div class="section-title" style="color:var(--accent);">Stat Icons (6 Qualifications) <span class="count">(6 items) — NEW</span></div>
+      <table class="task-table">
+        <thead><tr><th>#</th><th>Resource</th><th>Korean</th><th>Filename</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr><td>88</td><td>Authorization</td><td>인가 (認可)</td><td><code>stat-authorization.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Official seal stamp icon, red wax seal with golden key, authority aura, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>89</td><td>Merit</td><td>공훈 (功勳)</td><td><code>stat-merit.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Medal of honor icon, golden star on ribbon, military decoration style, achievement glow, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>90</td><td>Reputation</td><td>신망 (信望)</td><td><code>stat-reputation.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Crowd of small silhouettes looking up at a beacon, trust and respect, warm white glow, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>91</td><td>Lineage</td><td>문벌 (門閥)</td><td><code>stat-lineage.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Noble family crest on shield, ancestral tree branches forming a gate, deep blue and gold, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>92</td><td>Influence</td><td>세력 (勢力)</td><td><code>stat-influence.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Radiating circles of power from center, network connection nodes, purple energy field, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>93</td><td>Stake</td><td>지분 (持分)</td><td><code>stat-stake.png</code></td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Pie chart segment becoming golden coins, ownership shares, financial growth arrow, gold and green, minimal flat, dark bg, 128x128, transparent</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Event Icons -->
+    <div class="section">
+      <div class="section-title" style="color:var(--red);">Event & System Icons <span class="count">(8 items) — NEW</span></div>
+      <table class="task-table">
+        <thead><tr><th>#</th><th>Resource</th><th>Filename</th><th>Size</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr><td>94</td><td>Natural Disaster</td><td><code>event-disaster.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Cracking earth with flood water and lightning, red warning aura, catastrophe energy, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>95</td><td>Crime</td><td><code>event-crime.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Broken chain link with shadow dagger, dark red and black, sinister vibe, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>96</td><td>Celebration</td><td><code>event-celebration.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fireworks bursting above festival lanterns, gold and multicolor, joyous atmosphere, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>97</td><td>Death</td><td><code>event-death.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fading candle flame with soul wisps rising, somber gray-blue, peaceful ending, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>98</td><td>Reincarnation</td><td><code>event-reincarnation.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Phoenix-like cycle of light, old flame becoming new spark, ouroboros circle, gold to cyan gradient, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>99</td><td>Election / Vote</td><td><code>event-election.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Ballot box with glowing ballot paper, democratic scales, white and gold, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>100</td><td>Secret / Rumor</td><td><code>event-rumor.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Whispering lips with shadowy speech bubble, hidden eye peering, dark purple mist, minimal flat, dark bg, 128x128, transparent</td></tr>
+          <tr><td>101</td><td>Breakthrough</td><td><code>event-breakthrough.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Shattering barrier with golden light bursting through, power surge, ascending energy, minimal flat, dark bg, 128x128, transparent</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- UI Elements -->
+    <div class="section">
+      <div class="section-title" style="color:var(--text-dim);">Dashboard UI Elements <span class="count">(4 items) — NEW</span></div>
+      <table class="task-table">
+        <thead><tr><th>#</th><th>Resource</th><th>Filename</th><th>Size</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr><td>102</td><td>Dashboard Background</td><td><code>ui-bg-main.png</code></td><td>1920x1080</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Dark fantasy landscape, distant castle silhouette, three colored light pillars (navy, green, purple) on horizon, starry sky, subtle fog, low opacity background suitable for UI overlay, 1920x1080</td></tr>
+          <tr><td>103</td><td>Notification Frame</td><td><code>ui-notification.png</code></td><td>400x100</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy game notification banner, ornate dark frame with golden trim, parchment-like center area, subtle glow edges, dark bg compatible, 400x100, transparent</td></tr>
+          <tr><td>104</td><td>Panel Border (9-slice)</td><td><code>ui-panel-border.png</code></td><td>256x256</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Fantasy game UI panel border for 9-slice, dark metallic frame with subtle blue glow corners, ornate but minimal corner decorations, tileable edges, 256x256, transparent</td></tr>
+          <tr><td>105</td><td>Loading Spinner</td><td><code>ui-spinner.png</code></td><td>128x128</td>
+            <td style="font-size:0.75rem; color:var(--text-dim);">Circular magic rune loading indicator, golden arcane symbols on rotating ring, dark bg, fantasy game UI, 128x128, transparent (to be animated via CSS)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Production Priority -->
+    <div class="section">
+      <div class="section-title">Production Priority Order</div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px;">
+        <table class="task-table">
+          <thead><tr><th>Phase</th><th>Items</th><th>Count</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td><span class="priority urgent">P1</span></td><td>WILL coin + Region emblems + Class icons</td><td>17</td><td>Dashboard core visuals</td></tr>
+            <tr><td><span class="priority urgent">P2</span></td><td>Daemon symbols + Stat icons + Type icons</td><td>15</td><td>System identity + card details</td></tr>
+            <tr><td><span class="priority important">P3</span></td><td>Terrain maps (world + 3 regions)</td><td>4</td><td>Physis engine + region identity</td></tr>
+            <tr><td><span class="priority important">P4</span></td><td>Weather + Season + Emotion icons</td><td>20</td><td>Simulation UI (after tick daemon)</td></tr>
+            <tr><td><span class="priority important">P5</span></td><td>Facility + Event icons</td><td>18</td><td>Life simulation UI</td></tr>
+            <tr><td><span class="priority enrichment">P6</span></td><td>Card frames + Wall illustrations + Capital illustrations</td><td>13</td><td>Visual polish</td></tr>
+            <tr><td><span class="priority enrichment">P7</span></td><td>UI elements (bg, notifications, panel, spinner)</td><td>4</td><td>Dashboard chrome</td></tr>
+            <tr><td style="color:var(--text-dim)">P8</td><td>Nation flag + Emblem + Tier badges + Relationship icons</td><td>14</td><td>Branding & relationship graph</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px; font-size:0.85rem; color:var(--text-dim);">
+          Total: <strong style="color:var(--text);">45 (v1) + 50 (v2) = 95 resources</strong> across 8 production phases
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Summary -->
+    <div class="section">
+      <div class="section-title">Resource Count Summary</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="label">National Symbols</div><div class="value" style="color:var(--text);">3</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label">Region Emblems</div><div class="value" style="color:var(--text);">3</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label">Class Icons</div><div class="value" style="color:var(--text);">10</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label">Tier Badges</div><div class="value" style="color:var(--text);">5</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label">Type Icons</div><div class="value" style="color:var(--text);">5</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label">Walls</div><div class="value" style="color:var(--text);">4</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label">Capitals</div><div class="value" style="color:var(--text);">4</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label">Card Frames</div><div class="value" style="color:var(--text);">5</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label">Relations</div><div class="value" style="color:var(--text);">6</div><div class="detail">v1</div></div>
+        <div class="stat-card"><div class="label" style="color:var(--green);">Daemon Symbols</div><div class="value" style="color:var(--green);">4</div><div class="detail">v2 NEW</div></div>
+        <div class="stat-card"><div class="label" style="color:var(--green);">Terrain Maps</div><div class="value" style="color:var(--green);">4</div><div class="detail">v2 NEW</div></div>
+        <div class="stat-card"><div class="label" style="color:var(--green);">Weather/Season</div><div class="value" style="color:var(--green);">12</div><div class="detail">v2 NEW</div></div>
+        <div class="stat-card"><div class="label" style="color:var(--green);">Emotions</div><div class="value" style="color:var(--green);">12</div><div class="detail">v2 NEW</div></div>
+        <div class="stat-card"><div class="label" style="color:var(--green);">Facilities</div><div class="value" style="color:var(--green);">10</div><div class="detail">v2 NEW</div></div>
+        <div class="stat-card"><div class="label" style="color:var(--green);">Stats</div><div class="value" style="color:var(--green);">6</div><div class="detail">v2 NEW</div></div>
+        <div class="stat-card"><div class="label" style="color:var(--green);">Events</div><div class="value" style="color:var(--green);">8</div><div class="detail">v2 NEW</div></div>
+        <div class="stat-card"><div class="label" style="color:var(--green);">UI Elements</div><div class="value" style="color:var(--green);">4</div><div class="detail">v2 NEW - 설계/구현 후 추가 가능</div></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function showTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>
