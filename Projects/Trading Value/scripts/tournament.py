@@ -64,6 +64,8 @@ INITIAL_BALANCE = 10_000.0
 TOURNAMENT_INTERVAL_DAYS = 14
 EXPLORATION_PHASE_WEEKS = 4
 SAVE_INTERVAL_SEC = 3600  # save state every hour
+TICK_INTERVAL_SEC = 69     # effectiveness tick every 69 seconds
+MAX_TICK_HISTORY = 500     # keep last 500 ticks (~9.6 hours)
 
 # Timeframe definitions
 TIMEFRAME_CHOICES = {0: "1m", 1: "5m", 2: "15m", 3: "1h", 4: "4h", 5: "1d"}
@@ -713,6 +715,8 @@ class TournamentManager:
         self.ensemble_top_idx: np.ndarray = np.arange(10)  # top-10 indices
         self.ensemble_signal: float = 0.0
         self._last_save = time.monotonic()
+        self._last_tick = time.monotonic()
+        self.tick_history: list[dict] = []  # 69-second effectiveness ticks
 
         # Multi-timeframe cache
         self.mtf_cache = MultiTimeframeCache()
@@ -850,6 +854,30 @@ class TournamentManager:
             self.save_state()
             self._last_save = now
             print(f"[Tournament] State saved (gen={self.generation})")
+
+    def _maybe_tick(self):
+        """Record a 69-second effectiveness tick."""
+        now = time.monotonic()
+        if now - self._last_tick < TICK_INTERVAL_SEC:
+            return
+        self._last_tick = now
+
+        rets = self.portfolio.returns_pct()
+        top_rets = rets[self.ensemble_top_idx] if len(self.ensemble_top_idx) > 0 else rets[:10]
+        total_trades = int(self.portfolio.trade_counts.sum())
+
+        tick = {
+            "t": datetime.now(tz=timezone.utc).strftime("%H:%M:%S"),
+            "best": round(float(rets.max()), 3),
+            "top10_avg": round(float(top_rets.mean()), 3),
+            "avg": round(float(rets.mean()), 3),
+            "worst": round(float(rets.min()), 3),
+            "trades": total_trades,
+            "positive_pct": round(float((rets > 0).sum() / max(len(rets), 1) * 100), 1),
+        }
+        self.tick_history.append(tick)
+        if len(self.tick_history) > MAX_TICK_HISTORY:
+            self.tick_history = self.tick_history[-MAX_TICK_HISTORY:]
 
     # ---- Data fetching ----
 
@@ -1241,6 +1269,7 @@ class TournamentManager:
                 self.evaluate_all()
                 self.maybe_run_tournament()
                 self._maybe_save()
+                self._maybe_tick()
             except KeyboardInterrupt:
                 print("\n[Tournament] Shutting down, saving state...")
                 self.save_state()
@@ -1295,6 +1324,18 @@ canvas{width:100%;height:200px}
   <div class="section" id="progress">로딩 중...</div>
 
   <div class="summary" id="summary"></div>
+
+  <div class="section" style="position:relative">
+    <h2>목표 근접도 (69초 틱)</h2>
+    <canvas id="tickChart" style="width:100%;height:200px"></canvas>
+    <div id="tickLegend" style="display:flex;gap:16px;margin-top:6px;font-size:9px">
+      <span style="color:#00d4aa">&#9632; 최고 변형</span>
+      <span style="color:#ffd700">&#9632; 상위10 평균</span>
+      <span style="color:#4dabf7">&#9632; 전체 평균</span>
+      <span style="color:#ff4d6a">&#9632; 최저 변형</span>
+      <span style="color:#555">&#9632; 수익 비율(%)</span>
+    </div>
+  </div>
 
   <div class="section">
     <h2>토너먼트 현황</h2>
@@ -1449,6 +1490,86 @@ async function refresh(){
         </div>
       </div>
     `;
+
+    // 69-second tick chart
+    const ticks = d.ticks || [];
+    if(ticks.length > 1){
+      const canvas = document.getElementById('tickChart');
+      if(canvas){
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width = canvas.offsetWidth;
+        const H = canvas.height = 200;
+        ctx.clearRect(0,0,W,H);
+
+        const series = {
+          best: {data:ticks.map(t=>t.best), color:'#00d4aa'},
+          top10: {data:ticks.map(t=>t.top10_avg), color:'#ffd700'},
+          avg: {data:ticks.map(t=>t.avg), color:'#4dabf7'},
+          worst: {data:ticks.map(t=>t.worst), color:'#ff4d6a'},
+        };
+
+        // Find global min/max
+        let allVals = [];
+        for(const s of Object.values(series)) allVals.push(...s.data);
+        let yMin = Math.min(...allVals, 0);
+        let yMax = Math.max(...allVals, 0.1);
+        const yPad = (yMax - yMin) * 0.1 || 0.5;
+        yMin -= yPad; yMax += yPad;
+
+        const n = ticks.length;
+        const xStep = W / Math.max(n-1, 1);
+
+        // Zero line
+        const zeroY = H - (0 - yMin) / (yMax - yMin) * H;
+        ctx.strokeStyle = '#2a3040';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.moveTo(0, zeroY); ctx.lineTo(W, zeroY); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Draw each series
+        for(const [name, s] of Object.entries(series)){
+          ctx.strokeStyle = s.color;
+          ctx.lineWidth = name==='top10' ? 2.5 : 1.2;
+          ctx.globalAlpha = name==='top10' ? 1 : 0.7;
+          ctx.beginPath();
+          for(let i=0; i<n; i++){
+            const x = i * xStep;
+            const y = H - (s.data[i] - yMin) / (yMax - yMin) * H;
+            if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+
+        // Positive % area (subtle)
+        const posData = ticks.map(t=>t.positive_pct);
+        ctx.fillStyle = 'rgba(85,85,85,0.15)';
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        for(let i=0; i<n; i++){
+          const x = i * xStep;
+          const y = H - posData[i] / 100 * H;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+
+        // Labels
+        ctx.fillStyle = '#555'; ctx.font = '9px monospace';
+        ctx.fillText(yMax.toFixed(1)+'%', 4, 12);
+        ctx.fillText(yMin.toFixed(1)+'%', 4, H-4);
+        ctx.fillText('0%', W-30, zeroY-4);
+        if(ticks.length > 0){
+          ctx.fillText(ticks[0].t, 4, H-14);
+          ctx.fillText(ticks[ticks.length-1].t, W-55, H-14);
+        }
+        // Latest values on right edge
+        const last = ticks[ticks.length-1];
+        ctx.fillStyle='#00d4aa'; ctx.fillText(last.best.toFixed(2)+'%', W-60, 12);
+        ctx.fillStyle='#ffd700'; ctx.fillText(last.top10_avg.toFixed(2)+'%', W-60, 24);
+        ctx.fillStyle='#4dabf7'; ctx.fillText(last.avg.toFixed(2)+'%', W-60, 36);
+      }
+    }
 
     // Notification banner
     const notify = d.notify;
@@ -1666,6 +1787,7 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             "tournament": tournament,
             "progress": progress,
             "notify": notify,
+            "ticks": m.tick_history[-200:],  # last 200 ticks for chart
         }
 
 
