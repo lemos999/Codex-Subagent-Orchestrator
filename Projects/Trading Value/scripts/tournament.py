@@ -65,7 +65,8 @@ TOURNAMENT_INTERVAL_DAYS = 14
 EXPLORATION_PHASE_WEEKS = 4
 SAVE_INTERVAL_SEC = 3600  # save state every hour
 TICK_INTERVAL_SEC = 69     # effectiveness tick every 69 seconds
-MAX_TICK_HISTORY = 500     # keep last 500 ticks (~9.6 hours)
+MAX_TICK_HISTORY = 100     # keep last 100 ticks in memory (chart)
+TICK_LOG_PATH = DATA_DIR / "effectiveness.jsonl"  # permanent log
 
 # Timeframe definitions
 TIMEFRAME_CHOICES = {0: "1m", 1: "5m", 2: "15m", 3: "1h", 4: "4h", 5: "1d"}
@@ -879,6 +880,13 @@ class TournamentManager:
         if len(self.tick_history) > MAX_TICK_HISTORY:
             self.tick_history = self.tick_history[-MAX_TICK_HISTORY:]
 
+        # Permanent log (append)
+        try:
+            with open(TICK_LOG_PATH, "a", encoding="utf-8") as f:
+                f.write(json.dumps(tick) + "\n")
+        except Exception:
+            pass
+
     # ---- Data fetching ----
 
     def _is_us_open(self) -> bool:
@@ -1519,13 +1527,21 @@ async function refresh(){
         const n = ticks.length;
         const xStep = W / Math.max(n-1, 1);
 
-        // Zero line
+        // Zero line (0% baseline - prominent)
         const zeroY = H - (0 - yMin) / (yMax - yMin) * H;
-        ctx.strokeStyle = '#2a3040';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4,4]);
+        // Background band to highlight 0%
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillRect(0, zeroY - 1, W, 2);
+        // Dashed line
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([8,4]);
         ctx.beginPath(); ctx.moveTo(0, zeroY); ctx.lineTo(W, zeroY); ctx.stroke();
         ctx.setLineDash([]);
+        // Label
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText('0%', 4, zeroY - 5);
 
         // Draw each series
         for(const [name, s] of Object.entries(series)){
@@ -1558,7 +1574,7 @@ async function refresh(){
         ctx.fillStyle = '#555'; ctx.font = '9px monospace';
         ctx.fillText(yMax.toFixed(1)+'%', 4, 12);
         ctx.fillText(yMin.toFixed(1)+'%', 4, H-4);
-        ctx.fillText('0%', W-30, zeroY-4);
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font='bold 10px monospace'; ctx.fillText('0%', W-30, zeroY-5);
         if(ticks.length > 0){
           ctx.fillText(ticks[0].t, 4, H-14);
           ctx.fillText(ticks[ticks.length-1].t, W-55, H-14);
@@ -1787,7 +1803,7 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             "tournament": tournament,
             "progress": progress,
             "notify": notify,
-            "ticks": m.tick_history[-200:],  # last 200 ticks for chart
+            "ticks": m.tick_history[-100:],  # last 100 ticks for chart
         }
 
 
