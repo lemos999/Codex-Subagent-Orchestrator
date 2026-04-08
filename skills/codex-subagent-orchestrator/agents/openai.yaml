@@ -1,7 +1,0 @@
-interface:
-  display_name: "Codex Subagent Orchestrator"
-  short_description: "Supervise one or more codex exec workers with bounded prompts, manifest-backed output capture, and efficient validation loops."
-  default_prompt: "Use $codex-subagent-orchestrator when a user starts a request with /sub and you need to form a small worker team, choose efficient reasoning and model settings, preserve a manifest, and validate the delegated result."
-
-policy:
-  allow_implicit_invocation: true
