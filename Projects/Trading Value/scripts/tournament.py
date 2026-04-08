@@ -1290,6 +1290,8 @@ canvas{width:100%;height:200px}
   <div id="clock" class="gy"></div>
 </div>
 <div class="wrap">
+  <div id="notification" style="display:none;margin-bottom:12px"></div>
+  <div class="section" id="progress" style="margin-bottom:12px">Loading progress...</div>
   <div class="summary" id="summary"></div>
 
   <div class="grid3" id="distributions">
@@ -1411,14 +1413,61 @@ async function refresh(){
         return `<div style="margin:2px 0"><span class="gy" style="display:inline-block;width:140px">${h.name}</span><div class="heatmap-cell" style="background:${bg};display:inline-block;padding:2px 8px">${c.toFixed(3)}</div></div>`;
       }).join('');
 
-    // Ensemble
+    // Tournament status
     const e = d.tournament;
     document.getElementById('ensemble').innerHTML = `
       <div style="margin:4px 0">Phase: <span class="yl">${e.phase}</span> | Generation: <span class="bl">${e.generation}</span></div>
       <div style="margin:4px 0">Next tournament: <span class="gy">${e.next_round}</span></div>
-      <div style="margin:4px 0">Ensemble signal: <span class="bl">${fmt(s.ensemble_signal,3)}</span> (avg position of top-10)</div>
-      <div style="margin:4px 0">Top-10 indices: <span class="gy">${e.top10_idx}</span></div>
+      <div style="margin:4px 0">Ensemble signal: <span class="bl">${fmt(s.ensemble_signal,3)}</span></div>
     `;
+
+    // Progress & ETA
+    const p = d.progress || {};
+    const pct30 = p.pct_30 || 0;
+    const pct100 = p.pct_100 || 0;
+    const rdColor = p.readiness==='READY'?'gn':p.readiness==='APPROACHING'?'yl':'gy';
+    let progEl = document.getElementById('progress');
+    if(progEl) progEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="margin:4px 0;font-size:10px;color:#555">ELAPSED</div>
+          <div style="font-size:20px;font-weight:bold" class="bl">${(p.elapsed_days||0).toFixed(1)} days</div>
+          <div style="margin:4px 0">Total trades: <b>${(p.total_trades||0).toLocaleString()}</b> (${(p.trades_per_day||0).toFixed(0)}/day)</div>
+          <div style="margin:4px 0">Avg per variant: <b>${(p.avg_trades||0).toFixed(1)}</b> / 30 needed</div>
+        </div>
+        <div>
+          <div style="margin:4px 0;font-size:10px;color:#555">READINESS</div>
+          <div style="font-size:20px;font-weight:bold" class="${rdColor}">${p.readiness||'--'}</div>
+          <div style="margin:4px 0">${p.readiness_msg||''}</div>
+          <div style="margin:4px 0">ETA to 30 trades: <b class="yl">${p.eta_to_30||'--'}</b></div>
+        </div>
+      </div>
+      <div style="margin:10px 0">
+        <div style="font-size:9px;color:#555;margin-bottom:3px">Variants with 30+ trades: ${p.variants_30plus||0} / ${s.n_variants} (${pct30}%)</div>
+        <div style="height:10px;background:#1a2030;border-radius:5px;overflow:hidden">
+          <div style="height:100%;width:${pct30}%;background:linear-gradient(90deg,#ffd700,#ff9800);border-radius:5px;transition:width 2s"></div>
+        </div>
+      </div>
+      <div style="margin:8px 0">
+        <div style="font-size:9px;color:#555;margin-bottom:3px">Variants with 100+ trades: ${p.variants_100plus||0} / ${s.n_variants} (${pct100}%)</div>
+        <div style="height:10px;background:#1a2030;border-radius:5px;overflow:hidden">
+          <div style="height:100%;width:${pct100}%;background:linear-gradient(90deg,#00d4aa,#00d4aa88);border-radius:5px;transition:width 2s"></div>
+        </div>
+      </div>
+    `;
+
+    // Notification banner
+    const notify = d.notify;
+    let notifEl = document.getElementById('notification');
+    if(notifEl){
+      if(notify){
+        const nc = notify.level==='success'?'#00d4aa':notify.level==='warning'?'#ffd700':'#555';
+        notifEl.style.display='block';
+        notifEl.innerHTML=`<div style="padding:12px 20px;background:${nc}22;border:1px solid ${nc};border-radius:8px;color:${nc};font-weight:bold;font-size:13px;text-align:center">${notify.msg}</div>`;
+      } else {
+        notifEl.style.display='none';
+      }
+    }
   } catch(e){ console.error(e); }
 }
 refresh();
@@ -1561,6 +1610,56 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             "top10_idx": m.ensemble_top_idx.tolist(),
         }
 
+        # Progress & ETA
+        total_trades = int(m.portfolio.trade_counts.sum())
+        avg_trades_per_variant = float(m.portfolio.trade_counts.mean())
+        variants_with_30 = int((m.portfolio.trade_counts >= 30).sum())
+        variants_with_100 = int((m.portfolio.trade_counts >= 100).sum())
+        elapsed_days = max((now - m.started_at).total_seconds() / 86400, 0.01)
+        trades_per_day = total_trades / elapsed_days if elapsed_days > 0.1 else 0
+        # ETA: when will avg variant reach 30 trades?
+        if avg_trades_per_variant < 30 and trades_per_day > 0:
+            remaining_trades = (30 - avg_trades_per_variant) * N_VARIANTS
+            eta_days = remaining_trades / trades_per_day
+            eta_str = f"{eta_days:.0f}d" if eta_days > 1 else f"{eta_days*24:.0f}h"
+        else:
+            eta_str = "Ready"
+
+        # Readiness level
+        if variants_with_100 >= N_VARIANTS * 0.5:
+            readiness = "READY"
+            readiness_msg = "Data sufficient. Ready for review."
+        elif variants_with_30 >= N_VARIANTS * 0.5:
+            readiness = "APPROACHING"
+            readiness_msg = f"50%+ variants have 30+ trades. {variants_with_100} have 100+."
+        elif variants_with_30 >= N_VARIANTS * 0.1:
+            readiness = "BUILDING"
+            readiness_msg = f"{variants_with_30} variants have 30+ trades ({variants_with_30*100//N_VARIANTS}%)"
+        else:
+            readiness = "EARLY"
+            readiness_msg = f"Avg {avg_trades_per_variant:.1f} trades/variant. Need 30 minimum."
+
+        # Notification flags
+        notify = None
+        if readiness == "READY":
+            notify = {"level": "success", "msg": "Data sufficient! Review recommended."}
+        elif readiness == "APPROACHING":
+            notify = {"level": "warning", "msg": "Approaching readiness. Almost there."}
+
+        progress = {
+            "elapsed_days": round(elapsed_days, 1),
+            "total_trades": total_trades,
+            "avg_trades": round(avg_trades_per_variant, 1),
+            "trades_per_day": round(trades_per_day, 0),
+            "variants_30plus": variants_with_30,
+            "variants_100plus": variants_with_100,
+            "eta_to_30": eta_str,
+            "readiness": readiness,
+            "readiness_msg": readiness_msg,
+            "pct_30": round(variants_with_30 / N_VARIANTS * 100, 1),
+            "pct_100": round(variants_with_100 / N_VARIANTS * 100, 1),
+        }
+
         return {
             "summary": summary,
             "histogram": histogram,
@@ -1571,6 +1670,8 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             "bot10": bot10,
             "heatmap": heatmap,
             "tournament": tournament,
+            "progress": progress,
+            "notify": notify,
         }
 
 
