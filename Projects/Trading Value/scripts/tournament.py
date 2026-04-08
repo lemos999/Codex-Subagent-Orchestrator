@@ -1383,6 +1383,30 @@ canvas{width:100%;height:200px}
   <div class="section" style="color:#555;font-size:10px;text-align:center;padding:10px">
     READY 상태가 되면 녹색 배너가 표시됩니다. 그때 결과를 검토하고 다음 단계를 결정하세요.
   </div>
+  <div class="section" style="font-size:11px;color:#999;line-height:1.8">
+    <h2 style="color:#ff9800">프로젝트 이어가기</h2>
+    <div style="margin-bottom:10px">데이터가 충분히 쌓인 후(READY 또는 APPROACHING), 아래 순서로 이어갑니다:</div>
+    <div style="color:#ccc"><b>1.</b> Claude Code를 열고 이렇게 말하세요:</div>
+    <div style="background:#0a0e17;border:1px solid #2a3040;border-radius:6px;padding:10px;margin:6px 0;font-family:monospace;color:#4dabf7">
+      "Trading Value 프로젝트 현재 상태 확인해주세요. 토너먼트 데이터가 쌓였습니다."
+    </div>
+    <div style="color:#ccc"><b>2.</b> Claude가 자동으로 확인하는 것들:</div>
+    <div style="margin-left:16px;color:#888">
+      - RESUME.md (세션 재개 가이드)<br>
+      - limits-history.md (한계 돌파 기록 8건)<br>
+      - 메모리 (프로젝트 상태, 결정 사항)<br>
+      - 대시보드 API (localhost:8895/api/state)<br>
+      - effectiveness.jsonl (목표 근접도 로그)
+    </div>
+    <div style="color:#ccc;margin-top:8px"><b>3.</b> 함께 결정할 것들:</div>
+    <div style="margin-left:16px;color:#888">
+      - 상위 전략 분석 (어떤 종목 x 전략 x 시간축이 가장 효과적인가)<br>
+      - 프로덕션 앙상블 구성 (상위 몇 개를 어떻게 결합할 것인가)<br>
+      - 실전 배포 여부 (페이퍼 → 실전 전환 시점)
+    </div>
+    <div style="color:#555;margin-top:12px;font-size:10px">
+      대화 맥락은 메모리 시스템으로 자동 보존됩니다. 새 세션이어도 이전 결정과 교훈이 유지됩니다.
+  </div>
 </div>
 <script>
 function fmt(v, d=1){ return v !== null && v !== undefined ? v.toFixed(d) : '-'; }
