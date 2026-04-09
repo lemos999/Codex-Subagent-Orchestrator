@@ -25,10 +25,20 @@ function extractGitSubcommand(cmd: string): string {
   const tokens = cmd.trim().split(/\s+/);
   const gitIdx = tokens.indexOf('git');
   if (gitIdx === -1 || gitIdx + 1 >= tokens.length) return '';
-  const sub = tokens[gitIdx + 1];
-  // skip flags like -C
-  if (sub.startsWith('-')) return '';
-  return sub;
+
+  // Flags that take a value argument: -C <path>, -c <config>, --git-dir <path>, etc.
+  const FLAGS_WITH_VALUE = new Set(['-C', '-c', '--git-dir', '--work-tree', '--namespace']);
+
+  for (let i = gitIdx + 1; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (FLAGS_WITH_VALUE.has(t)) {
+      i++; // skip the flag's value
+      continue;
+    }
+    if (t.startsWith('-')) continue; // skip other flags (--no-pager, etc.)
+    return t; // first non-flag token = subcommand
+  }
+  return '';
 }
 
 // ─── compressStatus ───
