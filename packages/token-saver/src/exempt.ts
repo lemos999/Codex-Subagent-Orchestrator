@@ -10,9 +10,9 @@ const EXEMPT_PATTERNS: Array<string | RegExp> = [
   'tsc',
   'eslint',
 
-  // WKI commands (우리 인프라)
-  'workspace-knowledge-index',
-  'wki',
+  // WKI CLI commands only (not directory references like "cd workspace-knowledge-index")
+  /workspace-knowledge-index\/dist\/index\.js/,
+  /\bwki\s/,
 
   // External engine calls (Codex, Gemini)
   'codex exec',

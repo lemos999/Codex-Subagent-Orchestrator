@@ -113,49 +113,44 @@ function compressStatus(stdout: string): string {
     }
   }
 
-  // Summary line
+  // Split into tracked (modified/deleted/added) vs untracked
+  const trackedLines = result.filter(l => l.match(/^[ MADR]\s/));
+  const untrackedLines = result.filter(l => l.startsWith('??'));
+  const nonFileLines = result.filter(l => !l.match(/^[ MADR?]{1,2}\s/));
+
+  // Strategy: show ALL tracked files (AI needs them for work)
+  //           truncate untracked to 10 (rarely needed, biggest size contributor)
+  const MAX_UNTRACKED = 10;
+  const output: string[] = [...nonFileLines];
+
+  // Tracked files: show all (modified, deleted, added, renamed)
+  if (trackedLines.length > 0) {
+    output.push(`~ Modified/Staged: ${trackedLines.length} files`);
+    output.push(...trackedLines);
+  }
+
+  // Untracked files: show first 10, summarize rest
+  if (untrackedLines.length > 0) {
+    output.push(`? Untracked: ${untracked} files`);
+    if (untrackedLines.length <= MAX_UNTRACKED) {
+      output.push(...untrackedLines);
+    } else {
+      output.push(...untrackedLines.slice(0, MAX_UNTRACKED));
+      output.push(`   ... +${untrackedLines.length - MAX_UNTRACKED} more`);
+    }
+  }
+
+  // Summary
   const parts: string[] = [];
   if (added > 0) parts.push(`${added} added`);
   if (modified > 0) parts.push(`${modified} modified`);
   if (deleted > 0) parts.push(`${deleted} deleted`);
   if (untracked > 0) parts.push(`${untracked} untracked`);
-
-  // If too many files, group by top-level directory
-  const MAX_FILES = 20;
-  const fileLines = result.filter(l => l.match(/^[ MADR?]{1,2}\s/));
-  const nonFileLines = result.filter(l => !l.match(/^[ MADR?]{1,2}\s/));
-
-  if (fileLines.length > MAX_FILES) {
-    // Group by directory
-    const dirs = new Map<string, string[]>();
-    for (const line of fileLines) {
-      const path = line.substring(3).trim().replace(/^"/, '').replace(/"$/, '');
-      const dir = path.includes('/') ? path.split('/').slice(0, 2).join('/') : '.';
-      if (!dirs.has(dir)) dirs.set(dir, []);
-      dirs.get(dir)!.push(line);
-    }
-
-    const grouped: string[] = [...nonFileLines];
-    for (const [dir, files] of [...dirs.entries()].sort((a, b) => b[1].length - a[1].length)) {
-      if (files.length <= 5) {
-        grouped.push(...files);
-      } else {
-        grouped.push(...files.slice(0, 4));
-        grouped.push(`   ... +${files.length - 4} more in ${dir}/`);
-      }
-    }
-    if (parts.length > 0) {
-      grouped.push(`(${parts.join(', ')}, ${fileLines.length} files total)`);
-    }
-    grouped.push(`(run 'git status -s' for full file list)`);
-    return grouped.join('\n');
-  }
-
   if (parts.length > 0) {
-    result.push(`(${parts.join(', ')})`);
+    output.push(`(${parts.join(', ')})`);
   }
 
-  return result.join('\n');
+  return output.join('\n');
 }
 
 // ─── compressLog ───
