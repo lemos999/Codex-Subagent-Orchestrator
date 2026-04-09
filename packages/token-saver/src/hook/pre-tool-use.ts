@@ -46,10 +46,16 @@ function processHook(input: HookInput): Record<string, unknown> {
   // Use absolute path to avoid PATH issues on Windows
   const ctsPath = path.resolve(__dirname, '..', 'index.js');
 
+  // Shell-escape the original command for safe wrapping
+  const escapedCmd = cmd.replace(/'/g, "'\\''");
+
   return {
-    updatedInput: {
-      ...input.tool_input,
-      command: `node "${ctsPath}" exec ${cmd}`,
+    hookSpecificOutput: {
+      hookEventName: 'PreToolUse',
+      permissionDecision: 'allow',
+      updatedInput: {
+        command: `node "${ctsPath}" exec $'${escapedCmd}'`,
+      },
     },
   };
 }

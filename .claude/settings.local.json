@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node packages/token-saver/dist/hook/pre-tool-use.js",
+            "command": "node C:/Users/haj/projects/subagent-orchestrator/packages/token-saver/dist/hook/pre-tool-use.js",
             "timeout": 10
           }
         ]
