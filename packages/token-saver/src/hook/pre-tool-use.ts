@@ -42,6 +42,9 @@ function processHook(input: HookInput): Record<string, unknown> {
   // Check exempt
   if (isExempt(cmd)) return {};
 
+  // Heredocs and complex shell constructs break when wrapped in $'...'
+  if (cmd.includes('<<') || cmd.includes('$(cat')) return {};
+
   // Rewrite command
   // Use absolute path to avoid PATH issues on Windows
   const ctsPath = path.resolve(__dirname, '..', 'index.js');
