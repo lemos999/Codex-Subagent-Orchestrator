@@ -1,0 +1,7 @@
+interface:
+  display_name: "Plan Mode Default"
+  short_description: "Default contract for coding-plan mode."
+  default_prompt: "Use $plan-mode-default when the workspace should turn a coding request into an approved long-form plan saved under repo-root plan/ as a versioned progress-tracking record before implementation."
+
+policy:
+  allow_implicit_invocation: false
