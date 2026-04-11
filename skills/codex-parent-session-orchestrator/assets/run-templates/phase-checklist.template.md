@@ -10,7 +10,8 @@
 
 ## Pause Points
 
-- none
+- coding runs: pause after the understanding report in `plan` until the user explicitly approves proceeding
+- non-coding runs: none by default
 
 ## Known Return Edges
 

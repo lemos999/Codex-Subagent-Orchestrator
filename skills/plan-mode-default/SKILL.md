@@ -18,7 +18,7 @@ The shared plan-first gate is defined by `../agent-skills-integration/agent-skil
 - Do not treat "do it now", urgency, blanket authority, or tiny scope as a waiver of the approval gate.
 - Do not treat minor subtasks, one-line fixes, tiny follow-up edits, or repair steps as exempt; they must either fit the active approved plan record or reopen planning.
 - After approval, follow the contract exactly, including English output, persistence of the approved full PLAN under repo-root `plan/`, time-sortable versioned filenames, explicit plan-type markers, in-file status and progress tracking, an in-file `Scoreboard` section with score history, minimum PLAN length, natural-language directive style, hidden-rule surfacing, iterative refinement behavior, and re-gating when a later request materially changes the approved coding direction.
-- Keep the `Scoreboard` section in the active plan file updated through the life of the task. Record explicit user scores as authoritative, and when the user gives no score yet, maintain a conservative provisional score based on the current evidence instead of stopping or inventing a fixed default number. Preserve prior score states by appending score-history entries instead of overwriting them.
+- Keep the `Scoreboard` section in the active plan file updated through the life of the task. Record explicit user scores as authoritative, and when the user gives no score yet, maintain a conservative provisional score based on the current evidence instead of stopping or inventing a fixed default number, but do not set that provisional score above `50`. Preserve prior score states by appending score-history entries instead of overwriting them.
 
 ## Resources
 

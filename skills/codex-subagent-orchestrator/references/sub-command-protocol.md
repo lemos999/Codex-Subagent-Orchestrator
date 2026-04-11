@@ -12,20 +12,22 @@ If the runtime cannot provide the required internal agent tools, do not invent d
 
 ## Plan First
 
-Before any worker starts, the parent must decide:
+Before any worker starts, the parent must establish at least a provisional execution view:
 
-- whether one worker is enough or whether a team is justified
-- whether execution should be serial, parallel, or mixed
+- whether one worker is enough or whether a team is likely justified
+- whether execution should likely be serial, parallel, or mixed
 - whether the work should stay inside one issue-sized run or become an in-session queue
 - which workers need write access
 - where review belongs
 - which imported vendor skills each phase or worker actually needs
 
-For any coding request, the parent must also activate the shared gate defined in `skills/agent-skills-integration/agent-skill-routing.md`, deliver the short understanding report required by `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md`, and obtain explicit user approval before any writable worker can launch.
+For any new coding request, or any later coding request that is not already covered by the active approved plan record, the parent must also activate the shared gate defined in `skills/agent-skills-integration/agent-skill-routing.md`, use `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay for coding stages and coding workers, deliver the short understanding report required by `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md`, and obtain explicit user approval before any writable worker can launch.
 For coding requests, the parent must write or update the approved full PLAN under repo-root `plan/` before any writable worker can launch.
 For coding requests, the parent must keep that active plan file updated so it clearly shows plan type, version, status, completion state, completed work, remaining work, blockers, next step, and `Scoreboard` state as the run progresses.
-For coding requests, the parent owns score tracking even when workers perform the delegated execution. Explicit user scores should be recorded as authoritative, and missing score feedback should not block the run; instead maintain a conservative provisional score based on the current evidence without using a fixed fallback number.
+For coding requests, the parent owns score tracking even when workers perform the delegated execution. Explicit user scores should be recorded as authoritative, and missing score feedback should not block the run; instead maintain a conservative provisional score based on the current evidence without using a fixed fallback number, and do not set that provisional score above `50`.
 For coding requests, the parent must keep `orchestration-plan.md`, `status.md`, and the active file under `plan/` aligned on the same active plan path, version, current status, and current score state.
+For coding requests, any pre-approval judgment about delegation, worker count, execution mode, or role split is provisional only. Finalize the actual team shape only after the understanding report and coding direction have been explicitly approved.
+If a later tiny follow-up edit, repair step, or similar writable coding action is already explicitly covered by the active approved plan record and does not materially change the approved direction, continue under that plan by refreshing the active plan file instead of reopening a fresh approval gate.
 
 ## Mandatory Pre-Launch Report
 
@@ -45,12 +47,17 @@ Report this to the user before launch:
 - current score and score source from the active plan for coding runs
 - evidence paths on disk
 
-For coding runs, the worker topology may be provisional before the approval gate and should be finalized only after the understanding report and coding direction have been explicitly approved.
-For coding requests, always pause first for explicit approval of the understanding report and coding direction. After that gate is satisfied, finalize delegation justification, worker count, execution mode, per-worker assignments, and the rest of the pre-launch report before writable worker launch. Blanket authority or explicit proceed-now language do not waive this gate.
+For coding runs, the worker topology, delegation justification, and execution mode may be provisional before the approval gate and should be finalized only after the understanding report and coding direction have been explicitly approved.
+For any new coding request, or any later coding request that is not already covered by the active approved plan record, always pause first for explicit approval of the understanding report and coding direction. After that gate is satisfied, finalize delegation justification, worker count, execution mode, per-worker assignments, and the rest of the pre-launch report before writable worker launch. Blanket authority or explicit proceed-now language do not waive this gate.
+If a later tiny follow-up edit, repair step, or similar writable coding action is already explicitly covered by the active approved plan record and does not materially change the approved direction, refresh the active plan file and continue without reopening a fresh approval pause.
 
 ## Approval Skip Conditions
 
-Skip the pause only for non-coding runs, or for execution pacing after the mandatory coding plan-first gate has already been satisfied, when one of these is true:
+For non-coding runs, skip the approval pause by default and continue directly into the normal pre-launch report and launch-preparation flow.
+
+For coding runs, the mandatory plan-first gate may never be skipped.
+
+After the mandatory coding plan-first gate has already been satisfied, later execution pacing may skip extra pauses when one of these is true:
 
 - the user clearly delegated blanket authority for the run
 - the user explicitly said to proceed immediately

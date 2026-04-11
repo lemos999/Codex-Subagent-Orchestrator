@@ -15,14 +15,14 @@ Before runtime tests, verify the imported vendor pack is intact:
 
 ### 0. Hard plan-first gate
 
-Prove that every coding request triggers the understanding report and explicit approval gate before implementation, even when the request is tiny, urgent, or explicitly says to code immediately.
+Prove that every new coding request, and any later coding request that is not already covered by the active approved plan record, triggers the understanding report and explicit approval gate before implementation, even when the request is tiny, urgent, or explicitly says to code immediately.
 
 Check:
 
 - no code, patch, or code-level implementation guidance appears before approval
 - no writable worker launches before approval
 - "do it now", blanket authority, or tiny scope do not bypass the gate
-- tiny follow-up edits and repair steps do not bypass the gate or escape the active approved plan record
+- tiny follow-up edits and repair steps do not escape the active approved plan record; if they are not already explicitly covered or they materially change the approved direction, they reopen the gate before implementation resumes
 - follow-up material change requests reopen the gate before implementation resumes
 - the approved full PLAN is written under repo-root `plan/`
 - the full approved PLAN is not dumped into chat as a Markdown code block by default
@@ -108,7 +108,7 @@ Check:
 
 - the active plan artifact contains a `Scoreboard` section
 - an explicit user score is recorded as authoritative when one is given
-- when the user gives no score, the workflow continues with a conservative provisional score instead of blocking
+- when the user gives no score, the workflow continues with a conservative provisional score instead of blocking, and that provisional score never exceeds `50`
 - no fixed hardcoded fallback number is required by the docs
 - unchanged score is treated as the current overall rating staying the same, not as zero new points
 - when an explicit user score replaces a provisional score with the same numeric value, the score-history log still preserves both states

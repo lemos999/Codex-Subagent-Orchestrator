@@ -84,7 +84,7 @@ Each phase file should contain:
 - stop condition
 - selected imported skill paths when the phase needs vendored execution discipline
 
-For the `plan` phase, include `skills/agent-skills-integration/agent-skill-routing.md`, `skills/plan-mode-default/SKILL.md`, and `skills/plan-mode-default/references/coding-plan-prompt-en.md` in `files to read first` by default when those files exist, unless the user explicitly asks for a different planning contract format that still preserves the understanding-report and explicit-approval gate.
+For the `plan` phase, include `skills/agent-skills-integration/agent-skill-routing.md`, `skills/karpathy-guidelines/SKILL.md`, `skills/plan-mode-default/SKILL.md`, and `skills/plan-mode-default/references/coding-plan-prompt-en.md` in `files to read first` by default when those files exist, unless the user explicitly asks for a different planning contract format that still preserves the understanding-report and explicit-approval gate.
 For coding runs, use the `plan` phase to write or update the approved full PLAN under repo-root `plan/` as a versioned, time-sortable Markdown record with typed status, progress, and scoreboard fields, and record that file path in `session-summary.md`.
 For coding runs, do not activate `implement.md` until `session-summary.md` records that the plan-first approval gate has been satisfied and names the approved plan file under `plan/`.
 For coding runs, any later phase that materially changes progress, blockers, completion state, next step, or score state should list the active plan file under `plan/` in `outputs to update on disk`.

@@ -32,9 +32,9 @@ Record:
 - worker count
 - execution mode: `serial | parallel | mixed`
 - review timing or review policy
-- approved plan file path in `plan/` for coding runs
-- approved plan type, version, and current status for coding runs
-- current score and score source from the active plan for coding runs
+- approved plan file path in `plan/` for coding runs; otherwise record `n/a`
+- approved plan type, version, and current status for coding runs; otherwise record `n/a`
+- current score and score source from the active plan for coding runs; otherwise record `n/a`
 - for each worker:
   - worker id
   - role
@@ -59,18 +59,19 @@ Authority split for coding runs:
 Record:
 
 - run id
+- run type: `coding | non-coding`
 - current stage
-- active plan file, if any
-- active plan path verified on disk, if any
-- orchestration/status/plan linkage check, if any
-- active plan type, if any
-- active plan version, if any
-- active plan status, if any
-- active plan progress state, if any
-- current score, if any
-- score source, if any
-- score last updated, if any
-- score maintenance focus, if any
+- active plan file: coding runs only; otherwise record `n/a`
+- active plan path verified on disk: coding runs only; otherwise record `n/a`
+- orchestration/status/plan linkage check: coding runs only; otherwise record `n/a`
+- active plan type: coding runs only; otherwise record `n/a`
+- active plan version: coding runs only; otherwise record `n/a`
+- active plan status: coding runs only; otherwise record `n/a`
+- active plan progress state: coding runs only; otherwise record `n/a`
+- current score: coding runs only; otherwise record `n/a`
+- score source: coding runs only; otherwise record `n/a`
+- score last updated: coding runs only; otherwise record `n/a`
+- score maintenance focus: coding runs only; otherwise record `n/a`
 - active agents
 - waiting agents
 - completed agents
@@ -96,7 +97,8 @@ Each worker brief should contain:
 - return contract
 - stop condition
 
-If the worker is planning, refining a plan, or producing planner-like output, include `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` in `read-first files` by default when those files exist, unless the user explicitly overrides the planning contract format while preserving the understanding-report and explicit-approval gate.
+If the worker belongs to a coding run, include `skills/karpathy-guidelines/SKILL.md` in `read-first files` by default as the local anti-overengineering overlay.
+If the worker is planning, refining a plan, or producing planner-like output for coding work, include `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` in `read-first files` by default when those files exist, unless the user explicitly overrides the planning contract format while preserving the understanding-report and explicit-approval gate.
 For coding runs, do not launch or record a writable worker stage until the run artifacts show that the understanding-report approval gate has been satisfied and name the approved plan file under `plan/`.
 For coding runs, keep `status.md` and the active plan file aligned whenever plan status, progress state, blockers, next step, or score state change.
 For coding runs, keep `orchestration-plan.md`, `status.md`, and the active file under `plan/` aligned on the same active path, version, current status, and current score state.

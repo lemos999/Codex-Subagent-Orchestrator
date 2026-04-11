@@ -18,13 +18,15 @@ The parent should:
 - keep summaries compact and delta-oriented
 - end writable work with a read-only review pass
 - use a bounded `fix -> re-verify -> re-review` loop when `verify` or `review` opens an approved fix scope
+- apply `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay for coding phases so the parent favors explicit assumptions, the smallest complete design, surgical edits, and goal-driven verification
 - inherit the shared mandatory plan-first gate from `skills/agent-skills-integration/agent-skill-routing.md` and use `skills/plan-mode-default/SKILL.md` plus `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the default planning contract before any implementation begins, unless the user explicitly overrides the contract format while preserving the understanding-report and explicit-approval gate
 - treat the approved full PLAN as a living disk artifact under repo-root `plan/`, not as a chat code block dump
-- keep score tracking in the active plan artifact and update it through the task, using explicit user scores when given and a conservative provisional score when the user has not scored yet
+- keep score tracking in the active plan artifact and update it through the task, using explicit user scores when given and a conservative provisional score capped at `50` when the user has not scored yet
 
 ## Read In This Order
 
 - read `skills/agent-skills-integration/agent-skill-routing.md` first for the shared plan-first authority and vendored routing rules
+- read `skills/karpathy-guidelines/SKILL.md` next for the default local anti-overengineering posture on coding phases
 - read `skills/plan-mode-default/SKILL.md` next for the default workspace planning behavior
 - read `skills/plan-mode-default/references/coding-plan-prompt-en.md` after that for the detailed planning contract text
 - read `references/parent-session-workflow.md` for the phase model and operating rules
@@ -37,12 +39,13 @@ The parent should:
 - keep the parent responsible for decomposition, edits, validation, and final acceptance
 - treat subagent roles as short-lived parent phases, not new sessions
 - use vendored `agent-skills` as the execution-discipline layer for the active phase; keep local parent-session rules authoritative for acceptance, scope, and repair-loop behavior
+- for coding phases, treat `skills/karpathy-guidelines/SKILL.md` as the default local overlay for simplicity, surgical scope, and explicit assumption handling
 - for every coding request, satisfy the shared gate from `skills/agent-skills-integration/agent-skill-routing.md` before entering `implement` or making writable changes
 - do not treat urgency, tiny scope, direct edit language, or "just do it now" requests as a waiver of the plan-first gate
 - do not treat minor subtasks, one-line fixes, tiny follow-up edits, or repair steps as exempt; every writable coding action must already fit the active approved plan record or reopen planning first
 - write or update the approved full PLAN under repo-root `plan/` before `implement` begins
 - keep the active approved plan file versioned, time-sortable, clearly typed, and updated with progress, completion state, blockers, next step, and scoreboard state as work advances
-- record explicit user scores as authoritative when available and otherwise maintain a conservative provisional score instead of blocking for feedback or using a fixed default number
+- record explicit user scores as authoritative when available and otherwise maintain a conservative provisional score capped at `50` instead of blocking for feedback or using a fixed default number
 - default runtime path:
   - `scan`
   - `plan`

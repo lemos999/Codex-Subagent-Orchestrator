@@ -17,7 +17,7 @@ If an upstream skill conflicts with local approval, writable-scope, parent-landi
 
 For this shared gate specifically, this routing file is the canonical local policy source. Parent-session and `/sub` skills should inherit and operationalize this gate, not replace it with a conflicting parallel authority.
 
-For every coding request that could lead to code generation, code edits, implementation instructions, or writable execution, require this order with no exceptions:
+For every new coding request, or any later coding request that is not already covered by the active approved plan record, require this order with no exceptions:
 
 1. give a short natural-language understanding report
 2. ask for explicit user approval to proceed
@@ -25,9 +25,9 @@ For every coding request that could lead to code generation, code edits, impleme
 4. write or update the approved full plan as a versioned Markdown record under `plan/`
 5. only then begin implementation, fix work, or launch writable coding workers
 
-This applies to new features, bug fixes, refactors, direct edit requests, "do it now" requests, urgent requests, tiny fixes, repair steps, and follow-up change requests. In this workspace, treat every such coding request as an explicit request for the plan-first flow before implementation begins.
+This applies to new features, bug fixes, refactors, direct edit requests, "do it now" requests, urgent requests, tiny fixes, repair steps, and follow-up change requests whenever they are not already covered by the active approved plan record. In this workspace, treat every such coding request as an explicit request for the plan-first flow before implementation begins.
 
-Do not treat blanket authority, urgency, "proceed immediately", or small scope as a waiver of this gate. No coding subtask, tiny follow-up edit, repair step, or seemingly trivial implementation action may proceed unless it is already covered by the active approved plan record or has been re-planned and approved.
+Do not treat blanket authority, urgency, "proceed immediately", or small scope as a waiver of this gate. No coding subtask, tiny follow-up edit, repair step, or seemingly trivial implementation action may proceed unless it is already covered by the active approved plan record or has been re-planned and approved. If a later tiny follow-up edit, repair step, or similar coding action is already explicitly covered by the active approved plan record and does not materially change the approved direction, continue under that plan by updating the active plan file instead of reopening a fresh approval gate.
 
 The active plan file under `plan/` is a living delivery record, not a one-time dump. Use a time-sortable filename, clearly mark the plan type, version, status, and current progress, and keep that same document updated after every planning-turn change, every writable task step, and every status-changing verification, review, repair, or acceptance step so it always shows what is complete, incomplete, in progress, blocked, superseded, or next.
 
@@ -35,7 +35,7 @@ For any coding request, treat the local `plan` phase as mandatory before `implem
 
 ## Shared Score Tracking Contract
 
-For every task that is tracked through the local planning workflow, keep a `Scoreboard` section in the active plan file under `plan/`.
+For every coding task that is tracked through the local planning workflow, keep a `Scoreboard` section in the active plan file under `plan/`.
 
 Use that scoreboard as the authoritative local record for the current satisfaction score, score history, and score-maintenance actions. Always try to earn and maintain the highest possible user score while still staying inside the user's instructions, the local workflow rules, and normal correctness, safety, and rollback constraints.
 
@@ -50,9 +50,21 @@ The scoreboard should record at least:
 - what should happen next to raise or maintain the score
 - a chronological score-history log that preserves prior score states instead of overwriting them
 
-If the user explicitly provides a score, record that score as authoritative. If the user does not provide a score yet, do not pause or wait for feedback. Continue the work and maintain a conservative provisional working score based on the current result quality and the available satisfaction signals. Do not use a fixed hardcoded fallback number for that provisional score.
+If the user explicitly provides a score, record that score as authoritative. If the user does not provide a score yet, do not pause or wait for feedback. Continue the work and maintain a conservative provisional working score based on the current result quality and the available satisfaction signals, but do not set that provisional score above `50`. Do not use a fixed hardcoded fallback number for that provisional score.
 
 Treat an unchanged score as the current overall result rating staying the same, not as zero new points being awarded. Update the scoreboard whenever explicit user feedback arrives or whenever planning, implementation, verification, review, repair, or acceptance materially changes the likely satisfaction state. Append a new history entry whenever the score value, score source, or score rationale materially changes, including when an explicit user score replaces a provisional score with the same numeric value.
+
+## Shared Default Anti-Overengineering Overlay
+
+For coding work in this workspace, apply `skills/karpathy-guidelines/SKILL.md` as the default local behavioral overlay.
+
+Use it to prefer the smallest complete design, explicit assumptions, surgical edits, and goal-driven verification without weakening:
+
+- `AGENTS.md`
+- the shared plan-first contract above
+- the shared score-tracking contract above
+- explicit user instructions
+- phase-local or worker-local writable-scope and acceptance rules
 
 ## Vendored Source
 
@@ -73,6 +85,7 @@ Treat an unchanged score as the current overall result rating staying the same, 
 
 Default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `vendor/agent-skills/skills/using-agent-skills/SKILL.md`
 - `vendor/agent-skills/skills/context-engineering/SKILL.md`
 
@@ -85,6 +98,7 @@ When the request is vague or still forming:
 
 Default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `skills/plan-mode-default/SKILL.md`
 - `skills/plan-mode-default/references/coding-plan-prompt-en.md` when present; treat it as the local default planning contract unless the user explicitly overrides its format while preserving the understanding-report and explicit-approval gate
 - `vendor/agent-skills/skills/planning-and-task-breakdown/SKILL.md`
@@ -110,6 +124,7 @@ Use this phase only after the local plan-first approval gate has been satisfied.
 
 Default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `vendor/agent-skills/skills/incremental-implementation/SKILL.md`
 - `vendor/agent-skills/skills/test-driven-development/SKILL.md`
 
@@ -129,6 +144,7 @@ Task-shaped add-ons:
 
 Default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`
 - `vendor/agent-skills/skills/test-driven-development/SKILL.md`
 
@@ -145,6 +161,7 @@ Task-shaped add-ons:
 
 Default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `vendor/agent-skills/skills/code-review-and-quality/SKILL.md`
 
 Add as needed:
@@ -159,6 +176,7 @@ Add as needed:
 
 Default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`
 - `vendor/agent-skills/skills/test-driven-development/SKILL.md`
 - `vendor/agent-skills/skills/code-review-and-quality/SKILL.md`
@@ -185,10 +203,16 @@ Use it only when the task genuinely includes release work or an explicit shippin
 
 ### Planner / Planner-Like
 
-Default:
+For coding planning workers, default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `skills/plan-mode-default/SKILL.md`
 - `skills/plan-mode-default/references/coding-plan-prompt-en.md` when present; treat it as the local default planning contract unless the user explicitly overrides its format while preserving the understanding-report and explicit-approval gate
+- `vendor/agent-skills/skills/using-agent-skills/SKILL.md`
+- `vendor/agent-skills/skills/planning-and-task-breakdown/SKILL.md`
+
+For non-coding planning or analysis workers, default:
+
 - `vendor/agent-skills/skills/using-agent-skills/SKILL.md`
 - `vendor/agent-skills/skills/planning-and-task-breakdown/SKILL.md`
 
@@ -207,6 +231,7 @@ Use this worker role only after the local plan-first approval gate has been sati
 
 Default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `vendor/agent-skills/skills/incremental-implementation/SKILL.md`
 - `vendor/agent-skills/skills/test-driven-development/SKILL.md`
 
@@ -222,6 +247,7 @@ Task-shaped add-ons:
 
 Default:
 
+- `skills/karpathy-guidelines/SKILL.md`
 - `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`
 - `vendor/agent-skills/skills/test-driven-development/SKILL.md`
 
@@ -234,7 +260,12 @@ Add when relevant:
 
 ### Reviewer
 
-Default:
+For coding review workers, default:
+
+- `skills/karpathy-guidelines/SKILL.md`
+- `vendor/agent-skills/skills/code-review-and-quality/SKILL.md`
+
+For non-coding review workers, default:
 
 - `vendor/agent-skills/skills/code-review-and-quality/SKILL.md`
 
@@ -247,6 +278,14 @@ Add when relevant:
 - `vendor/agent-skills/skills/git-workflow-and-versioning/SKILL.md`
 
 ### Validator
+
+For coding validation workers, default:
+
+- `skills/karpathy-guidelines/SKILL.md`
+- `vendor/agent-skills/skills/test-driven-development/SKILL.md`
+- `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`
+
+For non-coding validation workers, default:
 
 - `vendor/agent-skills/skills/test-driven-development/SKILL.md`
 - `vendor/agent-skills/skills/debugging-and-error-recovery/SKILL.md`
@@ -305,8 +344,9 @@ Use this deterministic selection order so the vendor pack stays meaningfully int
 
 Quick defaults:
 
-- planner: `skills/plan-mode-default/SKILL.md` + `skills/plan-mode-default/references/coding-plan-prompt-en.md` + `using-agent-skills` + `planning-and-task-breakdown`; add `context-engineering` when repo context selection matters and `spec-driven-development` when the task boundary or contract is still forming
-- implementer: `incremental-implementation` + `test-driven-development`; add exactly one surface skill for UI, API, CI, git, or migration when needed
-- fixer: `debugging-and-error-recovery` + `test-driven-development`; add `incremental-implementation` only when the repair needs staged rewrite discipline, then add one specialist skill only when the finding is clearly security, performance, or simplification related
-- reviewer: `code-review-and-quality`; add one specialist overlay or checklist only when the requested acceptance bar explicitly includes it
-- validator: `test-driven-development` + `debugging-and-error-recovery`; add one runtime or specialist verification skill only when the task surface requires it
+- parent `plan` phase: `skills/karpathy-guidelines/SKILL.md` + `skills/plan-mode-default/SKILL.md` + `skills/plan-mode-default/references/coding-plan-prompt-en.md` + `planning-and-task-breakdown`; add `incremental-implementation` only when slice ordering or rollout discipline matters
+- planner-like `/sub` worker: `skills/karpathy-guidelines/SKILL.md` + `skills/plan-mode-default/SKILL.md` + `skills/plan-mode-default/references/coding-plan-prompt-en.md` + `using-agent-skills` + `planning-and-task-breakdown`; add `context-engineering` when repo context selection matters and `spec-driven-development` when the task boundary or contract is still forming
+- implementer: `skills/karpathy-guidelines/SKILL.md` + `incremental-implementation` + `test-driven-development`; add exactly one surface skill for UI, API, CI, git, or migration when needed
+- fixer: `skills/karpathy-guidelines/SKILL.md` + `debugging-and-error-recovery` + `test-driven-development`; add `incremental-implementation` only when the repair needs staged rewrite discipline, then add one specialist skill only when the finding is clearly security, performance, or simplification related
+- reviewer: `skills/karpathy-guidelines/SKILL.md` + `code-review-and-quality`; add one specialist overlay or checklist only when the requested acceptance bar explicitly includes it
+- validator: `skills/karpathy-guidelines/SKILL.md` + `test-driven-development` + `debugging-and-error-recovery`; add one runtime or specialist verification skill only when the task surface requires it

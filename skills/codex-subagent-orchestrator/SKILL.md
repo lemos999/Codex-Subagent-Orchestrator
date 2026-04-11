@@ -14,9 +14,10 @@ The parent should:
 - treat `/sub <request>` as an orchestration entrypoint
 - classify the task before any worker starts
 - produce an orchestration plan before launch
+- apply `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay for coding stages and coding worker roles so the run favors explicit assumptions, the smallest complete design, surgical edits, and goal-driven verification
 - for coding requests, require the shared plan-first approval gate from `skills/agent-skills-integration/agent-skill-routing.md` before any writable worker launch or implementation activity; do not treat blanket authority or immediate-approval language as a waiver of that gate
 - for coding requests, treat the approved full PLAN as a living disk artifact under repo-root `plan/`, not as a chat code block dump
-- keep score tracking in the active plan artifact and treat the parent as the owner of score updates during `/sub` runs, including explicit user scores and provisional score maintenance when the user gives no score yet
+- for coding `/sub` runs, keep score tracking in the active plan artifact and treat the parent as the owner of score updates, including explicit user scores and provisional score maintenance capped at `50` when the user gives no score yet
 - decide whether delegation is justified and whether one worker or a team is warranted
 - choose team size, worker roles, model, and reasoning per worker from the internal agent capabilities available in the active session
 - decide whether execution should be serial, parallel, or mixed
@@ -28,8 +29,10 @@ The parent should:
 ## Read In This Order
 
 - read `skills/agent-skills-integration/agent-skill-routing.md` first for the shared plan-first authority and worker-routing rules
-- read `skills/plan-mode-default/SKILL.md` next for the default workspace planning behavior
-- read `skills/plan-mode-default/references/coding-plan-prompt-en.md` after that for the detailed planning contract text
+- classify whether the `/sub` request is coding or non-coding before loading coding-only overlays
+- if the run is coding, read `skills/karpathy-guidelines/SKILL.md` next for the default local anti-overengineering posture on coding stages and workers
+- if the run is coding, read `skills/plan-mode-default/SKILL.md` next for the default workspace planning behavior
+- if the run is coding, read `skills/plan-mode-default/references/coding-plan-prompt-en.md` after that for the detailed planning contract text
 - read `references/orchestration-workflow.md` for the internal operating model, supervision loop, and worker patterns
 - read `references/sub-command-protocol.md` when the user request starts with `/sub`
 - read `references/spec-format.md` when you need the on-disk run kit or worker brief format
@@ -45,6 +48,7 @@ The parent should:
 - do not launch any external runtime, wrapper command, detached terminal, or background watcher
 - satisfy `/sub` only by using internal chat-session agents
 - use vendored `agent-skills` as worker execution discipline; keep local `/sub` rules authoritative for approval, team shape, parent landing, status, and acceptance
+- for coding stages and coding workers, treat `skills/karpathy-guidelines/SKILL.md` as the default local overlay for simplicity, surgical scope, and explicit assumption handling
 - use `spawn_agent` for bounded worker execution
 - use `send_input` only when reusing an existing worker is cleaner than replacing it
 - use `wait_agent` sparingly and only when the parent is blocked on the next critical result
@@ -64,11 +68,12 @@ The parent should:
   - plan artifact type, version, and current status for coding runs
   - current score and score source from the active plan for coding runs
   - evidence file paths
+- for coding runs, treat delegation justification, worker count, execution mode, and per-worker assignments as provisional before approval and finalize them only after the understanding report and coding direction have been explicitly approved
 - for coding requests, the shared understanding-report approval gate is mandatory and cannot be skipped; blanket authority or "proceed immediately" may only affect later execution pacing after that gate has been satisfied
 - for coding requests, minor subtasks, one-line fixes, tiny follow-up edits, or repair steps are not exempt; every writable coding action must already fit the active approved plan record or reopen planning first
 - for coding requests, write or update the approved full PLAN under repo-root `plan/` before any writable worker launch
 - for coding requests, keep the active approved plan file versioned, time-sortable, clearly typed, and updated with progress, completion state, blockers, next step, and scoreboard state as the run advances
-- for coding requests, record explicit user scores as authoritative and otherwise keep a conservative provisional score in the active plan instead of waiting for feedback or using a fixed fallback number
+- for coding requests, record explicit user scores as authoritative and otherwise keep a conservative provisional score capped at `50` in the active plan instead of waiting for feedback or using a fixed fallback number
 - choose model dynamically from the models currently available to internal agents in the active session; if you cannot distinguish the available options safely, say so instead of inventing a model catalog
 - choose reasoning dynamically from task risk, ambiguity, writable scope, dependency depth, verification burden, and review burden
 - default reviewers and validators to read-only
@@ -109,7 +114,7 @@ Every worker brief should explicitly state:
 - any required skills
 - the stop condition
 
-When a worker's job is planning or plan refinement, its `files to read first` should include `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` by default when those files exist, unless the user explicitly overrides the planning contract format while preserving the understanding-report and explicit-approval gate.
+When a worker's job is planning or plan refinement for coding work, its `files to read first` should include `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` by default when those files exist, unless the user explicitly overrides the planning contract format while preserving the understanding-report and explicit-approval gate.
 Do not launch implementer or fixer workers for coding work until a planner-like stage has produced the required understanding report and the user has explicitly approved proceeding.
 When the parent materializes an approved full PLAN for coding work, it should save that artifact under repo-root `plan/` in the primary workspace, keep it updated as the run progresses, and keep chat output brief.
 

@@ -16,8 +16,9 @@
 ## Read First
 
 - AGENTS.md
-- skills/plan-mode-default/SKILL.md when this worker is planner-like or performs plan refinement and the file exists
-- skills/plan-mode-default/references/coding-plan-prompt-en.md when this worker is planner-like or performs plan refinement and the file exists; treat it as the detailed planning contract unless the user explicitly overrides it
+- skills/karpathy-guidelines/SKILL.md when this worker belongs to a coding run; treat it as the default local anti-overengineering overlay for simplicity, surgical scope, and explicit assumptions
+- skills/plan-mode-default/SKILL.md when this worker is planner-like or performs plan refinement for coding work and the file exists
+- skills/plan-mode-default/references/coding-plan-prompt-en.md when this worker is planner-like or performs plan refinement for coding work and the file exists; treat it as the detailed planning contract unless the user explicitly overrides it
 - 
 
 ## Writable Scope

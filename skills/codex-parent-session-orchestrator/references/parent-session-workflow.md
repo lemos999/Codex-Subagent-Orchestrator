@@ -18,7 +18,7 @@ Use one parent session and a small set of phase files:
 
 The chat should stay focused on the current phase only. Shared facts, constraints, and next steps should live in the run directory instead of being repeated in every turn.
 
-For any coding task that could lead to implementation, code generation, code edits, or writable execution, treat the request as an explicit request for the shared plan-first flow. Use `skills/agent-skills-integration/agent-skill-routing.md` as the shared gate authority, `skills/plan-mode-default/SKILL.md` as the default workspace planning behavior surface, and `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the detailed planning contract unless the user explicitly overrides the contract format. The `plan` phase should inherit that chain by default, the approved full PLAN should be written under repo-root `plan/` as a versioned living record, and `implement` must not begin before the user explicitly approves proceeding. Any override must still preserve the understanding-report and explicit-approval gate.
+For any coding task that could lead to implementation, code generation, code edits, or writable execution, treat the request as an explicit request for the shared plan-first flow. Use `skills/agent-skills-integration/agent-skill-routing.md` as the shared gate authority, `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay for coding phases, `skills/plan-mode-default/SKILL.md` as the default workspace planning behavior surface, and `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the detailed planning contract unless the user explicitly overrides the contract format. The `plan` phase should inherit that chain by default, the approved full PLAN should be written under repo-root `plan/` as a versioned living record, and `implement` must not begin before the user explicitly approves proceeding. Any override must still preserve the understanding-report and explicit-approval gate.
 
 When the active phase needs stronger execution discipline, route into `skills/agent-skills-integration/agent-skill-routing.md` and open only the vendored upstream skills needed for that phase.
 
@@ -41,9 +41,9 @@ For coding runs, the approved full PLAN under `plan/` is a living operational re
 - Mark the plan type clearly, for example `draft-plan`, `revision-plan`, or `work-plan`.
 - Keep the file header explicit about version, status, completion state, completed work, remaining work, blockers, and next step.
 - Keep a `Scoreboard` section in the active plan file and use it as the authoritative score ledger for the run.
-- Preserve prior score states in a chronological score-history log instead of overwriting them when the score changes.
+- Preserve prior score states in a chronological score-history log instead of overwriting them when the score value, score source, or score rationale materially changes, including when an explicit user score replaces a provisional score with the same numeric value.
 - Update the same active plan file after every planning-turn change, every writable `implement`, `fix`, repair-loop, or tiny follow-up step, and after every `verify`, `review`, `repair`, or `acceptance` step that changes status, blockers, remaining work, next action, or likely user-satisfaction state.
-- Record explicit user scores as authoritative when they are given. When no explicit score exists yet, continue the run and keep a conservative provisional score based on the current evidence instead of waiting or using a fixed fallback number.
+- Record explicit user scores as authoritative when they are given. When no explicit score exists yet, continue the run and keep a conservative provisional score based on the current evidence instead of waiting or using a fixed fallback number, but do not set that provisional score above `50`.
 - Create a new versioned file when the approved direction changed materially or when the plan type changed enough that a clean new snapshot is clearer.
 - When a new versioned file becomes current, immediately rewrite the prior active plan file so its status is `Superseded` and it points to the replacement.
 - Record the current active plan file path in `session-summary.md`.
@@ -72,6 +72,7 @@ Goal:
 - decide edit order
 - decide validation commands
 - choose the minimum imported execution-discipline skills needed for the later phases
+- inherit `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay so the plan favors explicit assumptions, the smallest complete design, surgical scope, and goal-driven verification
 - apply `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the default planning contract for the shape, sequence, and refinement behavior of planning output unless the user explicitly overrides its format; any override must still preserve the understanding-report and explicit-approval gate
 - deliver the required understanding report and obtain explicit user approval before any implementation begins
 - write or update the approved full PLAN under repo-root `plan/`, record its path in `session-summary.md`, and initialize its typed version, progress, and scoreboard fields

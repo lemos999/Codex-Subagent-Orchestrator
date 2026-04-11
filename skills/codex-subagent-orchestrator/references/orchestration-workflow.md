@@ -6,24 +6,42 @@ Use `skills/agent-skills-integration/agent-skill-routing.md` whenever a worker o
 
 If the runtime cannot provide the required internal agent tools, do not invent worker launches. Fall back to a parent-only reasoning path under `skills/codex-parent-session-orchestrator/SKILL.md`, keep the same plan-first contract, and preserve `/sub`-style evidence on disk so the degradation is explicit and reviewable.
 
-For any `/sub` coding request that could lead to implementation, treat the request as an explicit request for the shared plan-first flow. Use `skills/agent-skills-integration/agent-skill-routing.md` as the shared gate authority, `skills/plan-mode-default/SKILL.md` as the default workspace planning behavior surface, and `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the detailed planning contract unless the user explicitly overrides the contract format. This plan-first gate is mandatory before any writable worker launch or implementation activity, the approved full PLAN should be written under repo-root `plan/` as a versioned living record, and any override must still preserve the understanding-report and explicit-approval gate.
+For any `/sub` coding request that could lead to implementation, treat the request as an explicit request for the shared plan-first flow. Use `skills/agent-skills-integration/agent-skill-routing.md` as the shared gate authority, `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay for coding stages and coding workers, `skills/plan-mode-default/SKILL.md` as the default workspace planning behavior surface, and `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the detailed planning contract unless the user explicitly overrides the contract format. This plan-first gate is mandatory before any writable worker launch or implementation activity, the approved full PLAN should be written under repo-root `plan/` as a versioned living record, and any override must still preserve the understanding-report and explicit-approval gate.
 
 ## Core Loop
 
-Use this order:
+Use one of these two orders:
+
+### Coding `/sub` requests that need a fresh approval gate
 
 1. interpret the `/sub` request
 2. scan the repository enough to understand the boundary
 3. produce the short understanding report required by `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md`
 4. wait for explicit user approval to proceed with coding
 5. write or update the approved full PLAN under repo-root `plan/` in the primary workspace
-6. decide whether delegation is justified
-7. write the orchestration plan on disk
-8. launch bounded internal agents
-9. keep status visible in chat and on disk
-10. collect worker outputs
-11. run review or validation at the planned gate
-12. accept, repair, re-plan, or stop
+6. finalize whether delegation is justified
+7. finalize worker count, execution mode, and worker roles
+8. write the orchestration plan on disk
+9. launch bounded internal agents
+10. keep status visible in chat and on disk
+11. collect worker outputs
+12. run review or validation at the planned gate
+13. accept, repair, re-plan, or stop
+
+If a later tiny follow-up edit, repair step, or similar writable coding action is already explicitly covered by the active approved plan record and does not materially change the approved direction, do not reopen a fresh understanding-report approval gate. Refresh the active approved plan file, keep `status.md` and `orchestration-plan.md` aligned with that same active plan, and continue through the remaining delegated execution steps under the existing approval.
+
+### Non-coding `/sub` requests
+
+1. interpret the `/sub` request
+2. scan the repository enough to understand the boundary
+3. decide whether delegation is justified
+4. finalize worker count, execution mode, and worker roles
+5. write the orchestration plan on disk
+6. launch bounded internal agents
+7. keep status visible in chat and on disk
+8. collect worker outputs
+9. run review or validation at the planned gate when needed
+10. accept, repair, re-plan, or stop
 
 ## Parent Responsibilities
 
@@ -41,14 +59,15 @@ The parent owns:
 - final acceptance
 - integrating accepted writable worker outputs into the primary workspace
 - selecting the minimum imported vendor skills each stage or worker actually needs
-- ensuring that planner-like workers inherit `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the default planning contract unless the user explicitly overrides it
+- ensuring that coding stages and coding workers inherit `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay
+- ensuring that planner-like workers on coding runs inherit `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the default planning contract unless the user explicitly overrides it
 - ensuring that coding `/sub` runs do not launch writable workers before the understanding-report approval gate is satisfied
-- writing or updating the approved full PLAN under repo-root `plan/` in the primary workspace before writable worker launch
-- keeping the active approved plan file updated with typed progress, completion state, blockers, next step, and version links as the run advances
-- keeping the active plan file's `Scoreboard` section current and treating it as the authoritative score-history ledger for the run
-- recording explicit user scores as authoritative and otherwise maintaining a conservative provisional score without blocking for feedback or using a fixed hardcoded fallback number
-- keeping `orchestration-plan.md`, `status.md`, and the active plan file aligned on the same active path, version, current status, and current score state
-- keeping `status.md` as the authoritative current orchestration-state ledger, the active file under `plan/` as the authoritative approved plan-history ledger, and `orchestration-plan.md` as the authoritative record of the approved team shape and initial execution contract
+- for coding runs, writing or updating the approved full PLAN under repo-root `plan/` in the primary workspace before writable worker launch
+- for coding runs, keeping the active approved plan file updated with typed progress, completion state, blockers, next step, and version links as the run advances
+- for coding runs, keeping the active plan file's `Scoreboard` section current and treating it as the authoritative score-history ledger for the run
+- for coding runs, recording explicit user scores as authoritative and otherwise maintaining a conservative provisional score without blocking for feedback or using a fixed hardcoded fallback number, while keeping that provisional score at `50` or below
+- for coding runs, keeping `orchestration-plan.md`, `status.md`, and the active plan file aligned on the same active path, version, current status, and current score state
+- keeping `status.md` as the authoritative current orchestration-state ledger, the active file under `plan/` as the authoritative approved plan-history ledger for coding runs, and `orchestration-plan.md` as the authoritative record of the approved team shape and initial execution contract
 
 The parent should not satisfy requested deliverable edits directly when a bounded worker can do the work cleanly.
 
@@ -63,7 +82,7 @@ Each worker owns one bounded job in its own forked workspace:
 
 Workers should not infer broader scope, edit unrelated files, or silently change the team plan.
 For write tasks, their result is a proposed change set until the parent lands the accepted change in the primary workspace.
-For planning tasks, workers should read `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` first by default when those files exist and should follow that contract unless the user explicitly overrides it.
+For planning tasks on coding runs, workers should read `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` first by default when those files exist and should follow that contract unless the user explicitly overrides it.
 For coding tasks, no writable worker should launch until that contract has already produced the understanding report and the user has explicitly approved proceeding.
 
 ## Choosing Team Size
@@ -178,7 +197,10 @@ Before launch, the parent must report:
 - current score and score source from the active plan for coding runs
 - evidence file locations
 
-For coding requests, always pause for explicit approval of the understanding report before any writable worker launch. Blanket authority or explicit proceed-now language do not waive this plan-first gate.
+For coding runs, treat delegation justification, worker count, execution mode, and per-worker assignments as provisional before approval and finalize them only after the understanding report and coding direction have been explicitly approved.
+
+For any new coding request, or any later coding request that is not already covered by the active approved plan record, always pause for explicit approval of the understanding report before any writable worker launch. Blanket authority or explicit proceed-now language do not waive this plan-first gate.
+If a later tiny follow-up edit, repair step, or similar writable coding action is already explicitly covered by the active approved plan record and does not materially change the approved direction, continue under that plan by refreshing the active plan file instead of reopening a fresh approval gate.
 
 ## Status Reporting
 
