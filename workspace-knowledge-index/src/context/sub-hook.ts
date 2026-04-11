@@ -17,6 +17,7 @@ export interface SubHookConfig {
   knowledgeDir: string;      // path to .knowledge/
   projectId: string;
   ftsDbPath?: string;        // resolved FTS DB path (from resolveFtsDbPath). Falls back to knowledgeDir/fts.db
+  lanceDbPath?: string;      // resolved LanceDB path (from resolveLanceDbPath). Falls back to knowledgeDir/vectors.lance
   embeddingConfig: EmbeddingConfig;
   storageConfig: StorageConfig;
   searchConfig: SearchConfig;
@@ -62,12 +63,8 @@ export async function generateAgentContext(
 
     if (embeddingProvider && config.storageConfig.vector_backend === 'lancedb') {
       const dims = embeddingProvider.dimensions;
-      const lanceDbPath = config.storageConfig.lancedb?.path
-        ? path.resolve(
-            config.knowledgeDir,
-            config.storageConfig.lancedb.path.replace('{project}', config.projectId),
-          )
-        : path.join(config.knowledgeDir, 'vectors.lance');
+      const lanceDbPath = config.lanceDbPath
+        ?? path.join(config.knowledgeDir, 'vectors.lance');
 
       try {
         vectorStore = new LanceVectorStore(lanceDbPath, dims);

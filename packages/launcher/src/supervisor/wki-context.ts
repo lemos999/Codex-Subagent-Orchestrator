@@ -270,6 +270,13 @@ export async function generateContext(
     const ftsDbResolved = ftsDbTemplate.replace('{project}', config.projectId);
     const ftsDbPath = path.resolve(config.knowledgeDir, '..', ftsDbResolved);
 
+    // Resolve LanceDB path — same pattern as FTS to avoid .knowledge/.knowledge nesting
+    const storageCfg = (wkiConfig['storage'] ?? { index_root: '.knowledge', vector_backend: 'lancedb' }) as Record<string, unknown>;
+    const lanceCfg = (storageCfg['lancedb'] ?? {}) as Record<string, unknown>;
+    const lanceTemplate = (lanceCfg['path'] as string) ?? 'vectors.lance';
+    const lanceResolved = lanceTemplate.replace('{project}', config.projectId);
+    const lanceDbPath = path.resolve(config.knowledgeDir, '..', lanceResolved);
+
     // Expand Korean queries with English keywords for better cross-lingual search
     const expandedQuery = expandQuery(query);
 
@@ -277,8 +284,9 @@ export async function generateContext(
       knowledgeDir: config.knowledgeDir,
       projectId: config.projectId,
       ftsDbPath,
+      lanceDbPath,
       embeddingConfig: wkiConfig['embedding'] ?? { provider: 'local' },
-      storageConfig: wkiConfig['storage'] ?? { index_root: '.knowledge', vector_backend: 'lancedb' },
+      storageConfig: storageCfg,
       searchConfig: searchCfg,
       contextOptions: {
         topK: config.topK ?? 5,

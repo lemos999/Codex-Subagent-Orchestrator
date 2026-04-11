@@ -11,7 +11,7 @@ import { MdParser } from '../parsers/md-parser.js';
 import { LineParser } from '../parsers/line-parser.js';
 import { FtsStore, CHUNK_META_UPSERT_SQL, toChunkMetaParams } from '../store/fts-store.js';
 import { DepsGraphImpl } from './deps-graph.js';
-import { normalizePath, toRelativePosix } from '../utils/path.js';
+import { normalizePath, toIndexPath, toRelativePosix } from '../utils/path.js';
 import { classifySourceType } from '../utils/file-types.js';
 import type { ChangedFiles } from './freshness.js';
 import type { ChunkingConfig, IndexingConfig } from '../config/schema.js';
@@ -269,7 +269,7 @@ export class Indexer {
     this.saveSymbolsIdx(allSymbols, symbolsPath);
 
     // 6. Build and save deps.graph (JSON)
-    const depsGraph = new DepsGraphImpl();
+    const depsGraph = new DepsGraphImpl(this.projectRoot);
     for (const imp of allImports) {
       depsGraph.addFromImports([imp], path.resolve(this.projectRoot, imp.source));
     }
@@ -306,11 +306,11 @@ export class Indexer {
     const indexedFilesRows = db.prepare(
       'SELECT DISTINCT file_path FROM chunks_meta WHERE project_id = ?',
     ).all(this.projectId) as Array<{ file_path: string }>;
-    const indexedFileSet = new Set(indexedFilesRows.map(r => r.file_path));
+    const indexedFileSet = new Set(indexedFilesRows.map(r => toIndexPath(this.projectRoot, r.file_path)));
 
     const missingFiles: string[] = [];
     for (const entry of allDiskFiles) {
-      const normalized = normalizePath(entry.path);
+      const normalized = toIndexPath(this.projectRoot, entry.path);
       if (!indexedFileSet.has(normalized)) {
         missingFiles.push(entry.path);
       }
@@ -332,7 +332,7 @@ export class Indexer {
     const symbolsPath = path.join(this.knowledgeDir, 'symbols.idx');
     const existingSymbols = this.loadSymbolsIdx(symbolsPath);
     const depsPath = path.join(this.knowledgeDir, 'deps.graph');
-    const depsGraph = new DepsGraphImpl();
+    const depsGraph = new DepsGraphImpl(this.projectRoot);
     if (fs.existsSync(depsPath)) {
       try {
         const depsData = fs.readFileSync(depsPath, 'utf-8');
@@ -479,7 +479,7 @@ export class Indexer {
 
           if (!tsInitFailed && tsParser) {
             try {
-              const tsResult = tsParser.parseFile(fullPath);
+              const tsResult = this.normalizeParserResult(tsParser.parseFile(fullPath));
               rawChunks = tsResult.chunks;
               fileSymbols = tsResult.symbols;
               fileImports = tsResult.imports;
@@ -626,20 +626,31 @@ export class Indexer {
     allSymbols: SymbolInfo[],
     allImports: ImportInfo[],
   ): void {
+    this.normalizeParserResult(tsResult);
+
     for (const raw of tsResult.chunks) {
-      // Normalize TS parser absolute paths to relative
-      raw.filePath = toRelativePosix(this.projectRoot, raw.filePath);
       allChunks.push(this.enrichChunk(raw, this.projectId));
     }
-    // Also normalize symbol/import paths
-    for (const sym of tsResult.symbols) {
-      sym.filePath = toRelativePosix(this.projectRoot, sym.filePath);
-    }
-    for (const imp of tsResult.imports) {
-      imp.source = toRelativePosix(this.projectRoot, imp.source);
-    }
+
     allSymbols.push(...tsResult.symbols);
     allImports.push(...tsResult.imports);
+  }
+
+  /** Normalize parser output to the index path contract. */
+  private normalizeParserResult(tsResult: TsParserResult): TsParserResult {
+    for (const raw of tsResult.chunks) {
+      raw.filePath = toIndexPath(this.projectRoot, raw.filePath);
+    }
+
+    for (const sym of tsResult.symbols) {
+      sym.filePath = toIndexPath(this.projectRoot, sym.filePath);
+    }
+
+    for (const imp of tsResult.imports) {
+      imp.source = toIndexPath(this.projectRoot, imp.source);
+    }
+
+    return tsResult;
   }
 
   /** Save SymbolInfo[] as JSONL. */
