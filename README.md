@@ -32,6 +32,8 @@ For coding work, the repository also uses a plan-first gate before implementatio
 3. write or update the approved plan under `plan/`
 4. only then begin implementation
 
+For tracked coding work, the active plan under `plan/` is also the place where progress and score tracking live. If the user gives a score, record it there as authoritative. If the user has not scored the work yet, keep a conservative provisional score and continue working.
+
 If a problem is found, the workflow does not just stop there. It goes back to the necessary step, applies a bounded fix, updates the active on-disk record when needed, and checks again.
 
 #### 2. `/sub` mode: internal subagents
@@ -48,6 +50,7 @@ Before launch, the parent session decides:
 - which skills are actually needed
 
 For coding runs, `/sub` still follows the same plan-first gate before any writable worker launch.
+For delegated coding runs, the parent remains responsible for keeping the active plan file and its score record current.
 
 ### Agent Skills integration
 
@@ -70,6 +73,7 @@ In short, the rule is not "always use fewer skills." The rule is "use what is ne
 - using internal `/sub` workers only when they are justified
 - applying a plan-first flow for coding work
 - keeping approved plans and progress records under `plan/`
+- tracking score and satisfaction state in the active plan record
 - separating planning, implementation, verification, and review
 - running bounded fix-and-recheck loops instead of broad reruns
 - keeping plan, status, results, and acceptance notes on disk
@@ -136,6 +140,7 @@ For Agent Skills routing:
 - use `/sub` or another explicit subagent request only when delegation is justified
 - for coding work, follow the plan-first flow before implementation
 - keep the approved active plan under `plan/` and keep it updated as work moves
+- keep progress and score tracking in the active plan under `plan/`
 - do not attach a reviewer after every writer
 - use bounded repairs when review finds a problem
 - do not load all Agent Skills by habit
@@ -175,6 +180,8 @@ For Agent Skills routing:
 3. 승인된 계획을 `plan/` 아래에 작성하거나 갱신한다
 4. 그다음 구현을 시작한다
 
+추적되는 코딩 작업이라면 `plan/` 아래의 활성 계획 파일 안에서 진행 상태와 점수도 함께 관리합니다. 사용자가 점수를 주면 그 점수를 우선 기록하고, 아직 점수를 주지 않았으면 보수적인 임시 점수를 유지한 채 계속 진행합니다.
+
 중간에 문제가 보이면 그냥 멈추지 않습니다. 필요한 단계로 돌아가서 정해진 범위 안에서 고치고, 필요하면 디스크에 있는 활성 기록도 갱신한 뒤 다시 확인합니다.
 
 #### 2. `/sub` 방식: 내부 서브에이전트 사용
@@ -191,6 +198,7 @@ For Agent Skills routing:
 - 어떤 스킬이 실제로 필요한지
 
 코딩 작업이라면 `/sub` 도 writable worker를 실행하기 전에 같은 plan-first 게이트를 따릅니다.
+위임된 코딩 작업에서는 부모 세션이 활성 계획 파일과 그 안의 점수 기록을 계속 책임집니다.
 
 ### Agent Skills 통합
 
@@ -213,6 +221,7 @@ For Agent Skills routing:
 - `/sub` 가 정당화될 때만 내부 작업자를 붙이기
 - 코딩 작업에 plan-first 흐름 적용하기
 - 승인된 계획과 진행 기록을 `plan/` 아래에 유지하기
+- 활성 계획 기록 안에서 점수와 만족도 상태까지 함께 추적하기
 - 계획, 구현, 확인, 검토를 나눠서 보기
 - 문제를 찾았을 때 전부 다시 하기보다 필요한 범위만 고치고 다시 확인하기
 - 계획, 상태, 결과, 승인 기록을 파일로 남기기
@@ -279,6 +288,7 @@ Agent Skills 연결 규칙:
 - `/sub` 또는 다른 명시적 서브에이전트 요청은 위임이 정당화될 때만 사용
 - 코딩 작업은 구현 전에 plan-first 흐름을 먼저 따른다
 - 승인된 활성 계획은 `plan/` 아래에 두고 진행에 맞춰 계속 갱신한다
+- 진행 상태와 점수 추적도 활성 계획 파일 안에서 함께 유지한다
 - 구현자마다 검토자를 붙이지 않는다
 - 검토에서 문제가 나오면 필요한 범위만 고치고 다시 확인한다
 - Agent Skills를 습관처럼 전부 붙이지 않는다
