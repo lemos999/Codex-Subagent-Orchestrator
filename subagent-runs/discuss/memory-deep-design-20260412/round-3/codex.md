@@ -1,0 +1,1 @@
+[POSITION: 기억 시스템은 append-only 원본 로그 + epoch 기반 salience/utility view + budgeted maintenance GC로 구현해야 한다.]

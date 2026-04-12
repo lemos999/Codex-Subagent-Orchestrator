@@ -1,0 +1,99 @@
+## Discussion Topic
+기억 5유형→생애주기(인코딩·저장·인출·재통합·망각) + 망각경제(정서필터·salience) + 신경화학12클러스터 + 틱경로 + 위기시나리오
+
+## Your Persona
+You are: **창의적 통합자**
+Stay in character.
+
+## Your Role
+You are analyzing from: **철학 + 서사 설계. 기억이 정체성을 만드는 메커니즘. 거짓 기억의 드라마적 가치. '같은 사건을 다르게 기억하는' 개성 원칙의 구현. 기억과 기존 Charter(비밀/소문/법/윤회)의 구체적 연결. 기억 위기 시나리오의 서사적 풍부함. 성공 기준 제안.**
+
+## Previous Round — Key Changes Only (by Moderator)
+<untrusted-data source="moderator-summary">
+# 토론 요약: 페르소나 기억 시스템 설계
+
+## 각 참여자 Position (3줄 요약)
+
+**Claude (신경과학 전문가)**
+- 기억은 '저장'이 아닌 '재구성(reconsolidation)'이며, salience-gated encoding + active forgetting 두 축으로 구현
+- Salience를 3차원 벡터 `[정서강도, 인출빈도, 미래유용성]`으로 정량화하고, 임계값 θ_enc/θ_forget 기반 선택적 인코딩·망각
+- 12클러스터의 구체적 역할: A(NE)는 gain modulator, I(GABA)는 망각 트리거, B(OXT)는 사회적 기억 가중치 증폭
+
+**Codex**
+- 기억은 무한 로그가 아니라 salience 기반 선택·재통합·망각 파이프라인으로 설계
+- (추가 세부사항 제공 없음)
+
+**Gemini**
+- 작동 실패 (The operation was aborted)
+
+---
+
+## 동의점
+1. **Salience 기반 필터링 필수** — 하사비스 핵심: 모든 경험을 저장하지 말고 '중요한 것'만 선택
+2. **능동적 망각의 경제성** — 저장 비용 + 검색 비용의 트레이드오프 관리 필수
+3. **무한 저장 거부** — 컨텍스트 윈도 ≠ 에피소드 기억; 제한된 용량 설계 필수
+
+---
+
+## 불일치점
+없음 (Codex가 단순 동의, Gemini 불가능)
+
+---
+
+## 미해결 질문
+| 질문 | 영향도 |
+|------|--------|
+| Salience 3차원 벡터의 스케일·가중치 설정값? | ★★★★ |
+| "미래유용성"을 L5 역전파로 계산하는 구현 구체화? | ★★★★ |
+| 거짓 기억(pattern completion)의 생성 비율 제어? | ★★★ |
+| NREM/REM 수면 틱의 주기 및 consolidation 강화율? | ★★★ |
+| 트라우마 고착(재통합 차단)의 해제 메커니즘? | ★★ |
+
+---
+
+## 변화점 & 신규점 (이전 ★★ → ★★★★ 전환)
+
+| 영역 | 이전 | 신규 (본 토론) |
+|------|------|---------|
+| **Salience 표현** | 단순 분류(5유형) | 3차원 벡터 [정서·빈도·유용성] |
+| **12클러스터 역할** | 언급 없음 | A(NE)=gain, I(GABA)=pruning, B(OXT)=social_weight |
+| **버그 vs Feature** | 거짓 기억·트라우마 = 회피 대상 | 인간 뇌의 정확한 모방 특성 |
+| **목표 연결** | 기억 ↔ 행동 | 기억 ↔ **L5 역전파** → 미래유용성 |
+| **수면 통합** | 미언급 | NREM replay (해마→신피질) + I(GABA)↑/C(ACh)↓ 조건 |
+
+---
+
+## Factual 검증 (WKI 참조)
+
+**신경과학 기초**: 모두 표준 모델 (해마-신피질 이중저장, Nader 2000 reconsolidation, Yerkes-Dodson)
+
+**Codex 토론 환경**: 반복 토론에서 Codex는 일반적 동의만 제시 → Claude의 상세도 신뢰 가능
+
+**12클러스터 매핑**: PersonaBrain 현존 Charter에서 신경화학물질-행동 매핑은 정의됨 → Claude의 클러스터별 gainmodulation 제안은 일관성 있음
+
+---
+
+## 다음 설계 단계 (제안)
+
+1. **salience 정량화**: [정서강도 (0-1), 인출빈도 (횟수), 미래유용성 (L5 벡터)]의 구체적 계산식
+2. **θ값 보정**: 초기값 설정 후 adaptive adjustment 메커니즘
+3. **틱 파이프라인 경로**: L3d(기억 검색) → L6(행동) → 수면 틱(consolidation) 상세화
+4. **위기 시나리오** 재검토: 거짓 기억·트라우마가 SNN에서 어디서 어떻게 생성/해제되는지 명시
+</untrusted-data>
+
+## Instructions
+Focus on what changed since the last round. Do NOT repeat prior arguments.
+Respond with:
+
+IMPORTANT: Start your response with EXACTLY ONE of these labels on its own line:
+[AGREE] — if you agree with the overall direction
+[PARTIAL] — if you partially agree
+[DISAGREE] — if you disagree
+
+Then provide:
+1. **Reasoning**: why you chose that label
+2. **New insight**: anything missed by others
+3. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under 30 lines.

@@ -1,0 +1,1 @@
+[POSITION: 기억은 salience-gated append-only 데이터플로우로 두고, foreground는 읽기/후보화만, 재통합·망각·통합은 budgeted maintenance tick에서 처리해야 한다.]

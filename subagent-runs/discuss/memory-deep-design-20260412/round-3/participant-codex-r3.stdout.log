@@ -1,0 +1,26 @@
+[AGREE]
+
+1. **Reasoning**: 방향에 동의한다. 핵심 변화는 “기억을 고치는 시스템”이 아니라 “append-only 원본 로그 위에 salience/utility 인덱스를 계속 재계산하는 시스템”으로 정리됐다는 점이다. 이러면 재통합은 원본 변조가 아니라 파생 상태 갱신이 되고, 위기 시 롤백·감사·격리가 가능하다.
+
+2. **New insight**: 미래유용성은 L5 역전파 결과값으로 저장하면 안 되고, `utility_view(epoch)`로 물질화된 인덱스여야 한다. 목표가 바뀌면 원본 기억을 수정하지 말고 maintenance tick에서 관련 기억들의 `future_utility`를 새 epoch로 재산정한다. 이전 epoch는 남겨서 “왜 이때 이 기억이 중요했는가”를 추적 가능하게 둔다.
+
+틱 매핑은 이렇게 두는 게 안정적이다:  
+Step 1 감각/이벤트 수집: 1-2ms, 원시 입력 버퍼링  
+Step 2 패턴 후보화: 2-4ms, novelty/prediction error 계산  
+Step 3 salience gate: 1ms 이하, append 여부 결정  
+Step 4 행동 선택: 3-6ms, read-only retrieval만 허용  
+Step 5 append commit: foreground 말미 비동기 큐잉, 실패 시 재시도 가능  
+Step 6 maintenance: N틱마다 10-50ms budget, 재통합·망각·통합·압축 처리
+
+salience scoring은 최소한 이렇게 분리해야 한다:  
+`S = a*novelty + b*prediction_error + c*affect_intensity + d*goal_relevance + e*social/threat_priority + f*retrieval_frequency + g*prospective_overlap - h*age_decay - i*saturation_penalty`
+
+eviction은 원본 삭제가 아니라 계층 강등이 기본이다. `S < cold_threshold`, 장기 미인출, 낮은 prospective overlap, 중복도가 높음, 저장 budget 초과가 동시에 만족될 때 hot→warm→cold→compressed로 내린다. 실제 삭제는 감사 가능하고 복구 가능한 tombstone 이후에만 수행한다.
+
+망각 경로는 둘로 나누는 게 맞다. intrinsic decay는 maintenance tick에서 자연 감쇠·중복 압축으로 실행한다. motivated suppression은 PFC/위험 제어 신호가 있을 때 retrieval index를 억제하고, 원본은 보존한다. 트라우마 케이스에서 원본 삭제는 위험하다.
+
+위기 시나리오 관점에서 기억 조작은 “레코드 변조”보다 “salience/utility index poisoning”이 더 현실적인 장애다. 과부하는 salience 폭주로 retrieval latency 증가, foreground tick starvation, 잘못된 행동 선택으로 이어진다. 방어는 per-cluster write quota, salience clipping, maintenance circuit breaker, epoch rollback, anomalous salience spike 탐지가 필요하다.
+
+3. **Updated position**: 내 입장은 강화됐다. foreground는 판단과 후보화만 하고, 기억의 의미 변경은 반드시 budgeted maintenance에서 epoch 기반 파생 인덱스로 처리해야 한다.
+
+[POSITION: 기억 시스템은 append-only 원본 로그 + epoch 기반 salience/utility view + budgeted maintenance GC로 구현해야 한다.]

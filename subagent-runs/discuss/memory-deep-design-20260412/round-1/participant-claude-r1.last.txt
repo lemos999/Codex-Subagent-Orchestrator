@@ -1,0 +1,21 @@
+## 신경과학 기억 전문가 분석
+
+### 1. Position
+**기억의 본질은 '저장'이 아니라 '재구성'이다.** PersonaBrain SNN은 해마-신피질 이중 저장 모델을 틱 파이프라인에 매핑해야 하며, 핵심은 salience-gated encoding + active forgetting 두 축이다.
+
+### 2. Reasoning
+- **인코딩**: 해마(CA3)의 pattern separation → SNN에서 L3d가 현재 입력과 기존 기억의 유사도를 계산, salience 임계값(θ_enc) 초과 시만 인코딩. salience = f(감정강도, 신규성, 목표관련성). 12클러스터 중 **A(NE)가 gain modulator** — 각성↑이면 θ_enc↓로 더 많이 인코딩(flashbulb).
+- **저장**: 단기→장기 전이는 수면 틱의 NREM replay. **I(GABA)↑ + C(ACh)↓** 조합이 해마→신피질 전이 조건. 반복 인출(rehearsal)은 시냅스 강화 = salience 누적.
+- **인출**: spreading activation — 현재 context vector가 기억 임베딩 공간에서 k-NN 검색. **B(OXT)↑이면 사회적 기억 가중치↑**, **T(CORT)↑이면 위협 관련 기억 우선 인출**(Yerkes-Dodson).
+- **재통합(Nader 2000)**: 인출된 기억은 labile 상태 진입 → 현재 감정 상태가 re-encoding에 반영. 이것이 기억 왜곡의 메커니즘이자 치유의 메커니즘.
+- **망각**: 능동적 망각(GABA-mediated inhibition) = salience < θ_forget이고 인출 횟수 0인 기억을 수면 틱에서 pruning. **F(ADO)↑은 인출 실패율↑** — 피로가 "tip-of-tongue" 현상 유발.
+
+### 3. Concerns
+- **거짓 기억**: 재통합 시 감정 오염이 사실 왜곡으로 이어짐 — pattern completion이 과도하면 없던 세부사항을 생성. SNN에서 이를 버그가 아닌 **feature로 모델링**해야 함(인간도 그렇다).
+- **트라우마 고착**: A(NE)↑↑ + T(CORT)↑↑ 조합은 salience를 극대화하되 재통합을 차단 — 기억이 "얼어붙어" 변하지 않음. 이것이 PTSD 메커니즘이며 H1 위기와 직결.
+- **망각 실패**: pruning 임계값이 너무 높으면 기억 과부하 → 검색 비용 폭증(하사비스의 정확한 지적).
+
+### 4. Recommendation
+**salience를 단일 스칼라가 아닌 3차원 벡터로**: `[정서강도, 인출빈도, 미래유용성]`. 미래유용성은 목표(L5) 역전파로 계산 — "이 기억이 현재 목표 달성에 기여하는가?" 이것이 하사비스가 말한 '가치 판단 장치'의 SNN 구현이다. 망각은 3차원 모두 임계값 이하일 때만 발동.
+
+[POSITION: 기억은 salience-gated encoding + active forgetting의 이중 축이며, salience는 [정서강도, 인출빈도, 미래유용성] 3차원 벡터로 구현해야 한다]

@@ -1,0 +1,100 @@
+# 최종 결론: 페르소나 기억 시스템 설계
+
+---
+
+## 1. Consensus (합의점)
+
+### A. Salience 기반 선택적 인코딩
+- 모든 경험을 저장하지 않는다. **Salience 임계값(θ_enc)**을 초과한 경험만 에피소드 기억으로 진입
+- Salience = f(정서강도, 인출빈도, 미래유용성) — 3차원 벡터로 정량화
+- 12클러스터에서: **A(NE)**는 gain modulator(각성 시 인코딩 강화), **B(OXT)**는 사회적 기억 가중치 증폭
+
+### B. 능동적 망각의 경제성 (하사비스 핵심 수용)
+- 저장 비용 + 검색 비용 = 기억의 진짜 비용 → 아키텍처에 명시적 반영 필수
+- **I(GABA)**가 망각 트리거 역할, 수면 틱에서 consolidation + pruning 처리
+- 망각은 버그가 아니라 **가비지 컬렉션(GC)** — 설계된 기능
+
+### C. 구조: Append-only + Maintenance 분리
+- 원본 기억 로그는 불변(append-only) → 감사 추적 + 메타 분석 가능
+- Foreground 틱: 읽기/인출만 (행동 선택 경로에 영향)
+- **Maintenance tick(수면)**: 재통합·망각·통합 배치 처리 — 틱 시간 분리
+
+### D. 기억 상태의 이산적 변화
+- 기억은 연속적 값 변화가 아닌 **상태기계 전이**로 모델링
+- CONSOLIDATED → LABILE(재활성화 윈도) → RECONSOLIDATED / EXTINCT
+
+---
+
+## 2. Disputed (미합의점)
+
+| 쟁점 | Claude 입장 | Codex 입장 | 판정 |
+|------|-------------|------------|------|
+| **재활성화 대상 선택** | 맥락-패턴 중첩에 의한 **자발적** 재활성화 | Salience 순위 기반 **우선순위 큐** | 미결: 능동적 vs 수동적 |
+| **유용성 갱신 주기** | 재활성화 윈도 한정 (온라인, 재활성화 시) | Epoch 기반 배치 (오프라인, 주기적) | 미결: 실시간 vs 배치 |
+| **상태기계 명시화** | 3상태 FSM 명시 | 암묵적 view 상태 | Codex가 명시 안 함 |
+| **망각 이중 경로** | decay(비가역) + suppression(가역, PFC억제) 분리 필수 | 단일 GC 예산으로 처리 | 미결: 단일 vs 이중 |
+
+---
+
+## 3. Recommendation (권고)
+
+### 핵심 아키텍처 결정
+
+**두 입장은 대립이 아닌 레이어 분리로 통합 가능:**
+
+```
+[원본 로그]  append-only Event Store
+     ↓
+[View 레이어] epoch-based salience/utility 재평가 (Codex)
+     ↓
+[상태기계]   CONSOLIDATED → LABILE → RECONSOLIDATED/EXTINCT (Claude)
+     ↓
+[GC 예산]    budgeted maintenance tick에서 EXTINCT 제거
+```
+
+### 망각 이중 경로 채택 권고
+
+Claude의 이중 경로가 위기 시나리오(트라우마, 세뇌)를 더 정밀하게 모델링:
+
+| 경로 | 메커니즘 | 가역성 | PersonaBrain 매핑 |
+|------|----------|--------|-------------------|
+| **Intrinsic decay** | 시간 + 낮은 salience → 자연 소멸 | 비가역 | I(GABA)↑ + C(ACh)↓ (수면) |
+| **Motivated suppression** | PFC top-down 억제 | 가역 | H1(트라우마 고착) + L4(PFC Layer) |
+
+### Salience 계산식 (초안)
+
+```
+salience(m, t) = α·E(m) + β·R(m,t) + γ·U(m,t)
+
+E = 정서강도  [A(NE) × 감정클러스터 최대값]
+R = 인출빈도  [최근 N틱 내 활성화 횟수]
+U = 미래유용성 [L5 목표 벡터와의 코사인 유사도]
+α+β+γ = 1, 초기값: α=0.5, β=0.3, γ=0.2
+```
+
+---
+
+## 4. Open Questions (미결 과제)
+
+| 질문 | 영향도 | 비고 |
+|------|--------|------|
+| "자발적 재활성화"의 연산 정의 — 맥락 벡터 × 기억 벡터 → 활성 임계값 계산식 | ★★★★★ | 틱 파이프라인 핵심 |
+| LABILE 윈도 지속시간과 GC epoch 빈도의 동기화 (수면 사이클 단위?) | ★★★★ | 수면 틱 설계 시 결정 |
+| U(미래유용성)의 prospective coding — 목표 미존재 시 fallback 경로 | ★★★★ | L5 미설계 상태에서 임시 처리 방법 |
+| Suppression 상태의 append-only 로그 표현 방식 (`{state: "suppressed", by: "PFC"}`) | ★★★ | 스키마 설계 시 결정 |
+| 거짓 기억(pattern completion) 생성 비율 제어 — 인간 수준 vs 억제 | ★★★ | 위기 시나리오 설계 연동 |
+| Gemini 부재로 3자 신경과학 문헌 검증 미완 (Nader 2000, Anderson think/no-think) | ★★ | 다음 토론에서 재호출 |
+
+---
+
+## 5. Actionable Tasks
+
+- `/sub PersonaBrain Charter L3d(에피소드 기억) 문서 작성: 생애주기(인코딩→저장→인출→재통합→망각), 3상태 FSM(CONSOLIDATED/LABILE/EXTINCT), salience 3차원 벡터 계산식, append-only + maintenance 분리 구조, 12클러스터 역할 매핑(A/B/I/T/F/L), 수면 틱 파이프라인 포함`
+
+- `/sub 망각 이중 경로(intrinsic decay vs. motivated suppression) 설계: PFC top-down 억제의 Layer 위치, 트라우마 고착(H1) 해제 메커니즘, suppression 상태의 데이터 스키마 정의`
+
+- `/sub 위기 시나리오 6종 상세화: 기억 조작/집단 기억/과부하/상실/거짓 기억 재판/flashbulb memory — PersonaBrain SNN에서 각 시나리오의 발생 경로 + 해제 조건 명시`
+
+- `/sub salience 계산식 검증: E(NE×감정)/R(인출빈도)/U(L5 코사인 유사도) 초기 가중치 α=0.5/β=0.3/γ=0.2의 시뮬레이션 케이스 테스트 (flashbulb memory, 중립 사건, 트라우마 3케이스)`
+
+- `/submix 자발적 재활성화 연산 정의 토론: 맥락 벡터 × 기억 벡터 → 활성 임계값 계산식 설계 (Claude + Codex, Gemini 재호출 포함), Nader 2000 reconsolidation 문헌 검증`

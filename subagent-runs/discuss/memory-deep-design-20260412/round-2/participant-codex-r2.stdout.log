@@ -1,0 +1,32 @@
+[PARTIAL]
+
+1. **Reasoning**: 방향은 맞지만 아직 “기억 이론” 수준이고, 틱 파이프라인의 실행 계약이 부족하다. 시스템에서는 salience가 철학이 아니라 `write admission`, `read priority`, `GC 보호`, `reconsolidation writeback`을 동시에 제어하는 점수여야 한다.
+
+2. **New insight**: 기억 5유형은 별도 저장소가 아니라 동일 생애주기의 서로 다른 SLA로 봐야 한다.  
+감각/작업기억은 Step 1~2에서 TTL 초단기, 에피소드는 Step 3~5에서 조건부 영속화, 의미기억은 Step 6 consolidation 산물, 절차기억은 행동 성공률 기반 누적 가중치, 정서기억은 salience multiplier로 구현한다.
+
+틱 매핑은 이렇게 고정하는 편이 안전하다.  
+Step 1 입력 정규화: event 생성, 중복 제거, source trust 태깅.  
+Step 2 정서/화학 필터: 12클러스터로 gain 조정, salience 후보 산출.  
+Step 3 기억 인출: 현재 goal/context로 top-k 검색, p95 예산은 tick의 10~20%.  
+Step 4 행동 평가: L5/미래유용성 업데이트, 성공/실패 credit assignment.  
+Step 5 재통합: 읽힌 기억만 mutable 상태로 열고 delta writeback, 즉시 덮어쓰기 금지.  
+Step 6 유지보수: sleep/idle tick에서 consolidation, decay, eviction 실행.
+
+인코딩 예산은 foreground tick에서 작아야 한다. `T_tick=100ms`라면 Step 2 scoring 3~5ms, Step 3 retrieval 10~20ms, Step 5 writeback은 enqueue만 1~2ms. embedding 생성, clustering, 장기 저장은 background로 넘긴다.
+
+salience scoring은 단일 스칼라 + 근거 벡터를 같이 저장한다.  
+`S = sigmoid(1.4E + 1.0U + 0.8log(1+R7) + 0.6N + 0.5B_social - 0.9C_conflict - 0.7D_staleness)`  
+여기서 E=정서강도, U=미래유용성, R7=최근 7일 인출, N=novelty, B=OXT/social boost, C=모순/오염 위험, D=age decay.
+
+eviction은 LRU가 아니라 “가치 대비 비용”이다.  
+`evict_score = storage_cost + retrieval_noise + contradiction_risk - S - pin_bonus`  
+GC 트리거는 저장소 watermark 초과, retrieval latency p95 초과, contradiction graph 밀도 증가, 동일 사건 변형본 과다, low-S 장기 미인출이다. 실행은 foreground 금지, idle/sleep tick에서 batch로 한다.
+
+위기 시나리오에서 기억 조작은 Step 5가 가장 위험하다. 인출된 기억을 재통합하며 원본을 덮으면 false memory가 영속화된다. 해결은 append-only revision, source trust, reconsolidation diff, high-impact memory의 2-phase commit이다.
+
+과부하는 Step 3 검색 품질부터 망가진다. top-k가 잡음으로 오염되고 행동 Step 4가 잘못된 근거에 반응한다. 따라서 overload mode에서는 신규 인코딩 θ를 올리고, retrieval k를 줄이고, low-trust/social-amplified memory를 임시 감쇠해야 한다.
+
+3. **Updated position**: 내 입장은 강화됐다. 기억 시스템의 핵심은 “무엇을 저장할까”보다 “틱 예산 안에서 언제 쓰고, 언제 고치고, 언제 버릴까”를 보장하는 운영 정책이다.
+
+[POSITION: 기억은 salience-gated append-only 데이터플로우로 두고, foreground는 읽기/후보화만, 재통합·망각·통합은 budgeted maintenance tick에서 처리해야 한다.]

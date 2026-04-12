@@ -1,0 +1,27 @@
+**Position**
+PersonaBrain 기억은 “저장소”가 아니라 틱 파이프라인에 붙은 비용 제한 제어계로 봐야 한다. 모든 경험을 남기지 않고, 인코딩 시점에 미래 효용과 정서 salience를 점수화해 후보만 저장하고, 수면/유휴 시간에 GC로 정리한다.
+
+**Reasoning**
+Tick 경로는 명확해야 한다. Step 1에서 현재 자극, 장소, 단어, 관계자, 감정 벡터로 cue를 만들고 top-k 기억만 검색한다. Step 2는 검색 결과를 Layer 0 context에 “증거 + 불확실성”으로 주입한다. Step 4는 행동 선택에 bias로만 반영하고 명령권은 주지 않는다. Step 6은 이번 틱 outcome을 encoding candidate로 만든다.
+
+타이밍 예산은 온라인 경로를 작게 잡는다. Step 1 retrieval은 5~20ms, Layer 0 반영은 1~3ms, Step 6 encoding candidate 생성은 2~5ms. embedding 생성, consolidation, cluster 재계산, decay sweep은 비동기 작업으로 뺀다.
+
+Salience 공식은 운영 가능한 형태가 필요하다: `S = 0.30*emotion + 0.20*novelty + 0.15*goal_relevance + 0.15*social_weight + 0.10*surprise + 0.10*retrieval_reinforcement - interference_penalty - safety_penalty`. 여기서 A/NE는 surprise와 flashbulb 가중치, B/OXT는 social_weight, T/CORT는 중간 강도에서는 강화·과잉에서는 encoding 저하, F/ADO는 retrieval confidence 하락, I/GABA는 수면 consolidation/억제, L/β-END는 reward preservation, C/ACh는 학습률을 조절한다.
+
+망각은 삭제가 아니라 상태 전이다. `candidate -> episodic -> semanticized -> archived -> evicted`로 두고, 낮은 salience·낮은 인출률·높은 중복·높은 간섭 기억부터 축약하거나 제거한다. GC 트리거는 저장소 quota 초과, retrieval latency p95 초과, sleep phase 진입, stress overload, duplicate cluster 증가다.
+
+재통합은 append-only 원본과 mutable recall trace를 분리해야 한다. 원본은 forensic log처럼 보존하고, 인출될 때 생기는 해석·감정 변화·후속 지식은 새 revision으로 기록한다. 그래야 기억 왜곡은 모델링하되 조작 탐지는 가능하다.
+
+**Concerns**
+기억 조작의 핵심 위험은 외부 입력이 salience를 인위적으로 올려 장기 기억을 오염시키는 것이다. 출처 신뢰도, 반복 노출 감쇠, 권위자 bias 제한, contradiction check가 없으면 선전과 세뇌가 시스템 레벨 장애가 된다.
+
+기억 과부하는 retrieval 품질 저하보다 먼저 행동 선택을 망친다. 트라우마성 기억이 모든 cue에 과매칭되면 Step 4가 방어 행동으로 쏠린다. 이 경우 recall cap, affect dampening, trauma quarantine, therapist-mode reconsolidation 같은 안전 회로가 필요하다.
+
+거짓 기억은 “없던 원본”이 아니라 “낮은 증거의 조합 기억”으로 태깅해야 한다. 법정·감사·중요 의사결정에서는 reconstructed memory를 evidence로 쓰지 말고 source-backed memory만 허용해야 한다.
+
+**Recommendation**
+Charter의 ★★★★ 기준은 L3d Memory Charter를 `MemoryLifecycle`, `SalienceScorer`, `RetrievalIndex`, `ReconsolidationLedger`, `ForgettingPolicy`, `CrisisGuard` 여섯 블록으로 쪼개는 것이다. 각 블록에 입력/출력, tick 위치, 예산, 실패 모드, 성공 지표를 붙이면 구현 가능한 설계가 된다.
+
+성공 기준은 단순하다: 온라인 tick 지연 p95를 지키고, 저장량 증가율이 bounded이고, 반복 인출된 핵심 기억은 유지되며, 중립 이벤트는 자연 소멸하고, 조작성 반복 입력은 salience 상승이 제한되어야 한다. Flashbulb memory는 영구 보존이 아니라 “높은 보존 우선순위 + 주기적 안전 재평가”가 맞다.
+
+[POSITION: 기억은 무한 로그가 아니라 salience 기반 선택·재통합·망각 파이프라인으로 설계해야 한다]

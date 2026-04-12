@@ -1,0 +1,34 @@
+# 토론 요약
+
+## 각 참여자 입장
+
+**Claude:**
+1. 미래유용성의 현재 설계(L5 역전파)는 목표가 이미 존재할 때만 작동 → **prospective coding(해마의 실제 동작)처럼 목표 무관 경로 필요**
+2. 재통합(reconsolidation)은 단순히 기억을 변경하지 않고, **미래유용성을 소급 재평가**하는 구조여야 함 (재활성화 패턴 중첩도 기반)
+3. 능동적 망각이 I(GABA) 단일 클러스터에서만 처리 → **intrinsic decay vs. motivated suppression 이중 경로로 분리 필수** (트라우마 고착/해제 위기 시나리오 설계 필수)
+
+**Codex:**
+1. 기억은 salience-gated append-only 데이터플로우로 설계 (immutable 후보 추가)
+2. foreground(행동 선택) 페이즈는 읽기/후보화만 수행
+3. 재통합·망각·통합은 **budgeted maintenance tick에서 배치 처리** (틱 시간 분리)
+
+**Gemini:**
+- 불가용 (작업 중단)
+
+---
+
+## 영역 분석
+
+| 영역 | 상태 |
+|------|------|
+| **동의** | append-only 구조 + budgeted maintenance (Codex 구조 ⊇ Claude의 "재통합은 별도 틱"과 일치) |
+| **불동의** | **미래유용성의 동적 재계산**: Claude는 재활성화 패턴 기반 → Codex는 maintenance 내에서만 언급 (구체 메커니즘 미명시) |
+| **미해결 질문** | <ul><li>prospective coding과 L5 역전파의 통합 구조 → 목표 갱신 시 기존 유용성 소급 변동 메커니즘</li><li>I(GABA)에서 intrinsic vs. motivated 망각 경로 분리의 구체적 시그널 (HC→PFC feedback vs. SWR 기반 약화)</li><li>maintenance tick 주기와 salience decay의 동기화</li></ul> |
+
+---
+
+## 신규 포인트
+
+- **재통합의 정의 이동**: "기억 변경" → "**미래유용성의 동적 재평가**" (구조적 의미 상승)
+- **망각의 이중 경로 분리** 제안 (기존: I(GABA) 단일)
+- **append-only + maintenance 분리** 타이밍 구조 확인
