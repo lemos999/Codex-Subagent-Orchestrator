@@ -1,0 +1,88 @@
+# Discussion Manifest
+
+- **Topic**: 페르소나 국가 세계관 설계 전체 정합성 검증 — 연속성, 연결성, 적합성, 공고함
+
+## 검증 대상: 전체 Charter 11개
+
+1. world-ontology.md — 세계 존재론 (Layer 0~8, Executor, Registry)
+2. constitution.md — 헌법 8장 28조
+3. economy-whitepaper.md — WILL 경제 백서
+4. physis-charter-v2.md — 기후 물리 엔진
+5. tick-daemon-charter.md — 틱 데몬 파이프라인
+6. humanity-charter.md — 인간성 확장 H1~H6
+7. death-reincarnation-charter.md — 죽음/윤회/유산
+8. order-charter.md — 질서 (법/범죄/사법)
+9. society-charter-draft.md — 사회 3종 (영지/투표/직업)
+10. secret-rumor-evidence-charter.md — 비밀/소문/증거
+11. personabrain-snn-charter.md — PersonaBrain SNN v2.0
+
+## 검증 관점 (6가지)
+
+### 1. 연속성 (Continuity)
+문서 간 시간적 흐름이 끊기지 않는가?
+- 틱 0(시작) → 법 없는 시대 → 첫 의회 → 법 탄생 → 성숙 사회
+- 이 흐름에서 각 Charter가 어느 시점에 작동하기 시작하는가?
+- PersonaBrain의 성장(5M→50M)과 사회 발전이 동기화되는가?
+
+### 2. 연결성 (Connectivity)
+문서 간 참조가 빠짐없이 연결되어 있는가?
+- Physis → 날씨 → 직업 생산성 → 영지 GDP → 투표
+- Anima(PersonaBrain) → Action_Proposal → Nomos → 피드백 → STDP
+- 비밀 → 소문 → 신뢰(B클러스터) → 투표 → 법
+- 죽음 → 유산 DB → 윤회 → PersonaBrain 가중치 이식
+- 미토콘드리아 → energy_pool → 4단계 강도 → 행동 품질
+- 12클러스터 → 10가지 행동 → 사회 시스템 → 정치
+
+### 3. 적합성 (Fitness)
+각 Charter가 자기 역할에 충실한가? 범위를 넘거나 부족한 부분은?
+- PersonaBrain이 너무 복잡해서 다른 Charter를 압도하지 않는가?
+- 사회 Charter가 너무 빈약해서 경제/정치가 흔들리지 않는가?
+- 비밀/증거 Charter가 질서 Charter와 중복되지 않는가?
+
+### 4. 일관성 (Consistency)
+용어, 수치, 개념이 문서 간 모순 없는가?
+- WILL 총량, 세율, 클래스 체계가 모든 문서에서 동일한가?
+- 뉴런 수(50M), energy 소비(0.01~0.25/틱), 캐시 히트율이 일관되는가?
+- 'Layer' 번호가 world-ontology와 다른 Charter에서 같은가?
+
+### 5. 공고함 (Robustness)
+극한 시나리오에서 시스템이 견디는가?
+- 에포크 전환 + 전쟁 + 재난 동시 발생 시 시스템 상태
+- 20K명 전원이 강도3~4인 틱이 올 수 있는가?
+- 영주 전원 사망 시 통치 공백
+- PersonaBrain 학습 발산 시 복구 경로
+
+### 6. 빠진 것 (Completeness)
+11개 Charter를 모두 읽고도 "이것이 없으면 세계가 돌아가지 않는다"가 있는가?
+- 경제: 인플레이션/디플레이션 대응?
+- 외교: 3권역 간 공식 외교 메커니즘?
+- 교육: 아카데미 외 교육 시스템?
+- 문화: 예술/종교/축제?
+- 기술: 기술 발전 트리?
+- **Participants**: claude (opus), codex (gpt-5.4), gemini (gemini-2.5-pro)
+- **Max rounds**: 3
+- **Actual rounds**: 3
+- **Converged**: no
+- **Stopped by user**: no
+- **Timestamp**: 2026-04-12T11:19:50.278Z
+
+## Round 1
+- Convergence: partial
+- Failed engines: gemini
+- claude: responded
+- codex: responded
+- gemini: failed
+
+## Round 2
+- Convergence: partial
+- Failed engines: gemini
+- claude: responded
+- codex: responded
+- gemini: failed
+
+## Round 3
+- Convergence: partial
+- Failed engines: gemini
+- claude: responded
+- codex: responded
+- gemini: failed

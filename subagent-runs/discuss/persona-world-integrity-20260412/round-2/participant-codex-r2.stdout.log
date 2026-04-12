@@ -1,0 +1,17 @@
+[PARTIAL]
+
+1. **Reasoning**: 방향은 맞다. SOT 통일, Stage 1 결정, 상수 고정은 필요하다. 다만 현재 상태는 “몇 개 문서 동기화” 수준이 아니라 구현 상수 계약이 깨져 있어 Charter freeze 불가다. WILL 총량과 기본 세율은 대체로 PASS지만, 상속세·뉴런 수·energy 비용·10ms SLA는 아직 FAIL이다.
+
+2. **New insight**: 신경계 문서가 stale하다. 한쪽은 “10만 뉴런/6종 조절물질/강도별 0.1~5ms”이고, 최신 SNN 쪽은 “5M~50M 등가 뉴런/12클러스터/energy_pool 0.01~0.25/Stage 2 8.5ms per 1K batch”다. 이건 용어 차이가 아니라 구현 상수 충돌이다.
+
+3. **New insight**: 10ms SLA의 핵심 모순은 “전 페르소나 매틱 처리”와 “1K batch, 20틱 순환”이다. 20K명을 매틱 전원 처리하면 8.5ms × 20 = 약 170ms라 10ms 실패. 1K만 처리하면 10ms는 가능하지만 “각 페르소나가 매틱 1행동” 규칙이 깨진다.
+
+4. **New insight**: 에포크+재난 동시 시나리오는 현재 계산상 SLA가 깨진다. 정상 예산은 95% cache hit, 50 miss/1K 기준이다. 재난 hit 40~60%면 400~600 miss이고, 50 miss≈3ms 기준 선형 외삽 시 Step 4만 24~36ms, 총 29~41ms다. 에포크 0% hit는 1000 miss라 총 60ms+급이다.
+
+5. **New insight**: 같은 SNN Charter 안에서도 에포크 전환이 “전체 무효화, hit 0%”와 “부분 무효화 + stale fallback + background rewarm”으로 병존한다. 이 둘 중 하나를 SOT로 정하지 않으면 SLA 검증 자체가 불가능하다.
+
+6. **New insight**: “전쟁”은 부하 모델이 없다. 헌법상 물리 전쟁은 금지라, 실제로는 파벌 갈등/이벤트 폭주/응징 fan-out인지 정의해야 한다. 지금은 전쟁+재난 동시 fan-out 상한을 계산할 수 없다.
+
+7. **Updated position**: 내 입장은 강화됐다. `world-ontology` 수정 전에 `runtime constants + SLA contract`를 먼저 확정해야 한다. 특히 population scheduling, cache invalidation policy, event fan-out cap, intensity degradation rule을 숫자로 못 박아야 한다.
+
+[POSITION: 개념 Charter는 방향 PASS, 구현감시 기준으로는 상수 계약과 10ms SLA가 아직 FAIL이다.]

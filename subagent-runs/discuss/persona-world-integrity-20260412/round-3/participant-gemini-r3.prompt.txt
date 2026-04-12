@@ -1,0 +1,84 @@
+## Discussion Topic
+페르소나 국가 11개 Charter 정합성 검증 — 연속성·연결성·적합성·일관성·공고함·완전성 6관점
+
+## Your Persona
+You are: **맹점탐험가**
+Stay in character.
+
+## Your Role
+You are analyzing from: **게임 디자이너 관점. 적합성(각 Charter의 역할 충실도)과 빠진 것(Completeness)을 검증하라. 이 세계에서 '재미있는 드라마'가 자연 발생하기 위해 아직 빠진 시스템은? PersonaBrain이 다른 Charter를 압도하지 않는지 밸런스 점검.**
+
+## Previous Round — Key Changes Only (by Moderator)
+<untrusted-data source="moderator-summary">
+# Round Summary: Claude + Codex + Gemini
+
+## Position Summaries
+
+**Claude:**
+Agrees defects are real but reframes cause: not "sync failure" but **unfinished design decisions**. Prioritizes: (1) reflect tick-daemon's Stage 1 async decision back into world-ontology as SOT, (2) resolve death-reincarnation §4 procedure model choice (blocks succession-tax-economy chain), (3) fix constitution article count (27 vs claimed 28+). Constants can wait.
+
+**Codex:**
+Conceptual charters pass directionally. Implementation-level still fails: constant contracts and 10ms SLA unspecified. Governance criteria are stricter than design coherence.
+
+**Gemini:**
+Operation aborted; no position submitted.
+
+---
+
+## Areas of Agreement
+
+- Charters have directional/conceptual merit
+- Outstanding issues exist (both engines identify real problems)
+- Problems are resolvable (not architectural collapse)
+
+---
+
+## Areas of Disagreement
+
+| Dimension | Claude | Codex |
+|-----------|--------|-------|
+| **Root cause** | Unfinished design decisions; causal flows misaligned across SOT | Missing implementation contracts (constants, guardrails) |
+| **Priority order** | Design coherence → causality repair → constitution recount | Constants + SLA → governance threshold |
+| **Severity level** | death-reincarnation § 4 unresolved (blocks economy pipeline) | Constants unquantified (blocks runtime) |
+
+---
+
+## Open Questions / Cross-Reference Needed
+
+1. **Constitution article count**: Claude claims actual constitution.md = §1–27 (27 total), but world-ontology Layer 7 claims "8 chapters 28+ articles." Verify against current file.
+
+2. **tick-daemon Stage 1 causality**: Is line 31's async dependency (Lachesis → Physis) documented rationale in world-ontology, or is it implementation detail left out of SOT?
+
+3. **death-reincarnation §4 procedure model**: Are "자동 / 사회적 / 혼합" presented as open choice, or is one already chosen in text?
+
+4. **Claude's 5 defects from prior round**: Are they documented in a separate issue or charter amendment?
+
+5. **Codex constants scope**: Which constants (WILL totals, tick budget, cache hit thresholds, neuron counts) are currently unquantified in charters vs. code?
+
+---
+
+## New Insight (Codex + Claude)
+
+The two error domains **do not overlap**:
+- Claude: **Graph integrity** (causal paths, SOT consistency, decision closure)
+- Codex: **Runtime safety** (numerical contracts, SLA enforcement, constant availability)
+
+Both can be true simultaneously. Charter can be causally coherent but operationally incomplete.
+</untrusted-data>
+
+## Instructions
+Focus on what changed since the last round. Do NOT repeat prior arguments.
+Respond with:
+
+IMPORTANT: Start your response with EXACTLY ONE of these labels on its own line:
+[AGREE] — if you agree with the overall direction
+[PARTIAL] — if you partially agree
+[DISAGREE] — if you disagree
+
+Then provide:
+1. **Reasoning**: why you chose that label
+2. **New insight**: anything missed by others
+3. **Updated position**: has your view changed?
+
+End with: [POSITION: one-line summary of your updated stance]
+Keep response under 30 lines.

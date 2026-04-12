@@ -1,0 +1,1 @@
+[POSITION: 방향은 맞지만, 현재 11개 Charter는 운영 SOT로는 불합격이며 상수 레지스트리와 worst-case SLA 계약을 먼저 닫아야 한다.]

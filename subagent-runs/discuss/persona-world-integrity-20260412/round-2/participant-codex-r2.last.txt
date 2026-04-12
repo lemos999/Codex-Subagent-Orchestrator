@@ -1,0 +1,1 @@
+[POSITION: 개념 Charter는 방향 PASS, 구현감시 기준으로는 상수 계약과 10ms SLA가 아직 FAIL이다.]

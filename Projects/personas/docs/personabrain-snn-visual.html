@@ -162,12 +162,18 @@
   .neuro-card .high, .neuro-card .low { font-size: 0.8em; padding: 3px 0; }
   .neuro-card .high { color: #55ff88; }
   .neuro-card .low { color: #ff6b6b; }
-  .neuro-da { border-top: 3px solid #ff8855; }
-  .neuro-5ht { border-top: 3px solid #55aaff; }
-  .neuro-ne { border-top: 3px solid #ff4444; }
-  .neuro-ach { border-top: 3px solid #88ff55; }
-  .neuro-gaba { border-top: 3px solid #aa88ff; }
-  .neuro-glu { border-top: 3px solid #ffdd55; }
+  .neuro-v { border-top: 3px solid #ff8855; }
+  .neuro-l { border-top: 3px solid #ff55aa; }
+  .neuro-s { border-top: 3px solid #55aaff; }
+  .neuro-b { border-top: 3px solid #ff88cc; }
+  .neuro-a { border-top: 3px solid #ff4444; }
+  .neuro-t { border-top: 3px solid #cc5555; }
+  .neuro-c { border-top: 3px solid #88ff55; }
+  .neuro-g { border-top: 3px solid #ffdd55; }
+  .neuro-f { border-top: 3px solid #8888aa; }
+  .neuro-i { border-top: 3px solid #aa88ff; }
+  .neuro-d { border-top: 3px solid #dd8844; }
+  .neuro-p { border-top: 3px solid #55ddaa; }
 
   /* ===== BEHAVIOR ===== */
   .behavior-grid {
@@ -404,7 +410,7 @@
     <div class="layer-desc">
       입력을 전기 신호로 바꾸는 기본 회로. 설계도(가중치)는 딱 한 벌.<br>
       <strong>비유:</strong> 같은 모델의 TV를 2만 대 갖고 있다. 하지만 채널은 각자 다르게 돌린다.<br>
-      + <em>neuromodulator_tone</em> (256B) = 밝기/채도/볼륨이 사람마다 다름<br>
+      + <em>neuromodulator_tone</em> (480B, 12클러스터) = 밝기/채도/볼륨이 사람마다 다름<br>
       + <em>persona_bias</em> (&lt;1KB) = 활성화 문턱값 차이
     </div>
     <div class="layer-stats">
@@ -726,64 +732,112 @@
   </div>
 </div>
 
-<!-- ==================== 7. 신경조절물질 6종 ==================== -->
+<!-- ==================== 7. 신경화학물질 12클러스터 ==================== -->
 <div class="section">
-  <h2>뇌의 화학물질 6종</h2>
-  <p class="section-desc">뉴런은 전기로 신호를 보내지만, 그 전기의 "분위기"를 결정하는 건 화학물질이다. 6종이 페르소나의 성격을 만든다.</p>
+  <h2>신경화학물질 12클러스터</h2>
+  <p class="section-desc">54종의 신경화학물질을 12개 기능 클러스터로 압축했다. 각 클러스터가 페르소나의 성격 한 축을 결정한다.</p>
 
   <div class="neuro-grid">
-    <div class="neuro-card neuro-da">
+    <div class="neuro-card neuro-v">
       <div class="neuro-icon">&#x1F525;</div>
-      <h4>도파민</h4>
-      <div class="abbr">DA &mdash; 보상/동기/쾌락</div>
-      <div class="role">"이걸 하면 기분 좋을 거야"라고 속삭이는 물질</div>
-      <div class="high">&#x2191; 높으면: 대담, 탐색, 범죄 유혹</div>
-      <div class="low">&#x2193; 낮으면: 무기력, 우울</div>
+      <h4>V &mdash; Drive</h4>
+      <div class="abbr">DA (도파민) &mdash; 동기/보상/추진</div>
+      <div class="role">"이걸 하면 기분 좋을 거야"라고 속삭이는 엔진</div>
+      <div class="high">&#x2191; 높으면: 대담, 탐색, 목표 집착</div>
+      <div class="low">&#x2193; 낮으면: 무기력, 우울, 무동기</div>
     </div>
-    <div class="neuro-card neuro-5ht">
+    <div class="neuro-card neuro-l">
+      <div class="neuro-icon">&#x1F60D;</div>
+      <h4>L &mdash; Liking</h4>
+      <div class="abbr">&beta;-END (베타엔돌핀) &mdash; 쾌감/만족</div>
+      <div class="role">"지금 이 순간이 좋다"는 순수한 쾌감 신호</div>
+      <div class="high">&#x2191; 높으면: 깊은 만족감, 고통 내성</div>
+      <div class="low">&#x2193; 낮으면: 무쾌감증, 보상 불감</div>
+    </div>
+    <div class="neuro-card neuro-s">
       <div class="neuro-icon">&#x1F30A;</div>
-      <h4>세로토닌</h4>
-      <div class="abbr">5-HT &mdash; 기분 안정/충동 억제</div>
+      <h4>S &mdash; Stability</h4>
+      <div class="abbr">5-HT (세로토닌) &mdash; 기분 안정/충동 억제</div>
       <div class="role">"잠깐, 생각 좀 하고 행동하자"라는 브레이크</div>
-      <div class="high">&#x2191; 높으면: 인내, 사회적 유대</div>
+      <div class="high">&#x2191; 높으면: 인내, 정서 안정</div>
       <div class="low">&#x2193; 낮으면: 충동, 분노 폭발</div>
     </div>
-    <div class="neuro-card neuro-ne">
+    <div class="neuro-card neuro-b">
+      <div class="neuro-icon">&#x1F91D;</div>
+      <h4>B &mdash; Bonding</h4>
+      <div class="abbr">OXT (옥시토신) &mdash; 유대/신뢰/애착</div>
+      <div class="role">"이 사람을 믿어도 돼"라는 사회적 접착제</div>
+      <div class="high">&#x2191; 높으면: 깊은 유대, 집단 충성</div>
+      <div class="low">&#x2193; 낮으면: 불신, 사회적 고립</div>
+    </div>
+    <div class="neuro-card neuro-a">
       <div class="neuro-icon">&#x26A1;</div>
-      <h4>노르에피네프린</h4>
-      <div class="abbr">NE &mdash; 각성/위기/주의</div>
+      <h4>A &mdash; Acute</h4>
+      <div class="abbr">NE (노르에피네프린) &mdash; 각성/위기/주의</div>
       <div class="role">"위험해! 지금 당장 집중!"이라는 경보 사이렌</div>
       <div class="high">&#x2191; 높으면: 경계, 강도4 트리거</div>
       <div class="low">&#x2193; 낮으면: 주의력 산만</div>
     </div>
-    <div class="neuro-card neuro-ach">
-      <div class="neuro-icon">&#x1F4A1;</div>
-      <h4>아세틸콜린</h4>
-      <div class="abbr">ACh &mdash; 학습/기억/REM</div>
-      <div class="role">"이건 기억해둬"라고 메모장을 펼쳐주는 물질</div>
-      <div class="high">&#x2191; 높으면: 집중, 꿈 활성</div>
-      <div class="low">&#x2193; 낮으면: 학습 불가</div>
+    <div class="neuro-card neuro-t">
+      <div class="neuro-icon">&#x1F4A2;</div>
+      <h4>T &mdash; Tension</h4>
+      <div class="abbr">CORT (코르티솔) &mdash; 스트레스/긴장/각성</div>
+      <div class="role">"버텨야 해, 에너지를 끌어모아"라는 생존 모드</div>
+      <div class="high">&#x2191; 높으면: 만성 스트레스, 과잉 경계</div>
+      <div class="low">&#x2193; 낮으면: 무기력, 스트레스 무반응</div>
     </div>
-    <div class="neuro-card neuro-gaba">
+    <div class="neuro-card neuro-c">
+      <div class="neuro-icon">&#x1F4A1;</div>
+      <h4>C &mdash; Cognition</h4>
+      <div class="abbr">ACh (아세틸콜린) &mdash; 학습/기억/주의</div>
+      <div class="role">"이건 기억해둬"라고 메모장을 펼쳐주는 물질</div>
+      <div class="high">&#x2191; 높으면: 집중, 꿈 활성, 빠른 학습</div>
+      <div class="low">&#x2193; 낮으면: 학습 불가, 기억력 저하</div>
+    </div>
+    <div class="neuro-card neuro-g">
+      <div class="neuro-icon">&#x1F331;</div>
+      <h4>G &mdash; Growth</h4>
+      <div class="abbr">Glu&middot;BDNF (글루타메이트&middot;BDNF) &mdash; 성장/가소성</div>
+      <div class="role">"새 연결을 만들어!"라는 뇌의 건축 신호</div>
+      <div class="high">&#x2191; 높으면: 시냅스 생성, 회복력 강화</div>
+      <div class="low">&#x2193; 낮으면: 뉴런 위축, 학습 정체</div>
+    </div>
+    <div class="neuro-card neuro-f">
+      <div class="neuro-icon">&#x1F634;</div>
+      <h4>F &mdash; Fatigue</h4>
+      <div class="abbr">ADO (아데노신) &mdash; 피로/수면 압력</div>
+      <div class="role">"충분히 일했어, 이제 쉬자"라는 수면 신호</div>
+      <div class="high">&#x2191; 높으면: 졸음, 인지 저하</div>
+      <div class="low">&#x2193; 낮으면: 과각성, 불면</div>
+    </div>
+    <div class="neuro-card neuro-i">
       <div class="neuro-icon">&#x1F6D1;</div>
-      <h4>GABA</h4>
-      <div class="abbr">억제/진정/수면</div>
+      <h4>I &mdash; Inhibition</h4>
+      <div class="abbr">GABA&middot;MEL (GABA&middot;멜라토닌) &mdash; 억제/진정</div>
       <div class="role">"진정해, 쉬어"라고 뇌를 눌러주는 소화기</div>
       <div class="high">&#x2191; 높으면: 양심 제동, 수면 촉진</div>
       <div class="low">&#x2193; 낮으면: 불안, 과활성</div>
     </div>
-    <div class="neuro-card neuro-glu">
-      <div class="neuro-icon">&#x1F4A5;</div>
-      <h4>글루타메이트</h4>
-      <div class="abbr">Glu &mdash; 흥분/활성화</div>
-      <div class="role">"다 깨워! 전원 가동!"이라는 총동원 버튼</div>
-      <div class="high">&#x2191; 높으면: 전체 활성화</div>
-      <div class="low">&#x2193; 낮으면: 반응 둔화</div>
+    <div class="neuro-card neuro-d">
+      <div class="neuro-icon">&#x1F451;</div>
+      <h4>D &mdash; Dominance</h4>
+      <div class="abbr">T (테스토스테론) &mdash; 지배/경쟁/자신감</div>
+      <div class="role">"내가 이긴다"라는 사회적 서열 의지</div>
+      <div class="high">&#x2191; 높으면: 리더십, 공격성, 위험 감수</div>
+      <div class="low">&#x2193; 낮으면: 복종, 자신감 결여</div>
+    </div>
+    <div class="neuro-card neuro-p">
+      <div class="neuro-icon">&#x1F6E1;</div>
+      <h4>P &mdash; Protection</h4>
+      <div class="abbr">SP&middot;NPY (서브스턴스P&middot;NPY) &mdash; 방어/회복</div>
+      <div class="role">"고통을 감지하고, 회복력을 가동한다"</div>
+      <div class="high">&#x2191; 높으면: 통증 민감, 스트레스 내성</div>
+      <div class="low">&#x2193; 낮으면: 통증 무감, 취약성 증가</div>
     </div>
   </div>
 
   <div class="callout callout-purple">
-    <p class="sub">6종 &times; 20개 뇌 영역 &times; float16 = <strong>256B/페르소나</strong>. 이 작은 숫자 묶음이 "성격"을 결정한다.</p>
+    <p class="sub">12클러스터 &times; 20개 뇌 영역 &times; float16 = <strong>480B/페르소나</strong>. 54종 화학물질을 12축으로 압축한 성격 지문.</p>
   </div>
 </div>
 
@@ -1046,7 +1100,7 @@
 <!-- ==================== 14. 토론 여정 ==================== -->
 <div class="section">
   <h2>토론 여정: 1,024개에서 5천만까지</h2>
-  <p class="section-desc">3개의 AI 엔진(Claude, GPT, Gemini)이 10번의 토론을 거쳐 이 설계를 완성했다.</p>
+  <p class="section-desc">3개의 AI 엔진(Claude, GPT, Gemini)이 11번의 토론을 거쳐 이 설계를 완성했다.</p>
 
   <div class="disc-timeline">
     <div class="disc-item">
@@ -1126,6 +1180,13 @@
         <p>6종 조절물질, 10행동 회로, 학습/꿈/통합 파이프라인, Fallback 3단계 완성</p>
       </div>
     </div>
+    <div class="disc-item">
+      <div class="disc-round" style="background:#6bc8ff33; color:#6bc8ff;">11</div>
+      <div class="disc-content">
+        <h4 style="color:#6bc8ff;">신경화학 전수조사</h4>
+        <p>54종 신경화학물질 조사, 12클러스터 확정 (V-L-S-B-A-T-C-G-F-I-D-P)</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1145,7 +1206,7 @@
 
 <!-- ===== FOOTER ===== -->
 <div class="footer">
-  <p>10-Round Discussion &times; 3 AI Engines &mdash; 2026-04-12</p>
+  <p>11-Round Discussion &times; 3 AI Engines &mdash; 2026-04-12</p>
   <p style="margin-top:8px;">PersonaBrain SNN Charter v1 &mdash; <a href="https://mostria.com">mostria.com</a></p>
 </div>
 

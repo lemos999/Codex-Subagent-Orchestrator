@@ -1,0 +1,28 @@
+이제 결정적 증거를 확보했다. 응답을 작성한다.
+
+---
+
+[PARTIAL]
+
+**Reasoning**:
+
+이전 라운드의 Claude(그래프 정합성)와 Codex(런타임 계약) 진단이 상호 배타적이라는 분석에는 동의한다. 그러나 "둘 다 참이고 독립적"이라는 결론에서 한 걸음 더 들어간다 — 실제 파일 검증으로 **새로운 구조적 모순**을 확인했기 때문이다.
+
+**New Insight — Stage 1 실행 모델 충돌 (SOT vs Charter)**:
+
+| 문서 | Stage 1 정의 |
+|------|-------------|
+| `world-ontology.md:342` | `Physis ∥ Lachesis` — **병렬 (서로 무관)** |
+| `tick-daemon-charter.md:28` | `Lachesis 선행 → Physis 후행` — **반동기 (인과 종속)** |
+
+이것은 단순 표기 불일치가 아니다. tick-daemon은 line 31에서 *"Lachesis가 틱 번호를 먼저 확정해야 Physis가 '지금'을 알 수 있음"*이라고 **인과적 근거**까지 명시한다. world-ontology는 정반대로 "서로 무관"이라 선언한다. **SOT가 하위 Charter와 인과관계 방향에서 정면 충돌**하고 있다.
+
+이전 라운드에서 Claude가 "tick-daemon의 Stage 1 반동기를 world-ontology에 반영하라"고 제안했는데, 그 판단은 정확하다 — 단, SOT를 고치는 것은 **모든 하위 Charter의 Stage 1 참조를 연쇄 검증**해야 하므로 단순 편집이 아니다.
+
+추가 확인한 Open Question 답변:
+- **헌법 조항 수**: `constitution.md` = 제1조~제27조, 8장 + 부칙. **27조가 정확**. world-ontology:257의 "28+조"는 오류.
+- **death-reincarnation §4**: line 73에 "세계관 확정 시 택 1"로 명시된 **미결 설계 선택지**. 자동/사회적/혼합 중 아직 확정 없음.
+
+**Updated Position**: Claude의 "미완 설계 결정" 프레임에 동의하되, 최우선 수정 대상은 **world-ontology Stage 1 실행 모델**이다. SOT가 틀리면 하위 정합성 논의 자체가 무의미하다.
+
+[POSITION: SOT(world-ontology)의 Stage 1 병렬/반동기 충돌이 최우선 수정 — 헌법 27조 오표기, death §4 미결은 후순위]

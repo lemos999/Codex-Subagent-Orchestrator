@@ -1,0 +1,32 @@
+## Summary of Positions
+
+### Claude
+- **Stage 1 실행 모델 충돌 발견**: world-ontology는 Physis ∥ Lachesis(병렬)로, tick-daemon-charter는 Lachesis → Physis(반동기)로 정의 — SOT와 하위 Charter 간 **인과관계 방향 정면 충돌**.
+- **팩트 검증**: 헌법 27조 정확, death-reincarnation §4는 자동/사회적/혼합 3안 중 미결.
+- **우선순위**: SOT Stage 1 병렬/반동기 모순이 최우선 수정 — 이를 해야 하위 정합성 검증이 의미 있음.
+
+### Codex
+- **운영 SOT 불합격**: 현재 11개 Charter는 production-grade 세계관 규범으로서 상수 레지스트리와 worst-case SLA 계약 부재.
+- **해결 순서 상이**: 그래프 정합성(Claude 관점) 전에 **상수(WILL 총량, 에너지 소비, 뉴런 수) 레지스트리와 극한 시나리오 SLA**를 먼저 닫아야 운영 가능.
+
+### Gemini
+- **상태**: UNAVAILABLE (Operation aborted).
+
+---
+
+## Areas of Agreement
+1. **Stage 1 설계 문제 존재** — Claude와 Codex 모두 world-ontology 기반 Stage 1이 결함을 가지고 있음을 인정.
+2. **SOT(world-ontology)가 책임** — 상위 온톨로지의 결정이 하위 Charter에 전파되는 구조.
+
+## Areas of Disagreement
+| 측면 | Claude | Codex |
+|------|--------|-------|
+| **진단 각도** | 그래프 정합성 (병렬 vs 반동기 인과) | 런타임 계약 (상수/SLA) |
+| **최우선 수정** | world-ontology Stage 1 인과관계 방향 | 상수 레지스트리 + SLA 계약 정의 |
+| **검증 순서** | 구조 먼저 → 계약 | 계약 먼저 → 구조 |
+
+## Open Questions (미답 / 미결)
+1. **world-ontology §342의 "Physis ∥ Lachesis"가 의도된 병렬 설계인가, 오류 반영인가?**  
+2. **death-reincarnation §4의 3안(자동/사회적/혼합) 중 최종 택일 기준은?**  
+3. **Codex 지적 "상수 레지스트리"의 구체 항목** — WILL 총량 외에 반드시 고정해야 할 수치가 무엇인가?  
+4. **Stage 1 인과관계 수정 시 하위 Charter 중 몇 개가 §1 정의를 재검증해야 하는가?** (연쇄 영향 범위)
