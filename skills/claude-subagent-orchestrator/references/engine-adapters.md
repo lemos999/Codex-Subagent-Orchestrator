@@ -47,10 +47,13 @@
 
 ### Codex (exec)
 
-- 명령: `codex exec [-m <model>] [-s <sandbox>] "<prompt>"`
+- 명령: `cat prompt.md | codex exec --full-auto [-m <model>]`
+- 프롬프트는 **반드시 stdin pipe로 전달** — 인자 방식(`"$(cat file)"`)은 긴 프롬프트에서 "Argument list too long" 에러
+- **절대 금지**: stdin + 인자 동시 사용 (프롬프트 중복으로 에코만 반복)
 - `--full-auto` 플래그로 비대화형 실행
 - stdout에서 응답 추출
 - token usage: stdout footer에서 파싱
+- spawn.ts 구현: `{ cmd: 'codex', args: ['exec', '--full-auto'], stdin: prompt }`
 
 ### Gemini (CLI)
 
