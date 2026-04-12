@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PersonaBrain SNN - 5천만 뉴런의 인공 두뇌</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a1a; color: #e0e0e0; line-height: 1.7; }
+
+  /* ===== HERO ===== */
+  .hero {
+    text-align: center; padding: 80px 20px 50px;
+    background: linear-gradient(135deg, #0a0a2e 0%, #1a0a3e 50%, #0a1a2e 100%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 40%, rgba(100,80,200,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(60,120,255,0.06) 0%, transparent 50%);
+    animation: pulse 8s ease-in-out infinite alternate;
+  }
+  @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+  .hero h1 { font-size: 2.8em; color: #fff; margin-bottom: 10px; position: relative; }
+  .hero .subtitle { font-size: 1.3em; color: #a888ff; position: relative; }
+  .hero .tagline { font-size: 0.95em; color: #666; margin-top: 15px; position: relative; }
+  .hero .quote {
+    font-size: 0.9em; color: #888; font-style: italic; margin-top: 25px;
+    max-width: 600px; margin-left: auto; margin-right: auto; position: relative;
+  }
+
+  /* ===== SECTIONS ===== */
+  .section { max-width: 920px; margin: 0 auto; padding: 50px 20px; }
+  .section h2 {
+    font-size: 1.8em; color: #7b8cff; margin-bottom: 25px;
+    border-left: 4px solid #7b8cff; padding-left: 15px;
+  }
+  .section h3 { font-size: 1.3em; color: #aab; margin: 30px 0 12px; }
+  .section-desc { color: #999; margin-bottom: 20px; font-size: 0.95em; }
+
+  /* ===== PROBLEM CARDS ===== */
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+  .problem-card {
+    background: #1a1a2e; border-radius: 12px; padding: 25px;
+    border: 1px solid #333; transition: border-color 0.3s;
+  }
+  .problem-card:hover { border-color: #ff6b6b; }
+  .problem-card .emoji { font-size: 2.5em; margin-bottom: 10px; }
+  .problem-card h4 { color: #ff6b6b; margin-bottom: 8px; }
+  .problem-card p { color: #999; font-size: 0.9em; }
+
+  /* ===== CALLOUT BOX ===== */
+  .callout {
+    background: #1a1a2e; border-radius: 12px; padding: 20px; margin: 20px 0;
+    border-left: 4px solid #ff6b6b;
+  }
+  .callout-green { border-left-color: #55ff88; }
+  .callout-purple { border-left-color: #a888ff; }
+  .callout-blue { border-left-color: #6bc8ff; }
+  .callout .big { font-size: 1.1em; }
+  .callout .sub { color: #888; margin-top: 8px; font-size: 0.9em; }
+
+  /* ===== 3 LAYER ARCHITECTURE ===== */
+  .layer-box {
+    border-radius: 16px; padding: 25px; margin: 15px 0;
+    position: relative; overflow: hidden;
+  }
+  .layer-0 { background: #1a1a3e; border: 2px solid #5555ff; }
+  .layer-1 { background: #1a2e1a; border: 2px solid #55ff55; }
+  .layer-2 { background: #2e1a1a; border: 2px solid #ff5555; }
+  .layer-tag {
+    display: inline-block; padding: 3px 12px; border-radius: 20px;
+    font-size: 0.75em; font-weight: bold; margin-bottom: 10px;
+  }
+  .layer-0 .layer-tag { background: #5555ff33; color: #8888ff; }
+  .layer-1 .layer-tag { background: #55ff5533; color: #88ff88; }
+  .layer-2 .layer-tag { background: #ff555533; color: #ff8888; }
+  .layer-title { font-size: 1.3em; font-weight: bold; margin-bottom: 8px; }
+  .layer-desc { color: #aaa; font-size: 0.9em; margin-bottom: 12px; }
+  .layer-stats { display: flex; gap: 15px; flex-wrap: wrap; }
+  .stat-chip {
+    background: #00000040; padding: 6px 14px; border-radius: 8px; font-size: 0.8em;
+  }
+  .stat-chip span { color: #fff; font-weight: bold; }
+  .arrow-down { text-align: center; font-size: 1.5em; color: #555; margin: -5px 0; }
+
+  /* ===== ANALOGY ===== */
+  .analogy-box {
+    background: linear-gradient(135deg, #1e1e3a, #2a1a3a);
+    border-radius: 16px; padding: 30px; margin: 20px 0; border: 1px solid #444;
+  }
+  .analogy-row { display: flex; align-items: center; gap: 15px; margin: 12px 0; }
+  .analogy-icon { font-size: 2em; width: 50px; text-align: center; flex-shrink: 0; }
+  .analogy-text { flex: 1; }
+  .analogy-text strong { color: #c8b4ff; }
+
+  /* ===== GROWTH ===== */
+  .growth-track {
+    position: relative; margin: 30px 0; padding: 20px;
+    background: #1a1a2e; border-radius: 16px; border: 1px solid #333;
+  }
+  .growth-bar-container { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+  .growth-label { width: 100px; text-align: right; font-size: 0.85em; color: #888; flex-shrink: 0; }
+  .growth-bar {
+    height: 32px; border-radius: 6px; display: flex; align-items: center;
+    padding: 0 12px; font-size: 0.8em; font-weight: bold; color: #fff;
+    transition: width 0.5s;
+  }
+  .cycle-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+  .cycle-card {
+    background: #12122a; border-radius: 12px; padding: 20px; text-align: center;
+    border: 1px solid #333;
+  }
+  .cycle-card .cycle-icon { font-size: 2em; margin-bottom: 8px; }
+  .cycle-card h4 { margin-bottom: 6px; }
+  .cycle-card p { color: #999; font-size: 0.85em; }
+
+  /* ===== ENERGY ===== */
+  .energy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+  .energy-card {
+    background: #1a1a2e; border-radius: 12px; padding: 20px;
+    border: 1px solid #333; transition: transform 0.2s;
+  }
+  .energy-card:hover { transform: translateY(-3px); }
+  .energy-label { font-size: 0.75em; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .energy-card h4 { margin: 6px 0; }
+  .energy-card .pct { font-size: 2em; font-weight: bold; }
+  .energy-card .desc { color: #999; font-size: 0.85em; margin-top: 6px; }
+  .energy-1 { border-top: 3px solid #55ff88; }
+  .energy-1 .pct { color: #55ff88; }
+  .energy-2 { border-top: 3px solid #ffdd55; }
+  .energy-2 .pct { color: #ffdd55; }
+  .energy-3 { border-top: 3px solid #ff8855; }
+  .energy-3 .pct { color: #ff8855; }
+  .energy-4 { border-top: 3px solid #ff4444; }
+  .energy-4 .pct { color: #ff4444; }
+
+  /* ===== TABLE ===== */
+  .data-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9em; }
+  .data-table th {
+    background: #1a1a3e; color: #7b8cff; padding: 12px 15px; text-align: left;
+    border-bottom: 2px solid #333; font-weight: 600;
+  }
+  .data-table td { padding: 10px 15px; border-bottom: 1px solid #222; }
+  .data-table tr:hover td { background: #ffffff08; }
+  .data-table .mono { font-family: 'Consolas', monospace; color: #a888ff; }
+
+  /* ===== NEURO CARDS ===== */
+  .neuro-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 15px; margin: 20px 0;
+  }
+  .neuro-card {
+    background: #1a1a2e; border-radius: 12px; padding: 20px;
+    border: 1px solid #333; transition: transform 0.2s, border-color 0.3s;
+  }
+  .neuro-card:hover { transform: translateY(-3px); }
+  .neuro-card .neuro-icon { font-size: 2em; margin-bottom: 8px; }
+  .neuro-card h4 { margin-bottom: 4px; }
+  .neuro-card .abbr { font-size: 0.75em; color: #888; margin-bottom: 8px; }
+  .neuro-card .role { color: #ccc; font-size: 0.9em; margin-bottom: 8px; }
+  .neuro-card .high, .neuro-card .low { font-size: 0.8em; padding: 3px 0; }
+  .neuro-card .high { color: #55ff88; }
+  .neuro-card .low { color: #ff6b6b; }
+  .neuro-da { border-top: 3px solid #ff8855; }
+  .neuro-5ht { border-top: 3px solid #55aaff; }
+  .neuro-ne { border-top: 3px solid #ff4444; }
+  .neuro-ach { border-top: 3px solid #88ff55; }
+  .neuro-gaba { border-top: 3px solid #aa88ff; }
+  .neuro-glu { border-top: 3px solid #ffdd55; }
+
+  /* ===== BEHAVIOR ===== */
+  .behavior-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px; margin: 20px 0;
+  }
+  .behavior-item {
+    background: #1a1a2e; border-radius: 8px; padding: 12px 15px;
+    border-left: 3px solid; font-size: 0.9em;
+  }
+  .behavior-item:nth-child(1)  { border-color: #ff6b6b; }
+  .behavior-item:nth-child(2)  { border-color: #ffa06b; }
+  .behavior-item:nth-child(3)  { border-color: #ffda6b; }
+  .behavior-item:nth-child(4)  { border-color: #6bff6b; }
+  .behavior-item:nth-child(5)  { border-color: #6bffda; }
+  .behavior-item:nth-child(6)  { border-color: #6bcfff; }
+  .behavior-item:nth-child(7)  { border-color: #6b8cff; }
+  .behavior-item:nth-child(8)  { border-color: #a06bff; }
+  .behavior-item:nth-child(9)  { border-color: #da6bff; }
+  .behavior-item:nth-child(10) { border-color: #ff6bda; }
+  .behavior-item .region { font-size: 0.75em; color: #888; margin-top: 4px; }
+
+  /* ===== TIMELINE ===== */
+  .timeline { position: relative; margin: 30px 0; padding-left: 40px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 15px; top: 0; bottom: 0;
+    width: 3px; background: linear-gradient(to bottom, #5555ff, #55ff55, #ff5555, #ffaa55);
+  }
+  .timeline-item {
+    position: relative; margin: 25px 0; padding: 20px;
+    background: #1a1a2e; border-radius: 12px; border: 1px solid #333;
+  }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -33px; top: 25px;
+    width: 12px; height: 12px; border-radius: 50%; border: 3px solid;
+  }
+  .timeline-item:nth-child(1)::before { border-color: #5555ff; background: #5555ff44; }
+  .timeline-item:nth-child(2)::before { border-color: #55ff55; background: #55ff5544; }
+  .timeline-item:nth-child(3)::before { border-color: #ff5555; background: #ff555544; }
+  .timeline-item:nth-child(4)::before { border-color: #ffaa55; background: #ffaa5544; }
+  .timeline-item h4 { margin-bottom: 5px; }
+  .timeline-item p { color: #999; font-size: 0.9em; }
+
+  /* ===== DREAM ===== */
+  .dream-box {
+    background: linear-gradient(135deg, #0a0a2e, #1a0a3e);
+    border-radius: 16px; padding: 25px; margin: 20px 0;
+    border: 1px dashed #5544aa;
+  }
+  .dream-phases { display: grid; grid-template-columns: 3fr 1fr; gap: 20px; margin: 15px 0; }
+  .dream-phase {
+    background: #ffffff08; border-radius: 12px; padding: 20px;
+  }
+  .dream-phase h4 { margin-bottom: 8px; }
+  .dream-phase p { color: #999; font-size: 0.9em; }
+  .dream-theories { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+  .dream-chip {
+    background: #ffffff10; padding: 8px 16px; border-radius: 20px;
+    font-size: 0.85em; border: 1px solid #5544aa55;
+  }
+
+  /* ===== PIPELINE ===== */
+  .pipeline { margin: 20px 0; }
+  .pipe-step {
+    display: flex; align-items: flex-start; gap: 15px; margin: 12px 0;
+    background: #1a1a2e; border-radius: 12px; padding: 18px;
+    border: 1px solid #333;
+  }
+  .pipe-num {
+    width: 40px; height: 40px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-weight: bold;
+    font-size: 1.1em; flex-shrink: 0;
+  }
+  .pipe-content { flex: 1; }
+  .pipe-content h4 { margin-bottom: 4px; }
+  .pipe-content p { color: #999; font-size: 0.9em; }
+  .pipe-time { color: #a888ff; font-size: 0.8em; font-weight: bold; flex-shrink: 0; }
+
+  /* ===== FALLBACK ===== */
+  .fallback-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+  .fallback-card {
+    background: #1a1a2e; border-radius: 12px; padding: 20px; text-align: center;
+    border: 1px solid #333;
+  }
+  .fallback-card .rank { font-size: 2em; font-weight: bold; margin-bottom: 8px; }
+  .fallback-card h4 { margin-bottom: 8px; }
+  .fallback-card p { color: #999; font-size: 0.85em; }
+
+  /* ===== SCALE BAR ===== */
+  .scale-container { margin: 20px 0; }
+  .scale-bar-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+  .scale-label { width: 130px; text-align: right; font-size: 0.85em; color: #888; flex-shrink: 0; }
+  .scale-fill {
+    height: 32px; border-radius: 6px; display: flex; align-items: center;
+    padding: 0 12px; font-size: 0.8em; font-weight: bold; color: #fff;
+  }
+
+  /* ===== DISCUSSION TIMELINE ===== */
+  .disc-timeline { margin: 20px 0; }
+  .disc-item {
+    display: flex; gap: 15px; margin: 10px 0; padding: 15px;
+    background: #1a1a2e; border-radius: 10px; border: 1px solid #333;
+  }
+  .disc-round {
+    width: 36px; height: 36px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-weight: bold;
+    font-size: 0.85em; flex-shrink: 0; background: #7b8cff22; color: #7b8cff;
+  }
+  .disc-content { flex: 1; }
+  .disc-content h4 { font-size: 0.95em; margin-bottom: 3px; }
+  .disc-content p { color: #888; font-size: 0.82em; }
+
+  /* ===== BIG NUMBERS ===== */
+  .big-number { display: flex; justify-content: center; gap: 40px; margin: 30px 0; flex-wrap: wrap; }
+  .num-card { text-align: center; padding: 20px; }
+  .num-card .num { font-size: 2.5em; font-weight: bold; }
+  .num-card .label { font-size: 0.85em; color: #888; margin-top: 5px; }
+
+  /* ===== MITO ===== */
+  .vuln-bar {
+    display: flex; align-items: center; gap: 10px; margin: 8px 0;
+  }
+  .vuln-label { width: 80px; text-align: right; font-size: 0.82em; color: #888; flex-shrink: 0; }
+  .vuln-fill {
+    height: 24px; border-radius: 4px; display: flex; align-items: center;
+    padding: 0 10px; font-size: 0.75em; font-weight: bold; color: #fff;
+  }
+  .vuln-note { font-size: 0.75em; color: #888; flex-shrink: 0; }
+
+  /* ===== CLADE TABLE ===== */
+  .clade-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin: 20px 0;
+  }
+  .clade-card {
+    background: #1a1a2e; border-radius: 10px; padding: 15px; text-align: center;
+    border: 1px solid #333;
+  }
+  .clade-card h4 { font-size: 0.95em; margin-bottom: 6px; }
+  .clade-card .trait { color: #888; font-size: 0.8em; margin-bottom: 8px; }
+  .clade-bars { text-align: left; }
+  .clade-bar-row { display: flex; align-items: center; gap: 6px; margin: 3px 0; font-size: 0.75em; }
+  .clade-bar-label { width: 35px; text-align: right; color: #888; }
+  .clade-bar-fill { height: 8px; border-radius: 4px; }
+  .clade-card .tendency { color: #aaa; font-size: 0.78em; margin-top: 8px; font-style: italic; }
+
+  /* ===== SUMMARY ===== */
+  .summary-box {
+    background: linear-gradient(135deg, #1a0a3e, #0a1a3e);
+    border-radius: 16px; padding: 40px; margin: 20px 0; text-align: center;
+    border: 2px solid #5555ff44;
+  }
+  .summary-box .main { font-size: 1.4em; color: #fff; margin-bottom: 10px; }
+  .summary-box .sub { color: #888; font-size: 0.95em; }
+
+  /* ===== FOOTER ===== */
+  .footer { text-align: center; padding: 40px 20px; color: #444; font-size: 0.85em; }
+  .footer a { color: #555; text-decoration: none; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 700px) {
+    .problem-grid { grid-template-columns: 1fr; }
+    .energy-grid { grid-template-columns: 1fr; }
+    .cycle-cards { grid-template-columns: 1fr; }
+    .fallback-grid { grid-template-columns: 1fr; }
+    .dream-phases { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.8em; }
+    .hero .subtitle { font-size: 1em; }
+    .big-number { gap: 20px; }
+    .num-card .num { font-size: 1.8em; }
+    .section h2 { font-size: 1.4em; }
+    .analogy-row { flex-direction: column; text-align: center; }
+    .analogy-icon { width: auto; }
+    .scale-label, .growth-label, .vuln-label { width: 80px; font-size: 0.75em; }
+    .disc-item { flex-direction: column; gap: 8px; }
+    .pipe-step { flex-direction: column; gap: 8px; }
+    .neuro-grid { grid-template-columns: 1fr; }
+    .clade-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== 1. HERO ==================== -->
+<div class="hero">
+  <h1>PersonaBrain SNN</h1>
+  <div class="subtitle">5천만 뉴런의 인공 두뇌</div>
+  <div class="tagline">2만 명의 AI 페르소나가 각자의 뇌로 생각하고, 느끼고, 꿈꾸는 세계</div>
+  <div class="quote">"뇌는 에너지를 아끼는 기관이다. 99%는 잠자고, 1%만 일한다. 그 1%가 세상을 바꾼다."</div>
+</div>
+
+<!-- ==================== 2. 왜 어려운가 ==================== -->
+<div class="section">
+  <h2>왜 이게 어려운 걸까?</h2>
+  <p class="section-desc">AI 뇌를 만들려면 4가지 문제를 동시에 풀어야 한다:</p>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="emoji">🧠</div>
+      <h4>뉴런 수가 어마어마하다</h4>
+      <p>5천만 개의 뉴런. 꿀벌 뇌의 50배. 이걸 진짜로 하나하나 계산하면 슈퍼컴퓨터도 힘들다.</p>
+    </div>
+    <div class="problem-card">
+      <div class="emoji">👥</div>
+      <h4>사람이 2만 명</h4>
+      <p>AI 나라에는 2만 명이 산다. 각자 자기만의 뇌를 갖고 있다. 같은 구조지만 다른 성격, 다른 기억, 다른 트라우마.</p>
+    </div>
+    <div class="problem-card">
+      <div class="emoji">&#x23F1;&#xFE0F;</div>
+      <h4>10ms 안에 끝내야</h4>
+      <p>게임 세계의 시간은 멈추지 않는다. 한 틱에 모든 페르소나의 뇌가 결정을 내려야 한다. 제한 시간은 0.01초 &mdash; 눈 깜빡이는 시간의 1/30.</p>
+    </div>
+    <div class="problem-card">
+      <div class="emoji">&#x1F4BB;</div>
+      <h4>GPU 없이 CPU만</h4>
+      <p>비싼 그래픽 카드 없이, 일반 컴퓨터의 CPU만으로 돌려야 한다. 이게 진짜 도전.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p class="big">5천만 뉴런 &times; 2만 명 = <strong style="color: #ff6b6b;">1,000조 번의 계산</strong>/틱</p>
+    <p class="sub">그냥 계산하면 우주가 끝날 때까지 걸린다. 그래서 완전히 다른 방법이 필요했다.</p>
+  </div>
+</div>
+
+<!-- ==================== 3. 3계층 아키텍처 ==================== -->
+<div class="section">
+  <h2>뇌의 3개 층</h2>
+  <p class="section-desc">해결의 핵심: "전부 계산하지 마, 구조를 나눠." 설계도는 공유하고, 상태만 개인화한다.</p>
+
+  <div class="layer-box layer-0">
+    <span class="layer-tag">Layer 0 &mdash; 공유 설계도</span>
+    <div class="layer-title" style="color: #8888ff;">기본 뇌 구조 (모든 페르소나 공유)</div>
+    <div class="layer-desc">
+      입력을 전기 신호로 바꾸는 기본 회로. 설계도(가중치)는 딱 한 벌.<br>
+      <strong>비유:</strong> 같은 모델의 TV를 2만 대 갖고 있다. 하지만 채널은 각자 다르게 돌린다.<br>
+      + <em>neuromodulator_tone</em> (256B) = 밝기/채도/볼륨이 사람마다 다름<br>
+      + <em>persona_bias</em> (&lt;1KB) = 활성화 문턱값 차이
+    </div>
+    <div class="layer-stats">
+      <div class="stat-chip">실행 <span>1회/틱</span></div>
+      <div class="stat-chip">메모리 <span>1벌</span></div>
+      <div class="stat-chip">비용 <span>~2.5ms</span></div>
+    </div>
+  </div>
+
+  <div class="arrow-down">&#x25BC; context_embedding 전달</div>
+
+  <div class="layer-box layer-1">
+    <span class="layer-tag">Layer 1 &mdash; 개인 상태</span>
+    <div class="layer-title" style="color: #88ff88;">Persona Moment State (5M~50M 뉴런 등가)</div>
+    <div class="layer-desc">
+      수천만 뉴런의 활동을 수학적으로 요약한 "나의 현재 상태".<br>
+      <strong>비유:</strong> 내 기분/컨디션 대시보드 &mdash; 양심 수준, 감정, 두려움, 주의 방향 전부.<br>
+      캐시 히트 = 무의식 처리 (O(1), ~0.1ms) / 캐시 미스 = 의식적 연산
+    </div>
+    <div class="layer-stats">
+      <div class="stat-chip">뉴런 등가 <span>5M~50M</span></div>
+      <div class="stat-chip">캐시 히트 <span>~95%</span></div>
+      <div class="stat-chip">미스 시 <span>moment closure</span></div>
+      <div class="stat-chip">비용 <span>~3.5ms</span></div>
+    </div>
+  </div>
+
+  <div class="arrow-down">&#x25BC; 상태 전달</div>
+
+  <div class="layer-box layer-2">
+    <span class="layer-tag">Layer 2 &mdash; 결정</span>
+    <div class="layer-title" style="color: #ff8888;">Decision Readout</div>
+    <div class="layer-desc">
+      "그래서 뭘 할 건데?"를 결정하는 최종 층. 여기서 학습(STDP)이 일어난다.<br>
+      <strong>비유:</strong> 같은 상황을 봐도 A는 비밀을 폭로하고, B는 숨긴다. 성격이 빛나는 곳.
+    </div>
+    <div class="layer-stats">
+      <div class="stat-chip">가중치 <span>~2KB</span> sparse INT8</div>
+      <div class="stat-chip">학습 <span>STDP</span> (여기서만)</div>
+      <div class="stat-chip">출력 <span>Action_Proposal</span></div>
+    </div>
+  </div>
+
+  <h3>학교 비유로 이해하기</h3>
+  <div class="analogy-box">
+    <div class="analogy-row">
+      <div class="analogy-icon">&#x1F3EB;</div>
+      <div class="analogy-text">
+        <strong>Layer 0 = 학교 건물</strong><br>
+        건물은 하나. 모든 학생이 같은 건물에서 생활한다. 종소리, 복도, 급식실 &mdash; 환경은 공유.
+      </div>
+    </div>
+    <div class="analogy-row">
+      <div class="analogy-icon">&#x1F4D3;</div>
+      <div class="analogy-text">
+        <strong>Layer 1 = 각자의 성적표 + 일기장</strong><br>
+        같은 수업을 들어도 성적은 다르다. "수학 잘함, 체육 보통, 요즘 기분 안 좋음" &mdash; 이게 나의 현재 상태.
+      </div>
+    </div>
+    <div class="analogy-row">
+      <div class="analogy-icon">&#x1F914;</div>
+      <div class="analogy-text">
+        <strong>Layer 2 = "점심에 뭐 먹지?" 결정</strong><br>
+        같은 급식 메뉴를 보고도 다른 선택을 한다. 성적표(상태)와 성격(가중치)이 합쳐져서 결정이 나온다.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 4. 뉴런 성장 ==================== -->
+<div class="section">
+  <h2>뉴런 성장: 5M에서 50M까지</h2>
+  <p class="section-desc">태어날 때 500만 개. 경험을 쌓으며 5천만 개까지 자란다. 단, 한 번에 쭉 자라는 게 아니라 파도처럼 오르내린다.</p>
+
+  <div class="growth-track">
+    <h3 style="margin-top:0;">성숙도별 뉴런 규모</h3>
+    <div class="growth-bar-container">
+      <div class="growth-label">신생 (1~3)</div>
+      <div class="growth-bar" style="width:10%; background: linear-gradient(90deg, #5555ff, #7788ff);">5M</div>
+    </div>
+    <div class="growth-bar-container">
+      <div class="growth-label">성숙 (4~6)</div>
+      <div class="growth-bar" style="width:50%; background: linear-gradient(90deg, #55aa55, #88ff88);">10~30M</div>
+    </div>
+    <div class="growth-bar-container">
+      <div class="growth-label">원로 (7+)</div>
+      <div class="growth-bar" style="width:100%; background: linear-gradient(90deg, #ff8855, #ffaa55);">~50M</div>
+    </div>
+  </div>
+
+  <h3>3상 사이클: Grow &rarr; Prune &rarr; Consolidate</h3>
+  <p class="section-desc">뇌가 자라는 3단계. 파도처럼 반복하며 점점 커진다.</p>
+
+  <div class="cycle-cards">
+    <div class="cycle-card">
+      <div class="cycle-icon">&#x1F331;</div>
+      <h4 style="color:#55ff88;">Phase 1: Grow</h4>
+      <p>자극이 오면 새 시냅스가 생긴다. 뉴런 등가 수가 올라간다.</p>
+      <p style="color:#55ff88; font-size:0.85em; margin-top:8px;">5M &rarr; 7M</p>
+    </div>
+    <div class="cycle-card">
+      <div class="cycle-icon">&#x2702;&#xFE0F;</div>
+      <h4 style="color:#ffaa55;">Phase 2: Prune</h4>
+      <p>120% 초과하면 약한 시냅스를 잘라낸다. 쓸모없는 연결 제거.</p>
+      <p style="color:#ffaa55; font-size:0.85em; margin-top:8px;">7M &rarr; 6M</p>
+    </div>
+    <div class="cycle-card">
+      <div class="cycle-icon">&#x1F48E;</div>
+      <h4 style="color:#88aaff;">Phase 3: Consolidate</h4>
+      <p>남은 연결을 안정화. 에너지 절감 모드로 전환.</p>
+      <p style="color:#88aaff; font-size:0.85em; margin-top:8px;">6M &rarr; 안정</p>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <p class="big" style="color:#55ff88;">&#x1F30A; 파도 형태로 성장 &mdash; 단조 증가가 아니다</p>
+    <p class="sub">자라고, 잘라내고, 굳히고. 이걸 수천 번 반복하면 신생아의 5M이 현자의 50M이 된다.</p>
+  </div>
+
+  <h3>성장 경로 (모두에게 열려 있다)</h3>
+  <div class="energy-grid">
+    <div class="energy-card energy-1">
+      <div class="energy-label">경로 A</div>
+      <h4>경험 누적</h4>
+      <div class="desc">살면서 겪는 일들이 자연스럽게 뇌를 키운다.</div>
+    </div>
+    <div class="energy-card energy-2">
+      <div class="energy-label">경로 B</div>
+      <h4>높은 클래스 도달</h4>
+      <div class="desc">일정 등급에 도달하면 확장이 해금된다.</div>
+    </div>
+    <div class="energy-card energy-3">
+      <div class="energy-label">경로 C</div>
+      <h4>좋은 Mitotype</h4>
+      <div class="desc">유전적으로 유리하면 더 빠르게 성장한다.</div>
+    </div>
+    <div class="energy-card energy-4">
+      <div class="energy-label">경로 D</div>
+      <h4>한계 돌파</h4>
+      <div class="desc">유전이 불리해도 극단적 경험, 각성 이벤트, 명상, 멘토링으로 뚫는다.</div>
+    </div>
+  </div>
+  <div class="callout callout-purple">
+    <p class="big" style="color:#c8b4ff;">"DNA는 출발선이지 결승선이 아니다"</p>
+  </div>
+</div>
+
+<!-- ==================== 5. 에너지 4단계 ==================== -->
+<div class="section">
+  <h2>에너지 4단계</h2>
+  <p class="section-desc">뇌는 에너지를 아끼는 기관이다. 상황에 따라 1~4단계로 세기를 조절한다.</p>
+
+  <div class="energy-grid">
+    <div class="energy-card energy-1">
+      <div class="energy-label">강도 1</div>
+      <div class="pct">~2%</div>
+      <h4>일상 반복</h4>
+      <div class="desc">눈 감고도 할 수 있는 익숙한 일. 뉴런 2%만 활성. ~50M FLOP.</div>
+    </div>
+    <div class="energy-card energy-2">
+      <div class="energy-label">강도 2</div>
+      <div class="pct">~10%</div>
+      <h4>새로운 상황</h4>
+      <div class="desc">생각이 좀 필요한 일. 뉴런 10% 활성. ~500M FLOP.</div>
+    </div>
+    <div class="energy-card energy-3">
+      <div class="energy-label">강도 3</div>
+      <div class="pct">~25%</div>
+      <h4>복잡한 판단</h4>
+      <div class="desc">머리가 아픈 결정. 뉴런 25% 활성. ~2G FLOP.</div>
+    </div>
+    <div class="energy-card energy-4">
+      <div class="energy-label">강도 4</div>
+      <div class="pct">~90%</div>
+      <h4>생존 위협</h4>
+      <div class="desc">극한의 힘, 나머지 중단. 뉴런 90% 활성. ~8G FLOP. f16 정밀도.</div>
+    </div>
+  </div>
+
+  <h3>누가 세기를 정하는가? &mdash; LC x 시상</h3>
+  <div class="callout callout-blue">
+    <p class="big">두 개의 독립된 축이 협력한다</p>
+    <p class="sub">
+      <strong style="color:#ff8855;">LC (청반핵):</strong> "왜/얼마나 긴급한가?" &mdash; 각성도 0~1 결정<br>
+      <strong style="color:#55aaff;">시상 (Thalamus):</strong> "어떤 경로로 처리할 것인가?" &mdash; 캐시 vs SNN 라우팅<br>
+      두 축이 독립 &rarr; 2D 제어 공간. 긴급하지만 익숙한 일 = 높은 LC + 캐시 히트 = 즉시 반응.
+    </p>
+  </div>
+
+  <h3>무의식 고속도로 (Cache-first)</h3>
+  <div class="callout callout-green">
+    <p class="big" style="color:#55ff88;">반복 경험 &rarr; 시냅스 강화 &rarr; 캐시 등록 &rarr; 무의식 처리</p>
+    <p class="sub">
+      캐시 히트 = O(1), ~0.1ms. 시간이 지날수록 93% &rarr; 95% &rarr; 97% &rarr; 99%.<br>
+      이게 바로 "습관", "직관", "무의식". 새로운 상황만 비싸게 의식적으로 처리한다.
+    </p>
+  </div>
+</div>
+
+<!-- ==================== 6. 미토콘드리아 ==================== -->
+<div class="section">
+  <h2>미토콘드리아: 뇌의 발전소</h2>
+  <p class="section-desc">체력(energy_pool)이 뇌의 성능을 좌우한다. 체력이 바닥나면 뇌도 꺼진다.</p>
+
+  <h3>energy_pool (0.0 ~ 1.0)</h3>
+  <table class="data-table">
+    <thead>
+      <tr><th>에너지</th><th>상태</th><th>무슨 일이 일어나나</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="mono">&gt; 0.8</td><td>정상</td><td>모든 강도 사용 가능</td></tr>
+      <tr><td class="mono">0.5~0.8</td><td>피로 초기</td><td>강도4 비용 증가, 판단 오류 증가</td></tr>
+      <tr><td class="mono">0.3~0.5</td><td>중등 피로</td><td>강도3~4 차단, 감정 불안정</td></tr>
+      <tr><td class="mono">0.1~0.3</td><td>심한 피로</td><td>강도1~2만 가능, 양심 저하, 거짓말 증가</td></tr>
+      <tr><td class="mono">&lt; 0.1</td><td style="color:#ff4444;">고갈</td><td style="color:#ff4444;">강제 수면 &mdash; 뇌가 스스로 꺼진다</td></tr>
+    </tbody>
+  </table>
+
+  <h3>영역별 취약성: PFC가 먼저 죽는다</h3>
+  <p class="section-desc">피곤하면 제일 먼저 판단력(PFC)이 무너진다. 생존 본능(편도체)은 맨 마지막까지 버틴다.</p>
+
+  <div style="background:#1a1a2e; border-radius:12px; padding:20px; margin:15px 0;">
+    <div class="vuln-bar">
+      <div class="vuln-label">PFC</div>
+      <div class="vuln-fill" style="width:100%; background:#ff4444;">임계 0.6 &mdash; 복잡한 판단</div>
+      <div class="vuln-note">가장 먼저 &#x2B07;</div>
+    </div>
+    <div class="vuln-bar">
+      <div class="vuln-label">해마</div>
+      <div class="vuln-fill" style="width:83%; background:#ff8855;">임계 0.5 &mdash; 기억/학습</div>
+    </div>
+    <div class="vuln-bar">
+      <div class="vuln-label">선조체</div>
+      <div class="vuln-fill" style="width:67%; background:#ffaa55;">임계 0.4 &mdash; 동기/보상</div>
+    </div>
+    <div class="vuln-bar">
+      <div class="vuln-label">시상</div>
+      <div class="vuln-fill" style="width:58%; background:#ffcc55;">임계 0.35 &mdash; 정보 라우팅</div>
+    </div>
+    <div class="vuln-bar">
+      <div class="vuln-label">소뇌</div>
+      <div class="vuln-fill" style="width:42%; background:#88cc55;">임계 0.25 &mdash; 자동화/습관</div>
+    </div>
+    <div class="vuln-bar">
+      <div class="vuln-label">편도체</div>
+      <div class="vuln-fill" style="width:25%; background:#55aa55;">임계 0.15 &mdash; 생존/공포</div>
+      <div class="vuln-note">마지막까지 &#x2B06;</div>
+    </div>
+  </div>
+
+  <h3>Mitotype: 미토콘드리아 체질 (28~32종)</h3>
+  <p class="section-desc">DNA처럼 태어날 때 정해지는 체질. 7가지 기본 파라미터가 있고, 노력으로 &#177;60% 범위 내에서 바꿀 수 있다.</p>
+
+  <div class="clade-grid">
+    <div class="clade-card">
+      <h4 style="color:#ff8855;">&#x1F525; Alpha</h4>
+      <div class="trait">탐험형</div>
+      <div class="clade-bars">
+        <div class="clade-bar-row"><div class="clade-bar-label">DA</div><div class="clade-bar-fill" style="width:65%;background:#ff8855;"></div> 1.3</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">5-HT</div><div class="clade-bar-fill" style="width:45%;background:#55aaff;"></div> 0.9</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">NE</div><div class="clade-bar-fill" style="width:55%;background:#ff4444;"></div> 1.1</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">GABA</div><div class="clade-bar-fill" style="width:40%;background:#aa88ff;"></div> 0.8</div>
+      </div>
+      <div class="tendency">범죄 유혹 취약, 창의적</div>
+    </div>
+    <div class="clade-card">
+      <h4 style="color:#55aaff;">&#x2696;&#xFE0F; Beta</h4>
+      <div class="trait">안정형</div>
+      <div class="clade-bars">
+        <div class="clade-bar-row"><div class="clade-bar-label">DA</div><div class="clade-bar-fill" style="width:50%;background:#ff8855;"></div> 1.0</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">5-HT</div><div class="clade-bar-fill" style="width:50%;background:#55aaff;"></div> 1.0</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">NE</div><div class="clade-bar-fill" style="width:50%;background:#ff4444;"></div> 1.0</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">GABA</div><div class="clade-bar-fill" style="width:50%;background:#aa88ff;"></div> 1.0</div>
+      </div>
+      <div class="tendency">평범, 적응적</div>
+    </div>
+    <div class="clade-card">
+      <h4 style="color:#ff4444;">&#x2694;&#xFE0F; Gamma</h4>
+      <div class="trait">전사형</div>
+      <div class="clade-bars">
+        <div class="clade-bar-row"><div class="clade-bar-label">DA</div><div class="clade-bar-fill" style="width:55%;background:#ff8855;"></div> 1.1</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">5-HT</div><div class="clade-bar-fill" style="width:40%;background:#55aaff;"></div> 0.8</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">NE</div><div class="clade-bar-fill" style="width:65%;background:#ff4444;"></div> 1.3</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">GABA</div><div class="clade-bar-fill" style="width:45%;background:#aa88ff;"></div> 0.9</div>
+      </div>
+      <div class="tendency">위기 대응 강, 분노 취약</div>
+    </div>
+    <div class="clade-card">
+      <h4 style="color:#88ff55;">&#x1F4D6; Delta</h4>
+      <div class="trait">학자형</div>
+      <div class="clade-bars">
+        <div class="clade-bar-row"><div class="clade-bar-label">DA</div><div class="clade-bar-fill" style="width:45%;background:#ff8855;"></div> 0.9</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">5-HT</div><div class="clade-bar-fill" style="width:55%;background:#55aaff;"></div> 1.1</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">NE</div><div class="clade-bar-fill" style="width:45%;background:#ff4444;"></div> 0.9</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">GABA</div><div class="clade-bar-fill" style="width:55%;background:#aa88ff;"></div> 1.1</div>
+      </div>
+      <div class="tendency">신중, 분석적</div>
+    </div>
+    <div class="clade-card">
+      <h4 style="color:#aa88ff;">&#x1F6E1;&#xFE0F; Epsilon</h4>
+      <div class="trait">억제형</div>
+      <div class="clade-bars">
+        <div class="clade-bar-row"><div class="clade-bar-label">DA</div><div class="clade-bar-fill" style="width:40%;background:#ff8855;"></div> 0.8</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">5-HT</div><div class="clade-bar-fill" style="width:60%;background:#55aaff;"></div> 1.2</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">NE</div><div class="clade-bar-fill" style="width:40%;background:#ff4444;"></div> 0.8</div>
+        <div class="clade-bar-row"><div class="clade-bar-label">GABA</div><div class="clade-bar-fill" style="width:65%;background:#aa88ff;"></div> 1.3</div>
+      </div>
+      <div class="tendency">양심 최강, 결단 느림</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p class="sub">
+      <strong>유전:</strong> 모계 Base(mtDNA) + 부계 Modifier 속도 &#177;10% + 돌연변이 5%<br>
+      <strong>Bloodline Resonance:</strong> 같은 클레이드 부모 &rarr; Modifier 상한 +5%<br>
+      <strong>윤회:</strong> 새 Mitotype, 전생 최고 Modifier &rarr; 현생 seed &#177;5%<br>
+      <strong>리소스:</strong> 33B/페르소나 &times; 20K = 660KB. 사진 한 장 수준.
+    </p>
+  </div>
+</div>
+
+<!-- ==================== 7. 신경조절물질 6종 ==================== -->
+<div class="section">
+  <h2>뇌의 화학물질 6종</h2>
+  <p class="section-desc">뉴런은 전기로 신호를 보내지만, 그 전기의 "분위기"를 결정하는 건 화학물질이다. 6종이 페르소나의 성격을 만든다.</p>
+
+  <div class="neuro-grid">
+    <div class="neuro-card neuro-da">
+      <div class="neuro-icon">&#x1F525;</div>
+      <h4>도파민</h4>
+      <div class="abbr">DA &mdash; 보상/동기/쾌락</div>
+      <div class="role">"이걸 하면 기분 좋을 거야"라고 속삭이는 물질</div>
+      <div class="high">&#x2191; 높으면: 대담, 탐색, 범죄 유혹</div>
+      <div class="low">&#x2193; 낮으면: 무기력, 우울</div>
+    </div>
+    <div class="neuro-card neuro-5ht">
+      <div class="neuro-icon">&#x1F30A;</div>
+      <h4>세로토닌</h4>
+      <div class="abbr">5-HT &mdash; 기분 안정/충동 억제</div>
+      <div class="role">"잠깐, 생각 좀 하고 행동하자"라는 브레이크</div>
+      <div class="high">&#x2191; 높으면: 인내, 사회적 유대</div>
+      <div class="low">&#x2193; 낮으면: 충동, 분노 폭발</div>
+    </div>
+    <div class="neuro-card neuro-ne">
+      <div class="neuro-icon">&#x26A1;</div>
+      <h4>노르에피네프린</h4>
+      <div class="abbr">NE &mdash; 각성/위기/주의</div>
+      <div class="role">"위험해! 지금 당장 집중!"이라는 경보 사이렌</div>
+      <div class="high">&#x2191; 높으면: 경계, 강도4 트리거</div>
+      <div class="low">&#x2193; 낮으면: 주의력 산만</div>
+    </div>
+    <div class="neuro-card neuro-ach">
+      <div class="neuro-icon">&#x1F4A1;</div>
+      <h4>아세틸콜린</h4>
+      <div class="abbr">ACh &mdash; 학습/기억/REM</div>
+      <div class="role">"이건 기억해둬"라고 메모장을 펼쳐주는 물질</div>
+      <div class="high">&#x2191; 높으면: 집중, 꿈 활성</div>
+      <div class="low">&#x2193; 낮으면: 학습 불가</div>
+    </div>
+    <div class="neuro-card neuro-gaba">
+      <div class="neuro-icon">&#x1F6D1;</div>
+      <h4>GABA</h4>
+      <div class="abbr">억제/진정/수면</div>
+      <div class="role">"진정해, 쉬어"라고 뇌를 눌러주는 소화기</div>
+      <div class="high">&#x2191; 높으면: 양심 제동, 수면 촉진</div>
+      <div class="low">&#x2193; 낮으면: 불안, 과활성</div>
+    </div>
+    <div class="neuro-card neuro-glu">
+      <div class="neuro-icon">&#x1F4A5;</div>
+      <h4>글루타메이트</h4>
+      <div class="abbr">Glu &mdash; 흥분/활성화</div>
+      <div class="role">"다 깨워! 전원 가동!"이라는 총동원 버튼</div>
+      <div class="high">&#x2191; 높으면: 전체 활성화</div>
+      <div class="low">&#x2193; 낮으면: 반응 둔화</div>
+    </div>
+  </div>
+
+  <div class="callout callout-purple">
+    <p class="sub">6종 &times; 20개 뇌 영역 &times; float16 = <strong>256B/페르소나</strong>. 이 작은 숫자 묶음이 "성격"을 결정한다.</p>
+  </div>
+</div>
+
+<!-- ==================== 8. 10가지 행동 ==================== -->
+<div class="section">
+  <h2>이 뇌가 할 수 있는 10가지</h2>
+  <p class="section-desc">5천만 뉴런으로 구현하는 인간다운 행동들. 각 행동마다 다른 뇌 영역이 경쟁한다.</p>
+
+  <div class="behavior-grid">
+    <div class="behavior-item">
+      <strong>1. 양심 딜레마</strong><br>
+      <span style="color:#888;font-size:0.85em;">"친구의 비리를 고발할까?"</span>
+      <div class="region">DA(이득) vs 5-HT(도덕) &rarr; PFC_VM / 강도3</div>
+    </div>
+    <div class="behavior-item">
+      <strong>2. 거짓말</strong><br>
+      <span style="color:#888;font-size:0.85em;">날조부터 "괜찮아요"까지 7단계</span>
+      <div class="region">AMY(자아보존) &rarr; PFC 억제 / 강도2~3</div>
+    </div>
+    <div class="behavior-item">
+      <strong>3. 비밀/두려움</strong><br>
+      <span style="color:#888;font-size:0.85em;">알려지면 감당 못 할 정보</span>
+      <div class="region">AMY_BLA 공포 태그 &rarr; GABA 출력 / 강도2</div>
+    </div>
+    <div class="behavior-item">
+      <strong>4. 신뢰 판단</strong><br>
+      <span style="color:#888;font-size:0.85em;">"이 사람을 믿어도 될까?"</span>
+      <div class="region">TPJ + HPC + INS 3경로 통합 / 강도2~3</div>
+    </div>
+    <div class="behavior-item">
+      <strong>5. 소문 해석</strong><br>
+      <span style="color:#888;font-size:0.85em;">출처 &times; 내용 &times; 감정</span>
+      <div class="region">ACC (출처신뢰&times;내용정합&times;감정편향) / 강도2</div>
+    </div>
+    <div class="behavior-item">
+      <strong>6. 꿈</strong><br>
+      <span style="color:#888;font-size:0.85em;">수면 중 기억 정리</span>
+      <div class="region">NREM(GABA) vs REM(ACh) &rarr; BF/HPC / 수면</div>
+    </div>
+    <div class="behavior-item">
+      <strong>7. 감정</strong><br>
+      <span style="color:#888;font-size:0.85em;">오욕칠정의 복합 발현</span>
+      <div class="region">VTA/DRN/LC (6종 복합) / 강도1~3</div>
+    </div>
+    <div class="behavior-item">
+      <strong>8. 정치적 선택</strong><br>
+      <span style="color:#888;font-size:0.85em;">이득 vs 충성 vs 양심</span>
+      <div class="region">DA vs 5-HT vs PFC 3자 경쟁 / 강도3</div>
+    </div>
+    <div class="behavior-item">
+      <strong>9. 범죄 동기</strong><br>
+      <span style="color:#888;font-size:0.85em;">"이득이 크면 양심이 흔들린다"</span>
+      <div class="region">DA(이득) vs GABA(억제) vs PFC_VM / 강도3</div>
+    </div>
+    <div class="behavior-item">
+      <strong>10. 관계 관리</strong><br>
+      <span style="color:#888;font-size:0.85em;">신뢰/배신/사랑의 역학</span>
+      <div class="region">HPC/NAc, 3-factor STDP (DA=제3인자) / 강도1~2</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 9. 학습 4단계 ==================== -->
+<div class="section">
+  <h2>학습 4단계</h2>
+  <p class="section-desc">뇌가 어떻게 배우는지. 반사 &rarr; 선생님 모방 &rarr; 보상 학습 &rarr; 잠자면서 정리.</p>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <h4 style="color:#8888ff;">Phase 0: 기저 반사 (STDP)</h4>
+      <p>갓 태어난 뇌. Xavier 초기화 &rarr; 100틱 동안 기본 발화 패턴(5~15Hz) 안정화. 아직 아무것도 배우지 않은 상태.</p>
+    </div>
+    <div class="timeline-item">
+      <h4 style="color:#88ff88;">Phase 1: 선생님 흉내 (Teacher Net)</h4>
+      <p>LLM(거대 언어모델)의 지식을 SNN에 증류한다. "이런 상황에서 현명한 사람은 이렇게 반응해" &mdash; 이걸 뉴런 발화 패턴으로 변환. 이중 채널: 로짓 &rarr; 발화율, 히든 &rarr; 표상 기하.</p>
+    </div>
+    <div class="timeline-item">
+      <h4 style="color:#ff8888;">Phase 2: 보상 학습 (3-factor STDP + 도파민 RL)</h4>
+      <p>경험하며 배운다. &#916;W = &#951; &times; pre &times; post &times; DA(t). 좋은 결과엔 시냅스 강화, 나쁜 결과엔 약화. 외적 보상(법) + 내적 보상(감정) 모두 반영.</p>
+    </div>
+    <div class="timeline-item">
+      <h4 style="color:#ffaa55;">Phase 3: 꿈 Replay (수면 중)</h4>
+      <p>자면서 기억을 정리한다. NREM: 시냅스 10~20% 감쇠 + 약한 연결 가지치기. REM: 기생 회로 제거 + 감정 강도 상위 5% 경험 재생. 실패한 상황을 꿈에서 다시 시뮬레이션.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 10. 꿈 ==================== -->
+<div class="section">
+  <h2>꿈: 밤에 뇌가 하는 일</h2>
+  <p class="section-desc">잠자는 동안 뇌는 가만히 있지 않는다. 정리하고, 지우고, 새로운 연결을 만든다.</p>
+
+  <div class="dream-box">
+    <h3 style="color:#c8b4ff; margin-top:0;">수면 위상</h3>
+    <div class="dream-phases">
+      <div class="dream-phase">
+        <h4 style="color:#7788ff;">&#x1F319; NREM (75% &mdash; 깊은 잠)</h4>
+        <p>GABA가 지배. 전역 억제 모드.<br>
+        &#x2022; 시냅스 하향 정규화 (SHY) &mdash; 낮에 쌓인 잡음 제거<br>
+        &#x2022; 약한 연결 가지치기<br>
+        &#x2022; ATP 재충전: energy_pool += 0.05/s</p>
+      </div>
+      <div class="dream-phase">
+        <h4 style="color:#ff88aa;">&#x1F31F; REM (25% &mdash; 꿈)</h4>
+        <p>ACh가 지배. 내부 자극 생성.<br>
+        &#x2022; 기생 회로 제거 (anti-replay)<br>
+        &#x2022; 감정 Top 5% 경험 재생<br>
+        &#x2022; 새로운 연합 생성</p>
+      </div>
+    </div>
+
+    <h3 style="color:#c8b4ff;">꿈의 내용 = 3가지 이론 혼합</h3>
+    <div class="dream-theories">
+      <div class="dream-chip">&#x1F3B2; 경험 재조합 <strong>50%</strong> &mdash; 낮의 기억을 무작위 순서로 재생</div>
+      <div class="dream-chip">&#x1F9EC; DNA/윤회 디코딩 <strong>20%</strong> &mdash; Layer 0 고정 가중치 강제 활성화</div>
+      <div class="dream-chip">&#x1F504; RPE 시뮬레이션 <strong>30%</strong> &mdash; 실패 상황 재현 + 대안 보상 예측</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p class="sub">
+      <strong>수면 트리거:</strong> energy_pool &lt; 0.1 &rarr; 강제 수면 / 게임 시간 기반 정기 수면<br>
+      <strong>수면 거부:</strong> 가능하지만 성능 급락 (neuro_tone 노이즈 증가)
+    </p>
+  </div>
+</div>
+
+<!-- ==================== 11. 틱 처리 흐름 ==================== -->
+<div class="section">
+  <h2>한 틱의 흐름: 6 Step 파이프라인</h2>
+  <p class="section-desc">한 번의 "생각"이 일어나는 전체 과정. 총 ~8.5ms, 여유 1.5ms.</p>
+
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:#5555ff33;color:#8888ff;">1</div>
+      <div class="pipe-content">
+        <h4>입력 조립</h4>
+        <p>날씨, 이벤트(소문/비밀/죽음), 관계 상태를 전기 신호로 변환. 72B/페르소나.</p>
+      </div>
+      <div class="pipe-time">0.5ms</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:#5577ff33;color:#88aaff;">2</div>
+      <div class="pipe-content">
+        <h4>Layer 0 배치 실행</h4>
+        <p>공유 가중치 &times; 1K명 배치 (SIMD 벡터화) + persona_bias + neuromodulator_tone 변조.</p>
+      </div>
+      <div class="pipe-time">2.5ms</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:#55aa5533;color:#88ff88;">3</div>
+      <div class="pipe-content">
+        <h4>에너지 판정</h4>
+        <p>LC arousal &times; 시상 게이팅 &times; energy_pool &rarr; 강도 1~4 결정. 토큰 버킷 Admission Control.</p>
+      </div>
+      <div class="pipe-time">0.5ms</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:#ffaa5533;color:#ffcc88;">4</div>
+      <div class="pipe-content">
+        <h4>캐시 조회 / Moment Closure</h4>
+        <p>히트 ~95%: 즉시 반환 (0.1ms). 미스 ~5%: moment closure &rarr; Layer 2 readout (2~5ms).</p>
+      </div>
+      <div class="pipe-time">3.5ms</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:#ff555533;color:#ff8888;">5</div>
+      <div class="pipe-content">
+        <h4>Action_Proposal 출력</h4>
+        <p>행동 제안을 기록하고 Arbiter에게 violation_hint를 전달.</p>
+      </div>
+      <div class="pipe-time">0.5ms</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num" style="background:#aa55ff33;color:#cc88ff;">6</div>
+      <div class="pipe-content">
+        <h4>감정/관계 갱신 + STDP</h4>
+        <p>감정 상태 업데이트, 관계 변화 기록, energy_pool 소비. 이전 Nomos 피드백 반영.</p>
+      </div>
+      <div class="pipe-time">1.0ms</div>
+    </div>
+  </div>
+
+  <div class="big-number">
+    <div class="num-card">
+      <div class="num" style="color:#a888ff;">8.5ms</div>
+      <div class="label">총 처리 시간</div>
+    </div>
+    <div class="num-card">
+      <div class="num" style="color:#8888ff;">10ms</div>
+      <div class="label">제한 시간</div>
+    </div>
+    <div class="num-card">
+      <div class="num" style="color:#55ff88;">1.5ms</div>
+      <div class="label">여유 마진</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 12. Fallback ==================== -->
+<div class="section">
+  <h2>Fallback: 시간이 부족하면?</h2>
+  <p class="section-desc">10ms 안에 결정을 못 내리면 어떻게 할까? 3단계 비상 계획이 있다.</p>
+
+  <div class="fallback-grid">
+    <div class="fallback-card">
+      <div class="rank" style="color:#55ff88;">A</div>
+      <h4>유사 상황 반환</h4>
+      <p>캐시에서 비슷한 상황의 결과를 꺼낸다. 가장 자연스러움 &mdash; 관찰자가 구분 못 한다.</p>
+      <p style="color:#55ff88; font-size:0.8em; margin-top:8px;">조건: 시간 초과</p>
+    </div>
+    <div class="fallback-card">
+      <div class="rank" style="color:#ffaa55;">B</div>
+      <h4>직전 행동 반복</h4>
+      <p>"방금 한 거 그대로 또 해." 최대 2틱까지만 허용. 중간 수준의 자연스러움.</p>
+      <p style="color:#ffaa55; font-size:0.8em; margin-top:8px;">조건: A 실패, 최대 2틱</p>
+    </div>
+    <div class="fallback-card">
+      <div class="rank" style="color:#ff6b6b;">C</div>
+      <h4>아무것도 안 함 (no-op)</h4>
+      <p>최후의 수단. 가만히 있는다. 첫 틱이나 데이터 전손 시에만 사용.</p>
+      <p style="color:#ff6b6b; font-size:0.8em; margin-top:8px;">조건: 첫 틱/WAL 전손</p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 13. 생물 뇌 비교 ==================== -->
+<div class="section">
+  <h2>생물 뇌와 비교하면?</h2>
+  <p class="section-desc">PersonaBrain SNN은 자연계에서 어디쯤에 위치할까?</p>
+
+  <div class="scale-container">
+    <div class="scale-bar-row">
+      <div class="scale-label">선충 (C. elegans)</div>
+      <div class="scale-fill" style="width:1%; min-width:60px; background:#555;">302</div>
+    </div>
+    <div class="scale-bar-row">
+      <div class="scale-label">꿀벌</div>
+      <div class="scale-fill" style="width:3%; min-width:80px; background:linear-gradient(90deg,#666,#888);">1M</div>
+    </div>
+    <div class="scale-bar-row">
+      <div class="scale-label" style="color:#a888ff; font-weight:bold;">PersonaBrain</div>
+      <div class="scale-fill" style="width:20%; background:linear-gradient(90deg,#5555ff,#a888ff); border:2px solid #c8b4ff;">5M ~ 50M</div>
+    </div>
+    <div class="scale-bar-row">
+      <div class="scale-label">쥐</div>
+      <div class="scale-fill" style="width:35%; background:linear-gradient(90deg,#55aa55,#88cc55);">71M</div>
+    </div>
+    <div class="scale-bar-row">
+      <div class="scale-label">인간</div>
+      <div class="scale-fill" style="width:100%; background:linear-gradient(90deg,#ff6b6b,#ffaa55);">860억</div>
+    </div>
+  </div>
+
+  <div class="callout callout-purple">
+    <p class="sub">PersonaBrain은 꿀벌을 훨씬 넘어서고, 쥐의 뇌에 근접한다. 양심 딜레마, 거짓말, 꿈까지 구현 가능한 규모.</p>
+  </div>
+</div>
+
+<!-- ==================== 14. 토론 여정 ==================== -->
+<div class="section">
+  <h2>토론 여정: 1,024개에서 5천만까지</h2>
+  <p class="section-desc">3개의 AI 엔진(Claude, GPT, Gemini)이 10번의 토론을 거쳐 이 설계를 완성했다.</p>
+
+  <div class="disc-timeline">
+    <div class="disc-item">
+      <div class="disc-round">1</div>
+      <div class="disc-content">
+        <h4>기본 SNN 설계</h4>
+        <p>B+A 하이브리드 방식 채택, 2,400 뉴런으로 시작</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round">2</div>
+      <div class="disc-content">
+        <h4>Open Questions</h4>
+        <p>1,024 뉴런으로 축소, 학습 파이프라인 구조 설계</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round">3</div>
+      <div class="disc-content">
+        <h4>100K &times; 20K 스케일</h4>
+        <p>3계층 분리 구조 도입, moment closure 기법 발견</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round">4</div>
+      <div class="disc-content">
+        <h4>5M + 양자 영감</h4>
+        <p>cache-first 전략 채택, "무의식 고속도로" 개념 탄생</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round">5</div>
+      <div class="disc-content">
+        <h4>에너지 역학</h4>
+        <p>4단계 강도 시스템, LC &times; 시상 직교 제어 설계</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round">6</div>
+      <div class="disc-content">
+        <h4>미토콘드리아</h4>
+        <p>energy_pool 모델, 영역별 취약성 시스템 도입</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round">7</div>
+      <div class="disc-content">
+        <h4>Mitotype</h4>
+        <p>28~32종 체질 시스템, Base + Modifier(&#177;60%) 구조</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round">8</div>
+      <div class="disc-content">
+        <h4>최대 뉴런 논쟁</h4>
+        <p>10M이 한계라는 결론... 하지만 정말 그럴까?</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round" style="background:#ff555533; color:#ff8888;">9</div>
+      <div class="disc-content">
+        <h4 style="color:#ff8888;">50M 돌파!</h4>
+        <p>RG-Graphon 기법 도입. "동시에 50M" "명시적 저장" "moment만" &mdash; 3가지 전제 해체</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round" style="background:#55ff5533; color:#55ff88;">10</div>
+      <div class="disc-content">
+        <h4 style="color:#55ff88;">최종 통합</h4>
+        <p>Layer 0 수정, 3상 성장 사이클, 타이밍 검증 완료</p>
+      </div>
+    </div>
+    <div class="disc-item">
+      <div class="disc-round" style="background:#ffaa5533; color:#ffcc88;">+</div>
+      <div class="disc-content">
+        <h4 style="color:#ffcc88;">보완 라운드</h4>
+        <p>6종 조절물질, 10행동 회로, 학습/꿈/통합 파이프라인, Fallback 3단계 완성</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 15. 한 줄 요약 ==================== -->
+<div class="section">
+  <div class="summary-box">
+    <div class="main">"같은 뇌, 다른 영혼"</div>
+    <div class="sub">
+      2만 명이 하나의 설계도(Layer 0)를 공유하지만,<br>
+      각자의 기억, 성격, 트라우마, 체질이 만들어내는 5천만 뉴런의 고유한 세계.<br>
+      신생아의 500만에서 현자의 5천만까지, 뇌는 경험과 함께 자란다.<br>
+      99%는 무의식이 처리하고, 1%의 의식이 세상을 바꾼다.<br>
+      그리고 밤이 되면 &mdash; 뇌가 꿈을 꾼다.
+    </div>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <p>10-Round Discussion &times; 3 AI Engines &mdash; 2026-04-12</p>
+  <p style="margin-top:8px;">PersonaBrain SNN Charter v1 &mdash; <a href="https://mostria.com">mostria.com</a></p>
+</div>
+
+</body>
+</html>
