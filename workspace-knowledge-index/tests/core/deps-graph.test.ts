@@ -56,6 +56,17 @@ describe('DepsGraphImpl', () => {
     expect(loadedGraph.getImporters('/repo/src/c.ts')).toEqual(['/repo/src/b.ts']);
   });
 
+  it('stores project-relative paths when a project root is provided', () => {
+    const rootedGraph = new DepsGraphImpl(tempDir);
+    const source = path.join(tempDir, 'src/a.ts');
+    const target = path.join(tempDir, 'src/b.ts');
+
+    rootedGraph.addEdge(source, target);
+
+    expect(rootedGraph.getImports('src/a.ts')).toEqual(['src/b.ts']);
+    expect(rootedGraph.serialize()).not.toContain(tempDir.replace(/\\/g, '/'));
+  });
+
   it('returns empty results for an empty graph', () => {
     expect(graph.getImports('/repo/src/missing.ts')).toEqual([]);
     expect(graph.getImporters('/repo/src/missing.ts')).toEqual([]);

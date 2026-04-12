@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { normalizePath } from '../utils/path.js';
+import { normalizePath, toIndexPath } from '../utils/path.js';
 import type { ImportInfo } from '../types/index.js';
 
 const TS_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
@@ -13,10 +13,12 @@ export class DepsGraphImpl {
   private edges: Map<string, Set<string>> = new Map();
   private reverseEdges: Map<string, Set<string>> = new Map();
 
+  constructor(private projectRoot?: string) {}
+
   /** Add a directed edge: `from` imports `to`. */
   addEdge(from: string, to: string): void {
-    const f = normalizePath(from);
-    const t = normalizePath(to);
+    const f = this.normalizeGraphPath(from);
+    const t = this.normalizeGraphPath(to);
 
     if (!this.edges.has(f)) {
       this.edges.set(f, new Set());
@@ -31,21 +33,21 @@ export class DepsGraphImpl {
 
   /** Files that `filePath` imports. */
   getImports(filePath: string): string[] {
-    const key = normalizePath(filePath);
+    const key = this.normalizeGraphPath(filePath);
     const set = this.edges.get(key);
     return set ? [...set] : [];
   }
 
   /** Files that import `filePath`. */
   getImporters(filePath: string): string[] {
-    const key = normalizePath(filePath);
+    const key = this.normalizeGraphPath(filePath);
     const set = this.reverseEdges.get(key);
     return set ? [...set] : [];
   }
 
   /** BFS walk from startFile up to maxDepth. Returns at most 100 nodes. */
   walk(startFile: string, maxDepth: number): string[] {
-    const start = normalizePath(startFile);
+    const start = this.normalizeGraphPath(startFile);
     const visited = new Set<string>();
     const result: string[] = [];
     const queue: Array<{ file: string; depth: number }> = [{ file: start, depth: 0 }];
@@ -114,6 +116,10 @@ export class DepsGraphImpl {
       count += set.size;
     }
     return count;
+  }
+
+  private normalizeGraphPath(filePath: string): string {
+    return this.projectRoot ? toIndexPath(this.projectRoot, filePath) : normalizePath(filePath);
   }
 
   // ----------------------------------------------------------------

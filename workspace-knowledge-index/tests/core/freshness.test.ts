@@ -67,6 +67,17 @@ describe('FreshnessManager', () => {
       expect(state.indexed_at).toBeTruthy();
     });
 
+    it('should preserve UTF-8 untracked file paths instead of git quote escapes', () => {
+      const repoDir = createGitRepo();
+      fs.writeFileSync(path.join(repoDir, '한글.md'), 'hello');
+
+      const fm = new FreshnessManager();
+      const state = fm.captureState(repoDir);
+
+      expect(state.untracked_files).toContain('한글.md');
+      expect(state.untracked_files?.some((filePath) => filePath.includes('\\'))).toBe(false);
+    });
+
     it('should degrade gracefully in a non-git directory', () => {
       tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wki-test-'));
 
@@ -90,6 +101,30 @@ describe('FreshnessManager', () => {
       fs.writeFileSync(path.join(repoDir, 'init.txt'), 'modified');
       execSync('git add .', { cwd: repoDir, stdio: 'pipe' });
       execSync('git commit -m "modify"', { cwd: repoDir, stdio: 'pipe' });
+
+      const changes = fm.detectChanges(prevState, repoDir);
+      expect(changes.modified).toContain('init.txt');
+    });
+
+    it('should not repeatedly report unchanged dirty files after indexing', () => {
+      const repoDir = createGitRepo();
+      fs.writeFileSync(path.join(repoDir, 'init.txt'), 'dirty once');
+
+      const fm = new FreshnessManager();
+      const prevState = fm.captureState(repoDir);
+
+      const changes = fm.detectChanges(prevState, repoDir);
+      expect(changes.modified).not.toContain('init.txt');
+    });
+
+    it('should report dirty files whose signature changed after indexing', () => {
+      const repoDir = createGitRepo();
+      fs.writeFileSync(path.join(repoDir, 'init.txt'), 'dirty once');
+
+      const fm = new FreshnessManager();
+      const prevState = fm.captureState(repoDir);
+
+      fs.writeFileSync(path.join(repoDir, 'init.txt'), 'dirty twice with a different size');
 
       const changes = fm.detectChanges(prevState, repoDir);
       expect(changes.modified).toContain('init.txt');

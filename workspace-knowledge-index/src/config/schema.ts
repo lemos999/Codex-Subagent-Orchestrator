@@ -257,15 +257,23 @@ export function validateConfig(raw: Record<string, unknown>): WkiConfig {
 }
 
 /**
- * Resolve the FTS database path from config, replacing {project} placeholder.
+ * Resolve generated storage paths from config, replacing {project} placeholder.
  */
-export function resolveFtsDbPath(config: WkiConfig, knowledgeDir: string, projectId: string): string {
-  const template = config.search.fts_db;
+export function resolveStoragePath(
+  config: WkiConfig,
+  knowledgeDir: string,
+  projectId: string,
+  template: string,
+): string {
   const resolved = template.replace('{project}', projectId);
 
   // Normalize separators for cross-platform prefix comparison
   const normalizedResolved = resolved.replace(/\\/g, '/');
   const normalizedRoot = config.storage.index_root.replace(/\\/g, '/');
+
+  if (path.isAbsolute(resolved)) {
+    return path.resolve(resolved);
+  }
 
   // If the template starts with the index_root prefix, strip it and resolve from knowledgeDir
   if (normalizedResolved.startsWith(normalizedRoot)) {
@@ -275,4 +283,18 @@ export function resolveFtsDbPath(config: WkiConfig, knowledgeDir: string, projec
 
   // Otherwise resolve relative to knowledgeDir
   return path.resolve(knowledgeDir, resolved);
+}
+
+/**
+ * Resolve the FTS database path from config, replacing {project} placeholder.
+ */
+export function resolveFtsDbPath(config: WkiConfig, knowledgeDir: string, projectId: string): string {
+  return resolveStoragePath(config, knowledgeDir, projectId, config.search.fts_db);
+}
+
+/**
+ * Resolve the LanceDB vector path from config, replacing {project} placeholder.
+ */
+export function resolveLanceDbPath(config: WkiConfig, knowledgeDir: string, projectId: string): string {
+  return resolveStoragePath(config, knowledgeDir, projectId, config.storage.lancedb?.path ?? 'vectors.lance');
 }

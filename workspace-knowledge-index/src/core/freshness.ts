@@ -60,9 +60,10 @@ export class FreshnessManager {
     const staged = this.git(projectRoot, 'diff --cached --name-only');
     const stagedFingerprint = this.fingerprint(staged);
 
+    const dirtyFiles = this.splitGitLines(this.git(projectRoot, 'diff --name-only HEAD'));
     const untracked = this.git(projectRoot, 'ls-files --others --exclude-standard');
     const untrackedFingerprint = this.fingerprint(untracked);
-    const untrackedFiles = untracked.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const untrackedFiles = this.splitGitLines(untracked);
 
     return {
       head_commit: headCommit,
@@ -71,7 +72,10 @@ export class FreshnessManager {
       staged_fingerprint: stagedFingerprint,
       untracked_fingerprint: untrackedFingerprint,
       untracked_files: untrackedFiles,
-      file_hashes: {},
+      file_hashes: this.captureFileSignatures(projectRoot, [
+        ...dirtyFiles,
+        ...untrackedFiles,
+      ]),
       indexed_at: new Date().toISOString(),
     };
   }
@@ -110,9 +114,7 @@ export class FreshnessManager {
     const untrackedChanged = prev.untracked_fingerprint !== currentUntrackedFingerprint;
 
     if (untrackedChanged) {
-      const currentUntracked = new Set(
-        untracked.split('\n').map(l => l.trim()).filter(l => l.length > 0),
-      );
+      const currentUntracked = new Set(this.splitGitLines(untracked));
       const previousUntracked = new Set(prev.untracked_files ?? []);
 
       // New untracked files → added
@@ -131,12 +133,19 @@ export class FreshnessManager {
 
       // Modified untracked files (same name, different content) — treat as modified
       // Since we can't cheaply check content, treat all remaining as potentially modified
+      const currentSignatures = this.captureFileSignatures(projectRoot, [...currentUntracked]);
       for (const f of currentUntracked) {
-        if (previousUntracked.has(f) && !result.modified.includes(f)) {
+        if (
+          previousUntracked.has(f) &&
+          prev.file_hashes?.[f] !== currentSignatures[f] &&
+          !result.modified.includes(f)
+        ) {
           result.modified.push(f);
         }
       }
     }
+
+    this.dropUnchangedDirtyFiles(projectRoot, prev, result);
 
     // Deduplicate
     result.added = [...new Set(result.added)];
@@ -163,7 +172,11 @@ export class FreshnessManager {
    */
   private git(cwd: string, command: string): string {
     try {
-      return execSync(`git ${command}`, { cwd, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+      return execSync(`git -c core.quotePath=false ${command}`, {
+        cwd,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.warn(`[wki] git ${command.split(' ')[0]} failed: ${message.split('\n')[0]}`);
@@ -181,12 +194,57 @@ export class FreshnessManager {
    * Compute a SHA-256 fingerprint from sorted lines of output.
    */
   private fingerprint(output: string): string {
-    const lines = output
+    const lines = this.splitGitLines(output).sort();
+    return createHash('sha256').update(lines.join('\n')).digest('hex');
+  }
+
+  /** Split git line output while preserving UTF-8 paths from core.quotePath=false. */
+  private splitGitLines(output: string): string[] {
+    return output
       .split('\n')
       .map((l) => l.trim())
-      .filter((l) => l.length > 0)
-      .sort();
-    return createHash('sha256').update(lines.join('\n')).digest('hex');
+      .filter((l) => l.length > 0);
+  }
+
+  /**
+   * Capture a cheap signature for dirty/untracked files.
+   *
+   * Size + mtime is enough to avoid re-indexing unchanged dirty worktrees during
+   * agent startup without reading every untracked file into memory.
+   */
+  private captureFileSignatures(projectRoot: string, files: string[]): Record<string, string> {
+    const signatures: Record<string, string> = {};
+    for (const filePath of [...new Set(files)]) {
+      try {
+        const stat = fs.statSync(path.resolve(projectRoot, filePath));
+        if (stat.isFile()) {
+          signatures[filePath] = `${stat.size}:${stat.mtimeMs}`;
+        }
+      } catch {
+        // Deleted or inaccessible files are represented by the deleted list.
+      }
+    }
+    return signatures;
+  }
+
+  /** Remove dirty files whose signature matches the last successful index. */
+  private dropUnchangedDirtyFiles(
+    projectRoot: string,
+    prev: FreshnessState,
+    result: ChangedFiles,
+  ): void {
+    const candidates = [...new Set([...result.added, ...result.modified])];
+    if (candidates.length === 0) return;
+
+    const currentSignatures = this.captureFileSignatures(projectRoot, candidates);
+    const hasChangedSinceLastIndex = (filePath: string) => {
+      const previous = prev.file_hashes?.[filePath];
+      const current = currentSignatures[filePath];
+      return !previous || !current || previous !== current;
+    };
+
+    result.added = result.added.filter(hasChangedSinceLastIndex);
+    result.modified = result.modified.filter(hasChangedSinceLastIndex);
   }
 
   /**

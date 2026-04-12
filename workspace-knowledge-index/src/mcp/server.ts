@@ -9,7 +9,8 @@ import path from 'node:path';
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { loadConfig, resolveFtsDbPath } from '../config/schema.js';
+import { loadConfig, resolveFtsDbPath, resolveLanceDbPath } from '../config/schema.js';
+import { getFileMapCount } from '../core/change-filter.js';
 import { FreshnessManager } from '../core/freshness.js';
 import { IndexLock } from '../core/index-lock.js';
 import { SearchService } from '../search/search-service.js';
@@ -249,8 +250,8 @@ export async function handleKnowledgeStatus(
   let filesCount = 0;
   if (fs.existsSync(fileMapPath)) {
     try {
-      const data = JSON.parse(fs.readFileSync(fileMapPath, 'utf-8')) as Record<string, unknown>;
-      filesCount = Object.keys(data).length;
+      const data = JSON.parse(fs.readFileSync(fileMapPath, 'utf-8')) as unknown;
+      filesCount = getFileMapCount(data);
     } catch {
       /* ignore */
     }
@@ -287,12 +288,7 @@ export async function handleKnowledgeStatus(
   // vector status
   let vectorStatus = 'none';
   if (config.storage.vector_backend === 'lancedb') {
-    const lanceDbPath = config.storage.lancedb?.path
-      ? path.resolve(
-          knowledgeDir,
-          config.storage.lancedb.path.replace('{project}', projectId),
-        )
-      : path.join(knowledgeDir, 'vectors.lance');
+    const lanceDbPath = resolveLanceDbPath(config, knowledgeDir, projectId);
     vectorStatus = fs.existsSync(lanceDbPath) ? 'present' : 'not created';
   }
 

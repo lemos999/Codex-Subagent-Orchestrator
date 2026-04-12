@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import Database from 'better-sqlite3';
 import type { VectorBackend } from '../../src/interfaces/vector-backend.js';
 import type { ChangedFiles } from '../../src/core/freshness.js';
 import { Indexer } from '../../src/core/indexer.js';
@@ -203,5 +204,103 @@ describe('Indexer incremental', () => {
     expect(incResult.chunksAdded).toBeGreaterThanOrEqual(1);
     // No vector store means no delete should have been attempted -- no errors
     expect(incResult.errors).toHaveLength(0);
+  });
+
+  it('should not treat legacy absolute DB paths as missing files during gap repair', async () => {
+    const srcDir = path.join(projectRoot, 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    const srcFile = path.join(srcDir, 'util.ts');
+    fs.writeFileSync(srcFile, 'export const value = 1;\n');
+
+    const indexer = new Indexer(
+      'test-proj',
+      projectRoot,
+      knowledgeDir,
+      [],
+      undefined,
+      undefined,
+      undefined,
+    );
+    await indexer.indexFull();
+
+    const db = new Database(path.join(knowledgeDir, 'fts.db'));
+    try {
+      db.prepare('UPDATE chunks_meta SET file_path = ? WHERE file_path = ?').run(srcFile, 'src/util.ts');
+    } finally {
+      db.close();
+    }
+
+    const indexer2 = new Indexer(
+      'test-proj',
+      projectRoot,
+      knowledgeDir,
+      [],
+      undefined,
+      undefined,
+      undefined,
+    );
+
+    const incResult = await indexer2.indexIncremental({
+      added: [],
+      modified: [],
+      deleted: [],
+      renamed: [],
+    });
+
+    expect(incResult.filesProcessed).toBe(0);
+  });
+
+  it('should store relative POSIX paths for incremental TypeScript chunks', async () => {
+    fs.writeFileSync(
+      path.join(projectRoot, 'tsconfig.json'),
+      JSON.stringify({ include: ['src/**/*.ts'], compilerOptions: { target: 'ES2022', module: 'Node16' } }),
+    );
+    const srcDir = path.join(projectRoot, 'src');
+    fs.mkdirSync(srcDir, { recursive: true });
+    const srcFile = path.join(srcDir, 'math.ts');
+    fs.writeFileSync(srcFile, 'export function add(left: number, right: number) {\n  return left + right;\n}\n');
+
+    const indexer = new Indexer(
+      'test-proj',
+      projectRoot,
+      knowledgeDir,
+      [],
+      undefined,
+      undefined,
+      undefined,
+    );
+    await indexer.indexFull();
+
+    fs.writeFileSync(srcFile, 'export function add(left: number, right: number) {\n  return left + right + 1;\n}\n');
+    const indexer2 = new Indexer(
+      'test-proj',
+      projectRoot,
+      knowledgeDir,
+      [],
+      undefined,
+      undefined,
+      undefined,
+    );
+
+    const incResult = await indexer2.indexIncremental({
+      added: [],
+      modified: ['src/math.ts'],
+      deleted: [],
+      renamed: [],
+    });
+    expect(incResult.filesProcessed).toBe(1);
+
+    const db = new Database(path.join(knowledgeDir, 'fts.db'), { readonly: true });
+    try {
+      const paths = db
+        .prepare('SELECT DISTINCT file_path FROM chunks_meta WHERE project_id = ? ORDER BY file_path')
+        .all('test-proj')
+        .map((row) => (row as { file_path: string }).file_path);
+
+      expect(paths).toContain('src/math.ts');
+      expect(paths.some((filePath) => path.isAbsolute(filePath) || /^[A-Za-z]:[\\/]/.test(filePath))).toBe(false);
+    } finally {
+      db.close();
+    }
   });
 });

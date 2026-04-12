@@ -7,10 +7,11 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadConfig, resolveFtsDbPath } from './config/schema.js';
+import { loadConfig, resolveFtsDbPath, resolveLanceDbPath } from './config/schema.js';
 import { Scanner } from './core/scanner.js';
 import type { EmbeddingProvider } from './interfaces/embedding.js';
 import type { VectorBackend } from './interfaces/vector-backend.js';
+import { countChangedFiles, filterChangedFiles, getFileMapCount } from './core/change-filter.js';
 import { FileMap } from './core/file-map.js';
 import { FreshnessManager } from './core/freshness.js';
 import { IndexLock } from './core/index-lock.js';
@@ -32,7 +33,7 @@ Usage: wki <command> [options]
 Commands:
   init      Initialize .knowledge/ directory and perform first scan
   scan      Scan files and update file-map.json
-  index     Build or update the search index
+  index     Build or update the search index (FTS-only by default; use --vectors for embeddings)
   search    Search the knowledge index
   symbols   Search the symbol index (functions, classes, types, etc.)
   unused-exports  Find exported symbols with no importers (Step 0 dead code check)
@@ -196,6 +197,10 @@ function cmdScan(args: string[]): void {
 
 async function cmdIndex(args: string[]): Promise<void> {
   const isFullReindex = args.includes('--full');
+  const vectorsRequested =
+    args.includes('--vectors') || args.includes('--with-vectors') || isFullReindex;
+  const isFtsOnly =
+    args.includes('--fts-only') || args.includes('--no-vectors') || !vectorsRequested;
   const projectRoot = args.find(a => !a.startsWith('--'))
     ? path.resolve(args.find(a => !a.startsWith('--'))!)
     : process.cwd();
@@ -233,16 +238,9 @@ async function cmdIndex(args: string[]): Promise<void> {
         if (freshness.hasGitFailure()) {
           console.warn('[wki] Git change detection failed. Running full index as fallback.');
         } else {
-          // Filter out files that would be excluded by the scanner
           const scanner = new Scanner(excludePatterns);
-          const filterExcluded = (files: string[]) =>
-            files.filter(f => !scanner.shouldExclude(f));
-
-          const relevantChanges =
-            filterExcluded(changedFiles.added).length +
-            filterExcluded(changedFiles.modified).length +
-            filterExcluded(changedFiles.deleted).length +
-            changedFiles.renamed.length;
+          const filteredChanges = filterChangedFiles(changedFiles, scanner);
+          const relevantChanges = countChangedFiles(filteredChanges);
 
           if (relevantChanges === 0) {
             // Update freshness.lock on no-op to prevent repeated git diffs (#3 fix)
@@ -261,7 +259,7 @@ async function cmdIndex(args: string[]): Promise<void> {
     let embeddingProvider: EmbeddingProvider | undefined;
     let vectorStore: VectorBackend | undefined;
 
-    if (config.storage.vector_backend !== 'none') {
+    if (!isFtsOnly && config.storage.vector_backend !== 'none') {
       try {
         embeddingProvider = await createEmbeddingProvider(config.embedding, 'index');
       } catch (err) {
@@ -272,9 +270,7 @@ async function cmdIndex(args: string[]): Promise<void> {
 
       if (embeddingProvider && config.storage.vector_backend === 'lancedb') {
         const dims = embeddingProvider.dimensions;
-        const lanceDbPath = config.storage.lancedb?.path
-          ? path.resolve(knowledgeDir, config.storage.lancedb.path.replace('{project}', projectId))
-          : path.join(knowledgeDir, 'vectors.lance');
+        const lanceDbPath = resolveLanceDbPath(config, knowledgeDir, projectId);
         const lanceStore = new LanceVectorStore(lanceDbPath, dims);
         await lanceStore.init();
         vectorStore = lanceStore;
@@ -302,11 +298,9 @@ async function cmdIndex(args: string[]): Promise<void> {
         indexResult = await indexer.indexFull();
       } else {
         const changedFiles = freshness.detectChanges(prevState, projectRoot);
-        const totalChanges =
-          changedFiles.added.length +
-          changedFiles.modified.length +
-          changedFiles.deleted.length +
-          changedFiles.renamed.length;
+        const scanner = new Scanner(excludePatterns);
+        const filteredChanges = filterChangedFiles(changedFiles, scanner);
+        const totalChanges = countChangedFiles(filteredChanges);
 
         if (totalChanges === 0) {
           console.log('Index is up to date. No changes detected.');
@@ -314,7 +308,7 @@ async function cmdIndex(args: string[]): Promise<void> {
           return;
         }
 
-        indexResult = await indexer.indexIncremental(changedFiles);
+        indexResult = await indexer.indexIncremental(filteredChanges);
       }
     }
 
@@ -428,9 +422,7 @@ async function cmdSearch(args: string[]): Promise<void> {
 
     if (embeddingProvider && config.storage.vector_backend === 'lancedb') {
       const dims = embeddingProvider.dimensions;
-      const lanceDbPath = config.storage.lancedb?.path
-        ? path.resolve(knowledgeDir, config.storage.lancedb.path.replace('{project}', projectId))
-        : path.join(knowledgeDir, 'vectors.lance');
+      const lanceDbPath = resolveLanceDbPath(config, knowledgeDir, projectId);
       if (fs.existsSync(lanceDbPath)) {
         vectorStore = new LanceVectorStore(lanceDbPath, dims);
         await vectorStore.init();
@@ -619,12 +611,15 @@ function cmdStale(args: string[]): void {
     process.exit(1);
   }
 
-  const changes = freshness.detectChanges(prevState, projectRoot);
-  const totalChanges =
-    changes.added.length +
-    changes.modified.length +
-    changes.deleted.length +
-    changes.renamed.length;
+  const rawChanges = freshness.detectChanges(prevState, projectRoot);
+  const excludePatterns: string[] = [];
+  for (const proj of config.projects) {
+    if (proj.exclude) {
+      excludePatterns.push(...proj.exclude);
+    }
+  }
+  const changes = filterChangedFiles(rawChanges, new Scanner(excludePatterns));
+  const totalChanges = countChangedFiles(changes);
 
   if (outputFormat === 'json') {
     console.log(JSON.stringify({
@@ -742,8 +737,8 @@ async function cmdStatus(_args: string[]): Promise<void> {
   let fileCount = 0;
   if (fs.existsSync(fileMapPath)) {
     try {
-      const data = JSON.parse(fs.readFileSync(fileMapPath, 'utf-8')) as Record<string, unknown>;
-      fileCount = Object.keys(data).length;
+      const data = JSON.parse(fs.readFileSync(fileMapPath, 'utf-8')) as unknown;
+      fileCount = getFileMapCount(data);
     } catch { /* ignore */ }
   }
 
@@ -762,9 +757,7 @@ async function cmdStatus(_args: string[]): Promise<void> {
   // vectors.lance: existence + vector count
   let vectorStatus = 'none';
   if (config.storage.vector_backend === 'lancedb') {
-    const lanceDbPath = config.storage.lancedb?.path
-      ? path.resolve(knowledgeDir, config.storage.lancedb.path.replace('{project}', projectId))
-      : path.join(knowledgeDir, 'vectors.lance');
+    const lanceDbPath = resolveLanceDbPath(config, knowledgeDir, projectId);
     if (fs.existsSync(lanceDbPath)) {
       vectorStatus = 'present';
     } else {
@@ -854,12 +847,7 @@ async function cmdRebuild(args: string[]): Promise<void> {
     // 2. Delete vector store if requested or doing full rebuild
     if (rebuildVectors || !args.includes('--fts-only')) {
       if (config.storage.vector_backend === 'lancedb') {
-        const lanceDbPath = config.storage.lancedb?.path
-          ? path.resolve(
-              knowledgeDir,
-              config.storage.lancedb.path.replace('{project}', projectId),
-            )
-          : path.join(knowledgeDir, 'vectors.lance');
+        const lanceDbPath = resolveLanceDbPath(config, knowledgeDir, projectId);
         if (fs.existsSync(lanceDbPath)) {
           fs.rmSync(lanceDbPath, { recursive: true, force: true });
           console.log('Deleted vectors.lance/');
@@ -869,7 +857,11 @@ async function cmdRebuild(args: string[]): Promise<void> {
 
     // 3. Run full reindex under the same lock (IndexLock is reentrant)
     console.log('Rebuilding index...');
-    await cmdIndex(['--full', projectRoot]);
+    await cmdIndex(
+      args.includes('--fts-only')
+        ? ['--full', '--fts-only', projectRoot]
+        : ['--full', '--vectors', projectRoot],
+    );
   } finally {
     lock.release();
   }
@@ -919,12 +911,7 @@ async function cmdEval(args: string[]): Promise<void> {
 
     if (embeddingProvider && config.storage.vector_backend === 'lancedb') {
       const dims = embeddingProvider.dimensions;
-      const lanceDbPath = config.storage.lancedb?.path
-        ? path.resolve(
-            knowledgeDir,
-            config.storage.lancedb.path.replace('{project}', projectId),
-          )
-        : path.join(knowledgeDir, 'vectors.lance');
+      const lanceDbPath = resolveLanceDbPath(config, knowledgeDir, projectId);
       if (fs.existsSync(lanceDbPath)) {
         vectorStore = new LanceVectorStore(lanceDbPath, dims);
         await vectorStore.init();
@@ -1018,12 +1005,7 @@ async function cmdEvalContext(_args: string[]): Promise<void> {
 
     if (embeddingProvider && config.storage.vector_backend === 'lancedb') {
       const dims = embeddingProvider.dimensions;
-      const lanceDbPath = config.storage.lancedb?.path
-        ? path.resolve(
-            knowledgeDir,
-            config.storage.lancedb.path.replace('{project}', projectId),
-          )
-        : path.join(knowledgeDir, 'vectors.lance');
+      const lanceDbPath = resolveLanceDbPath(config, knowledgeDir, projectId);
       if (fs.existsSync(lanceDbPath)) {
         vectorStore = new LanceVectorStore(lanceDbPath, dims);
         await vectorStore.init();
