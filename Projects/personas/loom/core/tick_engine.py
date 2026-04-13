@@ -89,10 +89,10 @@ class TickEngine:
             self.inner.oyok[0] = max(0.0, self.inner.oyok[0] - 0.5)
             self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.05)
 
-        # 수면 진입 판정
-        if action == "sleep" or self.inner.energy_pool < 0.1:
+        # 수면 진입 판정: 에너지 고갈 시에만 (Phase 0)
+        if self.inner.energy_pool < 0.1:
             self.inner.is_sleeping = True
-            self.inner.sleep_ticks_remaining = 8  # 게임 8시간
+            self.inner.sleep_ticks_remaining = 6  # 게임 6시간 수면
 
         # 로그
         entry = {
@@ -114,8 +114,8 @@ class TickEngine:
         """수면 중 처리."""
         self.inner.sleep_ticks_remaining -= 1
 
-        # ATP 회복 (지수 회복)
-        recovery = 0.12  # 틱당 ~12% 회복 (8틱이면 ~96% 회복)
+        # ATP 회복 (6틱에 ~90% 회복)
+        recovery = 0.15
         self.inner.energy_pool = min(
             self.inner.max_capacity,
             self.inner.energy_pool + recovery
@@ -174,4 +174,19 @@ class TickEngine:
 
 if __name__ == "__main__":
     engine = TickEngine()
-    engine.run(n_ticks=48)  # 2일 (48시간)
+    log = engine.run(n_ticks=100)  # 100틱 안정화 검증
+
+    # Phase 0 완성 기준 검증
+    awake = [e for e in log if not e["sleeping"]]
+    asleep = [e for e in log if e["sleeping"]]
+    avg_fr = sum(e["firing_rate"] for e in awake) / len(awake) if awake else 0
+    print(f"\n--- Phase 0 검증 ---")
+    print(f"평균 발화율: {avg_fr:.4f} (목표: 0.01~0.05)")
+    print(f"활동: {len(awake)}틱, 수면: {len(asleep)}틱")
+    if awake:
+        print(f"수면 주기: ~{len(awake) // max(1, len([e for e in log if e['action']=='sleeping' and log[max(0,log.index(e)-1)]['action']!='sleeping']))}틱 활동 후 수면")
+    print(f"STDP: {'활성' if hasattr(engine.brain.snn, 'spike_trace') else '미구현'}")
+    if 0.01 <= avg_fr <= 0.05:
+        print(">>> Phase 0 발화율 기준 PASS")
+    else:
+        print(f">>> Phase 0 발화율 기준 FAIL (현재 {avg_fr:.4f})")

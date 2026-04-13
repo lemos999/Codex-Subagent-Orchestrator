@@ -12,7 +12,9 @@ from .lif_network import LIFNetwork
 ACTIONS = ["idle", "work", "eat", "sleep", "explore"]
 
 # 강도별 에너지 소비
-ENERGY_COST = {1: 0.01, 2: 0.05, 3: 0.10, 4: 0.25}
+# 강도별 에너지 소비 (16~18틱 활동 후 수면을 목표)
+# 강도1 주로 사용: 0.05/틱 × 18틱 = 0.9 소모 → energy 0.1 → 수면
+ENERGY_COST = {1: 0.05, 2: 0.08, 3: 0.12, 4: 0.25}
 
 
 class PersonaBrain:
@@ -48,42 +50,39 @@ class PersonaBrain:
         n_input = min(100, self.n_neurons)  # 첫 100뉴런이 감각 입력 수신
         rng = np.random.default_rng(self.snn.rng.integers(0, 2**31))
 
-        # 기후 → 감각 뉴런에 분산 주입 (충분한 강도)
+        # 기후 → 감각 뉴런에 분산 주입
         for i in range(min(8, n_input)):
-            spread = rng.choice(n_input, size=10, replace=False)
-            input_signal[spread] += float(climate_vec[i]) * 0.3
+            spread = rng.choice(n_input, size=8, replace=False)
+            input_signal[spread] += float(climate_vec[i]) * 0.2
 
-        # 오욕 → 동기 뉴런에 주입
+        # 오욕 → 동기 뉴런에 주입 (욕구가 높을수록 강한 신호)
         for i in range(5):
-            spread = rng.choice(range(n_input, min(n_input + 50, self.n_neurons)), size=5, replace=False)
-            input_signal[spread] += float(oyok[i]) * 0.4
+            if float(oyok[i]) > 0.1:
+                spread = rng.choice(range(n_input, min(n_input + 50, self.n_neurons)), size=3, replace=False)
+                input_signal[spread] += float(oyok[i]) * 0.3
 
-        # 배경 노이즈 (실제 뇌: 자발적 활동)
-        input_signal += rng.exponential(0.05, self.n_neurons).astype(np.float32)
+        # 배경 노이즈 (자발적 활동)
+        # 임계값 0.8에 10스텝 누적으로 도달: 0.1/스텝 × 10 × leak^5 ≈ 0.65 + 시냅스
+        input_signal += rng.exponential(0.045, self.n_neurons).astype(np.float32)
 
-        # 에너지 수준이 전체에 영향 (에너지 낮으면 활성↓)
+        # 에너지 수준이 전체에 영향
         input_signal *= (0.3 + 0.7 * energy_pool)
 
         # 2. SNN 실행 (10 시뮬레이션 스텝 = 1틱)
+        # 매 스텝 동일한 입력 유지 (뇌: 자극은 지속됨, 즉시 사라지지 않음)
         total_spikes = np.zeros(self.n_neurons, dtype=np.float32)
+        base_input = input_signal.copy()
         for step in range(10):
-            spikes = self.snn.step(input_signal)
+            # 지속 입력 + 스텝별 노이즈
+            step_input = base_input * 0.7 + rng.exponential(0.03, self.n_neurons).astype(np.float32)
+            spikes = self.snn.step(step_input)
             total_spikes += spikes.astype(np.float32)
-            # 입력은 매 스텝 감쇠하되 배경 노이즈는 유지
-            input_signal = input_signal * 0.5 + rng.exponential(0.03, self.n_neurons).astype(np.float32)
 
         # 발화율
         firing_rate = total_spikes / 10.0
 
-        # 3. 에너지 강도 판정
-        if energy_pool < 0.1:
-            intensity = 1  # 최소만 가능
-        elif energy_pool < 0.3:
-            intensity = 1
-        elif energy_pool < 0.5:
-            intensity = 2
-        else:
-            intensity = min(2, 1 + int(firing_rate.mean() * 20))  # Phase 0: 최대 강도2
+        # 3. 에너지 강도 판정 (Phase 0: 강도1만 사용)
+        intensity = 1
 
         # 4. 행동 결정 (readout)
         action_logits = self.readout_weights @ firing_rate
