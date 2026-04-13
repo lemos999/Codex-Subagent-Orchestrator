@@ -1,0 +1,67 @@
+[
+  {
+    "id": 0,
+    "energy": 0.9,
+    "hunger": 0.5,
+    "sleepiness": 0.7,
+    "fear": 0.6,
+    "joy": 0.0,
+    "anger": 0.3,
+    "context": "energetic, hungry, very sleepy, afraid",
+    "teacher": "codex",
+    "response": "sleep",
+    "action": "sleep"
+  },
+  {
+    "id": 1,
+    "energy": 0.05,
+    "hunger": 0.5,
+    "sleepiness": 0.4,
+    "fear": 0.0,
+    "joy": 0.0,
+    "anger": 0.3,
+    "context": "extremely exhausted, hungry, a bit sleepy",
+    "teacher": "codex",
+    "response": "sleep",
+    "action": "sleep"
+  },
+  {
+    "id": 2,
+    "energy": 0.15,
+    "hunger": 0.5,
+    "sleepiness": 0.7,
+    "fear": 0.0,
+    "joy": 0.6,
+    "anger": 0.3,
+    "context": "very tired, hungry, very sleepy, happy",
+    "teacher": "codex",
+    "response": "sleep",
+    "action": "sleep"
+  },
+  {
+    "id": 3,
+    "energy": 0.05,
+    "hunger": 0.5,
+    "sleepiness": 0.2,
+    "fear": 0.0,
+    "joy": 0.0,
+    "anger": 0.3,
+    "context": "extremely exhausted, hungry",
+    "teacher": "codex",
+    "response": "sleep",
+    "action": "sleep"
+  },
+  {
+    "id": 4,
+    "energy": 0.3,
+    "hunger": 0.7,
+    "sleepiness": 0.2,
+    "fear": 0.3,
+    "joy": 0.0,
+    "anger": 0.3,
+    "context": "somewhat tired, hungry",
+    "teacher": "codex",
+    "response": "eat",
+    "action": "eat"
+  }
+]

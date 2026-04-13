@@ -4,6 +4,7 @@ PersonaBrain Phase 0: 최소 뇌 — 입력 → LIF → 행동 결정.
 "서하린이 숨을 쉰다" — 에너지 소비, 피로, 수면을 느끼는 뇌.
 """
 from __future__ import annotations
+import os
 import numpy as np
 from .lif_network import LIFNetwork
 
@@ -24,11 +25,17 @@ class PersonaBrain:
         self.snn = LIFNetwork(n_neurons=n_neurons, seed=seed)
         self.n_neurons = n_neurons
 
-        # 행동 readout 가중치 (Layer 2 등가, 무작위 초기화)
-        rng = np.random.default_rng(seed + 1)
-        self.readout_weights = rng.standard_normal(
-            (len(ACTIONS), n_neurons)
-        ).astype(np.float32) * 0.01
+        # 행동 readout 가중치 (Layer 2)
+        model_path = os.path.join(os.path.dirname(__file__), "..", "data", "models", "readout_weights_v1.npy")
+        if os.path.exists(model_path):
+            self.readout_weights = np.load(model_path)
+            self._teacher_trained = True
+        else:
+            rng = np.random.default_rng(seed + 1)
+            self.readout_weights = rng.standard_normal(
+                (len(ACTIONS), n_neurons)
+            ).astype(np.float32) * 0.01
+            self._teacher_trained = False
 
     def tick(
         self,
