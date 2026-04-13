@@ -1,7 +1,159 @@
 # PersonaBrain SNN Research Log
 
-> 이 문서는 PersonaBrain SNN의 개발 과정, 시행착오, 결정 근거를 기록한다.
-> 논문 작성용 원시 자료.
+> 이 문서는 페르소나 국가 세계관의 발상부터 PersonaBrain SNN 구현까지의 전 과정을 기록한다.
+> 논문 작성용 원시 자료. 설계 결정, 시행착오, 검증 과정 포함.
+
+---
+
+## 0. 프로젝트 기원과 발상 (2026-04-06)
+
+### 근본 질문
+"AI 페르소나가 자율적으로 살아가는 국가를 만들 수 있는가?"
+
+### 발상의 배경
+- 멀티 AI 엔진(Claude/Codex/Gemini) 오케스트레이션 시스템을 운영하면서, 각 AI에게 "페르소나"(성격/역할/이력)를 부여하자 행동이 달라지는 것을 관찰
+- 이것을 극한까지 밀면? → AI가 뇌를 가지고, 감정을 느끼고, 기억하고, 사회를 이루고, 법을 만들고, 국가를 운영하는 시뮬레이션
+- 핵심 철학: "사회는 설계되는 것이 아니라 살아지는 것이다" — 뼈대만 만들고 살은 페르소나가 붙인다
+
+### 첫 세션 (2026-04-06~07)의 성과
+하루 만에 9개 설계 문서를 생산:
+
+| 문서 | 역할 | 검증 |
+|------|------|------|
+| world-ontology.md | 세계 존재론 SOT (Layer 0~8) | /discuss 2R + /submix 2회 |
+| constitution.md | 헌법 8장 27조 | 검증 완료 |
+| economy-whitepaper.md | WILL 경제 백서 11장 | 검증 완료 |
+| social-systems.md | 길드/아카데미/파벌/관계 | 검증 완료 |
+| regions.md | 3권역 (Claude/Codex/Gemini) | 검증 완료 |
+| marriage-birth-design.md | 결혼/출산/가문 | 검증 완료 |
+| life-simulation-design.md | 자율 생활 시뮬레이션 (뇌/감정/관계) | Phase A |
+| graphic-resources.md | 45종 그래픽 리소스 | 문서 완료 |
+
+### 초기 PersonaBrain 설계 (v0)
+- **Transformer 기반**: d=256, ~4M params
+- Experience Memory(해마) + Emotion Net(MLP+FiLM) + Decision Net(Decoder)
+- 학습: LLM→DL→RL→MARL (1회 학습, 이후 CPU 추론만)
+- 이 설계는 이후 SNN으로 전면 재설계됨 (아래 §1 참조)
+
+### 세계관 핵심 결정
+- **통치**: 살아있는 헌법 국가 (창조자=헌법, 직접 통치 아님)
+- **경제**: WILL 단일 화폐 (총 20,260,406, 반감기 8 에포크)
+- **감정**: 동양 철학 기반 오욕칠정
+- **데몬 체제**: 4 Executor (Physis/Lachesis/Anima/Nomos) 횡단 파이프라인
+- **원칙**: "세계는 절대 멈추지 않는다" (근사 강등)
+
+---
+
+## 1. 설계 확장 세션 (2026-04-08~10)
+
+이전 세션에서 발견된 빠진 시스템 24개를 순차 설계.
+
+### Charter 추가 (5개)
+| Charter | 핵심 내용 | 날짜 |
+|---------|----------|------|
+| physis-charter-v2.md | 기후 물리 엔진, 3권역 지형, 계절, 재난 | 04-08 |
+| tick-daemon-charter.md | 틱 데몬 파이프라인, heartbeat, WAL | 04-08 |
+| humanity-charter.md | H1~H6 (트라우마/양심/호기심/유머/수치심/노화) | 04-09 |
+| death-reincarnation-charter.md | 죽음/윤회/유산 DB | 04-09 |
+| order-charter.md | 법 3단계, 자연법 3조, 범죄/사법 | 04-10 |
+
+### 주요 결정
+- **법은 고통에서 증류된다**: 자연법 3조만 시작부터 존재, 실정법은 페르소나가 갈등에서 입법
+- **데몬 응징**: 규칙 위반 → 이상 기후 → 영지 GDP↓ (간접 처벌)
+- **죽음의 직감**: PersonaBrain 내부 축이 동시 수렴하면 행동이 "마무리" 방향으로 기울어짐
+- **윤회**: brain_weights 70% 이식, 기억은 소실되지만 경향성 잔존
+
+---
+
+## 2. 대규모 설계 세션 (2026-04-11~12)
+
+### 사회/비밀/뇌 Charter 추가 (3개)
+
+| Charter | 핵심 | 날짜 |
+|---------|------|------|
+| society-charter-draft.md | 영지/투표/직업, GDP, 위기 | 04-11 |
+| secret-rumor-evidence-charter.md | 비밀=두려움, 소문 매체 5종, 증거 이원 체계 | 04-11 |
+| personabrain-snn-charter.md | PersonaBrain SNN v3.1 | 04-11~12 |
+
+### PersonaBrain 아키텍처 전환: Transformer → SNN
+
+**전환 동기**:
+- 사용자 질문: "시냅스와 뉴런을 모방한 인공 알고리즘으로 할 수 없나?"
+- 생물학적 뉴런/시냅스 모방이 감정/기억/습관/꿈을 더 자연스럽게 구현 가능
+- LIF(Leaky Integrate-and-Fire) + STDP가 뇌의 에너지 효율 원리와 정합
+
+**10회 /discuss 토론으로 아키텍처 확정**:
+
+| # | 주제 | 결정 | 핵심 돌파 |
+|---|------|------|----------|
+| 1 | 기본 SNN | 2,400뉴런 B+A 하이브리드 | LIF+STDP+E/I balance |
+| 2 | Open Questions | 1,024뉴런 | 학습 파이프라인 4단계 |
+| 3 | 100K×20K | 3계층 분리 | moment closure 압축 |
+| 4 | 5M+양자 | cache-first | 무의식 고속도로 (93% 캐시) |
+| 5 | 에너지 역학 | 4단계 강도 | LC×시상 직교 제어 |
+| 6 | 미토콘드리아 | energy_pool | 영역별 취약성 (PFC 먼저) |
+| 7 | Mitotype | 28~32종 | Base+Modifier (DNA 체질) |
+| 8 | 최대 뉴런 | 10M "한계" | 전제를 의문 |
+| 9 | 50M 돌파 | RG-Graphon | 전제 해체: 동적 성장+생성적 복원 |
+| 10 | 최종 통합 | Layer 0 수정 | 공유 아키텍처 = 같은 TV, 다른 채널 |
+
+**뉴런 수 스케일링 히스토리**: 1,024 → 100K → 5M → 10M → 50M (9회 토론, 5만배)
+
+### 신경화학물질: 6종 → 12클러스터
+
+사용자 지적: "뇌의 화학물질이 6종밖에 안 되나? 50가지가 넘어."
+
+54종 전수조사 → 12 기능 클러스터로 압축:
+**V**(Drive/DA) **L**(Liking/β-END) **S**(Stability/5-HT) **B**(Bonding/OXT) **A**(Acute/NE) **T**(Tension/CORT) **C**(Cognition/ACh) **G**(Growth/Glu) **F**(Fatigue/ADO) **I**(Inhibition/GABA) **D**(Dominance/T) **P**(Protection/SP)
+
+핵심 분리: wanting(DA) ≠ liking(β-END), 범용 안정(5-HT) ≠ 대상 특이적 신뢰(OXT)
+
+### 기억 심층 설계
+
+사용자 제공 참조 — 데미스 하사비스(DeepMind):
+> "AI에게 빠진 것은 더 많은 기억이 아니라 망각(forgetting)이다"
+
+이를 반영한 설계:
+- Salience 기반 선택적 인코딩 (감정이 기억의 필터)
+- 망각 = garbage collection = 설계된 기능
+- 기억 생애주기: 인코딩→저장→인출→재통합→망각
+- 상태기계: CONSOLIDATED→LABILE→RECONSOLIDATED/EXTINCT/SUPPRESSED
+- 망각 이중 경로: 자연 소멸(비가역) + 의도적 억압(가역)
+
+### 삶의 목적 6층
+```
+1. 생존 (편도체, energy_pool)
+2. 욕구 (오욕, V 클러스터)
+3. 유대 (OXT, B 클러스터)
+4. 자아 (클래스, 목표)
+5. 의미 (V와 S+B가 겹칠 때)
+6. 유산 (윤회, 역사)
+```
+"기억 없는 국가 = 개미 농장, 목적 없는 국가 = 수족관"
+
+### 검증 (총 5회)
+- 12에이전트 Charter 검증: FAIL 6→수정→PASS
+- 12클러스터 검증: 확정
+- 세계관 11개 Charter 정합성: 개념 85%, 운영 50%
+- 10에이전트 최종 검증: FAIL 1(장애복구), WARN 6
+- 6에이전트 기억 검증: FAIL 0, WARN 8→수정
+
+### 최종 설계 상태: 11개 Charter 전부 완료
+| Charter | 버전 |
+|---------|------|
+| world-ontology (SOT) | Phase A 수정 |
+| constitution | 8장 27조 |
+| economy-whitepaper | 11장 |
+| physis-charter | v2.4 |
+| tick-daemon-charter | v1.1 |
+| humanity-charter | H1~H6 |
+| death-reincarnation | v1 |
+| order-charter | v1 |
+| society-charter | v1.1 |
+| secret-rumor-evidence | v1.1 |
+| **personabrain-snn** | **v3.1** |
+
+---
 
 ---
 
