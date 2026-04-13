@@ -88,11 +88,33 @@ class DashboardEngine:
 
         if self.inner.is_sleeping:
             self.inner.sleep_ticks_remaining -= 1
+            sleep_phase = "nrem" if self.inner.sleep_ticks_remaining > 1 else "rem"
             self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.15)
             self.inner.oyok[1] = max(0.0, self.inner.oyok[1] - 0.15)
+
+            # Phase 3: 꿈
+            dream_action = None
+            if sleep_phase == "nrem":
+                self.brain.snn.weights[:self.brain.snn.n_exc, :] *= 0.998
+                mask = np.abs(self.brain.snn.weights) < 0.001
+                self.brain.snn.weights[mask] = 0
+            else:
+                if self.inner.episodes:
+                    sorted_eps = sorted(self.inner.episodes, key=lambda e: e.salience, reverse=True)
+                    for ep in sorted_eps[:3]:
+                        self.inner.chiljeong = (self.inner.chiljeong * 0.5 + ep.emotion_snapshot * 0.5).astype(np.float16)
+                        ep.recall_count += 1
+                        dream_action = ep.action
+                    if len(self.inner.episodes) > 30:
+                        self.inner.episodes.sort(key=lambda e: e.salience, reverse=True)
+                        self.inner.episodes = self.inner.episodes[:30]
+
             if self.inner.sleep_ticks_remaining <= 0:
                 self.inner.is_sleeping = False
-            action, intensity, cost = "sleeping", 0, 0.0
+                self.brain.snn.clear_reward()
+
+            action = f"dream:{dream_action}" if dream_action else f"sleep:{sleep_phase}"
+            intensity, cost = 0, 0.0
             firing_rate = 0.0
         else:
             climate_vec = self.weather.to_climate_vec()
@@ -109,6 +131,10 @@ class DashboardEngine:
             if action == "eat":
                 self.inner.oyok[0] = max(0.0, self.inner.oyok[0] - 0.5)
                 self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.05)
+
+            # Phase 2: 도파민 RL
+            reward = self._compute_reward(action, self.inner.energy_pool, prev_energy)
+            self.brain.snn.apply_reward(reward)
 
             # Phase 1: 감정 + tone + 기억
             self.inner.update_emotion(action, self.inner.energy_pool, prev_energy)
@@ -129,6 +155,10 @@ class DashboardEngine:
             firing_rate = self.brain.get_stats()["firing_rate"]
 
         neuron_snapshot = self.get_neuron_snapshot() if not self.inner.is_sleeping else None
+        try:
+            reward_val = reward
+        except UnboundLocalError:
+            reward_val = 0.0
 
         return {
             "tick": self.time.tick,
@@ -154,6 +184,7 @@ class DashboardEngine:
                 "type": action,
                 "intensity": intensity,
                 "cost": cost,
+                "reward": round(reward_val, 3),
             },
             "brain": {
                 "firing_rate": round(firing_rate, 4),
@@ -161,6 +192,20 @@ class DashboardEngine:
                 "neurons": neuron_snapshot,
             },
         }
+
+    def _compute_reward(self, action, energy, prev_energy):
+        reward = 0.0
+        hunger = float(self.inner.oyok[0])
+        if energy < 0.1: reward -= 0.5
+        elif energy < prev_energy - 0.1: reward -= 0.1
+        if action == "eat" and hunger > 0.5: reward += 0.5
+        elif action == "eat" and hunger < 0.2: reward -= 0.2
+        if action == "sleep" and energy < 0.3: reward += 0.3
+        elif action == "sleep" and energy > 0.7: reward -= 0.2
+        if action == "work" and energy > 0.5 and hunger < 0.5: reward += 0.2
+        if action == "explore" and energy > 0.6: reward += 0.1
+        if action == "idle": reward -= 0.05
+        return max(-1.0, min(1.0, reward))
 
     async def broadcast(self, data: dict):
         if not self.clients:

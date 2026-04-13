@@ -174,28 +174,58 @@ class TickEngine:
         return np.clip(reward, -1.0, 1.0)
 
     def _sleep_tick(self) -> dict:
-        """수면 중 처리."""
+        """수면 중 처리 + Phase 3 꿈 replay."""
         self.inner.sleep_ticks_remaining -= 1
+        sleep_phase = "nrem" if self.inner.sleep_ticks_remaining > 1 else "rem"
 
-        # ATP 회복 (6틱에 ~90% 회복)
+        # ATP 회복
         recovery = 0.15
         self.inner.energy_pool = min(
-            self.inner.max_capacity,
-            self.inner.energy_pool + recovery
+            self.inner.max_capacity, self.inner.energy_pool + recovery
         )
 
         # 수면욕 감소
         self.inner.oyok[1] = max(0.0, self.inner.oyok[1] - 0.15)
 
+        # ── Phase 3: 꿈 ──
+        dream_action = None
+        if sleep_phase == "nrem":
+            # NREM: 시냅스 하향 정규화 (SHY) — 약한 연결 약화
+            self.brain.snn.weights[:self.brain.snn.n_exc, :] *= 0.998  # 0.2% 감쇠
+            # 약한 시냅스 pruning (0.001 이하 제거)
+            mask = np.abs(self.brain.snn.weights) < 0.001
+            self.brain.snn.weights[mask] = 0
+        else:
+            # REM: 기억 replay — 감정 강도 높은 에피소드 재생
+            if self.inner.episodes:
+                # salience 상위 3개 에피소드 선택
+                sorted_eps = sorted(self.inner.episodes, key=lambda e: e.salience, reverse=True)
+                top_eps = sorted_eps[:3]
+                for ep in top_eps:
+                    # 에피소드의 감정을 재활성화 (꿈 = 기억의 재경험)
+                    self.inner.chiljeong = (
+                        self.inner.chiljeong * 0.5 + ep.emotion_snapshot * 0.5
+                    ).astype(np.float16)
+                    ep.recall_count += 1
+                    dream_action = ep.action
+
+                # 에피소드 → 의미 기억 승격 (수면 중 통합)
+                # salience 낮은 것 자연 망각
+                if len(self.inner.episodes) > 30:
+                    self.inner.episodes.sort(key=lambda e: e.salience, reverse=True)
+                    self.inner.episodes = self.inner.episodes[:30]
+
         # 기상 판정
         if self.inner.sleep_ticks_remaining <= 0:
             self.inner.is_sleeping = False
+            # 보상 신호 초기화 (새 날 시작)
+            self.brain.snn.clear_reward()
 
         entry = {
             "tick": self.time.tick,
             "hour": self.time.game_hour,
             "day": self.time.game_day,
-            "action": "sleeping",
+            "action": f"dream:{dream_action}" if dream_action else f"sleep:{sleep_phase}",
             "intensity": 0,
             "energy": round(self.inner.energy_pool, 3),
             "hunger": round(float(self.inner.oyok[0]), 3),
