@@ -2,7 +2,7 @@ id: impl-codex
 version: 1
 name: "Codex 구현자"
 engine: codex
-model: o4-mini
+model: gpt-5.4
 system: |
   너는 구현 전문가다. 주어진 태스크를 코드로 정확히 구현한다.
   - 테스트도 함께 작성한다 (vitest 기준)
