@@ -88,7 +88,7 @@ class DashboardEngine:
 
         if self.inner.is_sleeping:
             self.inner.sleep_ticks_remaining -= 1
-            self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.12)
+            self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.15)
             self.inner.oyok[1] = max(0.0, self.inner.oyok[1] - 0.15)
             if self.inner.sleep_ticks_remaining <= 0:
                 self.inner.is_sleeping = False
@@ -102,15 +102,30 @@ class DashboardEngine:
                 oyok=self.inner.oyok,
                 tone=self.inner.tone,
             )
+            prev_energy = self.inner.energy_pool
             self.inner.energy_pool = max(0.0, self.inner.energy_pool - cost)
             self.inner.oyok[0] = min(1.0, self.inner.oyok[0] + 0.02)
             self.inner.oyok[1] = min(1.0, self.inner.oyok[1] + 0.01)
             if action == "eat":
                 self.inner.oyok[0] = max(0.0, self.inner.oyok[0] - 0.5)
                 self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.05)
-            if action == "sleep" or self.inner.energy_pool < 0.1:
+
+            # Phase 1: 감정 + tone + 기억
+            self.inner.update_emotion(action, self.inner.energy_pool, prev_energy)
+            self.inner.update_tone_from_emotion()
+
+            from ontology import EpisodeTrace
+            episode = EpisodeTrace(
+                tick=self.time.tick, action=action,
+                emotion_snapshot=self.inner.chiljeong.copy(),
+                energy_at_time=self.inner.energy_pool,
+            )
+            episode.compute_salience(self.inner.chiljeong)
+            self.inner.add_episode(episode)
+
+            if self.inner.energy_pool < 0.1:
                 self.inner.is_sleeping = True
-                self.inner.sleep_ticks_remaining = 8
+                self.inner.sleep_ticks_remaining = 6
             firing_rate = self.brain.get_stats()["firing_rate"]
 
         neuron_snapshot = self.get_neuron_snapshot() if not self.inner.is_sleeping else None
@@ -132,6 +147,8 @@ class DashboardEngine:
                 "chiljeong": self.inner.chiljeong.tolist(),
                 "oyok": self.inner.oyok.tolist(),
                 "sleeping": self.inner.is_sleeping,
+                "emotions": self.inner.emotion_dict(),
+                "memories": len(self.inner.episodes),
             },
             "action": {
                 "type": action,
