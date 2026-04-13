@@ -11,3 +11,7 @@ For coding requests, follow the shared mandatory plan-first contract defined in 
 At the start of every turn, read `AGENTS.md` again before any other substantial work so the active workspace contract is refreshed and the workflow does not drift.
 
 When time must be queried or recorded, always use the user's timezone from the current session context as the authoritative basis. Do not default to the agent, host, or system timezone when a user timezone is available.
+
+## Search Philosophy
+
+Search when the answer may be stale, when source precision matters, or when meaningful uncertainty remains; do not rely on memory in those cases. Prefer official and primary sources when accuracy matters, avoid unnecessary searching for stable well-known facts, and aim any search in the direction that most helps implement the user's intent and complete the task well.
