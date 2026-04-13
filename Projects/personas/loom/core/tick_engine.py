@@ -13,6 +13,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import numpy as np
 from ontology import Creator, Weather, GameTime, Persona, InnerWorld, ActionProposal
 from brain import PersonaBrain
 
@@ -90,6 +91,10 @@ class TickEngine:
             self.inner.oyok[0] = max(0.0, self.inner.oyok[0] - 0.5)
             self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.05)
 
+        # ── Phase 2: 도파민 RL (보상 신호 계산 + 주입) ──
+        reward = self._compute_reward(action, self.inner.energy_pool, prev_energy)
+        self.brain.snn.apply_reward(reward)
+
         # ── Phase 1: 감정 갱신 ──
         self.inner.update_emotion(action, self.inner.energy_pool, prev_energy)
 
@@ -130,9 +135,43 @@ class TickEngine:
             "tone_A": round(float(self.inner.tone[4]), 3),
             "tone_I": round(float(self.inner.tone[9]), 3),
             "memories": len(self.inner.episodes),
+            "reward": round(reward, 3),
         }
         self.log.append(entry)
         return entry
+
+    def _compute_reward(self, action: str, energy: float, prev_energy: float) -> float:
+        """행동 결과 → 보상 신호 (Nomos 등가)."""
+        reward = 0.0
+        hunger = float(self.inner.oyok[0])
+
+        # 생존 보상/벌점
+        if energy < 0.1:
+            reward -= 0.5  # 에너지 고갈 = 큰 벌점
+        elif energy < prev_energy - 0.1:
+            reward -= 0.1  # 에너지 급락
+
+        # 행동별 보상
+        if action == "eat" and hunger > 0.5:
+            reward += 0.5  # 배고플 때 먹음 = 큰 보상
+        elif action == "eat" and hunger < 0.2:
+            reward -= 0.2  # 안 배고픈데 먹음 = 벌점 (낭비)
+
+        if action == "sleep" and energy < 0.3:
+            reward += 0.3  # 피곤할 때 잠 = 보상
+        elif action == "sleep" and energy > 0.7:
+            reward -= 0.2  # 에너지 충분한데 잠 = 벌점
+
+        if action == "work" and energy > 0.5 and hunger < 0.5:
+            reward += 0.2  # 여유 있을 때 일 = 보상
+
+        if action == "explore" and energy > 0.6:
+            reward += 0.1  # 여유 있을 때 탐험 = 소량 보상
+
+        if action == "idle":
+            reward -= 0.05  # 아무것도 안 함 = 미세 벌점
+
+        return np.clip(reward, -1.0, 1.0)
 
     def _sleep_tick(self) -> dict:
         """수면 중 처리."""
@@ -184,13 +223,16 @@ class TickEngine:
                 fear = emo.get("fear", 0)
                 desire = emo.get("desire", 0)
                 mem = entry.get("memories", 0)
+                rw = entry.get("reward", 0)
+                rw_str = f"+{rw:.1f}" if rw >= 0 else f"{rw:.1f}"
                 print(
                     f"[D{entry['day']:2d} H{entry['hour']:02d}] "
                     f"{status} {entry['action']:8s} "
                     f"E={entry['energy']:.2f} "
                     f"h={entry['hunger']:.1f} "
                     f"fr={entry['firing_rate']:.3f} "
-                    f"joy={joy:.1f} ang={anger:.1f} fear={fear:.1f} "
+                    f"R={rw_str:>5s} "
+                    f"joy={joy:.1f} fear={fear:.1f} "
                     f"mem={mem}"
                 )
 

@@ -48,12 +48,19 @@ class LIFNetwork:
         self.spikes = np.zeros(n_neurons, dtype=np.bool_)
 
         # STDP 관련
-        self.spike_trace = np.zeros(n_neurons, dtype=np.float32)  # 스파이크 흔적 (지수 감쇠)
-        self.stdp_lr = 0.0003  # STDP 학습률 (0.001→0.0003, STDP 발산 억제)
+        self.spike_trace = np.zeros(n_neurons, dtype=np.float32)  # 스파이크 흔적
+        self.stdp_lr = 0.0003  # 기본 STDP 학습률
         self.trace_decay = 0.95  # 흔적 감쇠율
+
+        # Phase 2: 3-factor STDP (도파민 RL)
+        self.reward_signal = 0.0  # 외부 보상 신호 (-1 ~ +1)
+        self.rl_lr = 0.001  # RL 학습률 (STDP보다 3배 강함)
+        self.eligibility_trace = np.zeros((n_neurons, n_neurons), dtype=np.float32)  # 적격 흔적
+        self.eligibility_decay = 0.9  # 적격 흔적 감쇠
 
         # 통계
         self.total_spikes_history = []
+        self.reward_history = []
 
     def step(self, external_input: np.ndarray | None = None) -> np.ndarray:
         """1 시뮬레이션 스텝 실행."""
@@ -95,30 +102,60 @@ class LIFNetwork:
         return self.spikes.copy()
 
     def _stdp_update(self):
-        """기본 STDP: 함께 발화하면 강화, 시간차 있으면 약화."""
+        """3-factor STDP: pre × post × reward (도파민 RL)."""
         # 흔적 감쇠
         self.spike_trace *= self.trace_decay
 
         # 발화한 뉴런의 흔적 갱신
         self.spike_trace[self.spikes] = 1.0
 
+        # 적격 흔적(eligibility trace) 감쇠
+        self.eligibility_trace *= self.eligibility_decay
+
         if not np.any(self.spikes):
             return
 
-        # Pre-post: post가 발화할 때, pre의 흔적이 높으면 강화
+        # Pre-post: 적격 흔적 축적 (보상 도착 전까지 대기)
         spike_idx = np.where(self.spikes)[0]
         for post in spike_idx:
             if post >= self.n_exc:
-                continue  # 억제 뉴런의 시냅스는 STDP 안 함
-            # pre → post 시냅스 강화 (pre의 흔적에 비례)
+                continue  # 억제 뉴런은 STDP 제외
             pre_trace = self.spike_trace.copy()
-            pre_trace[post] = 0  # 자기 자신 제외
-            dw = self.stdp_lr * pre_trace
-            self.weights[post, :] += dw * (self.weights[post, :] != 0)  # 기존 연결만
+            pre_trace[post] = 0
+            # 적격 흔적에 추가 (보상이 올 때까지 축적)
+            mask = self.weights[post, :] != 0
+            self.eligibility_trace[post, :] += pre_trace * mask
+
+        # 보상 신호가 있을 때만 실제 가중치 변경 (3rd factor)
+        if abs(self.reward_signal) > 0.01:
+            # reward > 0: 적격 흔적 방향으로 강화
+            # reward < 0: 적격 흔적 반대 방향으로 약화
+            dw = self.rl_lr * self.reward_signal * self.eligibility_trace[:self.n_exc, :]
+            self.weights[:self.n_exc, :] += dw
+            # 보상 소비 후 적격 흔적 초기화
+            self.eligibility_trace *= 0.5  # 부분 소비 (완전 초기화 아님)
+            self.reward_history.append(self.reward_signal)
+        else:
+            # 보상 없으면 기본 STDP만 (약하게)
+            for post in spike_idx:
+                if post >= self.n_exc:
+                    continue
+                pre_trace = self.spike_trace.copy()
+                pre_trace[post] = 0
+                dw = self.stdp_lr * pre_trace
+                self.weights[post, :] += dw * (self.weights[post, :] != 0)
 
         # 가중치 클리핑 (발산 방지)
         self.weights[:self.n_exc, :] = np.clip(self.weights[:self.n_exc, :], 0, 0.3)
         self.weights[self.n_exc:, :] = np.clip(self.weights[self.n_exc:, :], -0.5, 0)
+
+    def apply_reward(self, reward: float):
+        """외부에서 보상 신호 주입. 다음 STDP 업데이트에 적용."""
+        self.reward_signal = np.clip(reward, -1.0, 1.0)
+
+    def clear_reward(self):
+        """보상 신호 소비 후 초기화."""
+        self.reward_signal = 0.0
 
     def get_firing_rate(self) -> float:
         """현재 스텝의 발화율."""
