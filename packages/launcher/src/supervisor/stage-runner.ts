@@ -18,6 +18,8 @@ import { findMissingPaths, findEmptyPaths } from '../common/fs-helpers.js';
 import type { UsageMonitor } from '../workers/usage-monitor.js';
 import { checkOutputQuality } from '../workers/output-quality.js';
 import type { TrustRegistry } from '../workers/trust-registry.js';
+import type { HarnessEventBus } from '../harness/event-bus.js';
+import type { SessionManager } from '../harness/session-manager.js';
 
 // ============================================================
 // Single worker execution with validation
@@ -27,7 +29,28 @@ async function executeWorker(
   spec: ResolvedWorkerSpec,
   monitor?: UsageMonitor,
   trustRegistry?: TrustRegistry,
+  harnessBus?: HarnessEventBus | null,
+  sessionManager?: SessionManager | null,
 ): Promise<WorkerResult> {
+  const sessionId = spec.sessionId;
+  const startTime = Date.now();
+
+  // Harness: create session and emit spawned event
+  if (sessionId && sessionManager) {
+    sessionManager.create(sessionId);
+    sessionManager.transition(sessionId, 'running');
+  }
+  if (sessionId && harnessBus) {
+    harnessBus.emit({
+      type: 'worker.spawned',
+      sessionId,
+      name: spec.name,
+      engine: spec.engine,
+      model: spec.model,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   // Register with usage monitor before spawn
   if (monitor?.enabled) {
     const stdoutPath = path.resolve(
@@ -70,6 +93,23 @@ async function executeWorker(
     const succeeded = output.exitCode === 0 && validationFailures.length === 0;
     trustRegistry.recordRun(spec.engine, succeeded, 0,
       succeeded ? undefined : validationFailures[0] ?? `exit code ${output.exitCode}`);
+  }
+
+  // Harness: emit completed event and transition state
+  const durationMs = Date.now() - startTime;
+  if (sessionId && harnessBus) {
+    const succeeded = output.exitCode === 0 && validationFailures.length === 0;
+    harnessBus.emit({
+      type: 'worker.completed',
+      sessionId,
+      name: spec.name,
+      exitCode: output.exitCode,
+      durationMs,
+      timestamp: new Date().toISOString(),
+    });
+    if (sessionManager) {
+      sessionManager.transition(sessionId, succeeded ? 'idle' : 'terminated');
+    }
   }
 
   return toWorkerResult(
@@ -149,6 +189,8 @@ export async function runStages(
   executionMode: ExecutionMode = 'sequential',
   monitor?: UsageMonitor,
   trustRegistry?: TrustRegistry,
+  harnessBus?: HarnessEventBus | null,
+  sessionManager?: SessionManager | null,
 ): Promise<WorkerResult[]> {
   const results: WorkerResult[] = [];
   const workerMap = new Map(workers.map((w) => [w.name, w]));
@@ -162,29 +204,52 @@ export async function runStages(
 
     if (stageWorkers.length === 0) continue;
 
+    // Harness: stage started
+    harnessBus?.emit({
+      type: 'stage.started',
+      stageNum: stage.stage,
+      workerCount: stageWorkers.length,
+      timestamp: new Date().toISOString(),
+    });
+
+    let stageSucceeded = 0;
+    let stageFailed = 0;
+
     if (executionMode === 'parallel' && stageWorkers.length > 1) {
       // Parallel: same-stage workers run concurrently
       const settled = await Promise.allSettled(
-        stageWorkers.map((w) => executeWorker(w, monitor, trustRegistry)),
+        stageWorkers.map((w) => executeWorker(w, monitor, trustRegistry, harnessBus, sessionManager)),
       );
 
       for (let i = 0; i < settled.length; i++) {
         const s = settled[i];
         if (s.status === 'fulfilled') {
           results.push(s.value);
+          if (s.value.succeeded) stageSucceeded++; else stageFailed++;
         } else {
           results.push(
             buildSpawnErrorResult(stageWorkers[i], stage.stage, s.reason),
           );
+          stageFailed++;
         }
       }
     } else {
       // Sequential: one worker at a time
       for (const spec of stageWorkers) {
-        const result = await executeWorker(spec, monitor, trustRegistry);
+        const result = await executeWorker(spec, monitor, trustRegistry, harnessBus, sessionManager);
         results.push(result);
+        if (result.succeeded) stageSucceeded++; else stageFailed++;
       }
     }
+
+    // Harness: stage completed
+    harnessBus?.emit({
+      type: 'stage.completed',
+      stageNum: stage.stage,
+      succeeded: stageSucceeded,
+      failed: stageFailed,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   return results;

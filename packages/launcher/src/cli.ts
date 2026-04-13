@@ -12,10 +12,11 @@ import { orchestrate } from './orchestrator.js';
 // Argument parsing
 // ============================================================
 
-function parseArgs(argv: string[]): { specPath: string; jsonOutput: boolean } {
+function parseArgs(argv: string[]): { specPath: string; jsonOutput: boolean; harnessMode: boolean } {
   const args = argv.slice(2); // skip node and script path
   let specPath: string | null = null;
   let jsonOutput = false;
+  let harnessMode = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--spec' && i + 1 < args.length) {
@@ -23,15 +24,17 @@ function parseArgs(argv: string[]): { specPath: string; jsonOutput: boolean } {
       i++;
     } else if (args[i] === '--json') {
       jsonOutput = true;
+    } else if (args[i] === '--harness') {
+      harnessMode = true;
     }
   }
 
   if (!specPath) {
-    console.error('Usage: subagent-launch --spec <path> [--json]');
+    console.error('Usage: subagent-launch --spec <path> [--json] [--harness]');
     process.exit(1);
   }
 
-  return { specPath, jsonOutput };
+  return { specPath, jsonOutput, harnessMode };
 }
 
 // ============================================================
@@ -97,12 +100,12 @@ function printSummaryTable(result: Awaited<ReturnType<typeof orchestrate>>): voi
 // ============================================================
 
 async function main(): Promise<void> {
-  const { specPath, jsonOutput } = parseArgs(process.argv);
+  const { specPath, jsonOutput, harnessMode } = parseArgs(process.argv);
   const absoluteSpecPath = path.resolve(process.cwd(), specPath);
   const invocationCwd = process.cwd();
 
   try {
-    const result = await orchestrate(absoluteSpecPath, invocationCwd);
+    const result = await orchestrate(absoluteSpecPath, invocationCwd, { harnessMode });
 
     if (jsonOutput) {
       // JSON output mode for queue runner integration

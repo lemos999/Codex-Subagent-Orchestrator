@@ -82,6 +82,10 @@ export interface AgentSpec {
   prompt?: string;
   task?: string;
 
+  // --- Agent registry (optional, harness mode) ---
+  agent_id?: string;
+  agent_version?: number;
+
   // --- Optional ---
   engine?: Engine;
   mode?: 'exec' | 'resume';

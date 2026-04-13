@@ -39,6 +39,7 @@ export interface ResolvedWorkerSpec {
   requiredNonEmptyPaths: string[];
   extraArgs: string[];
   timeoutMs: number;
+  sessionId?: string;
 }
 
 // ============================================================

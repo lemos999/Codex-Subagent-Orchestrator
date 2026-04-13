@@ -33,6 +33,8 @@ import { appendEntry, computeWorkerResultsHash, DEFAULT_CHAIN_FILENAME } from '.
 import { UsageMonitor } from './workers/usage-monitor.js';
 import { TrustRegistry } from './workers/trust-registry.js';
 import type { ResolvedWorkerSpec } from './workers/spawn.js';
+import { HarnessEventBus, SessionManager, ToolTracker, EventLogWriter, generateSessionId, loadAgentDefinition } from './harness/index.js';
+import type { HarnessEvent } from './harness/index.js';
 
 // ============================================================
 // Orchestrator result
@@ -148,6 +150,7 @@ async function resolveWorkers(
   resolvedPaths: ResolvedPaths,
   sharedDirective: string | null,
   wkiConfig: WkiContextConfig | null,
+  specName?: string,
 ): Promise<ResolvedWorkerSpec[]> {
   const defaultEngine = spec.defaults?.engine ?? 'codex';
   const defaultModel = spec.defaults?.model ?? ENGINE_DEFAULTS[defaultEngine];
@@ -161,10 +164,40 @@ async function resolveWorkers(
   const timeoutMs = (spec.timeout_seconds ?? 0) * 1000;
 
   return Promise.all(spec.agents.map(async (agent): Promise<ResolvedWorkerSpec> => {
-    const engine = agent.engine ?? defaultEngine;
-    const model = agent.model ?? defaultModel;
-    const kind = agent.kind ?? 'custom';
-    const sandbox = agent.sandbox ?? defaultSandbox;
+    // Agent registry resolution (C4)
+    let agentSystem: string | null = null;
+    let registryEngine = defaultEngine;
+    let registryModel = defaultModel;
+    let registrySandbox = defaultSandbox;
+    let registryKind: string = 'custom';
+
+    if (agent.agent_id) {
+      const def = loadAgentDefinition(agent.agent_id, resolvedPaths.workspaceRoot);
+
+      if (agent.agent_version != null && def.version !== agent.agent_version) {
+        throw new Error(
+          `Agent '${agent.agent_id}' version mismatch: requested ${agent.agent_version}, found ${def.version}`,
+        );
+      }
+
+      agentSystem = def.system;
+      registryEngine = def.engine;
+      registryModel = def.model;
+      if (def.defaults?.sandbox) registrySandbox = def.defaults.sandbox;
+      if (def.defaults?.kind) registryKind = def.defaults.kind;
+
+      // Warn if both agent_id and prompt are specified (C4-3 rule 4)
+      if (agent.prompt && agent.task) {
+        process.stderr.write(`[harness] Warning: agent '${agent.name}' has agent_id + task + prompt; prompt is ignored\n`);
+      } else if (agent.prompt && !agent.task) {
+        process.stderr.write(`[harness] Warning: agent '${agent.name}' has agent_id + prompt; using prompt as task\n`);
+      }
+    }
+
+    const engine = agent.engine ?? (agent.agent_id ? registryEngine : defaultEngine);
+    const model = agent.model ?? (agent.agent_id ? registryModel : defaultModel);
+    const kind = agent.kind ?? (agent.agent_id ? registryKind as ResolvedWorkerSpec['kind'] : 'custom');
+    const sandbox = agent.sandbox ?? (agent.agent_id ? registrySandbox : defaultSandbox);
     const isReadOnly =
       sandbox === 'read-only' || kind === 'reviewer' || kind === 'validator';
     const agentCwd = agent.cwd
@@ -172,10 +205,16 @@ async function resolveWorkers(
       : resolvedPaths.workspaceRoot;
 
     // Build prompt with WKI context injection
-    const taskText = agent.prompt ?? agent.task ?? '';
+    const taskText = agent.task ?? agent.prompt ?? '';
     const promptParts: string[] = [];
     if (sharedDirective) {
       promptParts.push(sharedDirective);
+      promptParts.push('');
+    }
+
+    // Inject agent system prompt from registry (between shared directive and WKI)
+    if (agentSystem) {
+      promptParts.push(agentSystem);
       promptParts.push('');
     }
 
@@ -225,6 +264,7 @@ async function resolveWorkers(
       requiredNonEmptyPaths,
       extraArgs: sanitizeExtraArgs(agent.extra_args ?? []),
       timeoutMs,
+      sessionId: specName ? generateSessionId(specName, agent.name) : undefined,
     };
   }));
 }
@@ -308,10 +348,17 @@ function buildManifestEvidence(
 // Main orchestration entry point
 // ============================================================
 
+export interface OrchestrateOptions {
+  harnessMode?: boolean;
+}
+
 export async function orchestrate(
   specFilePath: string,
   invocationCwd: string,
+  options?: OrchestrateOptions,
 ): Promise<OrchestratorResult> {
+  const harnessMode = options?.harnessMode ?? false;
+
   // Phase 1: Parse
   const specRaw = await fs.readFile(specFilePath, 'utf8');
   const specJson = JSON.parse(specRaw) as unknown;
@@ -341,10 +388,24 @@ export async function orchestrate(
     console.error(`[wki] Context injection enabled (${wkiConfig.knowledgeDir})`);
   }
 
+  // Phase 4.6: Initialize harness (if enabled)
+  let harnessBus: HarnessEventBus | null = null;
+  let sessionManager: SessionManager | null = null;
+  let toolTracker: ToolTracker | null = null;
+
+  if (harnessMode) {
+    harnessBus = new HarnessEventBus();
+    sessionManager = new SessionManager(harnessBus);
+    toolTracker = new ToolTracker(harnessBus);
+    new EventLogWriter(harnessBus, resolvedPaths.outputDir);
+    console.error('[harness] Harness mode enabled — event streaming active');
+  }
+
   // Phase 5: Build stage plan and validate policies
   const stagePlan = buildStagePlan(spec);
   enforcePolicies(spec, stagePlan);
-  const workers = await resolveWorkers(spec, resolvedPaths, sharedDirective.text, wkiConfig);
+  const specName = path.basename(specFilePath, path.extname(specFilePath));
+  const workers = await resolveWorkers(spec, resolvedPaths, sharedDirective.text, wkiConfig, specName);
 
   // Phase 5.5: Initialize usage monitor
   const usageMonitor = initUsageMonitor(spec, resolvedPaths.outputDir);
@@ -358,6 +419,8 @@ export async function orchestrate(
     executionMode,
     usageMonitor,
     trustRegistry,
+    harnessBus,
+    sessionManager,
   );
   console.error(`[trust] ${trustRegistry.summary()}`);
 
