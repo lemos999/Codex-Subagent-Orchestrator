@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import websockets
 import numpy as np
+import numpy as np
 from ontology import Creator, Weather, GameTime, Persona, InnerWorld, ActionProposal
 from brain import PersonaBrain
 from brain.lif_network import LIFNetwork
@@ -132,7 +133,7 @@ class DashboardEngine:
                 self.inner.oyok[0] = max(0.0, self.inner.oyok[0] - 0.5)
                 self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.05)
 
-            # Phase 2: 도파민 RL
+            # Phase 2: 도파민 RL (tick_engine과 동일)
             reward = self._compute_reward(action, self.inner.energy_pool, prev_energy)
             self.brain.snn.apply_reward(reward)
 
