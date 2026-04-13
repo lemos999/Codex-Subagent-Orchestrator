@@ -156,6 +156,20 @@ export function configureStoreDatabase(db: Database.Database): void {
 
 export function initializeStoreSchema(db: Database.Database): void {
   db.exec(STORE_SCHEMA_SQL);
+  migrateStoreSchema(db);
+}
+
+/** Idempotent migration: adds columns that may be missing in older DBs. */
+function migrateStoreSchema(db: Database.Database): void {
+  const columns = db.prepare('PRAGMA table_info(chunks_meta)').all() as Array<{ name: string }>;
+  const existing = new Set(columns.map(c => c.name));
+
+  if (!existing.has('source_type')) {
+    db.exec('ALTER TABLE chunks_meta ADD COLUMN source_type TEXT');
+  }
+  if (!existing.has('last_modified')) {
+    db.exec('ALTER TABLE chunks_meta ADD COLUMN last_modified TEXT');
+  }
 }
 
 export function toChunkMetaParams(chunk: Chunk): ChunkMetaStatementParams {
