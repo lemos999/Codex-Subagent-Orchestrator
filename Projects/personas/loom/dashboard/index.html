@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>PersonaBrain SNN Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a1a;--panel:#0e1225;--border:#1a2040;
+  --text:#c8cce0;--dim:#5a6080;--accent:#4488ff;
+  --exc:#4488ff;--inh:#ff4466;--fire:#ffdd44;
+  --energy-hi:#44ff88;--energy-mid:#ffaa22;--energy-lo:#ff4444;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consolas','Courier New',monospace;font-size:13px;overflow:hidden}
+#app{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;height:calc(100vh - 48px);gap:6px;padding:6px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px;overflow:hidden;display:flex;flex-direction:column}
+.panel h2{font-size:13px;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+#toolbar{height:42px;display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--border)}
+#toolbar .title{font-size:15px;font-weight:bold;color:var(--accent);margin-right:auto}
+#toolbar button{background:#1a2040;border:1px solid var(--border);color:var(--text);padding:4px 14px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px}
+#toolbar button:hover{background:#2a3060}
+#toolbar button.active{background:var(--accent);color:#000}
+#toolbar label{color:var(--dim);font-size:12px}
+#toolbar input[type=range]{width:100px;accent-color:var(--accent)}
+#toolbar .info{color:var(--dim);font-size:12px}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.status-dot.connected{background:#44ff88}
+.status-dot.disconnected{background:#ff4444}
+
+/* 좌상: 뉴런 네트워크 */
+#neuron-canvas{width:100%;flex:1;border-radius:4px}
+
+/* 우상: 통계 */
+#stats-panel{gap:6px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
+.stat-label{color:var(--dim)}
+.stat-value{font-weight:bold}
+.mini-canvas{width:100%;height:80px;border-radius:4px}
+.gauge-row{display:flex;gap:8px;align-items:center;margin:4px 0}
+.gauge-bar{flex:1;height:10px;background:#111;border-radius:5px;overflow:hidden;position:relative}
+.gauge-fill{height:100%;border-radius:5px;transition:width .3s}
+
+/* 좌하: 페르소나 */
+#persona-panel{gap:4px;overflow-y:auto}
+.energy-bar-wrap{width:100%;height:18px;background:#111;border-radius:9px;overflow:hidden;margin:4px 0}
+.energy-bar-fill{height:100%;border-radius:9px;transition:width .3s,background .3s}
+.bar-group{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+.bar-item{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:32px}
+.bar-item .bar-wrap{width:20px;height:50px;background:#111;border-radius:3px;overflow:hidden;position:relative}
+.bar-item .bar-fill{position:absolute;bottom:0;width:100%;border-radius:3px;transition:height .3s}
+.bar-item .bar-label{font-size:10px;color:var(--dim)}
+.bar-item .bar-val{font-size:10px}
+#radar-canvas{width:200px;height:200px}
+.action-badge{display:inline-block;padding:2px 10px;border-radius:10px;background:#1a2040;font-size:12px;margin:4px 0}
+.sleeping-badge{background:#2a1040;color:#aa88ff}
+
+/* 우하: 시간+로그 */
+#log-panel{gap:4px}
+.time-display{font-size:18px;font-weight:bold;text-align:center;padding:6px 0;color:var(--fire)}
+#action-log{flex:1;overflow-y:auto;font-size:11px;line-height:1.6}
+#action-log div{padding:1px 4px;border-bottom:1px solid #111}
+#energy-history-canvas{width:100%;height:70px}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <span class="title"><span class="status-dot disconnected" id="ws-dot"></span>PersonaBrain SNN</span>
+  <button id="btn-play" class="active">Play</button>
+  <button id="btn-pause">Pause</button>
+  <button id="btn-step">Step</button>
+  <label>속도 <input type="range" id="speed-slider" min="100" max="2000" value="500" step="100"><span id="speed-label">0.5s</span></label>
+  <span class="info" id="tick-info">Tick 0</span>
+</div>
+<div id="app">
+  <!-- 좌상: 뉴런 네트워크 -->
+  <div class="panel">
+    <h2>뉴런 네트워크</h2>
+    <canvas id="neuron-canvas"></canvas>
+  </div>
+  <!-- 우상: 뉴런 통계 -->
+  <div class="panel" id="stats-panel">
+    <h2>뉴런 통계</h2>
+    <div class="stat-row"><span class="stat-label">활성 뉴런</span><span class="stat-value" id="stat-active">0 / 0</span></div>
+    <div class="stat-row"><span class="stat-label">발화율</span><span class="stat-value" id="stat-fr">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">흥분 발화</span><span class="stat-value" style="color:var(--exc)" id="stat-exc">0</span></div>
+    <div class="stat-row"><span class="stat-label">억제 발화</span><span class="stat-value" style="color:var(--inh)" id="stat-inh">0</span></div>
+    <div class="gauge-row"><span class="stat-label" style="width:80px">E/I Balance</span><div class="gauge-bar"><div class="gauge-fill" id="ei-gauge" style="width:50%;background:linear-gradient(90deg,var(--exc),var(--inh))"></div></div><span id="ei-label" style="width:40px;text-align:right;font-size:11px">0.50</span></div>
+    <canvas class="mini-canvas" id="firing-chart"></canvas>
+    <h2 style="margin-top:6px">막전위 분포</h2>
+    <canvas class="mini-canvas" id="voltage-hist"></canvas>
+  </div>
+  <!-- 좌하: 페르소나 -->
+  <div class="panel" id="persona-panel">
+    <h2>페르소나 상태</h2>
+    <div class="stat-row"><span class="stat-label">이름</span><span class="stat-value" id="p-name">-</span></div>
+    <div class="stat-row"><span class="stat-label">에너지</span><span class="stat-value" id="p-energy-val">0.00</span></div>
+    <div class="energy-bar-wrap"><div class="energy-bar-fill" id="p-energy-bar" style="width:0%"></div></div>
+    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <h2>톤 (12 클러스터)</h2>
+        <canvas id="radar-canvas" width="200" height="200"></canvas>
+      </div>
+      <div style="flex:1;min-width:180px">
+        <h2>오욕 (식/색/재/명/수)</h2>
+        <div class="bar-group" id="oyok-bars"></div>
+        <h2 style="margin-top:6px">칠정 (희/노/애/구/애/오/경)</h2>
+        <div class="bar-group" id="chiljeong-bars"></div>
+      </div>
+    </div>
+    <div class="stat-row"><span class="stat-label">행동</span><span id="p-action" class="action-badge">-</span></div>
+  </div>
+  <!-- 우하: 시간+로그 -->
+  <div class="panel" id="log-panel">
+    <h2>시간 / 행동 로그</h2>
+    <div class="time-display" id="time-display">Day 1, 0시</div>
+    <canvas id="energy-history-canvas"></canvas>
+    <h2 style="margin-top:4px">최근 행동 로그</h2>
+    <div id="action-log"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 상수 / 상태
+// ============================================================
+const TONE_KEYS = ['V','L','S','B','A','T','C','G','F','I','D','P'];
+const OYOK_LABELS = ['식','색','재','명','수'];
+const CHILJEONG_LABELS = ['희','노','애','구','애','오','경'];
+const MAX_HISTORY = 50;
+const MAX_LOG = 20;
+
+let ws = null;
+let paused = false;
+let firingHistory = [];   // {exc, inh, total}
+let energyHistory = [];
+let actionLog = [];
+let lastState = null;
+
+// ============================================================
+// DOM
+// ============================================================
+const $=id=>document.getElementById(id);
+const neuronCanvas = $('neuron-canvas');
+const nCtx = neuronCanvas.getContext('2d');
+const firingCanvas = $('firing-chart');
+const fCtx = firingCanvas.getContext('2d');
+const voltageCanvas = $('voltage-hist');
+const vCtx = voltageCanvas.getContext('2d');
+const radarCanvas = $('radar-canvas');
+const rCtx = radarCanvas.getContext('2d');
+const energyCanvas = $('energy-history-canvas');
+const eCtx = energyCanvas.getContext('2d');
+
+// ============================================================
+// 바 차트 초기화
+// ============================================================
+function initBars(containerId, labels, color) {
+  const c = $(containerId);
+  c.innerHTML = '';
+  labels.forEach((l,i) => {
+    const item = document.createElement('div');
+    item.className = 'bar-item';
+    item.innerHTML = `<div class="bar-val" id="${containerId}-v${i}">0</div><div class="bar-wrap"><div class="bar-fill" id="${containerId}-f${i}" style="height:0%;background:${color}"></div></div><div class="bar-label">${l}</div>`;
+    c.appendChild(item);
+  });
+}
+initBars('oyok-bars', OYOK_LABELS, '#ffaa22');
+initBars('chiljeong-bars', CHILJEONG_LABELS, '#aa44ff');
+
+// ============================================================
+// 캔버스 리사이즈
+// ============================================================
+function resizeCanvas(canvas) {
+  const r = canvas.parentElement ? canvas.getBoundingClientRect() : {width:300,height:200};
+  const dpr = window.devicePixelRatio || 1;
+  // 뉴런 캔버스는 flex:1이므로 clientWidth/clientHeight 사용
+  const w = canvas.clientWidth || r.width;
+  const h = canvas.clientHeight || r.height;
+  if (canvas.width !== w*dpr || canvas.height !== h*dpr) {
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+  }
+  return {w, h};
+}
+
+function resizeAll() {
+  resizeCanvas(neuronCanvas);
+  resizeCanvas(firingCanvas);
+  resizeCanvas(voltageCanvas);
+  resizeCanvas(energyCanvas);
+}
+window.addEventListener('resize', resizeAll);
+setTimeout(resizeAll, 50);
+
+// ============================================================
+// WebSocket
+// ============================================================
+function connect() {
+  ws = new WebSocket('ws://localhost:8765');
+  ws.onopen = () => { $('ws-dot').className = 'status-dot connected'; };
+  ws.onclose = () => { $('ws-dot').className = 'status-dot disconnected'; setTimeout(connect, 2000); };
+  ws.onerror = () => {};
+  ws.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    lastState = d;
+    update(d);
+  };
+}
+connect();
+
+function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+
+// 컨트롤
+$('btn-play').onclick = () => { paused=false; send({type:'resume'}); $('btn-play').classList.add('active'); $('btn-pause').classList.remove('active'); };
+$('btn-pause').onclick = () => { paused=true; send({type:'pause'}); $('btn-pause').classList.add('active'); $('btn-play').classList.remove('active'); };
+$('btn-step').onclick = () => { send({type:'step'}); };
+$('speed-slider').oninput = function() { const v=this.value/1000; $('speed-label').textContent=v.toFixed(1)+'s'; send({type:'set_speed',interval:v}); };
+
+// ============================================================
+// 메인 업데이트
+// ============================================================
+function update(d) {
+  $('tick-info').textContent = 'Tick ' + d.tick;
+
+  // 시간
+  $('time-display').textContent = `Day ${d.day}, ${d.hour}시`;
+
+  // 페르소나
+  $('p-name').textContent = d.persona.name + ` (Class ${d.persona.class})`;
+  const en = d.inner.energy;
+  $('p-energy-val').textContent = en.toFixed(4);
+  const pct = (en * 100).toFixed(1);
+  const ebar = $('p-energy-bar');
+  ebar.style.width = pct + '%';
+  ebar.style.background = en > 0.5 ? 'var(--energy-hi)' : en > 0.2 ? 'var(--energy-mid)' : 'var(--energy-lo)';
+
+  // 오욕
+  d.inner.oyok.forEach((v,i) => {
+    const el = $('oyok-bars-f'+i);
+    if(el){el.style.height=(v*100)+'%';}
+    const vl = $('oyok-bars-v'+i);
+    if(vl) vl.textContent = v.toFixed(2);
+  });
+  // 칠정
+  d.inner.chiljeong.forEach((v,i) => {
+    const el = $('chiljeong-bars-f'+i);
+    if(el){el.style.height=(Math.abs(v)*100)+'%';}
+    const vl = $('chiljeong-bars-v'+i);
+    if(vl) vl.textContent = v.toFixed(2);
+  });
+
+  // 행동
+  const ab = $('p-action');
+  if (d.inner.sleeping) {
+    ab.textContent = 'sleeping';
+    ab.className = 'action-badge sleeping-badge';
+  } else {
+    ab.textContent = `${d.action.type} (강도 ${d.action.intensity}, 비용 ${d.action.cost.toFixed(3)})`;
+    ab.className = 'action-badge';
+  }
+
+  // 통계
+  const neurons = d.brain.neurons;
+  if (neurons) {
+    const activeCount = neurons.spikes.reduce((a,b)=>a+b,0);
+    $('stat-active').textContent = `${activeCount} / ${neurons.n_neurons}`;
+    $('stat-fr').textContent = neurons.firing_rate.toFixed(4);
+    $('stat-exc').textContent = neurons.exc_spikes;
+    $('stat-inh').textContent = neurons.inh_spikes;
+
+    const total = neurons.exc_spikes + neurons.inh_spikes;
+    const eiRatio = total > 0 ? neurons.exc_spikes / total : 0.5;
+    $('ei-gauge').style.width = (eiRatio*100)+'%';
+    $('ei-label').textContent = eiRatio.toFixed(2);
+
+    firingHistory.push({
+      total: neurons.firing_rate,
+      exc: neurons.n_exc > 0 ? neurons.exc_spikes / neurons.n_exc : 0,
+      inh: neurons.n_inh > 0 ? neurons.inh_spikes / neurons.n_inh : 0
+    });
+    if (firingHistory.length > MAX_HISTORY) firingHistory.shift();
+
+    drawNeurons(neurons);
+    drawFiringChart();
+    drawVoltageHist(neurons.voltages, neurons.threshold);
+  } else {
+    $('stat-active').textContent = '- (수면)';
+    $('stat-fr').textContent = '-';
+  }
+
+  // 에너지 히스토리
+  energyHistory.push(en);
+  if (energyHistory.length > MAX_HISTORY) energyHistory.shift();
+  drawEnergyChart();
+
+  // 톤 레이더
+  drawRadar(d.inner.tone);
+
+  // 행동 로그
+  actionLog.unshift({tick:d.tick, hour:d.hour, day:d.day, action:d.action.type, intensity:d.action.intensity, sleeping:d.inner.sleeping});
+  if (actionLog.length > MAX_LOG) actionLog.pop();
+  renderLog();
+}
+
+// ============================================================
+// 뉴런 네트워크 시각화 (Canvas)
+// ============================================================
+function drawNeurons(neurons) {
+  const {w,h} = resizeCanvas(neuronCanvas);
+  const ctx = nCtx;
+  ctx.clearRect(0,0,w,h);
+
+  const n = neurons.voltages.length;
+  const nExc = neurons.n_exc;
+  const cx = w/2, cy = h/2;
+  const radius = Math.min(w,h)*0.40;
+
+  // 뉴런 위치 계산
+  const pos = [];
+  for (let i=0;i<n;i++){
+    const angle = (2*Math.PI*i/n) - Math.PI/2;
+    pos.push({x:cx+radius*Math.cos(angle), y:cy+radius*Math.sin(angle)});
+  }
+
+  // 연결선
+  const conns = neurons.connections;
+  if (conns && conns.length > 0) {
+    for (const c of conns) {
+      if (c.from >= n || c.to >= n) continue;
+      const from = pos[c.from];
+      const to = pos[c.to];
+      const isExc = c.weight > 0;
+      const alpha = Math.min(1, Math.abs(c.weight) * 4);
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.strokeStyle = isExc ? `rgba(68,136,255,${alpha*0.3})` : `rgba(255,68,102,${alpha*0.3})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      // 화살표
+      if (alpha > 0.15) {
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const len = Math.sqrt(dx*dx+dy*dy);
+        if (len > 10) {
+          const mx = from.x + dx*0.65;
+          const my = from.y + dy*0.65;
+          const ang = Math.atan2(dy,dx);
+          const aSize = 3;
+          ctx.beginPath();
+          ctx.moveTo(mx, my);
+          ctx.lineTo(mx - aSize*Math.cos(ang-0.5), my - aSize*Math.sin(ang-0.5));
+          ctx.lineTo(mx - aSize*Math.cos(ang+0.5), my - aSize*Math.sin(ang+0.5));
+          ctx.closePath();
+          ctx.fillStyle = isExc ? `rgba(68,136,255,${alpha*0.5})` : `rgba(255,68,102,${alpha*0.5})`;
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  // 뉴런 원
+  for (let i=0;i<n;i++){
+    const p = pos[i];
+    const isExc = i < nExc;
+    const spiking = neurons.spikes[i] === 1;
+    const refr = neurons.refractory[i] > 0;
+    let r = 3;
+    let color;
+
+    if (spiking) {
+      color = '#ffdd44';
+      r = 5;
+      // glow
+      ctx.beginPath();
+      const grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,12);
+      grad.addColorStop(0, 'rgba(255,221,68,0.6)');
+      grad.addColorStop(1, 'rgba(255,221,68,0)');
+      ctx.fillStyle = grad;
+      ctx.arc(p.x,p.y,12,0,Math.PI*2);
+      ctx.fill();
+    } else if (refr) {
+      color = '#222233';
+      r = 2.5;
+    } else {
+      color = isExc ? '#4488ff' : '#ff4466';
+      // 전위에 따른 밝기
+      const v = Math.max(0, Math.min(1, neurons.voltages[i] / neurons.threshold));
+      const bright = 0.3 + v * 0.7;
+      if (isExc) {
+        color = `rgba(68,136,255,${bright})`;
+      } else {
+        color = `rgba(255,68,102,${bright})`;
+      }
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,r,0,Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  // 범례
+  ctx.font = '11px Consolas, monospace';
+  ctx.fillStyle = '#4488ff'; ctx.fillRect(10,h-40,8,8); ctx.fillStyle='#889';ctx.fillText('흥분',22,h-32);
+  ctx.fillStyle = '#ff4466'; ctx.fillRect(10,h-26,8,8); ctx.fillStyle='#889';ctx.fillText('억제',22,h-18);
+  ctx.fillStyle = '#ffdd44'; ctx.fillRect(70,h-40,8,8); ctx.fillStyle='#889';ctx.fillText('발화',82,h-32);
+  ctx.fillStyle = '#222233'; ctx.fillRect(70,h-26,8,8); ctx.fillStyle='#889';ctx.fillText('불응',82,h-18);
+}
+
+// ============================================================
+// 발화율 그래프
+// ============================================================
+function drawFiringChart() {
+  const {w,h} = resizeCanvas(firingCanvas);
+  const ctx = fCtx;
+  ctx.clearRect(0,0,w,h);
+  if (firingHistory.length < 2) return;
+
+  const n = firingHistory.length;
+  const xStep = w / (MAX_HISTORY - 1);
+
+  // 배경 그리드
+  ctx.strokeStyle = '#1a2040';
+  ctx.lineWidth = 0.5;
+  for (let y=0;y<=4;y++){
+    const yy = h * y/4;
+    ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(w,yy);ctx.stroke();
+  }
+
+  function drawLine(data, key, color) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    let maxVal = 1;
+    for (let i=0;i<n;i++) maxVal = Math.max(maxVal, data[i][key]);
+    for (let i=0;i<n;i++){
+      const x = (MAX_HISTORY - n + i) * xStep;
+      const y = h - (data[i][key] / maxVal) * (h - 4);
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  drawLine(firingHistory, 'total', '#ffffff');
+  drawLine(firingHistory, 'exc', '#4488ff');
+  drawLine(firingHistory, 'inh', '#ff4466');
+
+  // 범례
+  ctx.font = '10px Consolas';
+  ctx.fillStyle='#fff';ctx.fillText('전체',w-120,12);
+  ctx.fillStyle='#4488ff';ctx.fillText('흥분',w-80,12);
+  ctx.fillStyle='#ff4466';ctx.fillText('억제',w-40,12);
+}
+
+// ============================================================
+// 막전위 히스토그램
+// ============================================================
+function drawVoltageHist(voltages, threshold) {
+  const {w,h} = resizeCanvas(voltageCanvas);
+  const ctx = vCtx;
+  ctx.clearRect(0,0,w,h);
+
+  const bins = 20;
+  const minV = -0.2, maxV = threshold * 1.2;
+  const range = maxV - minV;
+  const counts = new Array(bins).fill(0);
+  for (const v of voltages) {
+    const idx = Math.floor(((v - minV) / range) * bins);
+    if (idx >= 0 && idx < bins) counts[idx]++;
+  }
+  const maxCount = Math.max(1, ...counts);
+  const barW = w / bins;
+
+  for (let i=0;i<bins;i++){
+    const barH = (counts[i]/maxCount) * (h-16);
+    const x = i * barW;
+    const val = minV + (i+0.5)*(range/bins);
+    const ratio = val / threshold;
+    const r = Math.min(255, Math.floor(ratio * 255));
+    const g = Math.max(0, 255 - r);
+    ctx.fillStyle = `rgb(${r},${g},100)`;
+    ctx.fillRect(x+1, h-barH-12, barW-2, barH);
+  }
+
+  // threshold 라인
+  const thX = ((threshold - minV)/range)*w;
+  ctx.strokeStyle = '#ffdd44';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(thX,0);ctx.lineTo(thX,h);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font='10px Consolas';
+  ctx.fillStyle='#ffdd44';
+  ctx.fillText('threshold',thX+4,10);
+}
+
+// ============================================================
+// 톤 레이더 차트
+// ============================================================
+function drawRadar(tone) {
+  const canvas = radarCanvas;
+  const ctx = rCtx;
+  const w=200,h=200;
+  canvas.width=200;canvas.height=200;
+  ctx.clearRect(0,0,w,h);
+
+  const cx=w/2, cy=h/2, r=70;
+  const n = TONE_KEYS.length;
+  const angleStep = (2*Math.PI)/n;
+
+  // 격자
+  for (let ring=1;ring<=4;ring++){
+    const rr = r*ring/4;
+    ctx.beginPath();
+    for(let i=0;i<=n;i++){
+      const a = angleStep*i - Math.PI/2;
+      const x=cx+rr*Math.cos(a), y=cy+rr*Math.sin(a);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='#1a2040';ctx.lineWidth=0.5;ctx.stroke();
+  }
+
+  // 축
+  for(let i=0;i<n;i++){
+    const a = angleStep*i - Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
+    ctx.strokeStyle='#1a2040';ctx.lineWidth=0.5;ctx.stroke();
+    // 레이블
+    const lx=cx+(r+14)*Math.cos(a);
+    const ly=cy+(r+14)*Math.sin(a);
+    ctx.font='10px Consolas';ctx.fillStyle='#889';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(TONE_KEYS[i],lx,ly);
+  }
+
+  // 데이터 다각형
+  ctx.beginPath();
+  for(let i=0;i<=n;i++){
+    const idx = i%n;
+    const a = angleStep*idx - Math.PI/2;
+    const val = Math.max(0, Math.min(1, tone[TONE_KEYS[idx]] || 0));
+    const x=cx+r*val*Math.cos(a);
+    const y=cy+r*val*Math.sin(a);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.fillStyle='rgba(68,136,255,0.2)';ctx.fill();
+  ctx.strokeStyle='#4488ff';ctx.lineWidth=1.5;ctx.stroke();
+
+  // 점
+  for(let i=0;i<n;i++){
+    const a = angleStep*i - Math.PI/2;
+    const val = Math.max(0, Math.min(1, tone[TONE_KEYS[i]] || 0));
+    const x=cx+r*val*Math.cos(a);
+    const y=cy+r*val*Math.sin(a);
+    ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fillStyle='#4488ff';ctx.fill();
+  }
+}
+
+// ============================================================
+// 에너지 히스토리
+// ============================================================
+function drawEnergyChart() {
+  const {w,h} = resizeCanvas(energyCanvas);
+  const ctx = eCtx;
+  ctx.clearRect(0,0,w,h);
+  if (energyHistory.length < 2) return;
+
+  const n = energyHistory.length;
+  const xStep = w / (MAX_HISTORY - 1);
+
+  // 영역
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const x = (MAX_HISTORY-n+i)*xStep;
+    const y = h - energyHistory[i] * (h-4);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.lineTo((MAX_HISTORY-1)*xStep, h);
+  ctx.lineTo((MAX_HISTORY-n)*xStep, h);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(68,255,136,0.1)';
+  ctx.fill();
+
+  // 선
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const x = (MAX_HISTORY-n+i)*xStep;
+    const y = h - energyHistory[i] * (h-4);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle = '#44ff88';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+// ============================================================
+// 행동 로그
+// ============================================================
+function renderLog() {
+  const el = $('action-log');
+  el.innerHTML = actionLog.map(l => {
+    const act = l.sleeping ? '<span style="color:#aa88ff">수면</span>' : `<span style="color:var(--accent)">${l.action}</span> (강도${l.intensity})`;
+    return `<div><span style="color:var(--dim)">D${l.day} ${l.hour}시 T${l.tick}</span> ${act}</div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
