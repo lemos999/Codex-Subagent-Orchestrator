@@ -9,24 +9,37 @@ description: 3개 AI 엔진(Claude + Codex/GPT + Gemini)이 하나의 주제에 
 
 3개 AI가 **같은 주제를 교차 검증**하는 토론 시스템.
 
-## `/sub` vs `/submix` vs `/discuss` 차이
+## 스킬 체계
 
-| | `/sub` | `/submix` | `/discuss` |
+| | `/sub` | `/discuss` | `/harness` |
 |---|---|---|---|
-| 구조 | Claude 단독 분업 | 3개 AI 혼합 분업 | **3개 AI 교차 검증** |
-| 목적 | 작업 효율 | 작업 효율 (멀티엔진) | **답변 품질** |
-| 라운드 | 1회 | 1회 | **다중 라운드** |
-| 결과 | 개별 산출물 | 개별 산출물 | **합의안 + 쟁점** |
+| 구조 | Claude 단독 위임 | **3엔진 교차 검증** | 에이전트 레지스트리 기반 실행+추적 |
+| 목적 | 빠른 위임 | **답변 품질 (토론)** | 실행 관측+재사용 |
+| 라운드 | 1회 | 다중 (또는 --quick 1회) | 스테이지 기반 |
+| 결과 | 개별 산출물 | **합의안 + 쟁점** | manifest + 이벤트 로그 |
+
+> **참고**: `/submix`는 `/discuss --quick` + `/harness`로 통합되었습니다.
+
+## 모드 분기
+
+| 사용법 | 모드 | 동작 |
+|--------|------|------|
+| `/discuss <주제>` | 기본 (다중 라운드) | 수렴까지 최대 3라운드, 모더레이터 요약, WKI 주입 |
+| `/discuss --quick <주제>` | 퀵 (1회) | 3엔진 독립 의견 1회 수집 → 비교 테이블 → 끝 |
+| `/discuss --quick --role "관점" <주제>` | 퀵 + 역할 | 엔진별 관점 지정하여 1회 수집 |
 
 ## Entry Protocol
 
-1. Strip the `/discuss` prefix
-2. 주제를 discussion-runner에 전달
-3. 실행 계획 표시 → 사용자 승인 (yes/no/modify)
-4. 라운드 실행 → 사용자 개입 (continue/stop/guide)
-5. 합의안 생성 → Evidence 저장
+1. Strip `/discuss` prefix
+2. `--quick` 플래그 확인 → 모드 결정
+3. 주제를 discussion-runner에 전달
+4. 실행 계획 표시 → 사용자 승인 (yes/no/modify)
+5. 라운드 실행 → 사용자 개입 (continue/stop/guide)
+6. 합의안 생성 → Evidence 저장
 
-## 실행
+## 기본 모드 (다중 라운드)
+
+### 실행
 
 ```bash
 node packages/launcher/dist/discussion/discuss-cli.js "토론 주제"
@@ -34,9 +47,65 @@ node packages/launcher/dist/discussion/discuss-cli.js --spec discussion.json
 node packages/launcher/dist/discussion/discuss-cli.js --auto "토론 주제"  # 자동 모드
 ```
 
-## 역할 커스터마이징
+### 라운드 흐름
 
-참가자에 역할을 부여하여 특정 관점에서 분석하도록 지시:
+```
+라운드 1: 3엔진 독립 응답 → 모더레이터(haiku) 요약 → 수렴 판정
+  ↓ [PARTIAL 또는 DISAGREE]
+라운드 2: 이견 집중 + WKI 마이크로 컨텍스트 → 재논의 → 수렴 판정
+  ↓ [PARTIAL 또는 DISAGREE]
+라운드 3: 최종 라운드 → 결론 도출 (부분 합의도 기록)
+```
+
+### 사용자 개입
+
+매 라운드 완료 후:
+- **continue** — 다음 라운드 진행
+- **stop** — 여기서 종료, 합의안 생성
+- **guide "지시"** — 다음 라운드에 추가 관점 주입
+
+## 퀵 모드 (`--quick`, 구 `/submix` 토론 기능)
+
+3엔진 독립 의견을 **1회** 수집하고 비교. 모더레이터 없음, 수렴 없음.
+
+### 실행 예시
+
+```
+/discuss --quick PersonaBrain 클러스터 12→8 줄여도 되는가?
+```
+
+### 출력 형식
+
+```markdown
+## 3엔진 독립 의견
+
+### Claude (sonnet)
+[의견]
+
+### Codex/GPT (gpt-5.4)
+[의견]
+
+### Gemini (gemini-2.5-pro)
+[의견]
+
+## 비교
+| 관점 | Claude | GPT | Gemini |
+|------|--------|-----|--------|
+| 결론 | ... | ... | ... |
+| 핵심 근거 | ... | ... | ... |
+| 이견 | ... | ... | ... |
+
+## 합의/이견 요약
+[합의점과 이견 정리]
+```
+
+### 퀵 모드에서 역할 지정
+
+```
+/discuss --quick --role "Claude=보안, GPT=성능, Gemini=확장성" 이 아키텍처 괜찮은가?
+```
+
+## 역할 커스터마이징 (공통)
 
 ```json
 {
@@ -48,16 +117,50 @@ node packages/launcher/dist/discussion/discuss-cli.js --auto "토론 주제"  # 
 }
 ```
 
-## 사용자 개입
+## 엔진별 특성 레퍼런스
 
-매 라운드 완료 후:
-- **continue** — 다음 라운드 진행
-- **stop** — 여기서 종료, 합의안 생성
-- **guide "지시"** — 다음 라운드에 추가 관점 주입
+### Claude
+| 강점 | 적합 관점 |
+|------|----------|
+| 도구 접근 (파일/검색) | 코드 기반 검증, 현재 상태 확인 |
+| 긴 컨텍스트 이해 | 복잡한 아키텍처 분석 |
+| 한글 품질 | 한글 기획/문서 토론 |
+| 정밀한 지시 따르기 | 정밀 검증 관점 |
+
+**모델**: haiku (경량) / sonnet (기본) / opus (고급)
+
+### Codex — GPT
+| 강점 | 적합 관점 |
+|------|----------|
+| 코드 생성/분석 | 코드 구현 가능성 판단 |
+| 폭넓은 라이브러리 지식 | 기술 대안 제시 |
+| 구조적 분석 | 비용/효율 관점 |
+
+**모델**: gpt-5.4 (기본) / o3 (추론) / o4-mini (경량)
+**호출**: `codex exec --full-auto` (긴 프롬프트는 stdin pipe)
+
+### Gemini
+| 강점 | 적합 관점 |
+|------|----------|
+| 긴 컨텍스트 (1M+) | 대규모 문서/코드 전체 분석 |
+| 멀티모달 | UI/디자인 토론 |
+| Google 생태계 | GCP/Firebase 관련 |
+
+**모델**: gemini-2.5-pro (기본) / gemini-2.5-flash (경량)
+**호출**: `echo "<prompt>" | npx @google/gemini-cli --yolo` (긴 프롬프트는 cat pipe)
+
+## 외부 엔진 호출 원칙
+
+- **긴 프롬프트는 반드시 stdin pipe** — `$(cat file)` 인자 방식은 "Argument list too long" 에러
+- 프롬프트에 **시크릿/자격 증명 절대 금지**
+- 외부 엔진 실패 시 **Claude(sonnet)로 폴백**
+- 타임아웃: Codex 300초, Gemini 120초
 
 ## 자동 작업 생성
 
-합의안에서 구체적 실행 항목이 도출되면 `/sub` 또는 `/submix` 명령으로 자동 추천됩니다.
+합의안에서 구체적 실행 항목이 도출되면:
+- 구현 필요 → `/harness`로 추천
+- Claude 단독 가능 → `/sub`로 추천
 
 ## Evidence
 
@@ -68,13 +171,17 @@ node packages/launcher/dist/discussion/discuss-cli.js --auto "토론 주제"  # 
 - `round-N/` — 라운드별 각 AI 응답 + Moderator 요약
 - `wki-context-snapshot.md` — 사용된 WKI 맥락
 
+퀵 모드는 `subagent-runs/discuss/<topic>-<date>-quick/`에 저장.
+
 ## Invariants
 
-- Moderator(Claude)는 판정만 — 토론에 참여하지 않음
+- Moderator(Claude)는 판정만 — 토론에 참여하지 않음 (기본 모드)
+- 퀵 모드에는 모더레이터 없음 — 비교 테이블만 생성
 - 수렴 판정: `[AGREE/PARTIAL/DISAGREE]` 라벨 기반
-- 최대 3라운드
+- 최대 3라운드 (기본 모드)
 - WKI 맥락은 1회 스냅샷 고정
 - Evidence는 필수이며 생략 불가
+- 외부 엔진(Codex/Gemini)은 반드시 non-interactive 모드 (--full-auto/--yolo)
 
 ## Intellectual Rigor Discipline
 
@@ -99,14 +206,14 @@ node packages/launcher/dist/discussion/discuss-cli.js --auto "토론 주제"  # 
 
 ### Deliverable: Is the Consensus Actionable?
 
-- When a debate leads to `/sub` or `/submix` execution, verify that the consensus's technical decisions **are feasible in the current codebase**. A consensus that assumes nonexistent functions or deleted modules will break at the execution stage.
+- When a debate leads to `/harness` execution, verify that the consensus's technical decisions **are feasible in the current codebase**.
 
 ### Breakthrough Protocol: When a Debate Is Stuck
 
-The enemy of debate is not deadlock — it is **disguised consensus**. The moment three engines politely rephrase "maybe" and you mistake it for agreement, the debate is dead.
-
-- **Repetition detection**: If all three engines repeat the same argument in different words, do not add another round. **Change the question itself** — from "is this good?" to "what scenario causes this to fail?"
-- **DISAGREE is the most valuable data**: Treat disagreement not as a problem to resolve but as **a source of information**. "Why does only this engine dissent?" may yield deeper insight than the consensus itself.
-- **Premise inversion**: If the debate won't converge, the Moderator extracts the **shared premises** of all three engines. Same premises produce same conclusions or deadlock — invert the premise itself and pose it in the next round.
-- **"Inconclusive" is not a valid conclusion**: If 3 rounds are spent, do not report "consensus failure." Instead, state **why consensus was not reached under these conditions** and propose what additional information or experiments could resolve it.
-- **Honor partial consensus**: If 7 of 10 points are agreed, lock in those 7 and keep only 3 open. Do not hold confirmed conclusions hostage while waiting for total agreement.
+- **Repetition detection**: If all three engines repeat the same argument in different words, **change the question itself**.
+- **DISAGREE is the most valuable data**: Treat disagreement as a source of information.
+- **Premise inversion**: Extract shared premises → invert the premise itself.
+- **"Inconclusive" is not a valid conclusion**: State **why** consensus was not reached and what would resolve it.
+- **Honor partial consensus**: Lock confirmed points, keep only open items.
+- **Engine swap is a dimension shift**: If one engine fails, try a different engine or restructure the task.
+- **Compose partial successes**: Selectively combine successful parts from each engine.
