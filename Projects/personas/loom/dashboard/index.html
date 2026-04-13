@@ -12,12 +12,19 @@
   --energy-hi:#44ff88;--energy-mid:#ffaa22;--energy-lo:#ff4444;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consolas','Courier New',monospace;font-size:13px;overflow:hidden}
-#app{display:grid;grid-template-columns:260px 1fr 260px;grid-template-rows:1fr 1fr;height:calc(100vh - 48px);gap:6px;padding:6px}
-#app>.panel:nth-child(1){grid-column:2;grid-row:1/3}
-#app>.panel:nth-child(2){grid-column:3;grid-row:1}
-#app>.panel:nth-child(3){grid-column:1;grid-row:1/3}
-#app>.panel:nth-child(4){grid-column:3;grid-row:2}
+#app{display:grid;grid-template-columns:var(--col-left,260px) 6px 1fr 6px var(--col-right,260px);grid-template-rows:1fr 6px 1fr;height:calc(100vh - 48px);padding:6px}
+#app>.panel:nth-child(1){grid-column:3;grid-row:1/4}
+#app>.panel:nth-child(2){grid-column:5;grid-row:1}
+#app>.panel:nth-child(3){grid-column:1;grid-row:1/4}
+#app>.panel:nth-child(4){grid-column:5;grid-row:3}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px;overflow:hidden;display:flex;flex-direction:column}
+/* 리사이즈 거터 */
+.gutter-col{grid-row:1/4;cursor:col-resize;background:transparent;display:flex;align-items:center;justify-content:center}
+.gutter-col:hover,.gutter-col.active{background:#2a3060}
+.gutter-col::after{content:'';width:2px;height:40px;background:var(--dim);border-radius:1px}
+.gutter-row{grid-column:5;cursor:row-resize;background:transparent;display:flex;align-items:center;justify-content:center}
+.gutter-row:hover,.gutter-row.active{background:#2a3060}
+.gutter-row::after{content:'';height:2px;width:40px;background:var(--dim);border-radius:1px}
 .panel h2{font-size:13px;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
 #toolbar{height:42px;display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--border)}
 #toolbar .title{font-size:15px;font-weight:bold;color:var(--accent);margin-right:auto}
@@ -76,7 +83,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consol
   <span class="info" id="tick-info">Tick 0</span>
 </div>
 <div id="app">
-  <!-- 좌상: 뉴런 네트워크 -->
+  <!-- 1: 뉴런 네트워크 (가운데, 2행) -->
   <div class="panel">
     <h2>뉴런 네트워크</h2>
     <canvas id="neuron-canvas"></canvas>
@@ -121,6 +128,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consol
     <h2 style="margin-top:4px">최근 행동 로그</h2>
     <div id="action-log"></div>
   </div>
+  <!-- 리사이즈 거터 -->
+  <div class="gutter-col" id="gutter-left" style="grid-column:2;grid-row:1/4"></div>
+  <div class="gutter-col" id="gutter-right" style="grid-column:4;grid-row:1/4"></div>
+  <div class="gutter-row" id="gutter-row-right" style="grid-column:5;grid-row:2"></div>
 </div>
 
 <script>
@@ -611,6 +622,53 @@ function renderLog() {
     return `<div><span style="color:var(--dim)">D${l.day} ${l.hour}시 T${l.tick}</span> ${act}</div>`;
   }).join('');
 }
+// ============================================================
+// 패널 리사이즈 (드래그)
+// ============================================================
+(function(){
+  const app = document.getElementById('app');
+  let dragging = null, startX = 0, startY = 0, startLeft = 260, startRight = 260, startRowTop = 50;
+
+  function getColLeft(){ return parseInt(getComputedStyle(app).getPropertyValue('--col-left')) || 260; }
+  function getColRight(){ return parseInt(getComputedStyle(app).getPropertyValue('--col-right')) || 260; }
+  function getRowTop(){ return parseInt(getComputedStyle(app).getPropertyValue('--row-top')) || 50; }
+
+  document.getElementById('gutter-left').addEventListener('mousedown', e => {
+    dragging = 'left'; startX = e.clientX; startLeft = getColLeft();
+    e.target.classList.add('active'); e.preventDefault();
+  });
+  document.getElementById('gutter-right').addEventListener('mousedown', e => {
+    dragging = 'right'; startX = e.clientX; startRight = getColRight();
+    e.target.classList.add('active'); e.preventDefault();
+  });
+  document.getElementById('gutter-row-right').addEventListener('mousedown', e => {
+    dragging = 'row'; startY = e.clientY; startRowTop = getRowTop();
+    e.target.classList.add('active'); e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    if (dragging === 'left') {
+      const w = Math.max(160, Math.min(500, startLeft + (e.clientX - startX)));
+      app.style.setProperty('--col-left', w + 'px');
+    } else if (dragging === 'right') {
+      const w = Math.max(160, Math.min(500, startRight - (e.clientX - startX)));
+      app.style.setProperty('--col-right', w + 'px');
+    } else if (dragging === 'row') {
+      const pct = Math.max(20, Math.min(80, ((e.clientY - app.getBoundingClientRect().top) / app.clientHeight) * 100));
+      app.style.gridTemplateRows = pct + '% 6px ' + (100 - pct) + '%';
+    }
+    // canvas 리사이즈 트리거
+    window.dispatchEvent(new Event('resize'));
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (dragging) {
+      document.querySelectorAll('.gutter-col,.gutter-row').forEach(g => g.classList.remove('active'));
+      dragging = null;
+    }
+  });
+})();
 </script>
 </body>
 </html>
