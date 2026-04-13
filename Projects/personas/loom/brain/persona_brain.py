@@ -44,24 +44,33 @@ class PersonaBrain:
         # 1. 입력 벡터 조립 (climate + energy + oyok → 외부 자극)
         input_signal = np.zeros(self.n_neurons, dtype=np.float32)
 
-        # 기후가 첫 N뉴런에 영향
-        n_climate = min(8, self.n_neurons)
-        input_signal[:n_climate] = climate_vec[:n_climate].astype(np.float32) * 0.5
+        # 기후가 넓은 뉴런 집단에 확산 (실제 뇌: 감각 입력은 넓게 퍼짐)
+        n_input = min(100, self.n_neurons)  # 첫 100뉴런이 감각 입력 수신
+        rng = np.random.default_rng(self.snn.rng.integers(0, 2**31))
 
-        # 오욕이 그 다음 뉴런에 영향
-        n_oyok = min(5, self.n_neurons - n_climate)
-        input_signal[n_climate:n_climate + n_oyok] = oyok[:n_oyok].astype(np.float32) * 0.3
+        # 기후 → 감각 뉴런에 분산 주입 (충분한 강도)
+        for i in range(min(8, n_input)):
+            spread = rng.choice(n_input, size=10, replace=False)
+            input_signal[spread] += float(climate_vec[i]) * 0.3
 
-        # 에너지 수준이 전체에 미세 영향 (에너지 낮으면 활성↓)
-        input_signal *= (0.5 + 0.5 * energy_pool)
+        # 오욕 → 동기 뉴런에 주입
+        for i in range(5):
+            spread = rng.choice(range(n_input, min(n_input + 50, self.n_neurons)), size=5, replace=False)
+            input_signal[spread] += float(oyok[i]) * 0.4
+
+        # 배경 노이즈 (실제 뇌: 자발적 활동)
+        input_signal += rng.exponential(0.05, self.n_neurons).astype(np.float32)
+
+        # 에너지 수준이 전체에 영향 (에너지 낮으면 활성↓)
+        input_signal *= (0.3 + 0.7 * energy_pool)
 
         # 2. SNN 실행 (10 시뮬레이션 스텝 = 1틱)
         total_spikes = np.zeros(self.n_neurons, dtype=np.float32)
-        for _ in range(10):
+        for step in range(10):
             spikes = self.snn.step(input_signal)
             total_spikes += spikes.astype(np.float32)
-            # 입력은 첫 스텝에서만 주입
-            input_signal = input_signal * 0.1  # 감쇠
+            # 입력은 매 스텝 감쇠하되 배경 노이즈는 유지
+            input_signal = input_signal * 0.5 + rng.exponential(0.03, self.n_neurons).astype(np.float32)
 
         # 발화율
         firing_rate = total_spikes / 10.0

@@ -19,7 +19,7 @@ class LIFNetwork:
 
         # 뉴런 상태
         self.v = np.zeros(n_neurons, dtype=np.float32)       # 막전위
-        self.threshold = np.full(n_neurons, 1.0, dtype=np.float32)  # 발화 임계값
+        self.threshold = np.full(n_neurons, 0.5, dtype=np.float32)  # 발화 임계값 (1.0→0.5, 입력 강도에 맞춤)
         self.reset_v = 0.0
         self.leak = 0.95                                     # 누출 계수 (매 스텝 5% 감쇠)
 
