@@ -146,20 +146,21 @@ class DashboardEngine:
         }
 
     async def broadcast(self, data: dict):
-        if self.clients:
-            msg = json.dumps(data, ensure_ascii=False)
-            dead = set()
-            for c in self.clients:
-                try:
-                    await c.send(msg)
-                except Exception:
-                    dead.add(c)
-            self.clients -= dead
+        if not self.clients:
+            return
+        msg = json.dumps(data, ensure_ascii=False)
+        dead = set()
+        for c in list(self.clients):  # list() 복사로 iteration 안전
+            try:
+                await c.send(msg)
+            except Exception:
+                dead.add(c)
+        self.clients -= dead
 
     async def handler(self, ws):
         self.clients.add(ws)
         try:
-            async for msg in ws:
+            async for msg in ws:  # noqa
                 cmd = json.loads(msg)
                 if cmd.get("type") == "set_speed":
                     self.tick_interval = max(0.1, cmd.get("interval", 0.5))
