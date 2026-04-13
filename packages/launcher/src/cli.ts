@@ -12,11 +12,13 @@ import { orchestrate } from './orchestrator.js';
 // Argument parsing
 // ============================================================
 
-function parseArgs(argv: string[]): { specPath: string; jsonOutput: boolean; harnessMode: boolean } {
+function parseArgs(argv: string[]): { specPath: string; jsonOutput: boolean; harnessMode: boolean; evolveMode: boolean; maxIterations: number } {
   const args = argv.slice(2); // skip node and script path
   let specPath: string | null = null;
   let jsonOutput = false;
   let harnessMode = false;
+  let evolveMode = false;
+  let maxIterations = 3;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--spec' && i + 1 < args.length) {
@@ -26,15 +28,21 @@ function parseArgs(argv: string[]): { specPath: string; jsonOutput: boolean; har
       jsonOutput = true;
     } else if (args[i] === '--harness') {
       harnessMode = true;
+    } else if (args[i] === '--evolve') {
+      evolveMode = true;
+      harnessMode = true; // evolve implies harness
+    } else if (args[i] === '--max-iterations' && i + 1 < args.length) {
+      maxIterations = parseInt(args[i + 1], 10) || 3;
+      i++;
     }
   }
 
   if (!specPath) {
-    console.error('Usage: subagent-launch --spec <path> [--json] [--harness]');
+    console.error('Usage: subagent-launch --spec <path> [--json] [--harness] [--evolve] [--max-iterations N]');
     process.exit(1);
   }
 
-  return { specPath, jsonOutput, harnessMode };
+  return { specPath, jsonOutput, harnessMode, evolveMode, maxIterations };
 }
 
 // ============================================================
@@ -100,12 +108,16 @@ function printSummaryTable(result: Awaited<ReturnType<typeof orchestrate>>): voi
 // ============================================================
 
 async function main(): Promise<void> {
-  const { specPath, jsonOutput, harnessMode } = parseArgs(process.argv);
+  const { specPath, jsonOutput, harnessMode, evolveMode, maxIterations } = parseArgs(process.argv);
   const absoluteSpecPath = path.resolve(process.cwd(), specPath);
   const invocationCwd = process.cwd();
 
   try {
-    const result = await orchestrate(absoluteSpecPath, invocationCwd, { harnessMode });
+    const result = await orchestrate(absoluteSpecPath, invocationCwd, {
+      harnessMode,
+      evolveMode,
+      maxIterations,
+    });
 
     if (jsonOutput) {
       // JSON output mode for queue runner integration

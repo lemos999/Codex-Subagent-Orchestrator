@@ -350,6 +350,8 @@ function buildManifestEvidence(
 
 export interface OrchestrateOptions {
   harnessMode?: boolean;
+  evolveMode?: boolean;
+  maxIterations?: number;
 }
 
 export async function orchestrate(
