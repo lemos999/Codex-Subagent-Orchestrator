@@ -54,7 +54,7 @@ class LIFNetwork:
 
         # Phase 2: 3-factor STDP (도파민 RL)
         self.reward_signal = 0.0  # 외부 보상 신호 (-1 ~ +1)
-        self.rl_lr = 0.001  # RL 학습률 (STDP보다 3배 강함)
+        self.rl_lr = 0.005  # RL 학습률 (강하게 → 벌점이 빠르게 반영)
         self.eligibility_trace = np.zeros((n_neurons, n_neurons), dtype=np.float32)  # 적격 흔적
         self.eligibility_decay = 0.9  # 적격 흔적 감쇠
 

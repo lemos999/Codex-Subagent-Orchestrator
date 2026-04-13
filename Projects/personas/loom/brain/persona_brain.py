@@ -63,10 +63,26 @@ class PersonaBrain:
             input_signal[spread] += float(climate_vec[i]) * 0.2
 
         # 오욕 → 동기 뉴런에 주입 (욕구가 높을수록 강한 신호)
+        # 높은 욕구 = 해당 행동 뉴런 흥분
+        # 낮은 욕구 = 해당 행동 뉴런 억제 (포만감 = GABA 억제)
         for i in range(5):
-            if float(oyok[i]) > 0.1:
-                spread = rng.choice(range(n_input, min(n_input + 50, self.n_neurons)), size=3, replace=False)
-                input_signal[spread] += float(oyok[i]) * 0.3
+            drive = float(oyok[i])
+            target_start = n_input + i * 10
+            target_end = min(target_start + 10, self.n_neurons)
+            if drive > 0.3:
+                # 욕구 높음 → 관련 뉴런 흥분
+                spread = rng.choice(range(target_start, target_end), size=min(5, target_end - target_start), replace=False)
+                input_signal[spread] += drive * 0.4
+            elif drive < 0.2:
+                # 욕구 낮음 → 관련 뉴런 억제 (포만감/충분함)
+                spread = rng.choice(range(target_start, target_end), size=min(5, target_end - target_start), replace=False)
+                input_signal[spread] -= 0.2  # 억제 신호
+
+        # 에너지 충만 → sleep 관련 뉴런 억제 (각성 유지)
+        if energy_pool > 0.5:
+            sleep_neurons = range(n_input + 10, min(n_input + 20, self.n_neurons))  # 수면욕 뉴런
+            for idx in sleep_neurons:
+                input_signal[idx] -= 0.15 * energy_pool  # 에너지 높을수록 강한 수면 억제
 
         # Phase 1: 12클러스터 tone이 뉴런 입력에 영향
         # tone > 1.0이면 해당 영역 활성↑, < 1.0이면 ↓
@@ -108,8 +124,7 @@ class PersonaBrain:
 
         # 에너지 기반 보정
         if energy_pool < 0.1:
-            # 강제 수면
-            action_idx = ACTIONS.index("sleep")
+            action_idx = ACTIONS.index("sleep")  # 강제 수면
         elif oyok[0] > 0.7:  # 식욕 높음
             action_logits[ACTIONS.index("eat")] += 1.0
             action_idx = int(np.argmax(action_logits))
