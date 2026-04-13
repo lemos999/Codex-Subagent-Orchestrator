@@ -148,7 +148,13 @@ class DashboardEngine:
     async def broadcast(self, data: dict):
         if self.clients:
             msg = json.dumps(data, ensure_ascii=False)
-            await asyncio.gather(*[c.send(msg) for c in self.clients])
+            dead = set()
+            for c in self.clients:
+                try:
+                    await c.send(msg)
+                except Exception:
+                    dead.add(c)
+            self.clients -= dead
 
     async def handler(self, ws):
         self.clients.add(ws)
