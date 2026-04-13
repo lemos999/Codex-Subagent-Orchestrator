@@ -719,8 +719,9 @@ class TournamentManager:
         self._last_tick = time.monotonic()
         self.tick_history: list[dict] = []  # 69-second effectiveness ticks
 
-        # contrarian_v2: locked worst variant per asset (set at resume)
-        self._locked_worst: dict[int, int] = {}  # {asset_idx: global_variant_idx}
+        # contrarian_v2: remember each v2 variant's original strategy type
+        # {global_variant_idx: original_strategy_type}  set at injection time
+        self._v2_source_strategy: dict[int, int] = {}
 
         # Multi-timeframe cache
         self.mtf_cache = MultiTimeframeCache()
@@ -881,75 +882,92 @@ class TournamentManager:
               f"(replaced worst {N_CONTRARIAN} by return)")
 
     def _inject_contrarian_v2_variants(self):
-        """One-time migration: add 500 contrarian_v2 variants.
+        """One-time migration: clone worst 500 variants with inverted direction.
 
-        Unlike contrarian (real-time worst), v2 locks onto the historical worst
-        variant per asset at resume time and mirrors that fixed target.
+        v2 copies the worst variants' FULL parameters (strategy, weights,
+        asset, timeframe, etc.) so they use the exact same trading logic.
+        Only strategy_type is set to 8; evaluate_all() negates the conviction.
+        The original strategy type is stored in _v2_source_strategy.
         """
         strat_types = self.params[:, 10].astype(int)
         n_existing = int((strat_types == 8).sum())
         if n_existing > 0:
+            # Restore source strategy map from params
+            self._restore_v2_source_strategies()
             print(f"[Tournament] Contrarian_v2 variants already exist: {n_existing}")
-            # Restore locked worst from saved state
-            self._lock_worst_per_asset()
             return
-
-        # Lock worst per asset BEFORE resetting anyone
-        self._lock_worst_per_asset()
 
         N_V2 = 500
         rets = self.portfolio.returns_pct()
 
-        # Pick next-worst 500 (skip those already converted to contrarian type 7)
+        # Pick worst 500 among non-contrarian variants (skip type 7)
         non_contra = np.where(strat_types != 7)[0]
         sorted_by_ret = non_contra[np.argsort(rets[non_contra])]
-        worst_indices = sorted_by_ret[:N_V2]
+        source_indices = sorted_by_ret[:N_V2]  # worst 500 to clone FROM
 
-        # Convert to contrarian_v2, reset portfolios
-        for ri in worst_indices:
-            self.params[ri, 10] = 8  # strategy_type = contrarian_v2
-            self.portfolio.balances[ri] = INITIAL_BALANCE
-            self.portfolio.positions[ri] = 0.0
-            self.portfolio.entry_prices[ri] = 0.0
-            self.portfolio.peak_balances[ri] = INITIAL_BALANCE
-            self.portfolio.trade_counts[ri] = 0
-            self.portfolio.win_counts[ri] = 0
-            self.portfolio.trade_pnls[ri] = []
-            self.portfolio.recent_pnls[ri] = []
+        # Find 500 slots to overwrite (next-worst after source)
+        remaining = sorted_by_ret[N_V2:]
+        target_indices = remaining[:N_V2]  # slots to overwrite
 
-        # Distribute across assets/timeframes
-        n_assets = len(ASSET_NAMES)
-        n_tfs = len(TIMEFRAME_CHOICES)
-        for i, ri in enumerate(worst_indices):
-            self.params[ri, 11] = i % n_assets
-            asset_sym = ASSET_NAMES[int(self.params[ri, 11])]
-            if ASSETS[asset_sym]["type"] == "stock":
-                self.params[ri, 12] = 5
-            else:
-                self.params[ri, 12] = (i // n_assets) % n_tfs
+        for i, (src, tgt) in enumerate(zip(source_indices, target_indices)):
+            # Clone ALL params from source (weights, asset, timeframe, etc.)
+            orig_strategy = int(self.params[src, 10])
+            self.params[tgt] = self.params[src].copy()
+            # Mark as contrarian_v2
+            self.params[tgt, 10] = 8
+            # Remember original strategy for evaluate_all dispatch
+            self._v2_source_strategy[int(tgt)] = orig_strategy
+
+            # Reset portfolio for fair start
+            self.portfolio.balances[tgt] = INITIAL_BALANCE
+            self.portfolio.positions[tgt] = 0.0
+            self.portfolio.entry_prices[tgt] = 0.0
+            self.portfolio.peak_balances[tgt] = INITIAL_BALANCE
+            self.portfolio.trade_counts[tgt] = 0
+            self.portfolio.win_counts[tgt] = 0
+            self.portfolio.trade_pnls[tgt] = []
+            self.portfolio.recent_pnls[tgt] = []
+
+            if i < 5:  # log first 5 for visibility
+                sym = ASSET_NAMES[int(self.params[tgt, 11])]
+                tf = TIMEFRAME_CHOICES[int(self.params[tgt, 12])]
+                orig_name = STRATEGY_NAMES[orig_strategy]
+                print(f"  [v2] #{tgt} cloned from #{src}: "
+                      f"{sym}/{tf}/{orig_name} (ret={rets[src]:.2f}%) → inverted")
 
         print(f"[Tournament] Injected {N_V2} contrarian_v2 variants "
-              f"(locked worst per asset from historical data)")
+              f"(cloned worst params, direction inverted)")
 
-    def _lock_worst_per_asset(self):
-        """Lock the worst non-contrarian variant per asset from current data."""
-        rets = self.portfolio.returns_pct()
+    def _restore_v2_source_strategies(self):
+        """Restore _v2_source_strategy map on subsequent resumes.
+
+        Since we can't persist the map in npz easily, we re-derive it:
+        each v2 variant was cloned from a worst variant with matching params
+        (except strategy_type). We stored the original strategy in a parallel
+        array saved in state, or we can infer from the source variant.
+
+        Fallback: if source unknown, use the params to compute conviction
+        as trend_both (type 1) which allows long+short, then negate.
+        """
         strat_types = self.params[:, 10].astype(int)
-        asset_indices = self.params[:, 11].astype(int)
+        v2_indices = np.where(strat_types == 8)[0]
 
-        for asset_idx in range(len(ASSET_NAMES)):
-            # Non-contrarian variants on this asset with trades
-            mask = ((asset_indices == asset_idx)
-                    & (strat_types != 7) & (strat_types != 8)
-                    & (self.portfolio.trade_counts >= 5))
-            candidates = np.where(mask)[0]
-            if len(candidates) == 0:
-                continue
-            worst = candidates[np.argmin(rets[candidates])]
-            self._locked_worst[asset_idx] = int(worst)
-            sym = ASSET_NAMES[asset_idx]
-            print(f"  [contrarian_v2] Locked worst for {sym}: "
-                  f"variant #{worst} (ret={rets[worst]:.2f}%)")
+        # Try to load from saved state
+        try:
+            data = np.load(str(STATE_PATH), allow_pickle=True)
+            if "v2_source_strategies" in data:
+                saved = data["v2_source_strategies"].item()  # dict
+                self._v2_source_strategy = {int(k): int(v) for k, v in saved.items()}
+                print(f"  [v2] Restored {len(self._v2_source_strategy)} source strategies from state")
+                return
+        except Exception:
+            pass
+
+        # Fallback: treat all v2 as trend_both (1) — allows long/short
+        for idx in v2_indices:
+            self._v2_source_strategy[int(idx)] = 1
+        if len(v2_indices) > 0:
+            print(f"  [v2] Fallback: {len(v2_indices)} variants mapped to trend_both")
 
     def save_state(self):
         pnls_arr = np.empty(N_VARIANTS, dtype=object)
@@ -969,6 +987,7 @@ class TournamentManager:
             started_at=self.started_at.isoformat(),
             last_tournament=self.last_tournament.isoformat(),
             ensemble_top_idx=self.ensemble_top_idx,
+            v2_source_strategies=self._v2_source_strategy,
         )
 
     def _maybe_save(self):
@@ -1088,41 +1107,51 @@ class TournamentManager:
                 strats = strategy_types[indices]
                 weight_matrix = self.params[indices, :5]  # (n_sub, 5)
 
+                # For contrarian_v2 (type 8): resolve to original strategy
+                # so they go through the SAME logic as their source
+                effective_strats = strats.copy()
+                v2_mask = strats == 8
+                if v2_mask.any():
+                    for li in np.where(v2_mask)[0]:
+                        gi = indices[li]
+                        effective_strats[li] = self._v2_source_strategy.get(
+                            int(gi), 1)  # fallback: trend_both
+
                 # Base conviction from weighted signals
                 raw_convictions = weight_matrix @ signals
 
                 # === Strategy type modifiers ===
 
                 # mean_reversion (type 2): invert RSI and momentum
-                mr_mask = strats == 2
+                mr_mask = effective_strats == 2
                 if mr_mask.any():
                     raw_convictions[mr_mask] = (
                         weight_matrix[mr_mask] @ (signals * np.array([1, -1, 1, -1, 1]))
                     )
 
                 # breakout (type 3): boost momentum, reduce RSI
-                bo_mask = strats == 3
+                bo_mask = effective_strats == 3
                 if bo_mask.any():
                     raw_convictions[bo_mask] = (
                         weight_matrix[bo_mask] @ (signals * np.array([1.5, 0.5, 1.5, 1.5, 0.5]))
                     )
 
                 # grid (type 4): sideways detection -> grid trading
-                grid_mask = strats == 4
+                grid_mask = effective_strats == 4
                 if grid_mask.any():
                     grid_conv = self._eval_grid_strategy(
                         indices[grid_mask], signals, price)
                     raw_convictions[grid_mask] = grid_conv
 
                 # momentum_rotation (type 5): rank-based
-                mr5_mask = strats == 5
+                mr5_mask = effective_strats == 5
                 if mr5_mask.any():
                     mom_conv = self._eval_mom_rotation(
                         sym, mom_rankings, indices[mr5_mask])
                     raw_convictions[mr5_mask] = mom_conv
 
                 # pair (type 6): pair Z-score mean reversion
-                pair_mask = strats == 6
+                pair_mask = effective_strats == 6
                 if pair_mask.any():
                     pair_conv = self._eval_pair_strategy(
                         sym, indices[pair_mask])
@@ -1135,12 +1164,9 @@ class TournamentManager:
                         asset_idx, indices, contra_mask)
                     raw_convictions[contra_mask] = contra_conv
 
-                # contrarian_v2 (type 8): invert locked historical worst's position
-                contra2_mask = strats == 8
-                if contra2_mask.any():
-                    contra2_conv = self._eval_contrarian_v2(
-                        asset_idx, contra2_mask)
-                    raw_convictions[contra2_mask] = contra2_conv
+                # contrarian_v2 (type 8): same logic as source, NEGATE conviction
+                if v2_mask.any():
+                    raw_convictions[v2_mask] = -raw_convictions[v2_mask]
 
                 # DL boost
                 dl_boost = self.params[indices, 7] * dl_prob
@@ -1317,24 +1343,6 @@ class TournamentManager:
         contra_conviction = -worst_norm
 
         return np.full(n_contra, np.clip(contra_conviction, -1.0, 1.0))
-
-    def _eval_contrarian_v2(self, asset_idx: int,
-                            contra2_local_mask: np.ndarray) -> np.ndarray:
-        """Contrarian_v2: invert a LOCKED historical worst variant's position.
-
-        Unlike contrarian (type 7) which tracks real-time worst,
-        v2 mirrors a fixed variant chosen at resume time from accumulated data.
-        """
-        n = int(contra2_local_mask.sum())
-        locked_idx = self._locked_worst.get(asset_idx)
-        if locked_idx is None:
-            return np.zeros(n)
-
-        worst_pos = self.portfolio.positions[locked_idx]
-        worst_lev = max(self.params[locked_idx, 6], 0.01)
-        worst_norm = worst_pos / worst_lev
-
-        return np.full(n, np.clip(-worst_norm, -1.0, 1.0))
 
     def _update_ensemble(self):
         """Compute ensemble signal from top-10 variants."""
