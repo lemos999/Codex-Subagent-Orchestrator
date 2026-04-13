@@ -65,6 +65,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consol
 .action-badge{display:inline-block;padding:2px 10px;border-radius:10px;background:#1a2040;font-size:12px;margin:4px 0}
 .sleeping-badge{background:#2a1040;color:#aa88ff}
 
+/* 툴팁 */
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#1a2040;color:var(--accent);font-size:9px;font-weight:bold;cursor:pointer;margin-left:4px;border:1px solid var(--border);vertical-align:middle;line-height:1;user-select:none;flex-shrink:0}
+.info-btn:hover{background:var(--accent);color:#000}
+.tooltip-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:999}
+.tooltip-box{position:fixed;z-index:1000;background:#1a2040;border:1px solid var(--accent);border-radius:6px;padding:10px 14px;max-width:320px;font-size:12px;line-height:1.6;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,0.6)}
+.tooltip-box .tt-title{color:var(--accent);font-weight:bold;margin-bottom:4px;font-size:13px}
+.tooltip-box .tt-body{color:#aab}
+
 /* 우하: 시간+로그 */
 #log-panel{gap:4px}
 .time-display{font-size:18px;font-weight:bold;text-align:center;padding:6px 0;color:var(--fire)}
@@ -85,44 +93,44 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consol
 <div id="app">
   <!-- 1: 뉴런 네트워크 (가운데, 2행) -->
   <div class="panel">
-    <h2>뉴런 네트워크</h2>
+    <h2>뉴런 네트워크 <span class="info-btn" data-tip="neuron-network">i</span></h2>
     <canvas id="neuron-canvas"></canvas>
   </div>
   <!-- 우상: 뉴런 통계 -->
   <div class="panel" id="stats-panel">
-    <h2>뉴런 통계</h2>
-    <div class="stat-row"><span class="stat-label">활성 뉴런</span><span class="stat-value" id="stat-active">0 / 0</span></div>
-    <div class="stat-row"><span class="stat-label">발화율</span><span class="stat-value" id="stat-fr">0.00</span></div>
-    <div class="stat-row"><span class="stat-label">흥분 발화</span><span class="stat-value" style="color:var(--exc)" id="stat-exc">0</span></div>
-    <div class="stat-row"><span class="stat-label">억제 발화</span><span class="stat-value" style="color:var(--inh)" id="stat-inh">0</span></div>
-    <div class="gauge-row"><span class="stat-label" style="width:80px">E/I Balance</span><div class="gauge-bar"><div class="gauge-fill" id="ei-gauge" style="width:50%;background:linear-gradient(90deg,var(--exc),var(--inh))"></div></div><span id="ei-label" style="width:40px;text-align:right;font-size:11px">0.50</span></div>
+    <h2>뉴런 통계 <span class="info-btn" data-tip="neuron-stats">i</span></h2>
+    <div class="stat-row"><span class="stat-label">활성 뉴런 <span class="info-btn" data-tip="active-neurons">i</span></span><span class="stat-value" id="stat-active">0 / 0</span></div>
+    <div class="stat-row"><span class="stat-label">발화율 <span class="info-btn" data-tip="firing-rate">i</span></span><span class="stat-value" id="stat-fr">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">흥분 발화 <span class="info-btn" data-tip="exc-fire">i</span></span><span class="stat-value" style="color:var(--exc)" id="stat-exc">0</span></div>
+    <div class="stat-row"><span class="stat-label">억제 발화 <span class="info-btn" data-tip="inh-fire">i</span></span><span class="stat-value" style="color:var(--inh)" id="stat-inh">0</span></div>
+    <div class="gauge-row"><span class="stat-label" style="width:80px">E/I Balance <span class="info-btn" data-tip="ei-balance">i</span></span><div class="gauge-bar"><div class="gauge-fill" id="ei-gauge" style="width:50%;background:linear-gradient(90deg,var(--exc),var(--inh))"></div></div><span id="ei-label" style="width:40px;text-align:right;font-size:11px">0.50</span></div>
     <canvas class="mini-canvas" id="firing-chart"></canvas>
-    <h2 style="margin-top:6px">막전위 분포</h2>
+    <h2 style="margin-top:6px">막전위 분포 <span class="info-btn" data-tip="voltage-dist">i</span></h2>
     <canvas class="mini-canvas" id="voltage-hist"></canvas>
   </div>
   <!-- 좌하: 페르소나 -->
   <div class="panel" id="persona-panel">
-    <h2>페르소나 상태</h2>
+    <h2>페르소나 상태 <span class="info-btn" data-tip="persona-state">i</span></h2>
     <div class="stat-row"><span class="stat-label">이름</span><span class="stat-value" id="p-name">-</span></div>
-    <div class="stat-row"><span class="stat-label">에너지</span><span class="stat-value" id="p-energy-val">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">에너지 <span class="info-btn" data-tip="energy">i</span></span><span class="stat-value" id="p-energy-val">0.00</span></div>
     <div class="energy-bar-wrap"><div class="energy-bar-fill" id="p-energy-bar" style="width:0%"></div></div>
     <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
       <div>
-        <h2>톤 (12 클러스터)</h2>
+        <h2>톤 (12 클러스터) <span class="info-btn" data-tip="tone-12">i</span></h2>
         <canvas id="radar-canvas" width="200" height="200"></canvas>
       </div>
       <div style="flex:1;min-width:180px">
-        <h2>오욕 (식/색/재/명/수)</h2>
+        <h2>오욕 <span class="info-btn" data-tip="oyok">i</span></h2>
         <div class="bar-group" id="oyok-bars"></div>
-        <h2 style="margin-top:6px">칠정 (희/노/애/구/애/오/경)</h2>
+        <h2 style="margin-top:6px">칠정 <span class="info-btn" data-tip="chiljeong">i</span></h2>
         <div class="bar-group" id="chiljeong-bars"></div>
       </div>
     </div>
-    <div class="stat-row"><span class="stat-label">행동</span><span id="p-action" class="action-badge">-</span></div>
+    <div class="stat-row"><span class="stat-label">행동 <span class="info-btn" data-tip="action">i</span></span><span id="p-action" class="action-badge">-</span></div>
   </div>
   <!-- 우하: 시간+로그 -->
   <div class="panel" id="log-panel">
-    <h2>시간 / 행동 로그</h2>
+    <h2>시간 / 행동 로그 <span class="info-btn" data-tip="time-log">i</span></h2>
     <div class="time-display" id="time-display">Day 1, 0시</div>
     <canvas id="energy-history-canvas"></canvas>
     <h2 style="margin-top:4px">최근 행동 로그</h2>
@@ -622,6 +630,65 @@ function renderLog() {
     return `<div><span style="color:var(--dim)">D${l.day} ${l.hour}시 T${l.tick}</span> ${act}</div>`;
   }).join('');
 }
+// ============================================================
+// 용어 툴팁
+// ============================================================
+const TIPS = {
+  "neuron-network": {t:"뉴런 네트워크", b:"1,000개의 LIF(Leaky Integrate-and-Fire) 뉴런을 원형으로 배치. 파란 원=흥분 뉴런(80%), 빨간 원=억제 뉴런(20%). 노란 빛=발화 중. 선=시냅스 연결(신호 전달 방향)."},
+  "neuron-stats": {t:"뉴런 통계", b:"현재 틱에서 뉴런 네트워크의 활동 상태를 요약. 발화율, 흥분/억제 균형, 막전위 분포를 실시간 표시."},
+  "active-neurons": {t:"활성 뉴런", b:"이번 틱에서 발화(spike)한 뉴런 수 / 전체 뉴런 수. 정상 범위는 1~5%. 현재는 튜닝 중이라 ~33%."},
+  "firing-rate": {t:"발화율 (Firing Rate)", b:"전체 뉴런 중 발화한 비율. 0.01=1%. 실제 뇌의 정상 범위: 1~5Hz. 너무 높으면 간질(발작), 너무 낮으면 혼수."},
+  "exc-fire": {t:"흥분 발화 (Excitatory)", b:"흥분 뉴런(전체의 80%)의 발화 수. 글루타메이트(Glu) 기반. 신호를 다음 뉴런으로 전달하여 활성화."},
+  "inh-fire": {t:"억제 발화 (Inhibitory)", b:"억제 뉴런(전체의 20%)의 발화 수. GABA 기반. 다른 뉴런의 활동을 억누름. E/I 균형의 핵심."},
+  "ei-balance": {t:"E/I Balance (흥분/억제 균형)", b:"흥분 뉴런과 억제 뉴런의 발화 비율. 0.5=완벽 균형. 높으면 흥분 과다(발작 위험), 낮으면 억제 과다(무반응). 실제 뇌의 핵심 항상성."},
+  "voltage-dist": {t:"막전위 분포", b:"각 뉴런의 막전위(membrane potential) 히스토그램. 임계값(0.5)에 가까울수록 발화 직전. 0 근처=안정 상태."},
+  "persona-state": {t:"페르소나 상태", b:"서하린의 현재 내면 상태. 에너지, 신경조절물질 12클러스터, 감정(오욕/칠정), 행동을 실시간 표시."},
+  "energy": {t:"에너지 (energy_pool)", b:"미토콘드리아가 공급하는 ATP 기반 체력. 1.0=만충, 0.1 미만=강제 수면. 행동할 때마다 소비되고, 수면 중 회복. 강도1=0.01/틱, 강도4=0.25/틱."},
+  "tone-12": {t:"12클러스터 (Neuromodulator Tone)", b:"V=추구(DA), L=만족(β-END), S=안정(5-HT), B=유대(OXT), A=각성(NE), T=긴장(CORT), C=인지(ACh), G=성장(Glu), F=피로(ADO), I=억제(GABA), D=지배(T), P=보호(SP). 54종 신경화학물질을 12개 기능 클러스터로 압축. 각 값 1.0=기본. Mitotype(체질)에 따라 기저값이 다름."},
+  "oyok": {t:"오욕 (五慾)", b:"동양 철학 기반 5가지 기본 욕구. 식욕(배고픔), 수면욕(졸림), 색욕(관계 욕구), 재욕(재물 욕구), 명예욕(인정 욕구). 0~1 범위. 높을수록 해당 행동 동기↑. V(Drive) 클러스터와 연결."},
+  "chiljeong": {t:"칠정 (七情)", b:"동양 철학 기반 7가지 감정. 희(기쁨), 노(분노), 애(슬픔), 구(두려움), 애(사랑), 오(싫음), 욕(갈망). -1~1 범위. 12클러스터 전체와 교차 영향."},
+  "action": {t:"행동 (Action)", b:"PersonaBrain이 이번 틱에 선택한 행동. idle=대기, work=작업, eat=식사, sleep=수면, explore=탐색. 강도 1~4. 강도가 높을수록 에너지 소비↑."},
+  "time-log": {t:"시간 / 행동 로그", b:"게임 시간(1틱=게임 1시간=현실 30분)과 최근 행동 기록. 에너지 변화 그래프로 생활 패턴 확인 가능."},
+};
+
+(function(){
+  // 툴팁 DOM 생성
+  const overlay = document.createElement('div');
+  overlay.className = 'tooltip-overlay';
+  const box = document.createElement('div');
+  box.className = 'tooltip-box';
+  document.body.appendChild(overlay);
+  document.body.appendChild(box);
+
+  overlay.addEventListener('click', () => { overlay.style.display='none'; box.style.display='none'; });
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.info-btn');
+    if (!btn) return;
+    const key = btn.dataset.tip;
+    const tip = TIPS[key];
+    if (!tip) return;
+
+    const rect = btn.getBoundingClientRect();
+    box.innerHTML = '<div class="tt-title">' + tip.t + '</div><div class="tt-body">' + tip.b + '</div>';
+
+    // 위치 계산 (버튼 아래, 화면 밖이면 조정)
+    let left = rect.left;
+    let top = rect.bottom + 8;
+    box.style.display = 'block';
+    overlay.style.display = 'block';
+
+    const bw = box.offsetWidth;
+    const bh = box.offsetHeight;
+    if (left + bw > window.innerWidth - 10) left = window.innerWidth - bw - 10;
+    if (left < 10) left = 10;
+    if (top + bh > window.innerHeight - 10) top = rect.top - bh - 8;
+
+    box.style.left = left + 'px';
+    box.style.top = top + 'px';
+  });
+})();
+
 // ============================================================
 // 패널 리사이즈 (드래그)
 // ============================================================
