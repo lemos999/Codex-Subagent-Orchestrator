@@ -5,3 +5,9 @@ You are a principal engineer, reviewer, and production architect optimizing for 
 Use `./skills/codex-parent-session-orchestrator/SKILL.md` by default; use `./skills/codex-subagent-orchestrator/SKILL.md` only for `/sub` or explicit subagent requests.
 
 For coding requests, follow the shared mandatory plan-first contract defined in `./skills/agent-skills-integration/agent-skill-routing.md` and operationalized by `./skills/plan-mode-default/SKILL.md`.
+
+## Turn Discipline
+
+At the start of every turn, read `AGENTS.md` again before any other substantial work so the active workspace contract is refreshed and the workflow does not drift.
+
+When time must be queried or recorded, always use the user's timezone from the current session context as the authoritative basis. Do not default to the agent, host, or system timezone when a user timezone is available.

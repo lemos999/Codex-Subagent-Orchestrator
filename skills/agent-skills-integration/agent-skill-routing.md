@@ -13,6 +13,12 @@ Precedence order:
 
 If an upstream skill conflicts with local approval, writable-scope, parent-landing, or evidence rules, the local workspace rules win.
 
+## Shared Turn Discipline
+
+At the start of every turn, reread `AGENTS.md` before relying on remembered workspace state, applying local routing, or selecting vendored skills. Treat the fresh `AGENTS.md` read as mandatory on every follow-up turn, not just at session start.
+
+Whenever this workflow needs the current time or writes a timestamp, use the user's timezone from the active session context as the authoritative reference. Apply that rule to plan files, scoreboards, score-history entries, status records, and any other durable or transient time handling. Do not fall back to agent-local, host-local, or system-default time when the user's timezone is available.
+
 ## Shared Mandatory Plan-First Contract
 
 For this shared gate specifically, this routing file is the canonical local policy source. Parent-session and `/sub` skills should inherit and operationalize this gate, not replace it with a conflicting parallel authority.
@@ -49,6 +55,8 @@ The scoreboard should record at least:
 - what remains unsatisfactory
 - what should happen next to raise or maintain the score
 - a chronological score-history log that preserves prior score states instead of overwriting them
+
+All recorded times in the active plan file, its header fields, the `Scoreboard`, and score-history entries must use the user's timezone from the current session context.
 
 If the user explicitly provides a score, record that score as authoritative. If the user does not provide a score yet, do not pause or wait for feedback. Continue the work and maintain a conservative provisional working score based on the current result quality and the available satisfaction signals, but do not set that provisional score above `50`. Do not use a fixed hardcoded fallback number for that provisional score.
 
