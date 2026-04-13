@@ -98,10 +98,10 @@ GRID_SPACING_BOUNDS = [0.005, 0.05]
 DL_WEIGHT_CHOICES = np.array([0.0, 0.1, 0.2, 0.3, 0.4])
 CHECK_INTERVAL_CHOICES = np.array([15, 30, 60])
 DD_LIMIT_CHOICES = np.array([15, 20, 25, 30])
-# Strategy types: 0-7
-STRATEGY_CHOICES = np.array([0, 1, 2, 3, 4, 5, 6, 7])
+# Strategy types: 0-8
+STRATEGY_CHOICES = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8])
 STRATEGY_NAMES = ["trend_long", "trend_both", "mean_revert", "breakout",
-                  "grid", "mom_rotation", "pair", "contrarian"]
+                  "grid", "mom_rotation", "pair", "contrarian", "contrarian_v2"]
 
 ASSETS = {
     # Crypto (24/7)
@@ -719,6 +719,9 @@ class TournamentManager:
         self._last_tick = time.monotonic()
         self.tick_history: list[dict] = []  # 69-second effectiveness ticks
 
+        # contrarian_v2: locked worst variant per asset (set at resume)
+        self._locked_worst: dict[int, int] = {}  # {asset_idx: global_variant_idx}
+
         # Multi-timeframe cache
         self.mtf_cache = MultiTimeframeCache()
 
@@ -827,6 +830,7 @@ class TournamentManager:
 
             # Migrate: inject contrarian variants if none exist
             self._inject_contrarian_variants()
+            self._inject_contrarian_v2_variants()
 
         except Exception as e:
             print(f"[Tournament] Resume failed ({e}), fresh start")
@@ -875,6 +879,77 @@ class TournamentManager:
 
         print(f"[Tournament] Injected {N_CONTRARIAN} contrarian variants "
               f"(replaced worst {N_CONTRARIAN} by return)")
+
+    def _inject_contrarian_v2_variants(self):
+        """One-time migration: add 500 contrarian_v2 variants.
+
+        Unlike contrarian (real-time worst), v2 locks onto the historical worst
+        variant per asset at resume time and mirrors that fixed target.
+        """
+        strat_types = self.params[:, 10].astype(int)
+        n_existing = int((strat_types == 8).sum())
+        if n_existing > 0:
+            print(f"[Tournament] Contrarian_v2 variants already exist: {n_existing}")
+            # Restore locked worst from saved state
+            self._lock_worst_per_asset()
+            return
+
+        # Lock worst per asset BEFORE resetting anyone
+        self._lock_worst_per_asset()
+
+        N_V2 = 500
+        rets = self.portfolio.returns_pct()
+
+        # Pick next-worst 500 (skip those already converted to contrarian type 7)
+        non_contra = np.where(strat_types != 7)[0]
+        sorted_by_ret = non_contra[np.argsort(rets[non_contra])]
+        worst_indices = sorted_by_ret[:N_V2]
+
+        # Convert to contrarian_v2, reset portfolios
+        for ri in worst_indices:
+            self.params[ri, 10] = 8  # strategy_type = contrarian_v2
+            self.portfolio.balances[ri] = INITIAL_BALANCE
+            self.portfolio.positions[ri] = 0.0
+            self.portfolio.entry_prices[ri] = 0.0
+            self.portfolio.peak_balances[ri] = INITIAL_BALANCE
+            self.portfolio.trade_counts[ri] = 0
+            self.portfolio.win_counts[ri] = 0
+            self.portfolio.trade_pnls[ri] = []
+            self.portfolio.recent_pnls[ri] = []
+
+        # Distribute across assets/timeframes
+        n_assets = len(ASSET_NAMES)
+        n_tfs = len(TIMEFRAME_CHOICES)
+        for i, ri in enumerate(worst_indices):
+            self.params[ri, 11] = i % n_assets
+            asset_sym = ASSET_NAMES[int(self.params[ri, 11])]
+            if ASSETS[asset_sym]["type"] == "stock":
+                self.params[ri, 12] = 5
+            else:
+                self.params[ri, 12] = (i // n_assets) % n_tfs
+
+        print(f"[Tournament] Injected {N_V2} contrarian_v2 variants "
+              f"(locked worst per asset from historical data)")
+
+    def _lock_worst_per_asset(self):
+        """Lock the worst non-contrarian variant per asset from current data."""
+        rets = self.portfolio.returns_pct()
+        strat_types = self.params[:, 10].astype(int)
+        asset_indices = self.params[:, 11].astype(int)
+
+        for asset_idx in range(len(ASSET_NAMES)):
+            # Non-contrarian variants on this asset with trades
+            mask = ((asset_indices == asset_idx)
+                    & (strat_types != 7) & (strat_types != 8)
+                    & (self.portfolio.trade_counts >= 5))
+            candidates = np.where(mask)[0]
+            if len(candidates) == 0:
+                continue
+            worst = candidates[np.argmin(rets[candidates])]
+            self._locked_worst[asset_idx] = int(worst)
+            sym = ASSET_NAMES[asset_idx]
+            print(f"  [contrarian_v2] Locked worst for {sym}: "
+                  f"variant #{worst} (ret={rets[worst]:.2f}%)")
 
     def save_state(self):
         pnls_arr = np.empty(N_VARIANTS, dtype=object)
@@ -1053,19 +1128,26 @@ class TournamentManager:
                         sym, indices[pair_mask])
                     raw_convictions[pair_mask] = pair_conv
 
-                # contrarian (type 7): invert worst variant's position
+                # contrarian (type 7): invert real-time worst's position
                 contra_mask = strats == 7
                 if contra_mask.any():
                     contra_conv = self._eval_contrarian(
                         asset_idx, indices, contra_mask)
                     raw_convictions[contra_mask] = contra_conv
 
+                # contrarian_v2 (type 8): invert locked historical worst's position
+                contra2_mask = strats == 8
+                if contra2_mask.any():
+                    contra2_conv = self._eval_contrarian_v2(
+                        asset_idx, contra2_mask)
+                    raw_convictions[contra2_mask] = contra2_conv
+
                 # DL boost
                 dl_boost = self.params[indices, 7] * dl_prob
                 convictions = np.clip(raw_convictions + dl_boost, 0.0, 1.0)
 
-                # Short allowed (type 1 and 7): allow negative conviction
-                short_mask = (strats == 1) | (strats == 7)
+                # Short allowed (type 1, 7, 8): allow negative conviction
+                short_mask = (strats == 1) | (strats == 7) | (strats == 8)
                 if short_mask.any():
                     short_conv = raw_convictions[short_mask] + self.params[indices[short_mask], 7] * dl_prob
                     convictions[short_mask] = np.clip(short_conv, -1.0, 1.0)
@@ -1235,6 +1317,24 @@ class TournamentManager:
         contra_conviction = -worst_norm
 
         return np.full(n_contra, np.clip(contra_conviction, -1.0, 1.0))
+
+    def _eval_contrarian_v2(self, asset_idx: int,
+                            contra2_local_mask: np.ndarray) -> np.ndarray:
+        """Contrarian_v2: invert a LOCKED historical worst variant's position.
+
+        Unlike contrarian (type 7) which tracks real-time worst,
+        v2 mirrors a fixed variant chosen at resume time from accumulated data.
+        """
+        n = int(contra2_local_mask.sum())
+        locked_idx = self._locked_worst.get(asset_idx)
+        if locked_idx is None:
+            return np.zeros(n)
+
+        worst_pos = self.portfolio.positions[locked_idx]
+        worst_lev = max(self.params[locked_idx, 6], 0.01)
+        worst_norm = worst_pos / worst_lev
+
+        return np.full(n, np.clip(-worst_norm, -1.0, 1.0))
 
     def _update_ensemble(self):
         """Compute ensemble signal from top-10 variants."""
