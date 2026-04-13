@@ -78,21 +78,39 @@ class TickEngine:
         )
 
         # 에너지 소비
+        prev_energy = self.inner.energy_pool
         self.inner.energy_pool = max(0.0, self.inner.energy_pool - cost)
 
-        # 오욕 갱신 (간단)
-        self.inner.oyok[0] = min(1.0, self.inner.oyok[0] + 0.02)   # 식욕 서서히 증가
-        self.inner.oyok[1] = min(1.0, self.inner.oyok[1] + 0.01)   # 수면욕 서서히 증가
+        # 오욕 갱신
+        self.inner.oyok[0] = min(1.0, self.inner.oyok[0] + 0.02)   # 식욕
+        self.inner.oyok[1] = min(1.0, self.inner.oyok[1] + 0.01)   # 수면욕
 
         # 식사하면 식욕 감소 + 에너지 약간 회복
         if action == "eat":
             self.inner.oyok[0] = max(0.0, self.inner.oyok[0] - 0.5)
             self.inner.energy_pool = min(self.inner.max_capacity, self.inner.energy_pool + 0.05)
 
-        # 수면 진입 판정: 에너지 고갈 시에만 (Phase 0)
+        # ── Phase 1: 감정 갱신 ──
+        self.inner.update_emotion(action, self.inner.energy_pool, prev_energy)
+
+        # ── Phase 1: 감정 → tone 반영 ──
+        self.inner.update_tone_from_emotion()
+
+        # ── Phase 1: 에피소드 기억 저장 ──
+        from ontology import EpisodeTrace
+        episode = EpisodeTrace(
+            tick=self.time.tick,
+            action=action,
+            emotion_snapshot=self.inner.chiljeong.copy(),
+            energy_at_time=self.inner.energy_pool,
+        )
+        episode.compute_salience(self.inner.chiljeong)
+        self.inner.add_episode(episode)
+
+        # 수면 진입 판정
         if self.inner.energy_pool < 0.1:
             self.inner.is_sleeping = True
-            self.inner.sleep_ticks_remaining = 6  # 게임 6시간 수면
+            self.inner.sleep_ticks_remaining = 6
 
         # 로그
         entry = {
@@ -106,6 +124,12 @@ class TickEngine:
             "sleepiness": round(float(self.inner.oyok[1]), 3),
             "sleeping": self.inner.is_sleeping,
             "firing_rate": round(self.brain.get_stats()["firing_rate"], 4),
+            # Phase 1 추가
+            "emotions": self.inner.emotion_dict(),
+            "tone_V": round(float(self.inner.tone[0]), 3),
+            "tone_A": round(float(self.inner.tone[4]), 3),
+            "tone_I": round(float(self.inner.tone[9]), 3),
+            "memories": len(self.inner.episodes),
         }
         self.log.append(entry)
         return entry
@@ -154,13 +178,20 @@ class TickEngine:
             entry = self.tick()
             if verbose:
                 status = "ZZZ" if entry["sleeping"] else "ACT"
+                emo = entry.get("emotions", {})
+                joy = emo.get("joy", 0)
+                anger = emo.get("anger", 0)
+                fear = emo.get("fear", 0)
+                desire = emo.get("desire", 0)
+                mem = entry.get("memories", 0)
                 print(
-                    f"[Day {entry['day']:2d} H{entry['hour']:02d}] "
-                    f"{status} {entry['action']:10s} "
+                    f"[D{entry['day']:2d} H{entry['hour']:02d}] "
+                    f"{status} {entry['action']:8s} "
                     f"E={entry['energy']:.2f} "
-                    f"hunger={entry['hunger']:.2f} "
-                    f"sleep={entry['sleepiness']:.2f} "
-                    f"fire={entry['firing_rate']:.3f}"
+                    f"h={entry['hunger']:.1f} "
+                    f"fr={entry['firing_rate']:.3f} "
+                    f"joy={joy:.1f} ang={anger:.1f} fear={fear:.1f} "
+                    f"mem={mem}"
                 )
 
         if verbose:

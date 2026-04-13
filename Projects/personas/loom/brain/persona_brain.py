@@ -61,9 +61,21 @@ class PersonaBrain:
                 spread = rng.choice(range(n_input, min(n_input + 50, self.n_neurons)), size=3, replace=False)
                 input_signal[spread] += float(oyok[i]) * 0.3
 
-        # 배경 노이즈 (자발적 활동)
-        # 임계값 0.8에 10스텝 누적으로 도달: 0.1/스텝 × 10 × leak^5 ≈ 0.65 + 시냅스
-        input_signal += rng.exponential(0.045, self.n_neurons).astype(np.float32)
+        # Phase 1: 12클러스터 tone이 뉴런 입력에 영향
+        # tone > 1.0이면 해당 영역 활성↑, < 1.0이면 ↓
+        tone_f32 = tone.astype(np.float32)
+        tone_mean = float(tone_f32.mean())
+        # tone이 전체 입력 강도를 조절 (기분 좋으면 활성↑, 나쁘면 ↓)
+        tone_gain = 0.8 + 0.2 * tone_mean  # 0.8~1.2 범위
+
+        # A(Acute/NE, idx=4)가 높으면 각성↑ → 입력 강화
+        acute_boost = float(tone_f32[4]) - 1.0  # 0이면 기본, 양수면 강화
+        # I(Inhibition/GABA, idx=9)가 높으면 억제↑ → 입력 약화
+        inhibit_dampen = float(tone_f32[9]) - 1.0  # 양수면 억제
+
+        # 배경 노이즈 + tone 영향
+        noise_scale = max(0.02, 0.045 * tone_gain * (1.0 + acute_boost * 0.3) * (1.0 - inhibit_dampen * 0.3))
+        input_signal += rng.exponential(noise_scale, self.n_neurons).astype(np.float32)
 
         # 에너지 수준이 전체에 영향
         input_signal *= (0.3 + 0.7 * energy_pool)

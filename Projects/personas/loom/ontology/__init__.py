@@ -1,3 +1,3 @@
-from .layers import Creator, Weather, GameTime, Persona, InnerWorld, ActionProposal
+from .layers import Creator, Weather, GameTime, Persona, InnerWorld, ActionProposal, EpisodeTrace
 
-__all__ = ["Creator", "Weather", "GameTime", "Persona", "InnerWorld", "ActionProposal"]
+__all__ = ["Creator", "Weather", "GameTime", "Persona", "InnerWorld", "ActionProposal", "EpisodeTrace"]

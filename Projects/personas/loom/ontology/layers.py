@@ -108,13 +108,97 @@ class InnerWorld:
     is_sleeping: bool = False
     sleep_ticks_remaining: int = 0
 
-    # 에피소드 기억 (Phase 0: 빈 리스트, Phase 1에서 ring buffer)
-    episodes: list = field(default_factory=list)
+    # ─── Phase 1: 에피소드 기억 ─────────────────────────
+    episodes: list = field(default_factory=list)  # EpisodeTrace 리스트 (ring buffer, 최대 50개)
+    episode_max: int = 50
+
+    # 캐시 (무의식 고속도로 — 상황→행동 매핑)
+    habit_cache: dict = field(default_factory=dict)  # {context_hash: action}
 
     CLUSTER_NAMES = ["V", "L", "S", "B", "A", "T", "C", "G", "F", "I", "D", "P"]
+    CHILJEONG_NAMES = ["joy", "anger", "sadness", "fear", "love", "disgust", "desire"]
+    OYOK_NAMES = ["hunger", "sleepiness", "lust", "greed", "honor"]
 
     def tone_dict(self) -> dict:
         return {name: float(val) for name, val in zip(self.CLUSTER_NAMES, self.tone)}
+
+    def emotion_dict(self) -> dict:
+        return {name: float(val) for name, val in zip(self.CHILJEONG_NAMES, self.chiljeong)}
+
+    def add_episode(self, episode: 'EpisodeTrace'):
+        """에피소드 기억 추가 (ring buffer)."""
+        self.episodes.append(episode)
+        if len(self.episodes) > self.episode_max:
+            # salience 가장 낮은 것 제거 (망각)
+            self.episodes.sort(key=lambda e: e.salience, reverse=True)
+            self.episodes = self.episodes[:self.episode_max]
+
+    def update_emotion(self, action: str, energy: float, prev_energy: float):
+        """행동과 상태 변화에 따른 감정 갱신."""
+        decay = 0.9  # 감정 자연 감쇠 (매 틱 10% 회귀)
+        self.chiljeong *= decay
+
+        # 식사 → 기쁨
+        if action == "eat":
+            self.chiljeong[0] = min(1.0, self.chiljeong[0] + 0.3)  # joy
+
+        # 에너지 급락 → 두려움
+        if energy < 0.2:
+            self.chiljeong[3] = min(1.0, self.chiljeong[3] + 0.2)  # fear
+
+        # 에너지 회복 → 기쁨
+        if energy > prev_energy + 0.1:
+            self.chiljeong[0] = min(1.0, self.chiljeong[0] + 0.1)  # joy
+
+        # 배고픔 높으면 → 짜증(분노) + 갈망
+        if self.oyok[0] > 0.7:
+            self.chiljeong[1] = min(1.0, self.chiljeong[1] + 0.1)  # anger
+            self.chiljeong[6] = min(1.0, self.chiljeong[6] + 0.2)  # desire
+
+        # 탐험 → 기쁨 약간
+        if action == "explore":
+            self.chiljeong[0] = min(1.0, self.chiljeong[0] + 0.1)  # joy
+
+        # 클리핑
+        self.chiljeong = np.clip(self.chiljeong, -1.0, 1.0)
+
+    def update_tone_from_emotion(self):
+        """감정 → 12클러스터 tone 영향."""
+        # 기쁨 → V(Drive)↑, L(Liking)↑
+        self.tone[0] = np.float16(1.0 + float(self.chiljeong[0]) * 0.2)  # V
+        self.tone[1] = np.float16(1.0 + float(self.chiljeong[0]) * 0.15)  # L
+
+        # 분노 → A(Acute)↑, S(Stability)↓, D(Dominance)↑
+        self.tone[4] = np.float16(1.0 + float(self.chiljeong[1]) * 0.3)  # A
+        self.tone[2] = np.float16(1.0 - float(self.chiljeong[1]) * 0.2)  # S
+        self.tone[10] = np.float16(1.0 + float(self.chiljeong[1]) * 0.2)  # D
+
+        # 두려움 → A↑, I(Inhibition)↑, P(Protection)↑
+        self.tone[4] = np.float16(min(2.0, float(self.tone[4]) + float(self.chiljeong[3]) * 0.2))  # A
+        self.tone[9] = np.float16(1.0 + float(self.chiljeong[3]) * 0.2)  # I
+        self.tone[11] = np.float16(1.0 + float(self.chiljeong[3]) * 0.3)  # P
+
+        # 갈망 → V↑, F(Fatigue) 약간↑
+        self.tone[0] = np.float16(min(2.0, float(self.tone[0]) + float(self.chiljeong[6]) * 0.15))  # V
+        self.tone[8] = np.float16(1.0 + float(self.chiljeong[6]) * 0.1)  # F
+
+
+# ─── L3d: Episode Trace (기억) ────────────────────────────────
+
+@dataclass
+class EpisodeTrace:
+    """에피소드 기억 1건."""
+    tick: int
+    action: str
+    emotion_snapshot: np.ndarray  # chiljeong 복사본
+    energy_at_time: float
+    salience: float = 0.5        # 중요도 (감정 강도에 비례)
+    recall_count: int = 0        # 인출 횟수
+
+    def compute_salience(self, emotion: np.ndarray) -> float:
+        """감정 강도로 salience 계산."""
+        self.salience = float(np.abs(emotion).max()) * 0.7 + 0.3
+        return self.salience
 
 
 # ─── Layer 4: Agency ──────────────────────────────────────────
