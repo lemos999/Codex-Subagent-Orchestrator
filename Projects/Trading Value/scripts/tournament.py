@@ -98,10 +98,10 @@ GRID_SPACING_BOUNDS = [0.005, 0.05]
 DL_WEIGHT_CHOICES = np.array([0.0, 0.1, 0.2, 0.3, 0.4])
 CHECK_INTERVAL_CHOICES = np.array([15, 30, 60])
 DD_LIMIT_CHOICES = np.array([15, 20, 25, 30])
-# Strategy types: 0-6
-STRATEGY_CHOICES = np.array([0, 1, 2, 3, 4, 5, 6])
+# Strategy types: 0-7
+STRATEGY_CHOICES = np.array([0, 1, 2, 3, 4, 5, 6, 7])
 STRATEGY_NAMES = ["trend_long", "trend_both", "mean_revert", "breakout",
-                  "grid", "mom_rotation", "pair"]
+                  "grid", "mom_rotation", "pair", "contrarian"]
 
 ASSETS = {
     # Crypto (24/7)
@@ -824,10 +824,57 @@ class TournamentManager:
                 self.ensemble_top_idx = data["ensemble_top_idx"]
             print(f"[Tournament] Resumed gen={self.generation}, "
                   f"avg_ret={self.portfolio.returns_pct().mean():.1f}%")
+
+            # Migrate: inject contrarian variants if none exist
+            self._inject_contrarian_variants()
+
         except Exception as e:
             print(f"[Tournament] Resume failed ({e}), fresh start")
             self.params = _generate_sobol_params()
             self.portfolio.reset()
+
+    def _inject_contrarian_variants(self):
+        """One-time migration: convert worst 500 variants to contrarian strategy.
+
+        Replaces the bottom 10% (by return) with contrarian variants,
+        spread across all assets and timeframes for diversity.
+        """
+        strat_types = self.params[:, 10].astype(int)
+        n_existing = int((strat_types == 7).sum())
+        if n_existing > 0:
+            print(f"[Tournament] Contrarian variants already exist: {n_existing}")
+            return
+
+        N_CONTRARIAN = 500  # 10% of 5000
+        rets = self.portfolio.returns_pct()
+        worst_indices = np.argsort(rets)[:N_CONTRARIAN]
+
+        # Convert them to contrarian, reset their portfolios
+        for ri in worst_indices:
+            self.params[ri, 10] = 7  # strategy_type = contrarian
+            # Reset portfolio for fair comparison
+            self.portfolio.balances[ri] = INITIAL_BALANCE
+            self.portfolio.positions[ri] = 0.0
+            self.portfolio.entry_prices[ri] = 0.0
+            self.portfolio.peak_balances[ri] = INITIAL_BALANCE
+            self.portfolio.trade_counts[ri] = 0
+            self.portfolio.win_counts[ri] = 0
+            self.portfolio.trade_pnls[ri] = []
+            self.portfolio.recent_pnls[ri] = []
+
+        # Ensure asset/timeframe diversity: redistribute evenly
+        n_assets = len(ASSET_NAMES)
+        n_tfs = len(TIMEFRAME_CHOICES)
+        for i, ri in enumerate(worst_indices):
+            self.params[ri, 11] = i % n_assets  # cycle through assets
+            asset_sym = ASSET_NAMES[int(self.params[ri, 11])]
+            if ASSETS[asset_sym]["type"] == "stock":
+                self.params[ri, 12] = 5  # stocks: daily only
+            else:
+                self.params[ri, 12] = (i // n_assets) % n_tfs
+
+        print(f"[Tournament] Injected {N_CONTRARIAN} contrarian variants "
+              f"(replaced worst {N_CONTRARIAN} by return)")
 
     def save_state(self):
         pnls_arr = np.empty(N_VARIANTS, dtype=object)
@@ -1006,15 +1053,21 @@ class TournamentManager:
                         sym, indices[pair_mask])
                     raw_convictions[pair_mask] = pair_conv
 
+                # contrarian (type 7): invert worst variant's position
+                contra_mask = strats == 7
+                if contra_mask.any():
+                    contra_conv = self._eval_contrarian(
+                        asset_idx, indices, contra_mask)
+                    raw_convictions[contra_mask] = contra_conv
+
                 # DL boost
                 dl_boost = self.params[indices, 7] * dl_prob
                 convictions = np.clip(raw_convictions + dl_boost, 0.0, 1.0)
 
-                # Short allowed (type 1): allow negative conviction
-                short_mask = strats == 1
+                # Short allowed (type 1 and 7): allow negative conviction
+                short_mask = (strats == 1) | (strats == 7)
                 if short_mask.any():
-                    short_conv = (weight_matrix[short_mask] @ signals
-                                  + self.params[indices[short_mask], 7] * dl_prob)
+                    short_conv = raw_convictions[short_mask] + self.params[indices[short_mask], 7] * dl_prob
                     convictions[short_mask] = np.clip(short_conv, -1.0, 1.0)
 
                 target_sizes = convictions * self.params[indices, 6]
@@ -1149,6 +1202,39 @@ class TournamentManager:
                 convictions[j] = -0.2 * np.sign(z)
 
         return convictions
+
+    def _eval_contrarian(self, asset_idx: int, group_indices: np.ndarray,
+                         contra_local_mask: np.ndarray) -> np.ndarray:
+        """Contrarian strategy: invert the worst variant's position for this asset.
+
+        Finds the worst-performing non-contrarian variant on the same asset,
+        then returns the negated normalized position as conviction.
+        """
+        n_contra = int(contra_local_mask.sum())
+
+        # All variants on this asset (global indices)
+        asset_mask = self.params[:, 11].astype(int) == asset_idx
+        asset_global = np.where(asset_mask)[0]
+
+        # Exclude contrarian variants themselves to avoid self-reference
+        non_contra = asset_global[self.params[asset_global, 10].astype(int) != 7]
+
+        if len(non_contra) == 0:
+            return np.zeros(n_contra)
+
+        # Find worst by return %
+        rets = self.portfolio.returns_pct()
+        worst_idx = non_contra[np.argmin(rets[non_contra])]
+
+        # Get worst's current normalized position (position / leverage)
+        worst_pos = self.portfolio.positions[worst_idx]
+        worst_lev = max(self.params[worst_idx, 6], 0.01)
+        worst_norm = worst_pos / worst_lev  # in [-1, 1]
+
+        # Invert: if worst is long -> go short, if short -> go long
+        contra_conviction = -worst_norm
+
+        return np.full(n_contra, np.clip(contra_conviction, -1.0, 1.0))
 
     def _update_ensemble(self):
         """Compute ensemble signal from top-10 variants."""
