@@ -1877,35 +1877,41 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             "counts": counts.tolist(),
         }
 
-        # Asset distribution
+        # Asset distribution (with win rate)
         asset_indices = m.params[:, 11].astype(int)
         asset_dist = []
         for ai, name in enumerate(ASSET_NAMES):
             mask = asset_indices == ai
             cnt = int(mask.sum())
             avg_r = float(rets[mask].mean()) if cnt > 0 else 0.0
+            avg_wr = float(wrs[mask].mean()) if cnt > 0 else 0.0
             asset_dist.append({"name": name, "count": cnt,
-                               "avg_ret": f"{avg_r:.1f}"})
+                               "avg_ret": f"{avg_r:.1f}",
+                               "avg_wr": f"{avg_wr:.1f}"})
 
-        # Strategy distribution
+        # Strategy distribution (with win rate)
         strat_indices = m.params[:, 10].astype(int)
         strategy_dist = []
         for si, name in enumerate(STRATEGY_NAMES):
             mask = strat_indices == si
             cnt = int(mask.sum())
             avg_r = float(rets[mask].mean()) if cnt > 0 else 0.0
+            avg_wr = float(wrs[mask].mean()) if cnt > 0 else 0.0
             strategy_dist.append({"name": name, "count": cnt,
-                                  "avg_ret": f"{avg_r:.1f}"})
+                                  "avg_ret": f"{avg_r:.1f}",
+                                  "avg_wr": f"{avg_wr:.1f}"})
 
-        # Timeframe distribution
+        # Timeframe distribution (with win rate)
         tf_indices = m.params[:, 12].astype(int)
         tf_dist = []
         for ti, name in TIMEFRAME_CHOICES.items():
             mask = tf_indices == ti
             cnt = int(mask.sum())
             avg_r = float(rets[mask].mean()) if cnt > 0 else 0.0
+            avg_wr = float(wrs[mask].mean()) if cnt > 0 else 0.0
             tf_dist.append({"name": name, "count": cnt,
-                            "avg_ret": f"{avg_r:.1f}"})
+                            "avg_ret": f"{avg_r:.1f}",
+                            "avg_wr": f"{avg_wr:.1f}"})
 
         # Top / Bottom 10
         sorted_idx = np.argsort(rets)[::-1]
