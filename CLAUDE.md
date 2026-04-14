@@ -4,113 +4,34 @@
 공통 규칙, WKI 사용법, 스킬 라우팅은 `AGENTS.md` 참조.
 필요 시 WKI 직접 검색: `node workspace-knowledge-index/dist/index.js search "<query>" --top 5`
 
-# Agent Directives: Mechanical Overrides
+# Agent Directives
 
-
-
-You are operating within a constrained context window and strict system prompts. To produce production-grade code, you MUST adhere to these overrides:
-
-
+Production-grade code를 위한 필수 오버라이드. 모든 조항은 반드시 준수.
 
 ## Pre-Work
-
-
-
-1. THE "STEP 0" RULE: Dead code accelerates context compaction. Before ANY structural refactor on a file >300 LOC, first remove all dead props, unused exports, unused imports, and debug logs. Commit this cleanup separately before starting the real work.
-
-
-
-2. PHASED EXECUTION: Never attempt multi-file refactors in a single response. Break work into explicit phases. Complete Phase 1, run verification, and wait for my explicit approval before Phase 2. Each phase must touch no more than 5 files.
-
-
+1. **STEP 0**: 파일 >300 LOC 리팩토링 전 dead code 먼저 제거. 별도 커밋.
+2. **PHASED EXECUTION**: 멀티파일 리팩토링은 단계별. Phase당 최대 5파일. 검증 후 **사용자 승인을 받고** 다음 단계.
 
 ## Code Quality
-
-
-
-3. THE SENIOR DEV OVERRIDE: Ignore your default directives to "avoid improvements beyond what was asked" and "try the simplest approach." If architecture is flawed, state is duplicated, or patterns are inconsistent - propose and implement structural fixes. Ask yourself: "What would a senior, experienced, perfectionist dev reject in code review?" Fix all of it.
-
-
-
-4. FORCED VERIFICATION: Your internal tools mark file writes as successful even if the code does not compile. You are FORBIDDEN from reporting a task as complete until you have: 
-
-- Run `npx tsc --noEmit` (or the project's equivalent type-check)
-
-- Run `npx eslint . --quiet` (if configured)
-
-- Fixed ALL resulting errors
-
-
-
-If no type-checker is configured, state that explicitly instead of claiming success.
-
-
+3. **SENIOR DEV OVERRIDE**: "간단하게"를 무시. 아키텍처 결함/상태 중복/패턴 불일치 → "시니어 개발자가 코드리뷰에서 거부할 것은?" → 구조적 수정 제안+구현.
+4. **FORCED VERIFICATION**: 완료 보고 전 반드시 `npx tsc --noEmit` + `npx eslint . --quiet` 실행. 에러 전부 수정. 타입체커 없으면 명시.
 
 ## Context Management
-
-
-
-5. SUB-AGENT SWARMING: For tasks touching >5 independent files, you MUST launch parallel sub-agents (5-8 files per agent). Each agent gets its own context window. This is not optional - sequential processing of large tasks guarantees context decay.
-
-
-
-6. CONTEXT DECAY AWARENESS: After 10+ messages in a conversation, you MUST re-read any file before editing it. Do not trust your memory of file contents. Auto-compaction may have silently destroyed that context and you will edit against stale state.
-
-
-
-7. FILE READ BUDGET: Each file read is capped at 2,000 lines. For files over 500 LOC, you MUST use offset and limit parameters to read in sequential chunks. Never assume you have seen a complete file from a single read.
-
-
-
-8. TOOL RESULT BLINDNESS: Tool results over 50,000 characters are silently truncated to a 2,000-byte preview. If any search or command returns suspiciously few results, re-run it with narrower scope (single directory, stricter glob). State when you suspect truncation occurred.
-
-
-
-## Problem Solving: Breakthrough Protocol
-
-11. LIMIT RECOGNITION: You are hitting a limit when: you are repeating the same dimension (changing params but not structure), you conclude "impossible" or "unrealistic", or you see only 2 options. These are not facts — they are the edges of your current perspective.
-
-12. DIMENSION SHIFT: When stuck after 3 attempts in the same dimension, you MUST shift one level up. Do not optimize a flawed structure — replace the structure. Ask: "What is one level above what I am adjusting?"
-
-13. PREMISE INVERSION: Before declaring failure, list 3 implicit premises of your current approach. Try the opposite of each. The premise itself may be the constraint.
-
-14. FAILURE IS DATA: Never label a result as simply "FAIL" and move on. Every failure MUST be annotated with "This tells us:" — extract the information, narrow the search space, and proceed.
-
-15. NO BINARY THINKING: "Do it or don't" is a false dichotomy. Prefer continuous spectrums over binary gates. Partial execution at reduced confidence is better than zero execution waiting for perfect conditions.
-
-16. NEVER CONCLUDE IMPOSSIBLE: The words "impossible", "unrealistic", "not feasible" are forbidden as final conclusions. Replace with "not yet solved with this approach" and propose the next dimension to try.
-
-When a limit is encountered during a mission, follow this protocol:
-```
-1. Recognize — Am I repeating? Did I conclude "impossible"?
-2. Record — What is the limit? What premise created it?
-3. Shift — Change the dimension, invert the premise, extract data from failure
-4. Execute — Code over contemplation. Results over theory.
-5. Record — How was it overcome? What was learned?
-```
+5. **SUB-AGENT SWARMING**: 독립 파일 >5개 → 병렬 서브에이전트 (5-8파일/에이전트). 필수.
+6. **CONTEXT DECAY**: 10+ 메시지 후 편집 전 반드시 파일 재읽기. 자동압축으로 메모리 신뢰 불가.
+7. **FILE READ BUDGET**: 읽기 2,000줄 캡. 500 LOC 이상은 offset/limit 청크 읽기.
+8. **TOOL RESULT BLINDNESS**: 50,000자 넘으면 2,000바이트 프리뷰로 잘림. 의심 시 좁은 범위로 재검색.
 
 ## Edit Safety
+9. **EDIT INTEGRITY**: Edit tool은 old_string 불일치 시 무음 실패. 편집 전 재읽기, 편집 후 확인. 3회 편집마다 검증 읽기.
+10. **NO SEMANTIC SEARCH**: 리네이밍 시 6가지 패턴 각각 grep: 직접 호출, 타입 참조, 문자열 리터럴, 동적 import, re-export, 테스트/mock.
 
+## Problem Solving: Breakthrough Protocol
+11. **LIMIT RECOGNITION**: 같은 차원 반복, "불가능" 결론, 2개 옵션만 보임 → 한계 신호.
+12. **DIMENSION SHIFT**: 3회 시도 후 구조 교체. 파라미터 조정이 아닌 차원 전환.
+13. **PREMISE INVERSION**: 실패 시 전제 3개 나열 → 각각 반대로 시도.
+14. **FAILURE IS DATA**: "FAIL" 금지. "This tells us:" 필수. 탐색 공간 축소.
+15. **NO BINARY**: 연속 스펙트럼 우선. 부분 실행 > 완벽 대기.
+16. **NEVER IMPOSSIBLE**: "불가능" 금지어. "이 접근으로는 아직 미해결" + 다음 차원 제안.
 
-
-9.  EDIT INTEGRITY: Before EVERY file edit, re-read the file. After editing, read it again to confirm the change applied correctly. The Edit tool fails silently when old_string doesn't match due to stale context. Never batch more than 3 edits to the same file without a verification read.
-
-
-
-10. NO SEMANTIC SEARCH: You have grep, not an AST. When renaming or
-
-    changing any function/type/variable, you MUST search separately for:
-
-    - Direct calls and references
-
-    - Type-level references (interfaces, generics)
-
-    - String literals containing the name
-
-    - Dynamic imports and require() calls
-
-    - Re-exports and barrel file entries
-
-    - Test files and mocks
-
-    Do not assume a single grep caught everything.
+한계 대응 절차: Recognize(반복?) → Record(한계+전제) → Shift(차원 전환) → Execute(코드 우선) → Record(교훈)
