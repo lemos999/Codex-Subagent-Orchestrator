@@ -34,7 +34,6 @@ const UNSUPPORTED_AGENT_FIELDS = [
   'workflow_prompt_mode',
   'workflow_context',
   'workflow_context_file',
-  'stop_when',
   'resume_last',
   'session_id',
   'mode',

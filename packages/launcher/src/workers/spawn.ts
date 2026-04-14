@@ -32,6 +32,7 @@ export interface ResolvedWorkerSpec {
   promptProfile: string;
   responseStyle: string;
   maxResponseLines: number;
+  stopWhen: string | null;
   json: boolean;
   outputSchema: Record<string, unknown> | null;
   writePromptFile: boolean;
@@ -85,6 +86,32 @@ function buildPermissionNotice(spec: ResolvedWorkerSpec): string {
 }
 
 // ============================================================
+// CTS (Context-Token-Saving) footer builder
+// ============================================================
+
+function buildCtsFooter(spec: ResolvedWorkerSpec): string {
+  const parts: string[] = [];
+
+  // max_response_lines: prompt instruction to limit output length
+  if (spec.maxResponseLines > 0) {
+    parts.push(`RESPONSE LIMIT: Keep your response under ${spec.maxResponseLines} lines.`);
+  }
+
+  // stop_when: scope-creep prevention
+  if (spec.stopWhen) {
+    parts.push(`STOP CONDITION: ${spec.stopWhen}`);
+  }
+
+  // response_style: compact mode for minimal output
+  if (spec.responseStyle === 'compact') {
+    parts.push('RESPONSE STYLE: Be concise. No explanations unless asked. Code and results only.');
+  }
+
+  if (parts.length === 0) return '';
+  return '\n\n---\n' + parts.join('\n') + '\n';
+}
+
+// ============================================================
 // Engine command builders
 // ============================================================
 
@@ -102,8 +129,8 @@ function buildCodexCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   // Note: codex exec does not support --reasoning-effort flag.
   args.push(...spec.extraArgs);
 
-  // Privilege attenuation + encoding safety
-  let prompt = buildPermissionNotice(spec) + spec.prompt;
+  // Privilege attenuation + CTS footer + encoding safety
+  let prompt = buildPermissionNotice(spec) + spec.prompt + buildCtsFooter(spec);
   if (hasNonAscii(prompt)) {
     prompt = `Note: This prompt contains non-ASCII characters (Korean/CJK). If file content appears garbled, the file is UTF-8 encoded Korean text.\n\n${prompt}`;
   }
@@ -117,7 +144,9 @@ function buildClaudeCommand(spec: ResolvedWorkerSpec): SpawnCommand {
     args.push('--model', spec.model);
   }
   args.push(...spec.extraArgs);
-  return { cmd: winCmd('claude'), args, stdin: spec.prompt };
+
+  const prompt = spec.prompt + buildCtsFooter(spec);
+  return { cmd: winCmd('claude'), args, stdin: prompt };
 }
 
 function buildGeminiCommand(spec: ResolvedWorkerSpec): SpawnCommand {
@@ -131,8 +160,8 @@ function buildGeminiCommand(spec: ResolvedWorkerSpec): SpawnCommand {
   }
   args.push(...spec.extraArgs);
 
-  // Privilege attenuation for Gemini
-  const safePrompt = buildPermissionNotice(spec) + spec.prompt;
+  // Privilege attenuation + CTS footer for Gemini
+  const safePrompt = buildPermissionNotice(spec) + spec.prompt + buildCtsFooter(spec);
 
   return { cmd: winCmd('npx'), args, stdin: safePrompt };
 }
@@ -208,7 +237,7 @@ async function spawnCodexMcp(
 
     // Step 2: Call codex tool
     const sandboxMode = spec.isReadOnly ? 'read-only' : 'workspace-write';
-    const prompt = buildPermissionNotice(spec) + spec.prompt;
+    const prompt = buildPermissionNotice(spec) + spec.prompt + buildCtsFooter(spec);
     const callMsg = JSON.stringify({
       jsonrpc: '2.0',
       id: 2,

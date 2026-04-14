@@ -31,6 +31,7 @@ export interface SharedDirectiveInfo {
   text: string | null;
   source: string | null;
   sha256: string | null;
+  originalCharCount?: number | null;
 }
 
 // ============================================================
@@ -57,7 +58,8 @@ function buildSharedDirectiveSection(
   spec: LauncherSpec,
   directive: SharedDirectiveInfo,
 ): ManifestSharedDirective {
-  const charCount = directive.text?.length ?? 0;
+  const effectiveCharCount = directive.text?.length ?? 0;
+  const originalCharCount = directive.originalCharCount ?? effectiveCharCount;
   return {
     source: directive.source,
     requested_mode: spec.shared_directive_mode ?? 'full',
@@ -65,9 +67,9 @@ function buildSharedDirectiveSection(
       ? (spec.shared_directive_mode ?? 'full')
       : 'disabled',
     sha256: directive.sha256,
-    char_count: charCount,
-    original_char_count: charCount,
-    effective_char_count: charCount,
+    char_count: originalCharCount,
+    original_char_count: originalCharCount,
+    effective_char_count: effectiveCharCount,
   };
 }
 

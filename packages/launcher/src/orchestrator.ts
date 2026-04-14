@@ -99,6 +99,52 @@ async function loadSharedDirective(
 }
 
 // ============================================================
+// Compact directive — strips noise from shared directives
+// ============================================================
+
+function compactDirective(text: string): string {
+  const lines = text.split('\n');
+  const result: string[] = [];
+  let inCodeBlock = false;
+  let prevBlank = false;
+
+  for (const line of lines) {
+    const trimmed = line.trimEnd();
+
+    // Track code blocks
+    if (trimmed.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      result.push(trimmed);
+      prevBlank = false;
+      continue;
+    }
+
+    if (inCodeBlock) {
+      result.push(trimmed);
+      prevBlank = false;
+      continue;
+    }
+
+    // Remove HTML comments
+    if (/^\s*<!--.*-->\s*$/.test(trimmed)) continue;
+
+    // Collapse blank lines
+    if (trimmed === '') {
+      if (!prevBlank) {
+        result.push('');
+        prevBlank = true;
+      }
+      continue;
+    }
+
+    prevBlank = false;
+    result.push(trimmed);
+  }
+
+  return result.join('\n').trim();
+}
+
+// ============================================================
 // Stage plan builder
 // ============================================================
 
@@ -262,6 +308,7 @@ async function resolveWorkers(
       writePromptFile: writePromptFiles,
       requiredPaths,
       requiredNonEmptyPaths,
+      stopWhen: agent.stop_when ?? null,
       extraArgs: sanitizeExtraArgs(agent.extra_args ?? []),
       timeoutMs,
       sessionId: specName ? generateSessionId(specName, agent.name) : undefined,
@@ -380,7 +427,17 @@ export async function orchestrate(
   );
 
   // Phase 4: Bootstrap (shared directive + workflow)
-  const sharedDirective = await loadSharedDirective(spec, resolvedPaths);
+  const sharedDirectiveRaw = await loadSharedDirective(spec, resolvedPaths);
+  const sharedDirectiveMode = spec.shared_directive_mode ?? 'full';
+  const sharedDirective: SharedDirectiveInfo =
+    sharedDirectiveMode === 'compact' && sharedDirectiveRaw.text
+      ? {
+          text: compactDirective(sharedDirectiveRaw.text),
+          source: sharedDirectiveRaw.source,
+          sha256: sharedDirectiveRaw.sha256,
+          originalCharCount: sharedDirectiveRaw.text.length,
+        }
+      : { ...sharedDirectiveRaw, originalCharCount: sharedDirectiveRaw.text?.length ?? null };
   const workflow = await loadWorkflow(spec, resolvedPaths.workspaceRoot, resolvedPaths.specDirectory);
 
   // Phase 4.5: Detect WKI and ensure index is fresh
