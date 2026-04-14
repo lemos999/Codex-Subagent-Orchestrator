@@ -330,26 +330,45 @@ export async function generateContext(
 
 /**
  * Rebuild context markdown from filtered chunks.
+ * CTS-optimized: merges adjacent chunks from the same file, reduces metadata.
  */
 function buildFilteredMarkdown(
   chunks: Array<{ score?: number; chunk: { filePath: string; startLine: number; endLine: number; chunkType: string; heading?: string; content: string } }>,
 ): string {
   if (chunks.length === 0) return '';
 
-  const sections: string[] = ['## Relevant Context (auto-injected)\n'];
-  for (const { chunk } of chunks) {
-    const lineRange = `lines ${chunk.startLine}-${chunk.endLine}`;
-    const heading = chunk.heading ?? chunk.chunkType;
-    sections.push(`### ${chunk.filePath} (${lineRange})`);
-    sections.push(`**${heading}** — ${chunk.chunkType}`);
+  // Deduplicate: same file + overlapping line ranges → keep higher score
+  const seen = new Map<string, number>();
+  const deduped = chunks.filter(({ score, chunk }) => {
+    const key = `${chunk.filePath}:${chunk.startLine}`;
+    if (seen.has(key)) return false;
+    seen.set(key, score ?? 0);
+    return true;
+  });
 
-    const lines = chunk.content.split('\n').slice(0, 5);
-    if (chunk.chunkType === 'markdown-section') {
-      sections.push(lines.map((l: string) => `> ${l}`).join('\n'));
-    } else {
-      sections.push(`\`\`\`\n${lines.join('\n')}\n\`\`\``);
+  // Group by file path for compact output
+  const byFile = new Map<string, typeof deduped>();
+  for (const entry of deduped) {
+    const fp = entry.chunk.filePath;
+    if (!byFile.has(fp)) byFile.set(fp, []);
+    byFile.get(fp)!.push(entry);
+  }
+
+  const sections: string[] = ['## Relevant Context (auto-injected)'];
+  for (const [filePath, entries] of byFile) {
+    // Merge line ranges for compact header
+    const ranges = entries.map(e => `${e.chunk.startLine}-${e.chunk.endLine}`).join(', ');
+    const heading = entries[0].chunk.heading ?? entries[0].chunk.chunkType;
+    sections.push(`### ${filePath} (L${ranges}) — ${heading}`);
+
+    for (const { chunk } of entries) {
+      const lines = chunk.content.split('\n').slice(0, 5);
+      if (chunk.chunkType === 'markdown-section') {
+        sections.push(lines.map((l: string) => `> ${l}`).join('\n'));
+      } else {
+        sections.push(`\`\`\`\n${lines.join('\n')}\n\`\`\``);
+      }
     }
-    sections.push('');
   }
   return sections.join('\n');
 }

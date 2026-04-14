@@ -65,6 +65,35 @@ For bounded tasks, keep the contract decision-oriented:
 - include alternatives only when they materially affect delivery
 - tell the worker to stop once the answer is sufficiently supported instead of elaborating uniformly
 
+### Stage 4.5: APPLY CTS (Context-Token-Saving)
+
+모든 워커 프롬프트에 CTS footer를 추가하여 토큰 절약. 품질 유지 필수.
+
+**프롬프트 끝에 추가할 CTS footer:**
+
+```
+---
+RESPONSE LIMIT: Keep your response under {N} lines.
+STOP CONDITION: {stop_when}
+RESPONSE STYLE: Be concise. No explanations unless asked. Code and results only.
+```
+
+**역할별 기본값:**
+
+| 역할 | max_response_lines | response_style | stop_when |
+|------|:-:|:-:|:-:|
+| implementer/fixer | 50 | standard | 작업 범위만 구현하라 |
+| reviewer | 30 | compact | 변경된 파일만 리뷰하라 |
+| planner | 60 | standard | 요청 범위만 설계하라 |
+
+**Shared directive 주입 시:**
+- REFERENCE MODE 사용 (기본) — 토큰 절약 효과 최대
+- 복���한 작업일 때만 INLINE MODE + compact 처리 (HTML 주석·빈줄 제거)
+
+**CTS를 적용하지 ���는 경우:**
+- 사용자가 상세 분석을 명시적으로 요청한 경우
+- opus 모델로 고품질 출력이 필요한 경우
+
 ### Stage 5: SELECT SETTINGS
 
 Per worker:

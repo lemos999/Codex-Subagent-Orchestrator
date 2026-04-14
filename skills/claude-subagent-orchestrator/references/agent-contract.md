@@ -93,6 +93,22 @@ When judgment is required, return one clear choice with the reason for it. Inclu
 ### Rule 8: Report Uncertainty Sparingly
 Report uncertainty only when it blocks execution, affects correctness, or changes the acceptance decision. Stop once the answer is sufficiently supported.
 
+### Rule 9: CTS Footer Required
+
+모든 계약의 마지막에 CTS(Context-Token-Saving) footer를 포함한다.
+
+```
+---
+RESPONSE LIMIT: Keep your response under {N} lines.
+STOP CONDITION: {stop_when from contract}
+RESPONSE STYLE: Be concise. No explanations unless asked. Code and results only.
+```
+
+- implementer/fixer: 50줄, standard
+- reviewer: 30줄, compact
+- planner: 60줄, standard
+- 사용자가 상세 분석을 요청하면 CTS footer를 생략할 수 있음
+
 ## Agent Type Behaviors
 
 ### sub-implementer
