@@ -23,8 +23,9 @@ PORT = 8900
 
 # Model endpoints to proxy
 MODELS = {
-    "tournament": {"port": 8895, "name": "Tournament (5K variants)", "color": "#ff8800"},
-    "v2":         {"port": 8897, "name": "V2 Prediction Engine",     "color": "#00ccff"},
+    "tournament": {"port": 8895, "name": "Tournament (5K variants)",       "color": "#ff8800"},
+    "v2":         {"port": 8897, "name": "V2 Prediction Engine",           "color": "#00ccff"},
+    "v3":         {"port": 8898, "name": "V3 Parker Brooks + Self-Learn",  "color": "#aa66ff"},
 }
 
 
@@ -359,6 +360,127 @@ function renderV2(id,d,color){
   return html;
 }
 
+function renderV3(id,d,color){
+  const s=d.state||{};
+  const online=d.online;
+  const variants=s.variants||{};
+  const warmup=s.memory_warmup||30;
+  const fullAct=s.memory_full_activation||100;
+
+  // Header summary: best variant + total trades
+  let bestName='--', bestRet=-Infinity, totalTrades=0;
+  for(const[vn,v]of Object.entries(variants)){
+    totalTrades+=v.total_trades||0;
+    if((v.total_return||0)>bestRet){bestRet=v.total_return||0;bestName=vn;}
+  }
+
+  let html='<div class="model-section"><div class="model-hdr" style="border-left:3px solid '+color+'"><h2><span class="'+(online?'live':'live offline')+'"></span> '+d.name+' <span style="font-size:10px;color:#aa66ff;margin-left:6px">VWAP/EMA9/VP + Context k-NN | 수수료 0.21% RT | Risk 0.5%/trade</span></h2><div class="stats">';
+  html+='<span>최고: <b class="'+(bestRet>0?'grn':'red')+'">'+fmt(bestRet)+'</b> ('+bestName+')</span>';
+  html+='<span>총 거래: <b>'+totalTrades+'</b>회</span>';
+  html+='<span class="dim" style="font-size:10px">메모리: '+warmup+'거래 후 활성 → '+fullAct+'거래에 100%</span>';
+  html+='</div></div><div class="model-body">';
+
+  // Variants grid — one card per variant
+  html+='<div style="display:grid;grid-template-columns:repeat('+Object.keys(variants).length+',1fr);gap:8px;margin-bottom:12px">';
+  for(const[vn,v]of Object.entries(variants)){
+    const ret=v.total_return||0;
+    const wr=v.win_rate||0;
+    const dd=v.drawdown||0;
+    const mem=v.memory||{};
+    const sig=v.signals||{};
+    const bl=mem.blacklisted_clusters||0;
+    const cfg=v.config||{};
+    const isOff=!cfg.memory;
+
+    html+='<div class="mc" style="border-left:3px solid '+(ret>0?'#00ff88':ret<-0.05?'#ff4466':'#ffcc00')+'">';
+    html+='<label>'+vn.replace('v3-','').toUpperCase()+' '+(isOff?'<span style="color:#f44">[CONTROL]</span>':'')+'</label>';
+    html+='<div class="val '+(ret>0?'grn':'red')+'" style="font-size:16px">'+fmt(ret)+'</div>';
+    html+='<div style="font-size:9px;color:#555;margin-top:3px">RR≥'+cfg.rr_min+' | TF '+cfg.timeframe+'</div>';
+    html+='<div style="font-size:10px;margin-top:4px"><span class="'+(wr>0.5?'grn':wr>0.4?'ylw':'red')+'">WR '+(wr*100).toFixed(0)+'%</span> <span class="dim">'+v.total_trades+'t</span> <span class="red" style="font-size:9px">DD '+(dd*100).toFixed(1)+'%</span></div>';
+    html+='<div style="font-size:9px;color:#666;margin-top:3px">mem: <span class="cyn">'+(mem.n_trades||0)+'</span> 블랙: <span class="'+(bl>0?'red':'dim')+'">'+bl+'</span></div>';
+    html+='</div>';
+  }
+  html+='</div>';
+
+  // Signal funnel table
+  html+='<div style="margin-top:8px"><div style="font-size:10px;color:#555;margin-bottom:3px;text-transform:uppercase">신호 필터링 깔때기 (각 variant 누적)</div>';
+  html+='<table class="dtbl"><tr><th>Variant</th><th>검토</th><th>CHOP 차단</th><th>RR 차단</th><th>메모리 차단</th><th>실행</th><th>실행률</th></tr>';
+  for(const[vn,v]of Object.entries(variants)){
+    const sig=v.signals||{};
+    const considered=sig.considered||0;
+    const exec=sig.executed||0;
+    const execPct=considered>0?(exec/considered*100):0;
+    html+='<tr><td><b>'+vn.replace('v3-','')+'</b></td>';
+    html+='<td>'+considered+'</td>';
+    html+='<td class="dim">'+(sig.blocked_chop||0)+'</td>';
+    html+='<td class="dim">'+(sig.blocked_rr||0)+'</td>';
+    html+='<td class="'+((sig.blocked_memory||0)>0?'ylw':'dim')+'">'+(sig.blocked_memory||0)+'</td>';
+    html+='<td class="cyn"><b>'+exec+'</b></td>';
+    html+='<td class="'+(execPct>5?'grn':'dim')+'">'+execPct.toFixed(1)+'%</td></tr>';
+  }
+  html+='</table></div>';
+
+  // Memory EV summary
+  html+='<div style="margin-top:10px"><div style="font-size:10px;color:#555;margin-bottom:3px;text-transform:uppercase">컨텍스트 메모리 통계 (자기학습)</div>';
+  html+='<table class="dtbl"><tr><th>Variant</th><th>메모리 거래</th><th>EV Long (R)</th><th>EV Short (R)</th><th>평균 R</th><th>승률</th><th>블랙리스트</th></tr>';
+  for(const[vn,v]of Object.entries(variants)){
+    const m=v.memory||{};
+    const evL=m.ev_long||0;
+    const evS=m.ev_short||0;
+    const avgR=m.avg_r||0;
+    const mwr=m.win_rate||0;
+    html+='<tr><td><b>'+vn.replace('v3-','')+'</b></td>';
+    html+='<td>'+(m.n_trades||0)+'</td>';
+    html+='<td class="'+(evL>0.3?'grn':evL<-0.3?'red':'dim')+'">'+evL.toFixed(2)+'</td>';
+    html+='<td class="'+(evS>0.3?'grn':evS<-0.3?'red':'dim')+'">'+evS.toFixed(2)+'</td>';
+    html+='<td class="'+(avgR>0?'grn':'red')+'">'+avgR.toFixed(2)+'</td>';
+    html+='<td class="'+(mwr>0.5?'grn':mwr>0.4?'ylw':'red')+'">'+(mwr*100).toFixed(0)+'%</td>';
+    html+='<td class="'+((m.blacklisted_clusters||0)>0?'red':'dim')+'">'+(m.blacklisted_clusters||0)+'</td></tr>';
+  }
+  html+='</table></div>';
+
+  // PnL charts per variant (compact)
+  html+='<div style="display:grid;grid-template-columns:repeat('+Object.keys(variants).length+',1fr);gap:6px;margin-top:10px">';
+  for(const[vn,v]of Object.entries(variants)){
+    html+='<div class="chart-box"><h3>'+vn.replace('v3-','').toUpperCase()+' PnL</h3><canvas id="cv-v3-'+vn+'"></canvas></div>';
+  }
+  html+='</div>';
+
+  // Positions (all variants)
+  let posCount=0;
+  let posHtml='';
+  for(const[vn,v]of Object.entries(variants)){
+    const pos=v.positions||[];
+    pos.forEach(p=>{
+      posCount++;
+      posHtml+='<div style="padding:3px 0;border-bottom:1px solid #111;font-size:11px"><span class="dim">['+vn.replace('v3-','')+']</span> <span class="'+(p.dir==='long'?'grn':'red')+'" style="font-weight:bold">'+p.dir.toUpperCase()+'</span> '+p.asset+' @$'+p.entry.toFixed(2)+' → tgt $'+p.target.toFixed(2)+' / stop $'+p.hard_stop.toFixed(2)+' <span class="org">'+p.lev+'x</span></div>';
+    });
+  }
+  if(posCount>0){
+    html+='<div style="margin-top:10px"><div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:bold">열린 포지션 ('+posCount+')</div>'+posHtml+'</div>';
+  }
+
+  // Recent trades (aggregated, latest 20)
+  let allTrades=[];
+  for(const[vn,v]of Object.entries(variants)){
+    (v.trade_log||[]).forEach(t=>{allTrades.push({...t,variant:vn});});
+  }
+  allTrades.sort((a,b)=>(b.time||'').localeCompare(a.time||''));
+  allTrades=allTrades.slice(0,20);
+  if(allTrades.length){
+    html+='<div style="margin-top:10px"><div style="font-size:11px;color:#888;margin-bottom:4px;font-weight:bold">최근 거래 (전체 variant)</div>';
+    html+='<div class="tlog">';
+    allTrades.forEach(t=>{
+      const r=t.r_mult||0;
+      html+='<div class="tlog-e"><span class="dim">['+t.variant.replace('v3-','')+']</span> <span class="'+(t.net>0?'grn':'red')+'" style="font-weight:bold">'+t.dir+'</span> '+t.asset+' $'+t.entry+' → $'+t.exit+' <span class="'+(r>0?'grn':'red')+'">'+(r>=0?'+':'')+r.toFixed(2)+'R</span> <span class="dim">['+t.reason+']</span> 잔고='+$(t.capital)+'</div>';
+    });
+    html+='</div></div>';
+  }
+
+  html+='</div></div>';
+  return html;
+}
+
 async function refresh(){
   try{
     const r=await fetch('/api/all');
@@ -369,6 +491,7 @@ async function refresh(){
       total++;
       if(m.online)online++;
       if(id==='tournament')html+=renderTournament(id,m,m.color);
+      else if(id==='v3')html+=renderV3(id,m,m.color);
       else html+=renderV2(id,m,m.color);
     }
     q('#root').innerHTML=html;
@@ -382,6 +505,17 @@ async function refresh(){
       drawLine(q('#cv-v2-pnl'),s.pnl_history,'#00ff88',s.initial_capital);
       drawLine(q('#cv-v2-acc'),s.accuracy_history,'#00ccff',0.5);
       renderFeatures(q('#v2-feat'),s.feature_importance,s.feature_names);
+    }
+
+    // Draw V3 per-variant PnL charts
+    const v3d=d.v3;
+    if(v3d&&v3d.online&&v3d.state){
+      const variants=v3d.state.variants||{};
+      for(const[vn,v]of Object.entries(variants)){
+        const ret=v.total_return||0;
+        const color=ret>0?'#00ff88':ret<-0.05?'#ff4466':'#ffcc00';
+        drawLine(q('#cv-v3-'+vn),v.pnl_history,color,v.initial_capital);
+      }
     }
   }catch(e){
     q('#root').innerHTML='<div style="color:#f44;padding:40px">대시보드 연결 오류. 모델이 오프라인일 수 있습니다.</div>';
