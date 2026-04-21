@@ -1,0 +1,3126 @@
+OpenAI Codex v0.121.0 (research preview)
+--------
+workdir: C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\haj\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019dae58-3452-7a02-8c0c-cbb3d0ea85aa
+--------
+user
+당신은 Codex GPT-5.4입니다. **구현 가능성 / 기술 대안 / 비용 효율** 관점에서 Oracle 설계 결정 2건을 교차 검증합니다.
+
+당신의 강점:
+- 코드 구현 가능성 판단
+- 폭넓은 라이브러리 지식 기반 대안 제시
+- 구조적 비용/효율 분석
+
+당신이 특히 주목할 포인트:
+- Topic 1: BollRev를 별도 variant로 구현하는 개발 공수 vs V3 feature 재사용. mean-reversion 모델이 prediction layer와 setup layer 중 어디에 더 자연스러운가 (구현 관점)
+- Topic 2: 3가지 대안의 **실제 개발 공수 / 운영 리스크**를 구체 수치로 비교. 다른 임베디드 시스템/ML 엔진에서 ablation 검증 시 일반적 패턴이 있다면 제시
+
+독립 의견을 내세요. 다른 엔진의 답변이 없다고 가정하고 자신의 관점으로 판단하십시오.
+
+---
+
+[context.md 내용이 여기에 append됨]
+# Discussion Context — Oracle Design Decisions (2 topics)
+
+**Date**: 2026-04-21
+**Prior artifacts**:
+- Phase 0 Intake 토론: `subagent-runs/discuss/oracle-phase0-intake-2026-04-21/conclusion.md` (8인 토론 AGREE 조건부)
+- Phase 1 Charter: `subagent-runs/design/oracle-2026-04-21/phase1-charter.md` (11/11 PASS)
+- Phase 2 Component Map: `subagent-runs/design/oracle-2026-04-21/phase2-component-map.md`
+- 48h Ablation 계획: `subagent-runs/design/oracle-2026-04-21/48h-ablation-plan.md`
+
+---
+
+## Topic 1: BollRev(Bollinger Reversion) variant 편입 여부
+
+### Current Decision
+**제외** (Phase 2 Component Map).
+
+### 제외 근거 3가지
+1. Phase 0 요약에 편입 근거 없음 — 8인 토론 Round 2 반대 sonnet 지적
+2. BollRev는 setup quality 영역 → V3 소관 (meta-decision layer)
+3. Charter Differentiation 레이어 분리 위배: **V3 = setup(meta-decision) / Oracle = prediction(signal-generation)**
+
+### 편입 옵션 근거
+- V3에 없는 mean-reversion regime 대응이 Oracle에 필요할 수 있음
+- Bollinger Band는 통계적 mean-reversion 신호로 classic하며 low-vol regime에 강점
+
+### 코드 검증된 팩트
+- `scripts/dl_features.py:93` — `_bollinger_position()` 함수 존재 (feature 수준)
+- `scripts/dl_features.py:163-164` — `feat["bb_pos"]` 컬럼 생성 (V3 feature set에 이미 포함)
+- **"BollRev variant"는 어디에도 구현 안 됨** — V3/TriArb 모든 variant 검색해도 없음
+- 즉 "편입"이 의미하는 것: Oracle에 신규로 BollRev variant를 추가 vs V3 영역에 남기기
+
+### Oracle 초기 variants 후보 (제외 전제 시)
+- `control` (baseline)
+- `aggressive` (risk-on)
+- `conservative` (risk-off)
+
+---
+
+## Topic 2: 48h Rule 2 Ablation 실행 파일 구조
+
+### Charter 원문 (8인 토론 conclusion.md 섹션 3)
+> 실행 환경: **신규 oracle.py 격리** (운영 sonnet), v2.py live 환경 수술 금지
+
+### Chicken-and-egg 이슈
+- Oracle은 Phase 3 Decision Card 이후 구현 예정 (2026-04-22 이후)
+- Ablation은 Phase 2와 병행 (2026-04-22 시작)
+- Oracle 구현 없이 Rule 2만 검증 필요
+
+### 대안 비교
+
+| 대안 | 설명 | 장점 | 단점 |
+|------|------|------|------|
+| **A** (현 제안) | `scripts/v2_ablation.py` — V2 포크 + `--no-rule2` flag. Oracle 완성 후 archive | - 즉시 실행 가능<br>- V2 구조 유지로 정확한 변수 분리<br>- 최소 개발 비용 | - "신규 oracle.py 격리" Charter 원문 위배<br>- 임시 파일 추가 관리 부담 |
+| **B** | `scripts/oracle_v0.py` — Oracle 최소 골격 선구현 + Rule 2 toggle | - Charter 원문 충실<br>- Oracle 구현을 앞당김 | - Phase 3 Decision Card 선행 필요<br>- Oracle 설계 미확정 상태에서 코드화 위험<br>- "Rule 2가 원인인지"의 순수 검증에서 변수 증가 |
+| **C** | v2.py 런타임 flag 추가 (v2.py 직접 수정) | - 파일 추가 없음<br>- 정확한 V2 행동 유지 | - 8인 토론 "v2.py live 수술 금지" 결정 위배<br>- 운영 중 V2 회귀 위험 |
+| **D** | 기타 — 새로운 아이디어 제시 | — | — |
+
+### 코드 검증된 팩트
+- V2 Rule 2 위치: `scripts/v2.py:302` — `self._rebalance_memory()` 호출
+- `scripts/v2.py:314-342` — `_rebalance_memory()` 본체 (엔트로피 균등화 + exploration noise)
+- V2 update() 함수: `scripts/v2.py:275-312` — Rule 2 호출이 학습 끝에 단일 라인
+- v2.py는 현재 live 운영 중 (port 8897)
+
+---
+
+## 요청
+
+각 주제에 대해 아래 형식으로 응답:
+
+### Topic 1 응답
+- **Position**: 편입 / 제외 (명시)
+- **Reasoning**: 2-4 bullet
+- **Concerns**: 2-4 bullet
+- **Recommendation**: 구체 다음 단계
+
+### Topic 2 응답
+- **Position**: A / B / C / D (명시. D인 경우 내용)
+- **Reasoning**: 2-4 bullet
+- **Concerns**: 2-4 bullet
+- **Recommendation**: 구체 다음 단계
+
+마지막 줄에 반드시:
+`[POSITION: T1=편입/제외, T2=A/B/C/D]`
+
+각 주제 30줄 이내. 전체 60줄 이내.
+
+codex
+요청하신 두 설계 결정을 구현 가능성, 대안, 실제 공수 관점에서 독립 검토하겠습니다. 먼저 워크스페이스 규칙대로 인덱스를 갱신하고, 현재 상태 문서와 실제 코드 지점을 확인해 판단 근거를 고정하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'node workspace-knowledge-index/dist/index.js index' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+2026-04-21T04:42:05.101327Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.4 seconds
+Output:
+node:internal/modules/cjs/loader:1451
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\workspace-knowledge-index\dist\index.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1448:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.13.1
+
+ exited 1 in 388ms:
+node:internal/modules/cjs/loader:1451
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\workspace-knowledge-index\dist\index.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1448:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.13.1
+
+codex
+WKI 명령은 현재 경로 기준으로는 대상 파일이 없어 실패했습니다. 경로를 바로잡기 위해 프로젝트 상태 문서와 인덱서 위치를 먼저 확인한 뒤, 필요한 코드와 설계 문서를 함께 읽겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg --files -g "project-status/current.md" -g "workspace-knowledge-index/**" -g "scripts/v2.py" -g "scripts/dl_features.py" -g "subagent-runs/design/oracle-2026-04-21/**" -g "subagent-runs/discuss/oracle-phase0-intake-2026-04-21/**"' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Force' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 369ms:
+scripts\v2.py
+scripts\dl_features.py
+
+ succeeded in 384ms:
+
+
+    디렉터리: C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        2026-04-21   오후 1:38                .knowledge                                                           
+d-----        2026-03-20   오후 2:08                .pytest_cache                                                        
+d-----        2026-04-01   오후 8:49                archive                                                              
+d-----        2026-03-21   오후 9:35                config                                                               
+d-----        2026-04-21  오전 11:28                data                                                                 
+d-----        2026-04-21  오전 10:14                docs                                                                 
+d-----        2026-04-08  오전 11:25                html                                                                 
+d-----        2026-03-20  오전 11:42                reusable-components                                                  
+d-----        2026-04-21  오전 11:28                scripts                                                              
+d-----        2026-03-21  오전 12:01                tests                                                                
+-a----        2026-03-20  오전 11:32          19435 auto_trading_state_machine_design.md                                 
+-a----        2026-04-02  오전 10:23           3324 breakthrough-guide.md                                                
+-a----        2026-03-20  오전 12:20          22744 coin_strategy_spec.md                                                
+-a----        2026-03-20  오전 11:31          21940 coin_strategy_spec_v2.md                                             
+-a----        2026-04-05   오후 8:50           4671 limits-history.md                                                    
+-a----        2026-03-20   오후 2:14            497 pyproject.toml                                                       
+-a----        2026-03-20  오전 11:43          15458 README.md                                                            
+-a----        2026-04-08   오후 1:59           2388 RESUME.md                                                            
+-a----        2026-03-20  오전 11:43           6320 reusable_components_guide.md                                         
+-a----        2026-04-20   오후 3:10         282771 uv.lock                                                              
+
+
+
+codex
+현재 워크스페이스 루트에는 `project-status/`와 `workspace-knowledge-index/`가 바로 보이지 않습니다. 관련 경로가 상위 디렉터리나 다른 위치에 있을 가능성이 있어, 지시된 파일들의 실제 위치를 좁혀서 찾는 중입니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Path . -Recurse -Directory -Filter project-status | Select-Object -ExpandProperty FullName' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Path .. -Recurse -Directory -Filter workspace-knowledge-index | Select-Object -ExpandProperty FullName' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Path .. -Recurse -Filter current.md | Where-Object { $_.FullName -match '"'project-status' } | Select-Object -ExpandProperty FullName" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+2026-04-21T04:42:19.918074Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.5 seconds
+Output:
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path . -Recurse -Directory -Filter project-status | Se ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...e\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+
+ exited 1 in 540ms:
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path . -Recurse -Directory -Filter project-status | Se ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...e\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+
+2026-04-21T04:42:20.777800Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 1.4 seconds
+Output:
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\personas\loom\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path .. -Recurse -Directory -Filter workspace-knowledg ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...m\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path .. -Recurse -Directory -Filter workspace-knowledg ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...e\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+
+ exited 1 in 1399ms:
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\personas\loom\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path .. -Recurse -Directory -Filter workspace-knowledg ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...m\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path .. -Recurse -Directory -Filter workspace-knowledg ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...e\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+
+2026-04-21T04:42:20.829487Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 1.3 seconds
+Output:
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\personas\loom\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path .. -Recurse -Filter current.md | Where-Object { $ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...m\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path .. -Recurse -Filter current.md | Where-Object { $ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...e\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+
+ exited 1 in 1324ms:
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\personas\loom\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path .. -Recurse -Filter current.md | Where-Object { $ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...m\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : 'C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value\.pytest_cache' 경로에 대한 액세스가 거부되었습니다.
+위치 줄:2 문자:1
++ Get-ChildItem -Path .. -Recurse -Filter current.md | Where-Object { $ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (C:\Users\haj\pr...e\.pytest_cache:String) [Get-ChildItem], Unauthoriz 
+   edAccessException
+    + FullyQualifiedErrorId : DirUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+
+codex
+재귀 탐색은 일부 캐시 디렉터리 권한 오류가 섞여 나왔습니다. `rg --files` 기반으로 범위를 줄여 필요한 문서와 코드만 잡겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg --files .. | rg \"project-status/current\\.md|workspace-knowledge-index/.+index\\.js|subagent-runs/.+oracle.+(conclusion|charter|component-map|ablation)|scripts/(v2|dl_features)\\.py"'$"' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+"'$paths = @(
+  '"'scripts/dl_features.py',
+  'scripts/v2.py'
+)
+foreach ("'$p in $paths) {
+  Write-Output "### $p"
+  Get-Content $p | Select-Object -First 380
+}
+'"'@ | powershell -NoProfile -Command -" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+2026-04-21T04:42:28.821180Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.5 seconds
+Output:
+
+ exited 1 in 494ms:
+ succeeded in 739ms:
+codex
+인덱스 관련 문서는 현재 작업 디렉터리 인접 경로에서 바로 잡히지 않았습니다. 판단 자체는 코드와 제공된 컨텍스트로 충분히 가능하므로, 이제 실제 구현 지점과 구조를 직접 읽어 개발 공수 기준으로 정리하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"_bollinger_position|bb_pos|_rebalance_memory|rebalance_memory|update\\(\" scripts/dl_features.py scripts/v2.py" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content scripts/dl_features.py | Select-Object -First 240' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content scripts/v2.py | Select-Object -First 380' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 432ms:
+scripts/v2.py:98:    def update(self, x: np.ndarray):
+scripts/v2.py:275:    def update(self, x_prev: np.ndarray, y_true: float):
+scripts/v2.py:278:        self.norm.update(x_prev)
+scripts/v2.py:302:        self._rebalance_memory()
+scripts/v2.py:314:    def _rebalance_memory(self):
+scripts/v2.py:720:                predictor.update(self.prev_features[asset], actual_return)
+scripts/dl_features.py:93:def _bollinger_position(close: pd.Series, window: int = 20, std: float = 2.0) -> pd.Series:
+scripts/dl_features.py:164:    feat["bb_pos"] = _bollinger_position(c, 20)
+
+ succeeded in 436ms:
+"""Multi-asset deep learning feature engineering.
+
+Generates, validates, and ranks DL features for 3 assets:
+  - BTC  (from local sim_1m.sqlite, 4h timeframe)
+  - NVDA (from yfinance, daily)
+  - AMZN (from yfinance, daily)
+
+Outputs per asset:
+  1. Feature matrix (X), target vector (y), feature name list
+  2. Per-feature correlation with next-bar direction
+  3. XGBoost feature importance ranking
+  4. Recommended top-15~20 feature set
+
+Public API:
+    get_btc_features(db_path, timeframe="4h") -> (X, y, feature_names)
+    get_nvda_features() -> (X, y, feature_names)
+    get_amzn_features() -> (X, y, feature_names)
+
+Usage:
+    py -3.12 scripts/dl_features.py
+"""
+from __future__ import annotations
+
+import json
+import sqlite3
+import subprocess
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+# ---------------------------------------------------------------------------
+# Dependency guard
+# ---------------------------------------------------------------------------
+
+def _ensure(pkg: str, import_name: str | None = None) -> None:
+    name = import_name or pkg
+    try:
+        __import__(name)
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", pkg, "-q"])
+
+
+_ensure("yfinance")
+_ensure("xgboost")
+_ensure("scikit-learn", "sklearn")
+
+import yfinance as yf  # noqa: E402
+from xgboost import XGBClassifier  # noqa: E402
+from sklearn.metrics import accuracy_score, roc_auc_score  # noqa: E402
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+
+_HERE = Path(__file__).resolve().parent
+_DATA = _HERE.parent / "data"
+DEFAULT_DB = _DATA / "sim_1m.sqlite"
+FUNDING_CACHE = _DATA / "btc_funding_cache.json"
+
+# ---------------------------------------------------------------------------
+# Common indicator helpers
+# ---------------------------------------------------------------------------
+
+
+def _sma(s: pd.Series, w: int) -> pd.Series:
+    return s.rolling(w, min_periods=w).mean()
+
+
+def _ema(s: pd.Series, span: int) -> pd.Series:
+    return s.ewm(span=span, adjust=False).mean()
+
+
+def _rsi(s: pd.Series, period: int = 14) -> pd.Series:
+    delta = s.diff()
+    gain = delta.clip(lower=0).rolling(period, min_periods=period).mean()
+    loss = (-delta.clip(upper=0)).rolling(period, min_periods=period).mean()
+    rs = gain / loss.replace(0, np.nan)
+    return 100.0 - (100.0 / (1.0 + rs))
+
+
+def _atr(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 14) -> pd.Series:
+    tr = pd.concat(
+        [high - low,
+         (high - close.shift(1)).abs(),
+         (low - close.shift(1)).abs()],
+        axis=1,
+    ).max(axis=1)
+    return tr.rolling(period, min_periods=period).mean()
+
+
+def _bollinger_position(close: pd.Series, window: int = 20, std: float = 2.0) -> pd.Series:
+    """(price - lower) / (upper - lower), clipped to [0, 1]."""
+    ma = _sma(close, window)
+    sigma = close.rolling(window, min_periods=window).std()
+    upper = ma + std * sigma
+    lower = ma - std * sigma
+    band = upper - lower
+    pos = (close - lower) / band.where(band > 0, np.nan)
+    return pos.clip(0.0, 1.0)
+
+
+def _macd_norm(close: pd.Series) -> pd.Series:
+    ema12 = _ema(close, 12)
+    ema26 = _ema(close, 26)
+    return (ema12 - ema26) / close.where(close > 0, np.nan)
+
+
+def _build_common_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Build feature columns shared by all assets.
+
+    df must have columns: open, high, low, close, volume.
+    Returns DataFrame of features (same index as df).
+    """
+    c = df["close"]
+    h = df["high"]
+    lo = df["low"]
+    v = df["volume"]
+    feat = pd.DataFrame(index=df.index)
+
+    # -- OHLCV normalised (% vs current close) --
+    feat["open_pct"] = (df["open"] - c) / c
+    feat["high_pct"] = (h - c) / c
+    feat["low_pct"] = (lo - c) / c
+    feat["vol_pct"] = v / v.rolling(20, min_periods=1).mean().where(lambda x: x > 0, 1.0)
+
+    # -- RSI --
+    feat["rsi14"] = _rsi(c, 14) / 100.0
+    feat["rsi7"] = _rsi(c, 7) / 100.0
+
+    # -- ATR normalised --
+    feat["atr_norm"] = _atr(h, lo, c, 14) / c.where(c > 0, np.nan)
+
+    # -- MA position: (price - MA) / MA --
+    for w in [5, 10, 20, 50, 200]:
+        ma = _sma(c, w)
+        feat[f"ma{w}_pos"] = (c - ma) / ma.where(ma > 0, np.nan)
+
+    # -- MA cross: fast/slow ratio --
+    pairs = [(5, 20), (20, 50), (50, 200)]
+    for fast, slow in pairs:
+        mf = _sma(c, fast)
+        ms = _sma(c, slow)
+        feat[f"cross_{fast}_{slow}"] = (mf - ms) / ms.where(ms > 0, np.nan)
+
+    # -- Momentum: N-bar returns --
+    for n in [1, 4, 12, 24]:
+        feat[f"mom_{n}"] = c.pct_change(n)
+
+    # -- Volume ratio --
+    vol_ma20 = _sma(v, 20)
+    feat["vol_ratio"] = v / vol_ma20.where(vol_ma20 > 0, np.nan)
+
+    # -- Time encoding --
+    hour_float = df.index.hour + df.index.minute / 60.0
+    feat["hour_sin"] = np.sin(2 * np.pi * hour_float / 24.0)
+    feat["hour_cos"] = np.cos(2 * np.pi * hour_float / 24.0)
+    dow = df.index.dayofweek.astype(float)
+    feat["dow_sin"] = np.sin(2 * np.pi * dow / 7.0)
+    feat["dow_cos"] = np.cos(2 * np.pi * dow / 7.0)
+
+    # -- Bollinger Band position --
+    feat["bb_pos"] = _bollinger_position(c, 20)
+
+    # -- MACD normalised --
+    feat["macd_norm"] = _macd_norm(c)
+
+    return feat
+
+
+# ---------------------------------------------------------------------------
+# BTC features
+# ---------------------------------------------------------------------------
+
+
+def _load_btc_ohlcv(db_path: Path, timeframe: str) -> pd.DataFrame:
+    """Load BTC from sim_1m.sqlite, resample to target timeframe."""
+    conn = sqlite3.connect(str(db_path))
+    df = pd.read_sql_query(
+        "SELECT datetime, open, high, low, close, volume "
+        "FROM ohlcv_1m WHERE symbol='BTCUSDT' ORDER BY datetime",
+        conn,
+    )
+    conn.close()
+    df["datetime"] = pd.to_datetime(df["datetime"])
+    df.set_index("datetime", inplace=True)
+
+    rule_map = {"4h": "4h", "1h": "1h", "15m": "15min", "1m": "1min"}
+    rule = rule_map.get(timeframe, timeframe)
+    if timeframe != "1m":
+        df = df.resample(rule).agg(
+            {"open": "first", "high": "max", "low": "min",
+             "close": "last", "volume": "sum"}
+        ).dropna()
+    return df
+
+
+def _load_funding_cache() -> pd.Series:
+    """Load BTC funding rate from cache, return as pd.Series indexed by UTC timestamp."""
+    if not FUNDING_CACHE.exists():
+        return pd.Series(dtype=float)
+    with open(FUNDING_CACHE) as f:
+        raw = json.load(f)
+    records = []
+    for item in raw:
+        ts = pd.to_datetime(item["timestamp"], unit="ms", utc=True)
+        rate = float(item.get("fundingRate", 0.0))
+        records.append((ts, rate))
+    if not records:
+        return pd.Series(dtype=float)
+    idx, vals = zip(*records)
+    return pd.Series(vals, index=pd.DatetimeIndex(idx), name="funding_rate").sort_index()
+
+
+def get_btc_features(
+    db_path: Path | str = DEFAULT_DB,
+    timeframe: str = "4h",
+) -> tuple[np.ndarray, np.ndarray, list[str]]:
+    """Build BTC feature matrix.
+
+    Returns (X, y, feature_names).
+      X: shape (n, n_features)
+      y: shape (n,) ??1 if next bar close > current close, else 0
+    """
+    db_path = Path(db_path)
+    df = _load_btc_ohlcv(db_path, timeframe)
+    feat = _build_common_features(df)
+
+    # -- BTC-specific: funding rate --
+    fr_series = _load_funding_cache()
+    if not fr_series.empty:
+        # Resample funding rate to match OHLCV index (forward-fill)
+        # Funding is every 8h on Binance; align to bar timestamps
+        feat_idx_utc = feat.index.tz_localize("UTC") if feat.index.tzinfo is None else feat.index
+        fr_aligned = fr_series.reindex(feat_idx_utc, method="ffill")
+        fr_aligned.index = feat.index  # strip tz for consistency
+        feat["funding_rate"] = fr_aligned.values
+        # Rate-of-change of funding (momentum of sentiment)
+        feat["funding_roc"] = feat["funding_rate"].diff(3)
+
+ succeeded in 455ms:
+"""V2 ??Prediction Engine.
+
+3 Rules:
+  1. Predict what happens next accurately
+  2. Use memory space evenly
+  3. Goal is maximum profit
+
+NOT contrarian. Pure prediction ??trade in predicted direction.
+
+Usage:
+    py -3.12 scripts/v2.py [--assets ETH,BTC,SOL,XRP] [--port 8897]
+
+Dashboard:
+    http://localhost:8897
+"""
+from __future__ import annotations
+
+import argparse
+import http.server
+import json
+import math
+import sys
+import threading
+import time
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import pandas as pd
+
+for _pkg, _imp in [("ccxt", "ccxt")]:
+    try:
+        __import__(_imp)
+    except ImportError:
+        import subprocess as _sp
+        _sp.check_call([sys.executable, "-m", "pip", "install", _pkg])
+
+import ccxt
+
+# ===================================================================
+# Constants
+# ===================================================================
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+STATE_PATH = DATA_DIR / "v2_state.npz"
+LOG_PATH = DATA_DIR / "v2.jsonl"
+DASH_PORT = 8897
+TICK_SEC = 60
+HISTORY_BARS = 500
+INITIAL_CAPITAL = 10_000.0
+SAVE_INTERVAL = 1800
+
+# Cost model (Bybit USDT perp)
+TAKER_FEE = 0.00055        # 0.055% per side
+SLIPPAGE = 0.0005           # 0.05% estimated
+ROUND_TRIP_COST = (TAKER_FEE * 2) + (SLIPPAGE * 2)  # ~0.21%
+
+# Rule 3: profit maximization with safety
+KELLY_CAP = 0.25            # fractional Kelly cap
+MAX_LEVERAGE = 100           # 1~100x leverage range
+TOTAL_EXPOSURE_CAP = 1.0    # max 100% margin across all assets
+MIN_EDGE_THRESHOLD = ROUND_TRIP_COST * 1.5  # prediction must exceed 1.5x costs
+
+# Feature config: 28 unique features, 0 duplicates
+FEATURE_NAMES = [
+    # Price dynamics (6)
+    "ret_1", "ret_5", "ret_15", "ret_60", "ret_240", "price_accel",
+    # Trend (4)
+    "sma_r5", "sma_r20", "sma_r60", "sma_r200",
+    # Momentum (4)
+    "rsi_14", "rsi_6", "macd_hist", "roc_20",
+    # Volatility (4)
+    "atr_ratio", "bb_width", "real_vol", "hl_range",
+    # Volume (4)
+    "vol_ratio", "obv_slope", "vwap_dist", "vol_trend",
+    # Microstructure (3)
+    "consec_dir", "body_wick", "range_rank",
+    # Market structure (3)
+    "funding_rate", "hour_sin", "hour_cos",
+]
+N_FEATURES = len(FEATURE_NAMES)  # 28
+
+
+# ===================================================================
+# EMA Normalizer (replaces Welford ??adapts to regime changes)
+# ===================================================================
+class EMANormalizer:
+    """Exponential moving average normalizer. Adapts to non-stationarity."""
+
+    def __init__(self, n: int, alpha: float = 0.01):
+        self.n = n
+        self.alpha = alpha
+        self.mean = np.zeros(n)
+        self.var = np.ones(n)
+        self.warm = 0
+
+    def update(self, x: np.ndarray):
+        self.warm += 1
+        a = max(self.alpha, 1.0 / self.warm)  # warm-up: higher alpha early
+        self.mean = (1 - a) * self.mean + a * x
+        diff = x - self.mean
+        self.var = (1 - a) * self.var + a * diff * diff
+
+    def normalize(self, x: np.ndarray) -> np.ndarray:
+        return (x - self.mean) / (np.sqrt(self.var) + 1e-8)
+
+    def is_warm(self) -> bool:
+        return self.warm >= 50
+
+
+# ===================================================================
+# Feature Engine (28 features, 0 duplicates)
+# ===================================================================
+class FeatureEngine:
+    """Compute 28 unique features from OHLCV."""
+
+    def __init__(self):
+        self._prev_ret1 = 0.0  # for price acceleration
+
+    def compute(self, df: pd.DataFrame, funding: float = 0.0) -> np.ndarray | None:
+        if len(df) < 250:
+            return None
+        c = df["close"].values.astype(float)
+        h = df["high"].values.astype(float)
+        lo = df["low"].values.astype(float)
+        v = df["volume"].values.astype(float)
+        o = df["open"].values.astype(float)
+        ts = df["ts"].iloc[-1]
+
+        feat = np.zeros(N_FEATURES, dtype=np.float64)
+
+        # --- Price dynamics (6) ---
+        ret1 = c[-1] / c[-2] - 1 if c[-2] != 0 else 0
+        feat[0] = ret1
+        feat[1] = c[-1] / c[-6] - 1 if c[-6] != 0 else 0
+        feat[2] = c[-1] / c[-16] - 1 if c[-16] != 0 else 0
+        feat[3] = c[-1] / c[-61] - 1 if c[-61] != 0 else 0
+        feat[4] = c[-1] / c[-241] - 1 if len(c) > 241 and c[-241] != 0 else 0
+        feat[5] = ret1 - self._prev_ret1  # acceleration
+        self._prev_ret1 = ret1
+
+        # --- Trend (4) ---
+        for i, period in enumerate([5, 20, 60, 200]):
+            sma = c[-period:].mean() if len(c) >= period else c.mean()
+            feat[6 + i] = c[-1] / sma - 1 if sma != 0 else 0
+
+        # --- Momentum (4) ---
+        feat[10] = self._rsi_norm(c, 14)
+        feat[11] = self._rsi_norm(c, 6)
+        feat[12] = self._macd_hist(c)
+        feat[13] = c[-1] / c[-21] - 1 if len(c) > 21 and c[-21] != 0 else 0
+
+        # --- Volatility (4) ---
+        atr14 = self._atr(h, lo, c, 14)
+        atr60 = self._atr(h, lo, c, 60)
+        feat[14] = atr14 / atr60 - 1 if atr60 > 0 else 0
+        sma20 = c[-20:].mean()
+        std20 = c[-20:].std()
+        feat[15] = (2 * std20 / sma20) if sma20 > 0 else 0
+        rets_20 = np.diff(c[-21:]) / (c[-21:-1] + 1e-10)
+        feat[16] = np.std(rets_20) if len(rets_20) > 0 else 0
+        feat[17] = (h[-1] - lo[-1]) / c[-1] if c[-1] > 0 else 0
+
+        # --- Volume (4) ---
+        vol_sma20 = v[-20:].mean()
+        feat[18] = v[-1] / vol_sma20 if vol_sma20 > 0 else 1.0
+        obv = np.cumsum(np.sign(np.diff(c[-21:])) * v[-20:])
+        feat[19] = (obv[-1] - obv[0]) / (abs(obv[0]) + 1e-10) if len(obv) > 1 else 0
+        vwap = np.sum(c[-20:] * v[-20:]) / (np.sum(v[-20:]) + 1e-10)
+        feat[20] = c[-1] / vwap - 1 if vwap > 0 else 0
+        vol_sma5 = v[-5:].mean()
+        vol_sma60 = v[-60:].mean()
+        feat[21] = vol_sma5 / vol_sma60 if vol_sma60 > 0 else 1.0
+
+        # --- Microstructure (3) ---
+        consec = 0
+        for k in range(1, min(20, len(c) - 1)):
+            if c[-k] > c[-k - 1]:
+                if consec >= 0:
+                    consec += 1
+                else:
+                    break
+            elif c[-k] < c[-k - 1]:
+                if consec <= 0:
+                    consec -= 1
+                else:
+                    break
+            else:
+                break
+        feat[22] = np.tanh(consec / 5.0)
+        body = abs(c[-1] - o[-1])
+        wick = h[-1] - lo[-1]
+        feat[23] = body / wick if wick > 0 else 0.5
+        ranges = h[-50:] - lo[-50:]
+        feat[24] = np.searchsorted(np.sort(ranges), h[-1] - lo[-1]) / len(ranges)
+
+        # --- Market structure (3) ---
+        feat[25] = funding  # funding rate (from exchange API, cached)
+        # Hour cycle: sin+cos encoding for full 24h representation
+        hour = ts.hour if hasattr(ts, "hour") else 0
+        feat[26] = math.sin(2 * math.pi * hour / 24)
+        feat[27] = math.cos(2 * math.pi * hour / 24)
+
+        return feat
+
+    def _rsi_norm(self, c: np.ndarray, period: int) -> float:
+        """RSI normalized to [-1, 1]."""
+        if len(c) < period + 1:
+            return 0.0
+        delta = np.diff(c[-(period + 1):])
+        gain = np.mean(np.maximum(delta, 0))
+        loss = np.mean(np.maximum(-delta, 0))
+        if loss == 0:
+            return 1.0
+        rs = gain / loss
+        rsi = 100.0 - 100.0 / (1.0 + rs)
+        return (rsi - 50) / 50
+
+    def _macd_hist(self, c: np.ndarray) -> float:
+        if len(c) < 35:
+            return 0.0
+        s = pd.Series(c)
+        macd_line = s.ewm(span=12).mean().iloc[-1] - s.ewm(span=26).mean().iloc[-1]
+        macd_series = s.ewm(span=12).mean() - s.ewm(span=26).mean()
+        signal_line = macd_series.ewm(span=9).mean().iloc[-1]
+        return (macd_line - signal_line) / c[-1] if c[-1] > 0 else 0.0
+
+    def _atr(self, h, lo, c, period: int) -> float:
+        if len(h) < period + 1:
+            return 0.0
+        tr = np.maximum(
+            h[-period:] - lo[-period:],
+            np.maximum(
+                np.abs(h[-period:] - c[-period - 1:-1]),
+                np.abs(lo[-period:] - c[-period - 1:-1]),
+            ),
+        )
+        return float(tr.mean())
+
+
+# ===================================================================
+# Rule 1+2: Online Predictor (per-asset, entropy memory balancing)
+# ===================================================================
+class OnlinePredictor:
+    """SGD ridge with EMA normalization + entropy-based memory balancing.
+
+    Rule 1: Predict accurately (tracks direction accuracy, calibration).
+    Rule 2: Use memory evenly (adaptive L2 via feature importance entropy).
+    """
+
+    def __init__(self, n: int = N_FEATURES, lr: float = 0.003,
+                 base_l2: float = 0.001, memory_alpha: float = 2.0):
+        self.n = n
+        self.w = np.random.randn(n) * 0.0001
+        self.b = 0.0
+        self.lr = lr
+        self.base_l2 = base_l2
+        self.memory_alpha = memory_alpha
+        self.l2_per_feat = np.full(n, base_l2)
+        self.norm = EMANormalizer(n)
+
+        # Tracking
+        self.predictions: list[float] = []
+        self.actuals: list[float] = []
+        self.accuracy_history: list[float] = []
+        self.entropy_history: list[float] = []
+        self.feature_importance = np.ones(n) / n
+
+    def predict(self, x: np.ndarray) -> float:
+        """Predict next-bar return."""
+        x_n = self.norm.normalize(x)
+        return float(np.dot(self.w, x_n) + self.b)
+
+    def update(self, x_prev: np.ndarray, y_true: float):
+        """Learn from previous features ??actual return. Proper t+1 labeling."""
+        # Update normalizer with previous features
+        self.norm.update(x_prev)
+        x_n = self.norm.normalize(x_prev)
+
+        y_pred = float(np.dot(self.w, x_n) + self.b)
+        error = y_pred - y_true
+
+        # SGD with per-feature L2
+        grad_w = error * x_n + self.l2_per_feat * self.w
+        grad_b = error
+
+        # Gradient clipping (protect against outliers)
+        grad_norm = np.linalg.norm(grad_w)
+        if grad_norm > 1.0:
+            grad_w = grad_w / grad_norm
+        grad_b = np.clip(grad_b, -1.0, 1.0)  # clip bias gradient too
+
+        self.w -= self.lr * grad_w
+        self.b -= self.lr * grad_b
+
+        # Track
+        self.predictions.append(y_pred)
+        self.actuals.append(y_true)
+
+        # Rule 2: rebalance memory
+        self._rebalance_memory()
+
+        # Direction accuracy (rolling 50)
+        if len(self.predictions) >= 10:
+            recent_p = self.predictions[-50:]
+            recent_a = self.actuals[-50:]
+            correct = sum(
+                1 for p, a in zip(recent_p, recent_a)
+                if (p > 0) == (a > 0)
+            )
+            self.accuracy_history.append(correct / len(recent_p))
+
+    def _rebalance_memory(self):
+        """Rule 2: Adaptive L2 + exploration noise to keep entropy high."""
+        # FIX: importance = |w| only (normalized model, sqrt(var) was wrong)
+        imp = np.abs(self.w)
+        imp_sum = imp.sum()
+        if imp_sum < 1e-10:
+            self.feature_importance = np.ones(self.n) / self.n
+            self.entropy_history.append(1.0)
+            return
+
+        p = imp / imp_sum
+        self.feature_importance = p
+
+        # Entropy (NaN-safe)
+        safe_p = np.clip(p, 1e-10, 1.0)
+        entropy = -np.sum(safe_p * np.log(safe_p))
+        max_entropy = np.log(self.n)
+        self.entropy_history.append(entropy / max_entropy)
+
+        # Adaptive L2: penalize overused features
+        uniform = 1.0 / self.n
+        excess = np.maximum(p - uniform, 0)
+        self.l2_per_feat = self.base_l2 * (1.0 + self.memory_alpha * excess * self.n)
+
+        # FIX: exploration noise for underused features (L2 only shrinks, can't grow)
+        deficit = np.maximum(uniform - p, 0)
+        if deficit.sum() > 0:
+            noise_scale = self.lr * 0.1 * deficit * self.n
+            self.w += np.random.randn(self.n) * noise_scale
+
+    def memory_entropy(self) -> float:
+        if not self.entropy_history:
+            return 1.0
+        return self.entropy_history[-1]
+
+    def direction_accuracy(self) -> float:
+        if not self.accuracy_history:
+            return 0.5
+        return self.accuracy_history[-1]
+
+    def calibration(self) -> float:
+        """Trust score [0, 1]. High accuracy + high entropy + enough data = high trust."""
+        acc = self.direction_accuracy()
+        ent = self.memory_entropy()
+        # FIX: entropy floor to prevent deadlock (low ent ??no trade ??no learn ??ent stays low)
+        ent_factor = max(ent, 0.3)
+        n_samples = min(len(self.predictions), 200)
+        warmup = min(n_samples / 50, 1.0)
+        return acc * ent_factor * warmup
+
+
+# ===================================================================
+# Rule 3: Position Manager (cost-aware, Kelly-capped, exposure-capped)
+# ===================================================================
+@dataclass
+class Position:
+    direction: str
+    entry_price: float
+    size: float          # margin fraction (0~1)
+    leverage: float      # 1~100x
+    entry_time: str
+    asset: str
+    entry_prediction: float
+
+
+class PositionManager:
+    """Fractional Kelly sizing with costs. Maximum profit within safety bounds."""
+
+codex
+핵심 코드 확인 결과, `bb_pos`는 현재 feature로만 존재하고 V2의 Rule 2는 학습 루프 말단의 단일 호출이라 분리가 쉬운 구조입니다. 워크스페이스 규칙 문서 위치만 한 번 더 확인한 뒤, 그 기준까지 반영해 최종 판단을 정리하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem .. | Select-Object Name,FullName' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem ..\\.. | Select-Object Name,FullName" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg --files ..\\.. | rg \"project-status/current\\.md"'$|workspace-knowledge-index['"\\\\/].*dist[\\\\/]index\\.js"'$|subagent-runs['"\\\\/].*(conclusion|charter|component-map|ablation-plan)\\.md"'$"' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 433ms:
+
+Name                        FullName                                                                        
+----                        --------                                                                        
+archive                     C:\Users\haj\projects\subagent-orchestrator\Projects\archive                    
+intelligent-delegation      C:\Users\haj\projects\subagent-orchestrator\Projects\intelligent-delegation     
+novel                       C:\Users\haj\projects\subagent-orchestrator\Projects\novel                      
+personas                    C:\Users\haj\projects\subagent-orchestrator\Projects\personas                   
+shortlive-shop-helper       C:\Users\haj\projects\subagent-orchestrator\Projects\shortlive-shop-helper      
+telegram-digest             C:\Users\haj\projects\subagent-orchestrator\Projects\telegram-digest            
+Trading Value               C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value              
+vibe-web                    C:\Users\haj\projects\subagent-orchestrator\Projects\vibe-web                   
+AI-SECURITY-INSTRUCTION.md  C:\Users\haj\projects\subagent-orchestrator\Projects\AI-SECURITY-INSTRUCTION.md 
+DEVELOPMENT-BIBLE.md        C:\Users\haj\projects\subagent-orchestrator\Projects\DEVELOPMENT-BIBLE.md       
+security-checklist-guide.md C:\Users\haj\projects\subagent-orchestrator\Projects\security-checklist-guide.md
+
+
+
+ succeeded in 519ms:
+
+Name                                     FullName                                                                      
+----                                     --------                                                                      
+-p                                       C:\Users\haj\projects\subagent-orchestrator\-p                                
+.claude                                  C:\Users\haj\projects\subagent-orchestrator\.claude                           
+.gemini                                  C:\Users\haj\projects\subagent-orchestrator\.gemini                           
+.github                                  C:\Users\haj\projects\subagent-orchestrator\.github                           
+.knowledge                               C:\Users\haj\projects\subagent-orchestrator\.knowledge                        
+.npm-cache                               C:\Users\haj\projects\subagent-orchestrator\.npm-cache                        
+.pytest_cache                            C:\Users\haj\projects\subagent-orchestrator\.pytest_cache                     
+.tq-journal                              C:\Users\haj\projects\subagent-orchestrator\.tq-journal                       
+claude-sub-specs                         C:\Users\haj\projects\subagent-orchestrator\claude-sub-specs                  
+config                                   C:\Users\haj\projects\subagent-orchestrator\config                            
+discussions                              C:\Users\haj\projects\subagent-orchestrator\discussions                       
+docs                                     C:\Users\haj\projects\subagent-orchestrator\docs                              
+game-design-director                     C:\Users\haj\projects\subagent-orchestrator\game-design-director              
+node_modules                             C:\Users\haj\projects\subagent-orchestrator\node_modules                      
+output                                   C:\Users\haj\projects\subagent-orchestrator\output                            
+packages                                 C:\Users\haj\projects\subagent-orchestrator\packages                          
+project-status                           C:\Users\haj\projects\subagent-orchestrator\project-status                    
+Projects                                 C:\Users\haj\projects\subagent-orchestrator\Projects                          
+skills                                   C:\Users\haj\projects\subagent-orchestrator\skills                            
+subagent-runs                            C:\Users\haj\projects\subagent-orchestrator\subagent-runs                     
+tests                                    C:\Users\haj\projects\subagent-orchestrator\tests                             
+workspace-knowledge-index                C:\Users\haj\projects\subagent-orchestrator\workspace-knowledge-index         
+.gitignore                               C:\Users\haj\projects\subagent-orchestrator\.gitignore                        
+.mcp.json                                C:\Users\haj\projects\subagent-orchestrator\.mcp.json                         
+AGENTS.md                                C:\Users\haj\projects\subagent-orchestrator\AGENTS.md                         
+chain.json                               C:\Users\haj\projects\subagent-orchestrator\chain.json                        
+CLAUDE.md                                C:\Users\haj\projects\subagent-orchestrator\CLAUDE.md                         
+CLAUDE.md.bak                            C:\Users\haj\projects\subagent-orchestrator\CLAUDE.md.bak                     
+CLAUDE_new.md                            C:\Users\haj\projects\subagent-orchestrator\CLAUDE_new.md                     
+deep-thinking-tokens-guide.md            C:\Users\haj\projects\subagent-orchestrator\deep-thinking-tokens-guide.md     
+dummy-spec.json                          C:\Users\haj\projects\subagent-orchestrator\dummy-spec.json                   
+gemini-subagent-orchestrator.skill       C:\Users\haj\projects\subagent-orchestrator\gemini-subagent-orchestrator.skill
+intelligent_ai_delegation_detailed_ko.md C:\Users\haj\projects\subagent-orchestrator\intelligent_ai_delegation_detai...
+package.json                             C:\Users\haj\projects\subagent-orchestrator\package.json                      
+plan-discussion-system.md                C:\Users\haj\projects\subagent-orchestrator\plan-discussion-system.md         
+plan-queue-runner-ts.md                  C:\Users\haj\projects\subagent-orchestrator\plan-queue-runner-ts.md           
+problem-resolution-log.md                C:\Users\haj\projects\subagent-orchestrator\problem-resolution-log.md         
+README.md                                C:\Users\haj\projects\subagent-orchestrator\README.md                         
+wki.config.json                          C:\Users\haj\projects\subagent-orchestrator\wki.config.json                   
+
+
+
+2026-04-21T04:42:48.862888Z ERROR codex_core::tools::router: error=Exit code: 1
+Wall time: 0.5 seconds
+Output:
+
+ exited 1 in 546ms:
+codex
+상위 저장소 루트에 `project-status/`와 `workspace-knowledge-index/`가 있었습니다. 이제 지시된 세션 초기화 절차를 올바른 루트에서 수행하고, Oracle 관련 설계 문서도 최소 범위로 확인하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'node workspace-knowledge-index/dist/index.js index' in C:\Users\haj\projects\subagent-orchestrator
+ succeeded in 999ms:
+Index is up to date. No changes detected.
+[wki] git diff failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] git diff failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] git ls-files failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] Git change detection failed. Running full index as fallback.
+[wki] git diff failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] git diff failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+[wki] git ls-files failed: spawnSync C:\WINDOWS\system32\cmd.exe EPERM
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content ..\\..\\project-status\\current.md" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content ..\\..\\subagent-runs\\design\\oracle-2026-04-21\\phase1-charter.md" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content ..\\..\\subagent-runs\\design\\oracle-2026-04-21\\phase2-component-map.md" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content ..\\..\\subagent-runs\\design\\oracle-2026-04-21\\48h-ablation-plan.md" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content ..\\..\\subagent-runs\\discuss\\oracle-phase0-intake-2026-04-21\\conclusion.md" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 408ms:
+# Project Charter ??Oracle ?덉륫 ?붿쭊
+
+**Date**: 2026-04-21
+**Mode**: Design (Phase 1)
+**Domain**: software (由??ㅼ퐫??
+**Previous Phase**: Phase 0 Intake (8???좊줎 AGREE 議곌굔遺 ?섎졃) ??`subagent-runs/discuss/oracle-phase0-intake-2026-04-21/conclusion.md`
+
+---
+
+## Primary Outcome (?듭떖 ?덉쭏 ?띿꽦)
+
+**Context-aware ?덉륫 ?좊ː??湲곕컲 ?섏씡 ?묒닔 ?ъ꽦.**
+
+> 怨쇨굅 ?덉륫 ?덉뒪?좊━瑜?留λ씫(context)蹂꾨줈 遺꾩꽍?섏뿬 "?대뒓 留λ씫?먯꽌 ???덉륫????留욎븯?붿?" ?숈뒿?섍퀬, ?먯떊媛??덈뒗 留λ씫?먯꽌留?嫄곕옒?섏뿬 5???꾩쟻 +4% ?댁긽 ?섏씡???ㅽ쁽?쒕떎.
+
+**?듭떖 ?쒕굹由ъ삤**: OHLCV tick ?섏떊 ???꾩옱 context 怨꾩궛 ??洹?context?먯꽌??怨쇨굅 ?밸쪧/?좊ː??議고쉶 ???좊ː??寃뚯씠???듦낵 ?쒖뿉留??덉륫 + 二쇰Ц ?ㅽ뻾 ??寃곌낵 ?쇰뱶諛깆쑝濡?context蹂??좊ː???낅뜲?댄듃.
+
+**?뺣웾 紐⑺몴**: ?밸쪧 **69%+**, 5???꾩쟻 ?섏씡瑜?**+6%+**, 理쒖냼 100+ trades ?섑뵆 (?좊ː???듦퀎 ?좎쓽).
+
+> **洹쇨굅**: Trading Value ?꾨줈?앺듃 ?먯닔 泥닿퀎(?섏씡 +0.1 / ?먯떎 -0.2, 鍮꾨?移?2諛??⑤꼸?????먯씡遺꾧린 ?밸쪧 67%?????**+2%p 留덉쭊**. 5??+6% ?섏씡? 湲곗〈 ?꾨줈?앺듃 紐⑺몴(+4%) ?鍮?怨듦꺽???곹뼢 ???먭린?ㅼ젙 紐⑺몴 "2二?66%"? ?쇨??섍쾶 Oracle? ?붿쭊 ?꾩껜媛 ??湲곗? ?댄븯濡??⑥뼱吏吏 ?딅룄濡??숈뒿瑜졖룹엫怨꾩튂瑜??먮룞 議곗젙?쒕떎.
+
+---
+
+## Operating Loop (?붿껌-泥섎━ ?먮쫫)
+
+**3?덉씠???쒗솚 援ъ“** (?먭린?ㅼ젙 紐⑺몴 湲곕컲):
+
+- **留덉씠?щ줈 (珥?遺?**: OHLCV tick ??context 踰≫꽣 怨꾩궛 (`predicted_edge, predictive_uncertainty, cost_margin, vol_regime, time_bucket`) ??Bayesian reliability head 議고쉶 ???좊ː?????꾧퀎移????덉륫 ?앹꽦 ??EV-blacklist 泥댄겕 ?듦낵 ??二쇰Ц (observe-only / soft-gate / full ?④퀎蹂?
+- **誘몃뱾 (?쒓컙~??**: 泥닿껐 寃곌낵 ?섏떊 ??online ridge/logistic 媛以묒튂 ?낅뜲?댄듃 (留욎땄 媛뺥솕, ?由??뚭굅) ??Beta-Bernoulli/Normal-Gamma posterior 媛깆떊 ???깅뒫 誘몃떖 context??blacklist 異붽? (n_local ??20 ?댄썑)
+- **留ㅽ겕濡?(二?**: Oracle vs V2 二쇨컙 ?밸쪧/?섏씡 鍮꾧탳 ??**3二??곗냽 Oracle ?곗쐞 ??v2.py ??`scripts/archive/` (?좎뀑 議고빆 諛쒕룞)** ???좊ː??紐⑺몴 媛깆떊, ?숈뒿瑜??ъ“??
+**留ㅽ겕濡?猷⑦봽 ?좏삎: ?쒗솚??** ?먭린?ㅼ젙 紐⑺몴 = **"2二??꾩쟻 ?밸쪧 66% ?좎?"** (誘몃떖 ???숈뒿瑜??щ낫?? ?곹쉶 ???꾧퀎移??곹뼢).
+
+---
+
+## Baseline Expectations (湲곕낯 ?붽뎄?ы빆)
+
+**?ы븿** (議고빆 C, D, F, ?쇰컲 ?명봽??:
+
+1. **?곹깭/濡쒓렇 援ъ“ ?쇨???* ??`data/oracle_state.npz` + `data/oracle_memory.json` + `data/oracle.jsonl`. V3/TriArb ?ㅼ젣 ?щ㎎(`*_state.npz + *_memory.json`) 以??(Phase 0 "npz+jsonl ?쇨?" ?쒗쁽? 遺덉셿?꾪뻽?? Codex A ?뺤씤).
+2. **Dashboard ?듯빀** ??`scripts/dashboard_unified.py` MODELS dict??`"oracle"` ??異붽?. `renderOracle()` ?⑥닔 ?좉퇋 ?묒꽦 (?섎뱶肄붾뵫 援ъ“ ??+25~40% 怨듭닔 ?몄젙).
+3. **API SLA** ??`/api/state` p95 500ms, hard ceiling 1s. Dashboard polling timeout 3珥? refresh 5珥?以?? (**議고빆 C**)
+4. **怨듭쑀 OHLCV collector/cache** ??Oracle/V3/TriArb媛 媛숈? ?щ낵 OHLCV瑜?以묐났 fetch?섏? ?딅룄濡?怨듯넻 ?섏쭛 ?덉씠???꾩엯. (**議고빆 D**)
+5. **?좉퇋 ?ы듃 8901** ??V2(8897)쨌V3(8898)쨌TriArb(8899)쨌Dashboard(8900)? 蹂묓뻾. (**議고빆 F**, ?섎떒 誘명빐寃??닿껄 李몄“)
+6. **Warmup ?④퀎** ??observe-only 150~200 trades ??soft-gate 300~500 ??full. blacklist ?쒖꽦? `n_local ??20` ?댄썑.
+7. **?ㅽ듃?뚰겕** ??濡쒖뺄 HTTP??`127.0.0.1` ?섎뱶肄붾뵫 (Windows IPv6 timeout ?뚰뵾).
+
+**?쒖쇅 諛??泥?* (議고빆 E, J):
+
+- ??**Rule 2 (?뷀듃濡쒗뵾 洹좊벑??** ???숈뒿 ??갑???묐룞. ???泥? **Bayesian reliability head** (Beta-Bernoulli / Normal-Gamma posterior per context) + **EV-based blacklist**.
+- ??**?⑥씪 ?좏삎 紐⑤뜽** (v2.py??SGD ridge ?⑤룆) ??context蹂??좊ː??遺꾪솕 遺덇?. ???泥? **Online ridge/logistic + context-indexed reliability posterior**.
+- ??**v2.py ??뼱?곌린** (opus 珥덇린 ?쒖븞, Round 2?먯꽌 泥좏쉶) ??濡ㅻ갚 遺덇?. ???泥? **?좉퇋 `scripts/oracle.py` 遺꾨━ + ?좎뀑 議고빆** ??Oracle??v2.py ?鍮?**3二??곗냽 二쇨컙 ?밸쪧 ?곗쐞 ??v2.py ??`scripts/archive/`**. (**議고빆 E**)
+- ??**v2.jsonl 臾몄꽌 ?섏튂 -13.13%** ???ㅼ젣 -10.97~-11.15%. ??Phase 5 臾몄꽌 ?앹꽦 ??遺濡?J濡??섏튂 ?뺤젙 諛섏쁺. (**議고빆 J**)
+
+---
+
+## Differentiation Thesis (?꾪궎?띿쿂 李⑤퀎??
+
+> **?몃젅?대뵫 ?덉륫 ?붿쭊?몃뜲, ex-ante predictive edge + uncertainty + regime??context蹂?Bayesian reliability posterior濡??숈뒿?섍린 ?뚮Ц??"?먯떊媛??녿뒗 ?쒖옣?먯꽌??嫄곕옒?섏? ?딅뒗" ?좏깮沅뚯씠 ?앷릿??**
+
+**V3????덉씠??遺꾨━** (**議고빆 G**, ?꾩썝 ?⑹쓽):
+
+- **V3 = setup quality / trade management** ?숈뒿 (`vwap_slope, ema_dist, vp_clearance, rr_estimate, hour, vol_regime`) ??**meta-decision** (?대뒓 setup???좏깮??寃껋씤媛)
+- **Oracle = ex-ante predictive edge / uncertainty / regime** ?숈뒿 (`predicted_edge, predictive_uncertainty, cost_margin, vol_regime, time_bucket`) ??**signal-generation** (???쒖젏 ?덉륫???좊ː??留뚰븳媛)
+
+??**V3 k-NN ?? ?ъ궗??媛?? 6李⑥썝 context 醫뚰몴???ъ꽕怨??꾩닔.** 媛숈? ?붿쭊 ?ㅽ깮(numpy/pandas only, 鍮?LSTM)?댁?留??섎? 怨듦컙???ㅻ쫫.
+
+**紐⑤뜽 怨④꺽** (**議고빆 A**, ?꾩썝 ?⑹쓽):
+
+> **Online ridge/logistic** (point prediction) + **Bayesian reliability head per context** (Beta-Bernoulli for binary direction / Normal-Gamma for magnitude) + **EV-based context blacklist**.
+>
+> - 鍮?LSTM / 鍮?neural (?꾩옱 ?ㅽ깮 ?쒖빟 + ?숈뒿 ?댁꽍媛?μ꽦)
+> - `numpy/pandas`留뚯쑝濡?援ы쁽
+> - Warmup: observe-only 150-200 trades ??soft-gate 300-500 ??full. blacklist??`n_local ??20`遺???쒖꽦.
+
+---
+
+## Target Audience (?ъ슜???대씪?댁뼵??
+
+| ??ぉ | 寃곗젙 |
+|------|------|
+| ????ъ슜???댄빐愿怨꾩옄 | ?ъ슜??1??(?먮룞留ㅻℓ ?댁쁺?? |
+| ?ъ슜 ?섍꼍 | Windows 11, Python 3.12, 濡쒖뺄 ?⑥씪 癒몄떊, ccxt + numpy + pandas (?좉퇋 ?섏〈??湲덉?) |
+| ?덉슜 蹂듭옟??| 以????섑븰??異붿긽??Bayesian posterior) ?덉슜, ?λ윭???꾨젅?꾩썙??PyTorch/TF) 湲덉? |
+| 湲곕? ?ъ슜 鍮덈룄 | 24/7 臾댁쨷???댁쁺, Dashboard 5珥?refresh polling, ?μ븷 ??利됱떆 v2.py ?대갚 媛??|
+| ?듭떖 ?쒖빟 | 5????Phase 4 "肄붾뵫 李⑹닔 媛?? ?좎뼵, V3/TriArb ?댁쁺 臾댁쨷?? API SLA p95 500ms |
+
+---
+
+## Charter 議고빆 10媛?(A~J) 踰덉뿭 留ㅽ븨
+
+| 議고빆 | ?댁슜 | Charter ?꾩튂 | ?ㅼ쓬 Phase 踰덉뿭 |
+|------|------|------------|----------------|
+| **A** | Oracle 紐⑤뜽 怨④꺽 (online ridge/logistic + Bayesian reliability + EV blacklist) | Differentiation | Phase 2 而댄룷?뚰듃 留?+ Phase 3 援ы쁽 寃곗젙 |
+| **B** | ?덉륫 ?源?/ horizon / ?먯닔?⑥닔 / confidence activation schedule | (Phase 3 ?꾩젣) | **Phase 3 Decision Card ?꾩닔** |
+| **C** | API SLA `/api/state` p95 500ms, hard 1s | Baseline 3 | Phase 3 援ы쁽 + Phase 4 寃利?|
+| **D** | 怨듭쑀 OHLCV collector/cache | Baseline 4 | Phase 2 而댄룷?뚰듃 `market-data-collector` |
+| **E** | v2.py ?좉퇋 遺꾨━ + ?좎뀑 議고빆 (3二??곗쐞 ??archive) | Baseline ?쒖쇅/?泥?| Phase 2 + Phase 6 蹂寃쎄?由?|
+| **F** | ?ы듃 8901 ?좉퇋 | Baseline 5 (**誘명빐寃?*) | ?섎떒 ?닿껄 李몄“ |
+| **G** | V3 李⑤퀎??1臾몄옣 (setup vs prediction ?덉씠??遺꾨━) | Differentiation | ??(?뺤젙) |
+| **H** | 寃利?湲곗? (CI, walk-forward, 理쒖냼 trade) | Operating Loop + ?쒖뒪??1踰?| Phase 4 寃利??듯빀 |
+| **I** | 48?쒓컙 Rule 2 ablation | **Charter ?쒖뒪??1踰?* | ?섎떒 ?뱀뀡 李몄“ |
+| **J** | v2.jsonl -11.15% ?섏튂 ?뺤젙 | Baseline ?쒖쇅/?泥?| Phase 5 臾몄꽌 ?앹꽦 ??諛섏쁺 |
+
+---
+
+## Charter ?쒖뒪??1踰? 48?쒓컙 Rule 2 Ablation Go/No-Go Gate (議고빆 I)
+
+**諛곗튂**: Phase 1 Charter ?뺤젙 吏곹썑, Phase 2 Component Map ?묒꽦怨?**蹂묓뻾 ?ㅽ뻾** 媛??
+
+**紐⑹쟻**: V2 ?ㅽ뙣??洹쇰낯 ?먯씤??Rule 2(?뷀듃濡쒗뵾 洹좊벑???몄? 寃利? ?듦낵 ??Oracle ?ъ꽕怨??ㅼ퐫??異뺤냼 媛?? 誘몃떖 ???ъ꽕怨??뺣떦??
+
+**?ㅽ뻾 ?섍꼍**:
+- **?좉퇋 `scripts/oracle.py` 寃⑸━** (v2.py live ?섍꼍 ?섏닠 湲덉?)
+- Oracle-w-Rule2 vs Oracle-wo-Rule2 2 variant 48?쒓컙 蹂묓뻾 observe-only + ?쇰? paper trades
+- 湲곗〈 V2/V3/TriArb ?댁쁺???곹뼢 ?놁쓬
+
+**?듦낵 湲곗?** (6??ぉ ?꾨? AND ??議고빆 H):
+
+1. **?섏닔猷????쒖닔???묒닔**
+2. **?밸쪧 95% CI lower bound > 50%** (Wilson score or Clopper-Pearson)
+3. **Walk-forward ?ы쁽** ??2~5媛?rolling window?먯꽌 ?듦낵 湲곗? ?쇨???4. **?먯궛蹂??몄감 ?덉슜 踰붿쐞 ??* ??BTC/ETH/SOL ??二쇱슂 ?щ낵 媛??밸쪧 ?몄감 짹5%p ?대궡
+5. **Calibration monotone** ???좊ː??踰꾪궥蹂??뺥솗?꾧? ?⑥“ 利앷? (reliability diagram)
+6. **理쒖냼 100+ trades** ???섑뵆 ?좎쓽???뺣낫
+
+**寃곌낵 遺꾧린**:
+- **PASS** ??V2???섏닠???섏젙(Rule 2 ?쒓굅)留??곸슜. Oracle ?ъ꽕怨??ㅼ퐫??異뺤냼 ?ш??? ?ъ슜?먯뿉寃?Charter Tier 2 蹂寃??쒖븞.
+- **FAIL** ??Oracle ?ъ꽕怨??먯븞?濡?Phase 2 吏꾩엯.
+- **INCONCLUSIVE** (?쇰? 湲곗?留??듦낵) ??異붽? 48?쒓컙 ?곗옣 1???덉슜, 洹몃옒??紐⑦샇 ??FAIL 泥섎━.
+
+**痢≪젙 濡쒓렇**: `data/oracle_ablation.jsonl` ??媛?trade??`(timestamp, variant, context, prediction, result, confidence, pnl_after_fee)` 湲곕줉.
+
+---
+
+## 誘명빐寃??닿껄 (Phase 2 ?댁쟾 ?뺤젙 ?꾩슂)
+
+### 1. ?ы듃 利됱떆 ?뺤젙 vs Phase 3 吏??(議고빆 F)
+
+- **?댁쁺 sonnet + opus**: 利됱떆 8901 ?뺤젙 (dashboard ?듯빀 ?쇱젙???ы듃 踰덊샇媛 ?곷쪟 醫낆냽)
+- **Codex B**: Phase 3源뚯? ??떠??臾대갑 (?ы듃??config ?뚮씪誘명꽣)
+- **Charter ??묒븞**: **?ы듃 8901 ?좎젙 ?뺤젙** + Phase 3?먯꽌 踰덈났 媛??議고빆 異붽?. Phase 2 Component Map ?묒꽦 ??踰덈났 ?몃━嫄??? dashboard 援ъ“ 由ы뙥?좊쭅 ?꾩슂)媛 ?놁쑝硫?Phase 4?먯꽌 理쒖쥌 ?뺤젙.
+
+### 2. BollRev ?ㅼ퐫???몄엯 寃쎌쐞 (諛섎? sonnet 吏??
+
+- Phase 0 ?붿빟 ?대뵒?먮룄 BollRev(Bollinger Reversion) variant ?몄엯 洹쇨굅 ?놁쓬
+- Oracle 湲곕낯 variant(control / aggressive / conservative) ??BollRev ?몄엯 ?댁쑀 誘몄꽕紐?- **Charter 寃곗젙**: Phase 2 Component Map?먯꽌 Oracle variants 理쒖쥌 紐⑸줉 ?뺤젙 ??BollRev ?몄엯 ?щ? ?ы룊媛. ?몄엯 ??洹쇨굅(?? "V3 aggressive variant ???) Component Map??紐낆떆 ?꾩닔.
+
+---
+
+## Charter ?쇨???寃利?(11 泥댄겕由ъ뒪??
+
+- [x] **Primary Outcome 1媛吏 ?뺤젙** ??Context-aware ?덉륫 ?좊ː??湲곕컲 ?섏씡 ?묒닔 ?ъ꽦
+- [x] **3?덉씠??Operating Loop ??臾몄옣??* ??留덉씠?щ줈/誘몃뱾/留ㅽ겕濡?紐⑤몢 ?뺤쓽
+- [x] **Baseline ?ы븿/?쒖쇅 寃곗젙** ???ы븿 7媛? ?쒖쇅 4媛?+ ?泥댁븞 紐낆떆
+- [x] **Differentiation Thesis ??臾몄옣** ??"ex-ante predictive edge + uncertainty瑜?context蹂?Bayesian posterior濡??숈뒿..."
+- [x] **Target Audience ?섍꼍/?쒖빟 ?뺤젙** ??5??ぉ ??- [x] **Primary Outcome ??Operating Loop ?묐┰?** ??留덉씠?щ줈 context 議고쉶 ??誘몃뱾 posterior ?낅뜲?댄듃 ??留ㅽ겕濡??좊ː??紐⑺몴 媛깆떊. ?먭린?ㅼ젙 紐⑺몴媛 Primary Outcome怨?吏곴껐.
+- [x] **Differentiation ??Baseline 紐⑥닚 ?놁쓬?** ??Baseline ?쒖쇅 ??ぉ(Rule 2, ?⑥씪 ?좏삎)??Differentiation ?泥댁븞(Bayesian posterior, online ridge)?쇰줈 ?뺥빀.
+- [x] **Target ?덉슜 蹂듭옟????Primary Outcome ?쇱튂?** ??numpy/pandas留뚯쑝濡?Bayesian posterior 援ы쁽 媛??Beta-Bernoulli ?낅뜲?댄듃??2以??섏떇). ?덉슜 蹂듭옟??"以? 踰붿쐞 ??
+- [x] **3?덉씠??紐⑤몢 Primary Outcome 媛뺥솕?** ??留덉씠?щ줈=?좊ː??寃뚯씠?? 誘몃뱾=?좊ː???숈뒿, 留ㅽ겕濡??좊ː??紐⑺몴. 紐⑤몢 Primary Outcome 湲곗뿬.
+- [x] **留덉씠?щ줈 ??誘몃뱾 ??留ㅽ겕濡??쇰뱶 ?곌껐?** ??留덉씠?щ줈 trade 寃곌낵 ??誘몃뱾 posterior ?낅뜲?댄듃 ??留ㅽ겕濡??밸쪧 吏묎퀎 ???숈뒿瑜??ъ“????留덉씠?щ줈 ?꾧퀎移?媛깆떊. ?쇰뱶諛??꾧껐.
+- [x] **留ㅽ겕濡쒓? ?쒗솚?뺤씠硫??먭린?ㅼ젙 紐⑺몴 湲곕컲?** ??"2二??꾩쟻 ?밸쪧 66% ?좎?" ?먭린?ㅼ젙 紐⑺몴 紐낆떆.
+
+**寃利?寃곌낵: PASS** ??11/11 ??ぉ ?듦낵. Phase 2 (Component Map) 吏꾩엯 議곌굔 異⑹”.
+
+---
+
+## Next Step
+
+1. **Charter ?쒖뒪??1踰??ㅽ뻾** (48?쒓컙 Rule 2 ablation) ??Phase 2 Component Map ?묒꽦怨?**蹂묓뻾**. 寃곌낵???곕씪 Phase 2 ?ㅼ퐫??議곗젙.
+2. **Phase 2 Component Map ?묒꽦** ??Oracle 紐⑤뱢??理쒕? 5媛?而댄룷?뚰듃濡?遺꾪븷. ?쒖븞:
+   - `oracle-core` (?덉륫 ?붿쭊 硫붿씤)
+   - `context-encoder` (5李⑥썝 context 踰≫꽣 ?앹꽦)
+   - `reliability-head` (Bayesian posterior ?좎?/議고쉶)
+   - `blacklist-manager` (EV 湲곕컲 context ?쒖쇅)
+   - `market-data-collector` (怨듭쑀 OHLCV, 議고빆 D)
+3. **Phase 3 Decision Card 以鍮?* ??議고빆 B(?덉륫 ?源?horizon/?먯닔?⑥닔/activation schedule), F(?ы듃 理쒖쥌), 諛?Phase 2?먯꽌 ?앸퀎??怨듭쑀 ?뚮씪誘명꽣 ?뺤젙.
+4. **?댄썑 `/spec`?쇰줈 Codex 援ы쁽 吏?쒖꽌 ?묒꽦** ??Phase 4 寃利??듦낵 ??
+
+---
+
+## Evidence
+
+- ?댁쟾 Phase 0 ?곗텧臾? `subagent-runs/discuss/oracle-phase0-intake-2026-04-21/conclusion.md`
+- ?좊줎 8??Round 1~2 ?묐떟: `subagent-runs/discuss/oracle-phase0-intake-2026-04-21/round-{1,2}/*.md`
+- ?꾨찓????李몄“: `skills/design-director/domains/software/` (profile.yaml, heuristics.md)
+- Charter ?묒떇: `skills/design-director/templates/charter.md`
+- Phase 1 ?먯씠?꾪듃 吏移? `skills/design-director/agents/phase1-charter.agent.md`
+
+ succeeded in 454ms:
+# Project Status ??Current
+
+> ???뚯씪? 紐⑤뱺 AI ?붿쭊(Claude, Codex/GPT, Gemini)??李몄“?⑸땲??
+> ???대뜑?먯꽌 ?묒뾽?섎뒗 AI?????뚯씪???쎄퀬 ?꾩옱 ?곹깭瑜??뚯븙?섏꽭??
+> ?꾨즺 湲곕줉? project-status/2026-Q2.md??吏곸젒 異붽??쒕떎.
+> current.md?먮뒗 ?꾨즺 ?대젰??湲곕줉?섏? ?딅뒗??
+> ???꾨즺 ?대젰: project-status/2026-Q2.md
+
+---
+
+## Project: Subagent Orchestrator
+
+硫??AI ?붿쭊(Claude, Codex/GPT, Gemini)??議곗쑉?섎뒗 ?ㅼ??ㅽ듃?덉씠???쒖뒪??
+
+## ?듭떖 援ъ꽦 ?붿냼
+
+| 援ъ꽦 ?붿냼 | ?곹깭 | 寃쎈줈 |
+|---|---|---|
+| TS ?곗쿂 (primary) | ?꾨즺 | `packages/launcher/` |
+| PS ?곗쿂 (legacy fallback) | ?좎? | `skills/codex-subagent-orchestrator/scripts/` |
+| WKI (Workspace Knowledge Index) | ?꾨즺 | `workspace-knowledge-index/` |
+| Claude ?ㅼ??ㅽ듃?덉씠??(/sub) | ?꾨즺 | `skills/claude-subagent-orchestrator/` |
+| 硫?곗뿏吏??ㅼ??ㅽ듃?덉씠??(/submix) | ?꾨즺 | `.claude/skills/submix/` |
+| Gemini ?ㅼ??ㅽ듃?덉씠??| ?꾨즺 | `skills/gemini-subagent-orchestrator/` |
+| Codex ?ㅼ??ㅽ듃?덉씠??| ?꾨즺 | `skills/codex-subagent-orchestrator/` |
+| **?좊줎 ?쒖뒪??(/discuss)** | **Phase 1~3 ?꾨즺** | `packages/launcher/src/discussion/` |
+| **???щ꼫 TS** | **Phase 1~2 ?꾨즺** | `packages/launcher/src/queue/` |
+| **踰붿슜 ?ㅺ퀎 ?붾젆??(/design)** | **?꾨즺** | `skills/design-director/` + `.claude/skills/design/` |
+| **寃뚯엫 湲고쉷 ?붾젆??(/gdd)** | **?꾨즺** | `skills/game-design-director/` + `.claude/skills/gdd/` |
+| **Intelligent Delegation ?꾨젅?꾩썙??* | **?꾨즺** | `packages/launcher/src/` + `config/capabilities/` + 湲고쉷??`Projects/intelligent-delegation/` |
+
+## ?ㅼ쓬 ?묒뾽 (?곗꽑?쒖쐞 ??
+
+1. **?섎Ⅴ?뚮굹 援?? ??Phase 17 過-1 Land 吏꾩엯 (援?? ?먯뿰?꾩깮 濡쒕뱶留?**
+   - Phase 11: 寃쎌젣 ?명봽??(goods/P2P/NPC/?꾧뎄) ???꾨즺
+   - Phase 12 / 12-B: SNN 寃쎌젣 ?곌껐 + ?깅뒫 理쒖쟻??+ NPC SNN?????꾨즺
+   - Phase 13~16: ?듭튂/?멸툑/?앸웾/怨듦났洹쇰줈 ??16-H 寃쎌젣 ?덉젙?붾줈 ?섎졃 (Hard 5吏??PASS, 2026-04-20)
+   - **Phase 17 吏꾪뻾 ?덉젙**: 過-1 Land Charter ?ㅺ퀎 以???LandCell(臾쇰━ 怨듦컙) + Territory(吏諛??ъ쁺) ?댁썝 遺꾨━, 2D tile grid, 2.5D/3D 洹몃옒???뺤옣 ?鍮?   - 濡쒕뱶留? **過-1 Land ??過-2 Faction ??過-3 Struggle ??過-4 Nation** (?먯뿰 ?꾩깮)
+2. **WKI 異붽? 媛쒖꽑** ??Mean nDCG 0.819, Line-scoped 0.655 (Min 0.630)
+3. **/design domains/software/ ?ㅼ쟾 ?ъ슜**
+
+## ?섎Ⅴ?뚮굹 援?? ?ㅺ퀎 ?꾪솴 (2026-04-12 ?꾨즺)
+
+| Charter | 踰꾩쟾 | ?곹깭 |
+|---------|------|:----:|
+| world-ontology | Phase A ?섏젙 ?꾨즺 | ??|
+| constitution | 8??27議?| ??|
+| economy-whitepaper | 11??| ??|
+| physis-charter-v2 | v2.4 | ??|
+| tick-daemon-charter | v1.1 | ??|
+| humanity-charter | H1~H6 | ??|
+| death-reincarnation-charter | v1 | ??|
+| order-charter | v1 | ??|
+| society-charter-draft | v1.1 | ??|
+| secret-rumor-evidence-charter | v1.1 | ??|
+| **personabrain-snn-charter** | **v3.1** | ??|
+
+PersonaBrain SNN: 50M ?대윴, 12?대윭占쏙옙??V-L-S-B-A-T-C-G-F-I-D-P), 湲곗뼲 5?좏삎+留앷컖 寃쎌젣?? 20K紐?CPU 10ms
+
+## 二쇱슂 紐낅졊??
+```bash
+# TS ?곗쿂 ?ㅽ뻾
+node packages/launcher/dist/cli.js --spec <spec.json>
+
+# WKI ?몃뜳??node workspace-knowledge-index/dist/index.js index
+
+# WKI 寃??node workspace-knowledge-index/dist/index.js search "<query>" --top 5
+
+# WKI ?곹깭 ?뺤씤
+node workspace-knowledge-index/dist/index.js status
+
+# WKI 寃???덉쭏 ?됯?
+node workspace-knowledge-index/dist/index.js eval workspace-knowledge-index/eval/gold-set-v2.json
+
+# ???щ꼫 ?ㅽ뻾
+node packages/launcher/dist/queue/queue-cli.js --config <queue.json>
+node packages/launcher/dist/queue/queue-cli.js --config <queue.json> --max-polls 10
+
+# ?좊줎 ?ㅽ뻾
+node packages/launcher/dist/discussion/discuss-cli.js "二쇱젣"
+node packages/launcher/dist/discussion/discuss-cli.js --auto "二쇱젣"
+
+# WKI lock 臾몄젣 ??rm .knowledge/.wki.lock
+```
+
+## 臾몄젣 ?닿껐
+
+臾몄젣 諛쒖깮 ??`problem-resolution-log.md`瑜?癒쇱? ?뺤씤?섏꽭?? 8嫄댁쓽 ?닿껐 ?щ?媛 湲곕줉?섏뼱 ?덉뒿?덈떎.
+
+## 洹쒖튃
+
+- **?몄뀡 ?쒖옉 ??WKI ?몃뜳???꾩닔** ??泥??묒뾽 ?꾩뿉 `node workspace-knowledge-index/dist/index.js index` 瑜?1???ㅽ뻾. ?ㅻⅨ AI/?몄뀡??蹂寃쎌궗??씠 諛섏쁺?? 蹂寃??놁쑝硫?利됱떆 諛섑솚 (0珥?.
+- ?뚯씪 ??젣 ??諛섎뱶???ъ슜?먯뿉寃??뺤씤 ??吏꾪뻾
+- ???대뜑?먮뒗 蹂꾨룄 ?꾨줈?앺듃 ?대뜑媛 議댁옱?????덉쓬 (game-design-director, trading-quest ??
+- Evidence 湲곕줉? ?꾩닔 ??寃곌낵 蹂닿퀬 ?꾩뿉 諛섎뱶??湲곕줉
+---
+
+## Mostria (vibe-web) ?꾨즺 ?대젰
+
+??`project-status/2026-Q2.md` 李몄“. `git log --oneline Projects/vibe-web/` 濡쒕룄 ?뺤씤 媛??
+
+ succeeded in 381ms:
+# Oracle Phase 0 Intake ?좊줎 ??理쒖쥌 寃곕줎
+
+**二쇱젣**: Phase 0 Intake ?붿빟??Oracle ?ㅺ퀎 李⑹닔 議곌굔?쇰줈 ?곹빀?쒓??
+**?쇱떆**: 2026-04-21
+**李몄뿬??*: 8紐?(Claude opus, Claude sonnet, Claude sonnet 횞 3 ?泥?(Gemini pro 荑쇳꽣 ?뚯쭊 fallback), Codex gpt-5.4 횞 3, Gemini 2.5-flash)
+**?쇱슫??*: 2
+
+## ?섎졃 ?먯젙: **AGREE (議곌굔遺)**
+
+Phase 1 Charter 吏꾩엯 ?곹빀. ??Charter ?꾩뿉 ?꾨옒 10??ぉ ?뺤젙 ?꾩닔.
+
+## ?⑹쓽??寃곗젙 (Round 2?먯꽌 ?섎졃)
+
+### 1. v2.py 泥섎━ ??**?좉퇋 `oracle.py` 遺꾨━** (8/8 ?⑹쓽)
+- opus媛 ?⑤룆 "??뼱?곌린" ?낆옣?먯꽌 ?묐낫, Codex B媛 "Phase 3 吏?? C?낆옣?먯꽌 B濡??대룞?섎ŉ ?꾩썝 ?⑹쓽
+- **?좎뀑 議고빆** (opus ?쒖븞): Oracle??v2.py ?鍮?**3二??곗냽 ?밸쪧 ?곗쐞 ??v2.py ??archive ?대룞**
+- 鍮꾩슜 ?덇컧? 誘몃?(~4.1 calls/min)?섎굹 濡ㅻ갚/踰좎씠?ㅻ씪???μ븷 遺꾨━ 媛移섍? ?⑥뵮 ??
+### 2. V3? Oracle???섎? 怨듦컙 遺꾨━ ???꾩썝 ?⑹쓽
+**V3 李⑤퀎??1臾몄옣 (?뺤젙)**:
+> **V3??setup quality / trade management ?숈뒿 (vwap_slope, ema_dist, vp_clearance, rr_estimate, hour, vol_regime). Oracle? ex-ante predictive edge / uncertainty / regime ?숈뒿 (predicted_edge, predictive_uncertainty, cost_margin, vol_regime, time_bucket). V3 = meta-decision (setup selection), Oracle = signal-generation (prediction).**
+
+??V3 k-NN **?**? ?ъ궗??媛?? 6李⑥썝 **醫뚰몴**???ъ꽕怨??꾩닔.
+
+### 3. 48?쒓컙 Rule 2 ablation ?ㅽ뿕 ???ㅽ뻾 (?꾩튂 ?쇱웳留??⑥쓬)
+- 7/8 "?ㅽ뻾 媛移??덉쓬", 1/8 "遺덊븘?? (flash)
+- **諛섎? sonnet**: ?좏뻾 Go/No-Go gate ??**Charter ?쒖뒪??1踰?*?쇰줈 踰덉뿭??(李ъ꽦 sonnet + Codex A/B/C ?⑹쓽)
+- ?ㅽ뻾 ?섍꼍: **?좉퇋 oracle.py 寃⑸━** (?댁쁺 sonnet), v2.py live ?섍꼍 ?섏닠 湲덉?
+- **?듦낵 湲곗? (?⑥씪 60%+ 嫄곕?)**:
+  - ?섏닔猷????쒖닔???묒닔
+  - 95% CI lower bound > 50%
+  - Walk-forward 2~5媛?window ?ы쁽
+  - ?먯궛蹂??몄감 ?덉슜 踰붿쐞 ??  - Calibration monotone
+  - 理쒖냼 100+ trades
+- 誘몃떖 ?????ъ꽕怨?吏꾪뻾. ?듦낵 ?????섏닠???섏젙 + ?ъ꽕怨??ㅼ퐫??異뺤냼.
+
+### 4. Oracle 紐⑤뜽 怨④꺽 ?ㅼ?移????뺤젙
+> **Online ridge/logistic + Bayesian reliability head (Beta-Bernoulli/Normal-Gamma posterior) + EV-based context blacklist**
+> - 鍮?LSTM (?꾩옱 ?ㅽ깮 ?쒖빟)
+> - `numpy/pandas`留뚯쑝濡?援ы쁽
+> - 珥덇린 `150-200` trades observe-only, `300-500` soft gate, blacklist??`n_local ??20` ?댄썑
+
+## Charter ???뺤젙 ?꾩슂 10??ぉ
+
+| # | ??ぉ | ?쒓린??| ?곹깭 |
+|---|------|--------|------|
+| A | 紐⑤뜽 怨④꺽 1臾몄옣 | opus/Codex A/B/C/flash | ???뱀뀡 4 ?뺤젙 |
+| B | ?덉륫 ?源?horizon/?먯닔?⑥닔/confidence activation schedule | Codex B | Phase 1 吏꾩엯 ???꾩닔 |
+| C | API SLA: `/api/state` p95 500ms, hard 1s | Codex C | ?뺤젙 |
+| D | 怨듭쑀 OHLCV collector/cache (以묐났 fetch 諛⑹?) | Codex C | Charter ?꾩닔 |
+| E | v2.py 泥섎━: ?좉퇋 oracle.py + ?좎뀑 議고빆 (3二??곗쐞 ??archive) | opus | **?뺤젙** |
+| F | ?ы듃: 8901 ?좉퇋 (?ㅼ닔) / Phase 3 ?좎?(?뚯닔) | ?댁쁺 sonnet, opus | 利됱떆 ?뺤젙 沅뚭퀬 |
+| G | V3 李⑤퀎??1臾몄옣 | opus/Codex B ?⑹쓽 | **?뺤젙** (?뱀뀡 2) |
+| H | 寃利?湲곗?: CI/walk-forward/理쒖냼 trade ??| Codex A/B/C + 李ъ꽦/諛섎? sonnet | **?뺤젙** (?뱀뀡 3) |
+| I | 48?쒓컙 Rule 2 ablation (Charter ?쒖뒪??1踰? | 諛섎? sonnet + ?ㅼ닔 | **?뺤젙** |
+| J | v2.jsonl ?섏튂 ?뺤젙 -11.15% ???꾩옱 ??-10.97% | Codex B | 臾몄꽌留??섏젙 |
+
+## 肄붾뱶 ?섏? 寃利앸맂 ?⑺듃 (Phase 0 ?ъ옉??洹쇨굅)
+
+1. **v2.jsonl ?ㅼ젣 ?섏씡瑜?-10.97~-11.15%** (臾몄꽌 -13.13%? 遺덉씪移? Codex B ?뺤씤)
+2. **V3/TriArb ?ㅼ젣 ?뚯씪 ?щ㎎**: `*_state.npz + *_memory.json` (Phase 0 "npz+jsonl ?쇨?" ?꾩젣 ?ㅻ쪟, Codex A ?뺤씤)
+3. **V3 ?ㅼ젣 ?밸쪧** (tick 2225, 2026-04-21 湲곗?): v3-control **54.5% (11 trades)**, v3-3m **50% (2)**, ?섎㉧吏 0-50%. **??variant 67% 誘몃떖** (諛섎? sonnet 痢≪젙)
+4. **Dashboard ?듯빀 怨듭닔 +25~40%**: `renderV2/V3/TriArb` ?섎뱶肄붾뵫?대씪 "MODELS ??以?異붽?"媛 ?꾨떂 (Codex A ?뺤씤)
+5. **Dashboard ?쒓퀎**: timeout 3珥? refresh 5珥? refresh 寃뱀묠 諛⑹? ?놁쓬 (Codex C)
+
+## ?닿껄 / 誘명빐寃?(以묒슂????쓬)
+
+- **?ы듃 利됱떆 ?뺤젙 vs Phase 3 吏??*: ?댁쁺 sonnet/opus??利됱떆 8901, Codex B????떠??OK. ???ㅼ슜????? **?ы듃 吏湲??뺤젙 + Charter??議고빆留?異붽?**
+- **BollRev ?ㅼ퐫??吏꾩엯 寃쎌쐞**: 諛섎? sonnet 吏?? ?꾨씫?? ??Charter??紐낆떆 ?꾩슂
+
+## Evidence ?꾩껜 寃쎈줈
+
+- `subagent-runs/discuss/oracle-phase0-intake-2026-04-21/`
+  - `context.md` ???먮낯 諛곌꼍
+  - `role_*.md` ????븷蹂??꾨＼?꾪듃
+  - `round-1/` ??Round 1 8紐??묐떟 + moderator-summary
+  - `round-2/focus.md` ??Round 2 吏묒쨷 ?곸젏
+  - `round-2/*.md` ??Round 2 8紐??묐떟
+
+## Next Step
+
+**`/design Phase 1 Charter 吏꾩엯`** 沅뚭퀬. Charter 吏꾩엯 泥?寃곗젙:
+1. ?뱀뀡 2 (V3 李⑤퀎??1臾몄옣) + ?뱀뀡 4 (紐⑤뜽 怨④꺽) ?뺤젙 ?섎줉
+2. 10??ぉ A~J 媛곴컖 Charter 議고빆?쇰줈 踰덉뿭
+3. Charter ?쒖뒪??1踰?= 48?쒓컙 Rule 2 ablation (?뱀뀡 3 湲곗??쇰줈 Go/No-Go)
+4. ?댄썑 `/spec`?쇰줈 Codex 援ы쁽 吏?쒖꽌 ?묒꽦
+
+**?먮뒗**, ?ъ슜?먭? ?먰븯硫?
+- Charter 吏꾩엯 ??v2.py Rule 2 ?쒓굅 ablation留?癒쇱? ?ㅽ뻾 ??寃곌낵 蹂닿퀬 ?ъ꽕怨??ㅼ퐫???ы룊媛
+
+ succeeded in 455ms:
+# Component Map ??Oracle ?덉륫 ?붿쭊 (Phase 2)
+
+**Date**: 2026-04-21
+**Previous Phase**: Phase 1 Charter (`phase1-charter.md`) ??PASS 11/11
+**Scope Adapter**: 由?(1~3??
+
+---
+
+## Core 而댄룷?뚰듃 (Primary Outcome 湲곗뿬????
+
+| # | 而댄룷?뚰듃紐?| Core 洹쇨굅 | VCT (?뺣컯/?좏깮沅??쇰뱶諛??숈뒿) |
+|---|----------|----------|-------------------------|
+| 1 | **`oracle-core`** | ?덉륫 ?붿쭊 硫붿씤. ?놁쑝硫?Oracle ?먯껜媛 ?깅┰ 遺덇?. 寃뚯씠??二쇰Ц/?숈뒿 ?쇰뱶諛?猷⑦봽??以묒떖 | ????????|
+| 2 | **`reliability-head`** | Differentiation???듭떖(Bayesian posterior per context). ?닿쾶 ?놁쑝硫?V2 ?섏??쇰줈 ?대낫 | ????????|
+| 3 | **`context-encoder`** | 5李⑥썝 context 踰≫꽣 ?앹꽦. reliability-head???낅젰. "context蹂??숈뒿"???꾩젣 | ????????|
+| 4 | **`blacklist-manager`** | EV<threshold context ?먮룞 ?쒖쇅. ?놁쑝硫???⑥쑉 context?먯꽌 怨꾩냽 ?먯떎 ??Primary Outcome ???| ????????|
+
+**Core 4媛?* ??由??ㅼ퐫???좎? 媛??(8媛?誘몃쭔).
+
+---
+
+## Support 而댄룷?뚰듃
+
+| 而댄룷?뚰듃紐?| Support 洹쇨굅 | Core ?곌껐 ?꾩닔? |
+|----------|-----------|----------------|
+| **`market-data-collector`** | 硫뷀? 而댄룷?뚰듃(?ъ슜??吏곸젒 ?곹샇?묒슜 X). 媛??붿쭊??媛쒕퀎 ?섏쭛?대룄 ?꾨줈?앺듃 ?깅┰? 媛?ν븯??**Charter 議고빆 D濡?紐낆떆???붽뎄** ??以묐났 fetch 諛⑹?, API rate limit ?덉빟 | ???꾩닔 (議고빆 D) |
+
+**Support 1媛?* ??由??ㅼ퐫??"Support ?꾩닔留? 議곌굔 異⑹”.
+
+---
+
+## ?섏〈??留?
+```
+[market-data-collector]
+        ??OHLCV ticker
+        ??[context-encoder] ??context vector????[reliability-head]
+        ??                                    ??        ??                                    ??posterior (mean, var), n_local, EV
+        ??                                    ??        ??                             [blacklist-manager]
+        ??                                    ??        ??                                    ??blacklist set, gate decision
+        ??                                    ??[oracle-core] ?????????????????????????????????        ??        ??trade outcome (PnL, context_id, hit/miss)
+        ??     (?쇰뱶諛?猷⑦봽: reliability-head + blacklist-manager濡???쪟)
+```
+
+**?섏〈???뚯씠釉?*:
+
+| A | ??| B | 怨듭쑀 ?뚮씪誘명꽣 |
+|---|---|---|---|
+| `market-data-collector` | ??| `context-encoder` | `symbol_list`, `ohlcv_interval`, `cache_ttl` |
+| `market-data-collector` | ??| `oracle-core` | `latest_price`, `fetch_timestamp` |
+| `context-encoder` | ??| `reliability-head` | `context_vector` (5D), `vol_regime_bucket` |
+| `context-encoder` | ??| `oracle-core` | `context_vector`, `context_id` |
+| `context-encoder` | ??| `blacklist-manager` | `context_id` |
+| `reliability-head` | ??| `oracle-core` | `posterior_mean`, `posterior_variance`, `confidence_score` |
+| `reliability-head` | ??| `blacklist-manager` | `n_local`, `EV_estimate` |
+| `blacklist-manager` | ??| `oracle-core` | `blacklist_set`, `gate_decision` (allow/deny) |
+| `oracle-core` | ??| `reliability-head` | `trade_outcome`, `prediction_hit` (feedback) |
+| `oracle-core` | ??| `blacklist-manager` | `pnl_after_fee`, `context_id` (feedback) |
+
+---
+
+## 怨듭쑀 ?뚮씪誘명꽣 ?덉??ㅽ듃由?(Phase 3.5 援먯감 寃利????
+
+| # | ?뚮씪誘명꽣 | 李몄“ 而댄룷?뚰듃 | 珥덇린 媛?(Phase 3?먯꽌 ?뺤젙) |
+|---|---------|-------------|-------------------------|
+| SP1 | `warmup_count` | `oracle-core`, `blacklist-manager` | 150~200 (observe-only) |
+| SP2 | `soft_gate_count` | `oracle-core`, `blacklist-manager` | 300~500 |
+| SP3 | `n_local_threshold` | `reliability-head`, `blacklist-manager` | 20 |
+| SP4 | `confidence_threshold` | `oracle-core` (gate), `reliability-head` (output) | Phase 3 Decision Card |
+| SP5 | `vol_regime_buckets` | `context-encoder`, `reliability-head` | V3 ?ъ궗??媛?μ꽦 (蹂꾨룄 ?뺤젙) |
+| SP6 | `symbol_list` | `market-data-collector`, ?꾩껜 ?붿쭊 | V3/TriArb? 怨듯넻 |
+| SP7 | `ohlcv_interval` | `market-data-collector`, ?꾩껜 ?붿쭊 | V3/TriArb? 怨듯넻 (1m base) |
+| SP8 | `EV_blacklist_threshold` | `blacklist-manager` | V3 湲곗? `-0.5R` 李몄“ |
+| SP9 | `horizon` | `context-encoder` (predicted_edge 怨꾩궛), `oracle-core` | Phase 3 Decision Card (議고빆 B) |
+| SP10 | `cost_margin` (?섏닔猷? | `context-encoder`, `oracle-core` (EV 怨꾩궛) | 嫄곕옒??fee schedule 湲곕컲 |
+
+**10媛?怨듭쑀 ?뚮씪誘명꽣** ??由??ㅼ퐫??"怨듭쑀 ?뚮씪誘명꽣留?Phase 3.5 援먯감 寃利? 議곌굔 ?곸슜.
+
+---
+
+## ?ㅼ퐫???대뙌??
+**?좏깮: 由?(1~3??**
+
+**洹쇨굅**:
+- ? 援ъ꽦: ?ъ슜??1??+ Claude (?ㅺ퀎/由щ럭) + Codex (援ы쁽) = ?ㅽ슚 1~3??- Core 而댄룷?뚰듃 4媛?< 8媛???由??좎? 媛??- 5????湲곕룞 ?붽뎄 ???꾩닔 援먯감 留ㅽ듃由?뒪 ?쒓컙 ?놁쓬
+
+**由??곸슜**:
+- Core ?꾩닔 Decision Card ?묒꽦
+- Support 1媛?(market-data-collector) ??Charter 議고빆 D濡?紐낆떆???꾩닔 ???꾩닔 踰붿쐞留?- Phase 3.5 援먯감 寃利???怨듭쑀 ?뚮씪誘명꽣 10媛쒕쭔 (?꾩껜 留ㅽ듃由?뒪 ?꾨떂)
+
+---
+
+## Charter 議고빆 ??而댄룷?뚰듃 留ㅽ븨
+
+| 議고빆 | ?대떦 而댄룷?뚰듃 |
+|------|-------------|
+| A 紐⑤뜽 怨④꺽 | `oracle-core` (online ridge/logistic) + `reliability-head` (Bayesian posterior) + `blacklist-manager` (EV blacklist) |
+| B ?덉륫 ?源?horizon | `oracle-core` + `context-encoder` ??Phase 3 Decision Card |
+| C API SLA p95 500ms | `oracle-core` ??Phase 3 Decision Card + Phase 4 寃利?|
+| D 怨듭쑀 OHLCV collector | `market-data-collector` ??Support(?꾩닔) |
+| E v2.py 遺꾨━ + ?좎뀑 | `oracle-core` ?ㅽ뻾 寃쎈줈(`scripts/oracle.py`) ??Phase 6 蹂寃쎄?由?|
+| F ?ы듃 8901 | `oracle-core` ??Phase 3?먯꽌 理쒖쥌 ?뺤젙 |
+| G V3 李⑤퀎??| `context-encoder` (5D 醫뚰몴 ?ъ꽕怨? |
+| H 寃利?湲곗? | Phase 4 ?꾨컲 + Charter ?쒖뒪??1踰?|
+| I 48h ablation | Charter ?쒖뒪??1踰?(Phase 2 蹂묓뻾) |
+| J v2.jsonl ?섏튂 ?뺤젙 | Phase 5 臾몄꽌 ?앹꽦 |
+
+---
+
+## BollRev ?ы룊媛 寃곌낵 (Phase 1 誘명빐寃?#2)
+
+**寃곗젙**: **BollRev??Oracle 珥덇린 variants?먯꽌 ?쒖쇅.**
+
+**洹쇨굅**:
+- Phase 0 ?붿빟???몄엯 洹쇨굅 ?놁쓬 (諛섎? sonnet 吏??
+- Oracle Core 4媛쒓? 紐⑤몢 prediction layer??吏묒쨷 ??BollRev(Bollinger Reversion)? setup quality??媛源뚯썙 V3 ?곸뿭
+- Differentiation Thesis??"prediction vs setup ?덉씠??遺꾨━" ?꾨같
+- 珥덇린 variants 援ъ꽦: `control` / `aggressive` / `conservative` 3醫?(Phase 3 Decision Card?먯꽌 理쒖쥌)
+
+?ν썑 Phase 6?먯꽌 ?ъ슜?먭? BollRev ?몄엯???ъ슂泥?븯硫?Tier 3 蹂寃?而댄룷?뚰듃 ?좎꽕)?쇰줈 泥섎━.
+
+---
+
+## Phase 2 ?꾨즺 泥댄겕由ъ뒪??
+- [x] 紐⑤뱺 而댄룷?뚰듃 ?섏뿴 ?꾨즺 (Core 4 + Support 1)
+- [x] 媛?而댄룷?뚰듃 Core/Support ?먯젙 洹쇨굅 湲곕줉 (VCT + 硫뷀? 而댄룷?뚰듃 ?먮퀎)
+- [x] Core 而댄룷?뚰듃 ?쒖꽌 ?뺤젙 (Primary Outcome 湲곗뿬????
+- [x] ?섏〈??留?珥덉븞 ?묒꽦 (?꾩떇 + ?뚯씠釉?
+- [x] ?ㅼ퐫???대뙌???좏깮 (由? + 洹쇨굅
+
+**Phase 3 吏꾩엯 議곌굔 異⑹”.**
+
+---
+
+## Next Step
+
+1. **Phase 3 Decision Card ?명꽣酉?吏꾩엯** ??Core 4媛?媛곴컖??????꾩닔/以?꾩닔/?좏깮 ?섏튂 ?뺤젙
+   - ?뱁엳 議고빆 B (?덉륫 ?源?horizon/?먯닔?⑥닔/activation schedule) 理쒖슦??   - 議고빆 C (API SLA) ?뺤젙
+   - 議고빆 F (?ы듃 8901) 理쒖쥌 ?뺤젙
+2. **Charter ?쒖뒪??1踰?蹂묓뻾 李⑹닔** ??`48h-ablation-plan.md` 李몄“
+3. **Phase 3.5 以鍮?* ??怨듭쑀 ?뚮씪誘명꽣 10媛??덉??ㅽ듃由?湲곕컲 援먯감 寃利?
+
+ succeeded in 518ms:
+# Charter ?쒖뒪??1踰???48?쒓컙 Rule 2 Ablation ?ㅽ뻾 怨꾪쉷
+
+**Date**: 2026-04-21
+**Parent Charter**: `phase1-charter.md` (議고빆 I)
+**Run Mode**: Phase 2? **蹂묓뻾**
+
+---
+
+## 紐⑹쟻
+
+V2 ?ㅽ뙣??洹쇰낯 ?먯씤??Rule 2(?뷀듃濡쒗뵾 洹좊벑???몄? **?⑥씪 蹂???ㅽ뿕**?쇰줈 寃利?
+
+- **PASS** ??V2???섏닠???섏젙(Rule 2 ?쒓굅)留??곸슜. Oracle ?ъ꽕怨??ㅼ퐫??異뺤냼 ?ш???Charter Tier 2 蹂寃?.
+- **FAIL** ??Oracle ?ъ꽕怨??먯븞?濡?Phase 3 吏꾩엯.
+- **INCONCLUSIVE** ??48h 1???곗옣, 洹몃옒??紐⑦샇 ??FAIL 泥섎━.
+
+---
+
+## ?ㅽ뻾 ?섍꼍 ??chicken-and-egg ?닿껐
+
+**?댁뒋**: Oracle? ?꾩쭅 援ы쁽?섏? ?딆쓬. Charter??"?좉퇋 `oracle.py` 寃⑸━"瑜?紐낆떆?섎굹, Oracle 吏꾩쭨 援ы쁽? Phase 3 Decision Card ?댄썑.
+
+**?닿껐**: Ablation? **V2 ?ы겕**濡??ㅽ뻾. Oracle 理쒖쥌 援ы쁽怨?蹂꾧컻??寃⑸━ ?ㅽ뻾 ?뚯씪.
+
+```
+scripts/
+?쒋?? v2.py              ???댁쁺 (嫄대뱶由ъ? ?딆쓬, port 8897)
+?쒋?? v2_ablation.py     ?????좉퇋. V2 蹂듭젣 + --no-rule2 flag
+?쒋?? oracle.py          ??(Phase 3 ?댄썑 ?묒꽦)
+?붴?? archive/
+    ?붴?? (v2.py??Oracle??3二??곗쐞 ???ш린濡??대룞)
+```
+
+**`v2_ablation.py`??Phase 4 ?듦낵 ??Oracle???꾩꽦?섎㈃ `archive/` ?대룞.** ?꾩떆 寃利??꾧뎄.
+
+---
+
+## Variant 援ъ꽦
+
+| Variant | ?뚯씪 | ?ы듃 | Rule 2 | ?ㅽ뻾 紐⑤뱶 |
+|---------|------|------|--------|----------|
+| `v2_abl_control` | `v2_ablation.py --variant control` | 8902 | ???좎? | paper trades (observe-only ?꾨떂) |
+| `v2_abl_no_rule2` | `v2_ablation.py --variant no_rule2` | 8903 | ???쒓굅 | paper trades |
+
+**??variant ?숈씪 議곌굔**:
+- ?숈씪 ?щ낵 由ъ뒪??(BTC/ETH/SOL ?곗꽑)
+- ?숈씪 OHLCV ?곗씠???뚯뒪 (`market-data-collector` 誘몄셿????媛곸옄 fetch)
+- ?숈씪 Rule 1/3 媛以묒튂 珥덇린媛?- ?쒕뱶 怨좎젙 (`numpy.random.seed(42)` ??
+- Live trading 湲덉? (paper trades留?
+
+**Rule 2 ?쒓굅??援ы쁽**: v2.py??`_normalize_memory_entropy()` ?몄텧 吏??`scripts/v2.py:314-331` 洹쇱쿂) `--no-rule2` flag濡?no-op 泥섎━.
+
+---
+
+## ?곗씠??濡쒓렇 ?ㅽ궎留?
+**?뚯씪**: `data/v2_ablation.jsonl` (蹂?대퀎 ?뚯씪濡?遺꾨━ 沅뚯옣)
+
+媛??쇱씤 (trade ?대깽??:
+```json
+{
+  "timestamp": "2026-04-22T08:30:00Z",
+  "variant": "no_rule2",
+  "symbol": "BTC/USDT",
+  "context": {
+    "predicted_edge": 0.0032,
+    "uncertainty": 0.18,
+    "cost_margin": 0.0008,
+    "vol_regime": "low",
+    "time_bucket": "asia_am"
+  },
+  "prediction": "long",
+  "confidence": 0.62,
+  "entry_price": 67841.5,
+  "exit_price": 67923.0,
+  "pnl_gross": 0.00120,
+  "fee": 0.00016,
+  "pnl_after_fee": 0.00104,
+  "hit": true,
+  "window_id": "walk_fwd_01"
+}
+```
+
+**遺媛 濡쒓렇**:
+- `data/v2_ablation_state_{variant}.npz` ??媛?variant???대? 媛以묒튂/?뷀듃濡쒗뵾 ?ㅻ깄??(?붾쾭洹몄슜)
+- `data/v2_ablation_summary.csv` ???섎（ ?⑥쐞 吏묎퀎
+
+---
+
+## ?쇱젙 (5????湲곕룞 紐⑺몴)
+
+| Day | ?묒뾽 | Owner | ?곗텧臾?|
+|-----|------|-------|--------|
+| **Day 1 (2026-04-22)** | `v2_ablation.py` ?묒꽦 (Codex 吏?쒖꽌 `/spec`) + ?ы듃 8902/8903 諛붿씤??寃利?| Codex (援ы쁽) + Claude (由щ럭) | `scripts/v2_ablation.py`, 湲곕룞 ?뚯뒪??濡쒓렇 |
+| **Day 1 留?* | ?ъ슜??由щ럭 + paper trades ?쒖옉 ?뱀씤 | User | Go signal |
+| **Day 1~3 (48h)** | 2 variant 蹂묐젹 ?ㅽ뻾. 以묎컙 ?먭? (24h 吏?? ???섑뵆 ??遺議??щ옒??媛먯? | ?먮룞 + Claude 紐⑤땲??| `data/v2_ablation.jsonl` |
+| **Day 3** | ?ㅽ뻾 醫낅즺, 遺꾩꽍 李⑹닔 (Walk-forward split, CI 怨꾩궛, calibration) | Claude (sonnet) + `/sub` | 遺꾩꽍 蹂닿퀬??珥덉븞 |
+| **Day 4** | PASS/FAIL/INCONCLUSIVE ?먯젙 + ?ъ슜??怨듭쑀 | Claude (opus) | `ablation-verdict.md` |
+| **Day 5** | 遺꾧린 ?ㅽ뻾: Phase 3 吏꾩엯 / Charter Tier 2 蹂寃?/ ?곗옣 | User + Claude | ?ㅼ쓬 Phase 吏꾩엯 |
+
+**蹂묓뻾 吏꾪뻾**: Day 1~3 ?숈븞 Claude??Phase 3 Decision Card 珥덉븞 **?덈퉬 ?묒꽦** (FAIL ?쒕굹由ъ삤 ?鍮?. PASS ??珥덉븞? ?쇰? ?ъ옉?? ?遺遺??ъ궗??媛??
+
+---
+
+## ?듦낵 湲곗? (Charter ?쒖뒪??1踰덇낵 ?숈씪, 6??ぉ AND)
+
+1. **?섏닔猷????쒖닔???묒닔** ??`no_rule2` variant??`sum(pnl_after_fee) > 0`
+2. **?밸쪧 95% CI lower bound > 50%** ??Wilson score interval (`from scipy.stats import binomtest`)
+3. **Walk-forward ?ы쁽** ??48h瑜?4媛?12?쒓컙 window濡?遺꾪븷, 2~3媛?window?먯꽌 湲곗? ?쇨???4. **?먯궛蹂??몄감 ?덉슜 踰붿쐞 ??* ??BTC/ETH/SOL 媛??밸쪧 ?몄감 짹5%p ?대궡
+5. **Calibration monotone** ???좊ː??踰꾪궥 [0.5, 0.6, 0.7, 0.8+]蹂??뺥솗?꾧? ?⑥“ 利앷? (reliability diagram)
+6. **理쒖냼 100+ trades** ??`no_rule2` variant 湲곗?
+
+**?숈떆 ?뺤씤(李멸퀬??**:
+- `control` variant (Rule 2 ?좎?)媛 `no_rule2`蹂대떎 ?대벑?쒖? ??**紐낆떆?곸쑝濡?worse** ?ъ빞 Rule 2媛 ?먯씤?꾩씠 ?낆쬆??
+---
+
+## ?ъ슜??媛쒖엯 吏??
+1. **Day 1 ?쒖옉 ??*: `scripts/v2_ablation.py` 肄붾뱶 由щ럭 (Codex ?묒꽦 ??Claude ??User ?뺤씤 ??湲곕룞)
+2. **Day 2 (24h 以묎컙)**: 以묎컙 ?섑뵆 ??/ ?щ옒???щ? 蹂닿퀬
+3. **Day 4 ?먯젙 ?뚯쓽**: PASS/FAIL/INCONCLUSIVE 寃곌낵 寃??4. **Day 5 遺꾧린**: ?ъ슜??理쒖쥌 寃곗젙 (Phase 3 吏꾩엯 vs Tier 2 蹂寃?vs ?곗옣)
+
+---
+
+## ?ㅽ뙣 由ъ뒪??(?ъ쟾 ?앸퀎)
+
+| 由ъ뒪??| ?꾪솕 |
+|--------|------|
+| Paper trades ?섑뵆 遺議?(100+ trades 誘몃떖) | 48h ?곗옣 1???덉슜 (Charter 紐낆떆). ?ъ쟾??遺議????щ낵 由ъ뒪???뺤옣 寃??|
+| `v2_ablation.py` 踰꾧렇濡?Rule 2 ???ㅻⅨ ?붿냼源뚯? 蹂寃?| v2.py???diff 泥댄겕由ъ뒪??由щ럭 ??Claude媛 Phase 4 1?④퀎 寃利?|
+| ?ы듃 8902/8903 異⑸룎 | 湲곕룞 ??`netstat -ano` ?뺤씤. ?泥??ы듃 8912/8913 ?덈퉬 |
+| Market regime 蹂?숈쑝濡?control/no_rule2 ??蹂???곹뼢 | ?숈씪 ?쒓컙? 蹂묐젹 ?ㅽ뻾 + ?쒕뱶 怨좎젙 + ?숈씪 OHLCV feed |
+| `control` variant???묒닔 ?섏씡????(Rule 2 ?먯씤 ?꾨땺 媛?μ꽦) | **INCONCLUSIVE ?먯젙** + Oracle ?ъ꽕怨??먯븞 吏꾪뻾 (FAIL怨??숈씪 遺꾧린) |
+
+---
+
+## Phase 2 / Phase 3 蹂묓뻾 愿怨?
+| ?쒖젏 | Phase 2/3 | Ablation |
+|------|----------|----------|
+| Day 1 | Phase 3 Decision Card 珥덉븞 ?쒖옉 | 援ы쁽 + 湲곕룞 |
+| Day 2~3 | Phase 3 Decision Card ?ы솕 (議고빆 B/C/F) | ?ㅽ뻾 以?|
+| Day 4 | Phase 3 以묐떒 (?먯젙 ?湲? | ?먯젙 |
+| Day 5 | 遺꾧린 | ??|
+
+**PASS ??*: Phase 3 Decision Card 以묐떒, Charter Tier 2 蹂寃?(Oracle ?ㅼ퐫??異뺤냼). V2??Rule 2 ?쒓굅 ?⑥튂留??곸슜.
+
+**FAIL ??*: Phase 3 Decision Card 珥덉븞???뺤떇 Phase 3?쇰줈 ?꾪솚, Phase 3.5 ??Phase 4 吏꾪뻾.
+
+---
+
+## Next Step
+
+1. **`/spec`?쇰줈 Codex 援ы쁽 吏?쒖꽌 ?묒꽦** ??`scripts/v2_ablation.py` + 濡쒓렇 ?ㅽ궎留?援ы쁽
+2. **?ъ슜???뱀씤 ??Day 1 李⑹닔**
+
+codex
+문서 기준도 확인했습니다. 이제 마지막으로 `BollRev`와 Oracle 관련 구현 흔적이 실제로 없는지 짧게 재검증하고, Topic 2는 공수와 운영 리스크를 숫자로 묶어 최종 판단으로 수렴하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"BollRev|bollrev|bollinger reversion|bb_pos|oracle.py|oracle_v0|v2_ablation\" scripts tests docs ..\\..\\subagent-runs ..\\..\\project-status" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "class OnlinePredictor|class FeatureEngine|DASH_PORT|LOG_PATH|STATE_PATH|http.server|/api/state|renderOracle|MODELS" scripts' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 434ms:
+docs\triarb_review_request_260420.md:82:- `dashboard_unified.py` still uses the existing `tournament`, `v2`, `v3` keys. I added `triarb` without renaming those existing models to avoid breaking the current dashboard while BollRev/rename work is incomplete.
+docs\triarb_review_request_260420.md:138:- 기존 `tournament`, `v2`, `v3` 키는 유지됨. architecture 문서의 rename 목표(`bollrev`, `oracle`, `brooks`)와 현재 repo 상태가 다르므로, 여기서는 기존 대시보드 호환성을 우선함.
+docs\triarb_fix_review_260420.md:13:  - `scripts/bollrev.py`
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:21:**이슈**: Oracle은 아직 구현되지 않음. Charter는 "신규 `oracle.py` 격리"를 명시하나, Oracle 진짜 구현은 Phase 3 Decision Card 이후.
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:28:├── v2_ablation.py     ← ★ 신규. V2 복제 + --no-rule2 flag
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:29:├── oracle.py          ← (Phase 3 이후 작성)
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:34:**`v2_ablation.py`는 Phase 4 통과 후 Oracle이 완성되면 `archive/` 이동.** 임시 검증 도구.
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:42:| `v2_abl_control` | `v2_ablation.py --variant control` | 8902 | ✅ 유지 | paper trades (observe-only 아님) |
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:43:| `v2_abl_no_rule2` | `v2_ablation.py --variant no_rule2` | 8903 | ❌ 제거 | paper trades |
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:58:**파일**: `data/v2_ablation.jsonl` (변이별 파일로 분리 권장)
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:86:- `data/v2_ablation_state_{variant}.npz` — 각 variant의 내부 가중치/엔트로피 스냅샷 (디버그용)
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:87:- `data/v2_ablation_summary.csv` — 하루 단위 집계
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:95:| **Day 1 (2026-04-22)** | `v2_ablation.py` 작성 (Codex 지시서 `/spec`) + 포트 8902/8903 바인딩 검증 | Codex (구현) + Claude (리뷰) | `scripts/v2_ablation.py`, 기동 테스트 로그 |
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:97:| **Day 1~3 (48h)** | 2 variant 병렬 실행. 중간 점검 (24h 지점) — 샘플 수 부족/크래시 감지 | 자동 + Claude 모니터 | `data/v2_ablation.jsonl` |
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:122:1. **Day 1 시작 전**: `scripts/v2_ablation.py` 코드 리뷰 (Codex 작성 → Claude → User 확인 → 기동)
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:134:| `v2_ablation.py` 버그로 Rule 2 외 다른 요소까지 변경 | v2.py와의 diff 체크리스트 리뷰 — Claude가 Phase 4 1단계 검증 |
+..\..\subagent-runs\design\oracle-2026-04-21\48h-ablation-plan.md:158:1. **`/spec`으로 Codex 구현 지시서 작성** — `scripts/v2_ablation.py` + 로그 스키마 구현
+..\..\subagent-runs\design\oracle-2026-04-21\phase2-component-map.md:113:| E v2.py 분리 + 선셋 | `oracle-core` 실행 경로(`scripts/oracle.py`) — Phase 6 변경관리 |
+..\..\subagent-runs\design\oracle-2026-04-21\phase2-component-map.md:122:## BollRev 재평가 결과 (Phase 1 미해결 #2)
+..\..\subagent-runs\design\oracle-2026-04-21\phase2-component-map.md:124:**결정**: **BollRev는 Oracle 초기 variants에서 제외.**
+..\..\subagent-runs\design\oracle-2026-04-21\phase2-component-map.md:128:- Oracle Core 4개가 모두 prediction layer에 집중 — BollRev(Bollinger Reversion)은 setup quality에 가까워 V3 영역
+..\..\subagent-runs\design\oracle-2026-04-21\phase2-component-map.md:132:향후 Phase 6에서 사용자가 BollRev 편입을 재요청하면 Tier 3 변경(컴포넌트 신설)으로 처리.
+..\..\subagent-runs\design\oracle-2026-04-21\phase1-charter.md:52:- ❌ **v2.py 덮어쓰기** (opus 초기 제안, Round 2에서 철회) — 롤백 불가. → 대체: **신규 `scripts/oracle.py` 분리 + 선셋 조항** — Oracle이 v2.py 대비 **3주 연속 주간 승률 우위 시 v2.py → `scripts/archive/`**. (**조항 E**)
+..\..\subagent-runs\design\oracle-2026-04-21\phase1-charter.md:114:- **신규 `scripts/oracle.py` 격리** (v2.py live 환경 수술 금지)
+..\..\subagent-runs\design\oracle-2026-04-21\phase1-charter.md:144:### 2. BollRev 스코프 편입 경위 (반대 sonnet 지적)
+..\..\subagent-runs\design\oracle-2026-04-21\phase1-charter.md:146:- Phase 0 요약 어디에도 BollRev(Bollinger Reversion) variant 편입 근거 없음
+..\..\subagent-runs\design\oracle-2026-04-21\phase1-charter.md:147:- Oracle 기본 variant(control / aggressive / conservative) 외 BollRev 편입 이유 미설명
+..\..\subagent-runs\design\oracle-2026-04-21\phase1-charter.md:148:- **Charter 결정**: Phase 2 Component Map에서 Oracle variants 최종 목록 확정 시 BollRev 편입 여부 재평가. 편입 시 근거(예: "V3 aggressive variant 대응") Component Map에 명시 필수.
+docs\triarb_260420.md:33:| 시장 상태 | Brooks | BollRev | Oracle | TriArb |
+docs\triarb_260420.md:101:**주의**: BollRev/Brooks는 `RISK_PER_TRADE=0.005` (자본의 0.5% 리스크). TriArb는 **스톱 거리 기반이 아닌 notional 기반**이므로 별도 상수:
+docs\triarb_260420.md:246:1. **절대** `scripts/brooks.py`, `scripts/bollrev.py`(존재 시), `scripts/oracle.py`를 수정하지 마라. 읽기만 허용. 구조 템플릿으로 사용.
+docs\triarb_260420.md:326:HTF_STRONG_TREND_THRESHOLD = 0.02  # BollRev는 0.01, TriArb는 더 극단만 배제
+docs\triarb_260420.md:429:BollRev의 `htf_strong_trend(df_htf)` 동일 구현. BTC/USDT 1h 기준.
+docs\triarb_260420.md:430:- `HTF_STRONG_TREND_THRESHOLD=0.02` (BollRev 0.01보다 완화)
+docs\triarb_260420.md:527:- 기존 Brooks 필드 중 **사용 안 함**: `signals_blocked_chop` (Brooks 전용), `signals_blocked_rr` (Brooks/BollRev 전용) → 0 고정, 대시보드에서는 노출 안 함.
+docs\triarb_260420.md:791:    {"id": "bollrev", "name": "BollRev (Bollinger Reversion)", "port": 8895, "color": "#ffaa44"},
+docs\triarb_260420.md:922:4. **Phase 3 — HTF**: `htf_strong_trend` 구현 (BollRev와 동일 로직, threshold만 다름)
+docs\triarb_fix_260420.md:13:2. **절대** `scripts/brooks.py`, `scripts/v3.py`, `scripts/dashboard_unified.py`, `scripts/bollrev.py`를 수정하지 마라.
+docs\triarb_fix_260420.md:258:**이유**: BollRev 스펙(`docs/bollrev_260420.md` §A.3 규칙 6)이 `ema50` 기준. TriArb가 동일 함수 재사용 선언(B.3.4)했으므로 일치시켜야 함. 위 로직 위의 `close <= 0` 체크는 **유지**. 다만 spread 계산은 `ema50`으로.
+docs\triarb_fix_260420.md:438:| `brooks.py`, `bollrev.py`, `v3.py` 접근 | 스펙 |
+docs\bollrev_260420.md:1:# BollRev — Bollinger Band Reversion Engine (설계 + Codex 구현 지시서)
+docs\bollrev_260420.md:21:| 시장 상태 | Brooks | BollRev |
+docs\bollrev_260420.md:27:**중요**: BollRev은 **Brooks의 VWAP_CHOP 차단 구간에서 핵심 수익 발생**이 기대됨.
+docs\bollrev_260420.md:90:    "bollrev-5m":         dict(bb_period=20, bb_sigma=2.0, rsi_os=30, rsi_ob=70,
+docs\bollrev_260420.md:93:    "bollrev-15m":        dict(bb_period=20, bb_sigma=2.0, rsi_os=30, rsi_ob=70,
+docs\bollrev_260420.md:96:    "bollrev-tight":      dict(bb_period=20, bb_sigma=1.5, rsi_os=35, rsi_ob=65,
+docs\bollrev_260420.md:99:    "bollrev-wide":       dict(bb_period=20, bb_sigma=2.5, rsi_os=25, rsi_ob=75,
+docs\bollrev_260420.md:102:    "bollrev-control":    dict(bb_period=20, bb_sigma=2.0, rsi_os=30, rsi_ob=70,
+docs\bollrev_260420.md:160:1. **`scripts/bollrev.py`** (신규, ~900 LOC 예상)
+docs\bollrev_260420.md:161:2. **`scripts/_smoke_bollrev.py`** (스모크 테스트, ~100 LOC)
+docs\bollrev_260420.md:162:3. **`scripts/dashboard_unified.py`** 수정 — `renderBollRev` 추가 + `MODELS` 리스트에 bollrev 추가
+docs\bollrev_260420.md:163:4. **리뷰 요청서**: `docs/bollrev_review_request_260420.md` (구현 후 Codex가 작성)
+docs\bollrev_260420.md:165:### B.3 `bollrev.py` 상세 시방
+docs\bollrev_260420.md:190:STATE_PATH = DATA_DIR / "bollrev_state.npz"
+docs\bollrev_260420.md:191:LOG_PATH = DATA_DIR / "bollrev.jsonl"
+docs\bollrev_260420.md:192:MEMORY_PATH = DATA_DIR / "bollrev_memory.json"
+docs\bollrev_260420.md:229:    "bollrev-5m":         dict(bb_period=20, bb_sigma=2.0, rsi_os=30, rsi_ob=70, time_stop_bars=10, timeframe="5m",  memory=True,  htf_filter=True),
+docs\bollrev_260420.md:230:    "bollrev-15m":        dict(bb_period=20, bb_sigma=2.0, rsi_os=30, rsi_ob=70, time_stop_bars=8,  timeframe="15m", memory=True,  htf_filter=True),
+docs\bollrev_260420.md:231:    "bollrev-tight":      dict(bb_period=20, bb_sigma=1.5, rsi_os=35, rsi_ob=65, time_stop_bars=12, timeframe="5m",  memory=True,  htf_filter=True),
+docs\bollrev_260420.md:232:    "bollrev-wide":       dict(bb_period=20, bb_sigma=2.5, rsi_os=25, rsi_ob=75, time_stop_bars=8,  timeframe="5m",  memory=True,  htf_filter=True),
+docs\bollrev_260420.md:233:    "bollrev-control":    dict(bb_period=20, bb_sigma=2.0, rsi_os=30, rsi_ob=70, time_stop_bars=10, timeframe="5m",  memory=False, htf_filter=False),
+docs\bollrev_260420.md:317:    mild: everything else (neutral, weak trend both OK for BollRev)
+docs\bollrev_260420.md:378:#### B.3.7 BollRevPosition + VariantPM
+docs\bollrev_260420.md:382:class BollRevPosition:
+docs\bollrev_260420.md:398:- `positions: dict[str, BollRevPosition]`
+docs\bollrev_260420.md:400:- `self.signals_blocked_rr`는 BollRev에 해당 없음 → 0 고정 (필드는 있어야 함, 대시보드 호환)
+docs\bollrev_260420.md:401:- `self.signals_blocked_chop`는 BollRev에서 time_stop 초과로 재활용 (다른 의미 부여 금지 — 그냥 0 두고 새 카운터 `signals_blocked_reversal`로 둘 것)
+docs\bollrev_260420.md:405:- `signals_blocked_chop`: BollRev 사용 **안 함** → 0
+docs\bollrev_260420.md:406:- `signals_blocked_rr`: BollRev 사용 **안 함** → 0
+docs\bollrev_260420.md:411:대시보드 renderBollRev에서 `blocked_chop`/`blocked_rr` 컬럼을 **"사용 안 함"**으로 표시해야 함 (section B.4).
+docs\bollrev_260420.md:429:      9. positions[asset] = BollRevPosition(...)
+docs\bollrev_260420.md:451:#### B.3.10 BollRevEngine 클래스
+docs\bollrev_260420.md:456:class BollRevEngine:
+docs\bollrev_260420.md:531:  - 실행 TF 폴링: Brooks 동일 (3m/5m 매 tick, 15m 매 3 tick, 30m 매 5 tick → BollRev는 5m/15m만 있으므로 그에 맞게).
+docs\bollrev_260420.md:538:  - `"model": "BollRev"`
+docs\bollrev_260420.md:540:- `_save_state()` / `_load_state()`: brooks.py 동일 패턴. 키 prefix만 `bollrev_` (사실상 variant name 이미 포함되므로 그대로).
+docs\bollrev_260420.md:550:    parser = argparse.ArgumentParser(description="BollRev — Bollinger Reversion")
+docs\bollrev_260420.md:555:    BollRevEngine(assets=assets, port=args.port).run()
+docs\bollrev_260420.md:567:    {"id": "bollrev", "name": "BollRev (Bollinger Reversion)", "port": 8895, "color": "#ffaa44"},
+docs\bollrev_260420.md:575:#### B.4.2 renderBollRev(id, d, color) 함수
+docs\bollrev_260420.md:579:1. 헤더: `"BollRev — Bollinger Reversion"`
+docs\bollrev_260420.md:582:4. 신호 깔때기: `blocked_chop/blocked_rr` 컬럼 제거 (BollRev 미사용), 대신 빈 자리에 `blocked_reversal` 같은 항목 넣지 말고 **깔끔히 4컬럼**: `검토 / HTF 차단 / 메모리 차단 / 실행 / 실행률`
+docs\bollrev_260420.md:586:라우팅에 `else if(id==='bollrev') html+=renderBollRev(id,m,m.color);` 추가.
+docs\bollrev_260420.md:588:### B.5 스모크 테스트 (`scripts/_smoke_bollrev.py`)
+docs\bollrev_260420.md:620:    """BollRevEngine(assets=['ETH','BTC']) initializes without network."""
+docs\bollrev_260420.md:632:py -3.12 "C:/Users/haj/projects/subagent-orchestrator/Projects/Trading Value/scripts/_smoke_bollrev.py"
+docs\bollrev_260420.md:643:### B.6 리뷰 요청서 (`docs/bollrev_review_request_260420.md`)
+docs\bollrev_260420.md:648:# BollRev Implementation — Review Request
+docs\bollrev_260420.md:651:- scripts/bollrev.py (XXX LOC)
+docs\bollrev_260420.md:652:- scripts/_smoke_bollrev.py (XXX LOC, XX 테스트)
+docs\bollrev_260420.md:653:- scripts/dashboard_unified.py (renderBollRev 추가, MODELS 업데이트)
+docs\bollrev_260420.md:659:[py -3.12 scripts/bollrev.py 기동 후 stdout 첫 2 tick]
+docs\bollrev_260420.md:680:6. **Phase 5 — VariantPM**: `BollRevPosition` + `VariantPM` 구현
+docs\bollrev_260420.md:681:7. **Phase 6 — Engine**: `BollRevEngine` (init/tick/snapshot/save/load/run)
+docs\bollrev_260420.md:682:8. **Phase 7 — Dashboard**: 핸들러 + renderBollRev
+docs\bollrev_260420.md:708:[BollRev] Bollinger Reversion + Context Memory | 4 assets | 5 variants
+docs\bollrev_260420.md:709:[BollRev] Exec TFs: 5m,15m | HTF: 1h
+docs\bollrev_260420.md:710:[BollRev] Cost: 0.21% RT | Risk/trade: 0.5%
+docs\bollrev_260420.md:711:[BollRev] Memory warmup: 30 trades
+docs\bollrev_260420.md:714:[BollRev] Dashboard API: http://localhost:8895/api/state
+docs\bollrev_260420.md:724:  [bollrev-5m ETH] LONG @3500.00 stop=3485.00 tgt=3520.00 ctx(bb=2.1,rsi=28)
+docs\bollrev_260420.md:734:1. BollRev의 목표 승률 70%+ 달성이 현재 공식으로 가능한가? (수익성 기대치 계산 §A.9)
+docs\bollrev_260420.md:742:7. ContextVector가 BollRev 맥락 의미를 정확히 담는가?
+docs\bollrev_260420.md:755:2. **RSI 30 이하 거의 없음** → 변동성 큰 시장에서만 진입 → variants에 `bollrev-wide` (rsi_os=25)가 보완
+docs\models_architecture_260420.md:5:> **개편 요지**: V1/V2/V3 숫자 네이밍 폐기. 각 모델을 "매매 기법 이름"으로 변경하고, Tournament(V1)를 폐기한 뒤 **BollRev**·**TriArb**로 대체한다.
+docs\models_architecture_260420.md:25:| 1 | **BollRev** | Bollinger Band Reversion | 평균회귀 (극단값 반등) | 70%+ | 1:1 | 횡보·레인지 |
+docs\models_architecture_260420.md:31:- **BollRev ↔ Brooks**: 정반대 철학. Brooks가 `VWAP_CHOP` 차단하는 구간을 BollRev가 메움.
+docs\models_architecture_260420.md:44:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 리네임만 |
+docs\models_architecture_260420.md:53:| `scripts/bollrev.py` | 8895 (Tournament 포트 재사용) | Bollinger Reversion 엔진 |
+docs\models_architecture_260420.md:60:├── bollrev.jsonl           # tick log
+docs\models_architecture_260420.md:61:├── bollrev_state.npz       # 자본/포지션/피크/tick_count 등
+docs\models_architecture_260420.md:62:├── bollrev_memory.json     # ContextMemory + trade_log
+docs\models_architecture_260420.md:131:  "model": "BollRev",
+docs\models_architecture_260420.md:163:- BollRev: `bb_width_atr, rsi_14, dist_to_mid_atr, time_in_band, session_hour_bucket, vol_regime`
+docs\models_architecture_260420.md:183:    self.signals_blocked_chop: int    # BollRev/Brooks 해당
+docs\models_architecture_260420.md:198:- 단, **모델 간 delta-neutral을 기대하지 말 것** — Brooks long + BollRev short 동시 발생 가능.
+docs\models_architecture_260420.md:209:    {"id": "bollrev", "name": "BollRev (Bollinger Reversion)", "port": 8895, "color": "#ffaa44"},
+docs\models_architecture_260420.md:218:- `renderBollRev(id,d,color)`
+docs\models_architecture_260420.md:223:공통 스키마 준수하므로 BollRev/TriArb는 renderBrooks 구조 참조 가능.
+docs\models_architecture_260420.md:227:- BollRev: **BB 폭 / RSI** 상태 표시 (자산별 현재 대역 위치)
+docs\models_architecture_260420.md:241:echo [1/5] Starting BollRev (port 8895)...
+docs\models_architecture_260420.md:242:start /min "" py -3.12 -u scripts\bollrev.py
+docs\models_architecture_260420.md:245:start /min "" py -3.12 -u scripts\oracle.py
+docs\models_architecture_260420.md:266:1. `v2.py` → `oracle.py` (Engine 클래스명 `V2Engine` → `OracleEngine`)
+docs\models_architecture_260420.md:274:### Phase 2 — BollRev 구현 (Codex 담당)
+docs\models_architecture_260420.md:275:- 지시서: `docs/bollrev_260420.md`
+docs\models_architecture_260420.md:276:- 산출물: `scripts/bollrev.py` + 대시보드 `renderBollRev` 추가
+docs\models_architecture_260420.md:302:codex exec --full-auto "$(cat 'Projects/Trading Value/docs/bollrev_260420.md')"
+docs\models_architecture_260420.md:345:- **model**: 엔진 단위 (BollRev/Oracle/Brooks/TriArb).
+scripts\dl_breakthrough_strategy.md:19:- **높은 예측력 (abs corr > 0.02)**: `mom_1`, `mom_4`, `rsi14`, `macd_norm`, `bb_pos`
+scripts\dl_features.py:164:    feat["bb_pos"] = _bollinger_position(c, 20)
+scripts\obs_predictability_test2.py:61:df["bb_pos"] = (c - bb_ma) / np.where(bb_std > 0, 2 * bb_std, 1.0)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\gemini_flash.md:6:쟁점 1 답: **B (신규 oracle.py)**. Overwriting V2 removes a valuable baseline for comparison and audit trail, crucial for a solo trader. A new file allows for clear iteration and rollback.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\focus.md:17:- 입장 B **신규 oracle.py**: sonnet / Codex A / Codex C / sonnet-찬성 (4명)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_C.md:30:- 입장 B **신규 oracle.py**: sonnet / Codex A / Codex C / sonnet-찬성 (4명)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_C.md:110:- **v2.py 처리**: 덮어쓰기 vs 신규 `oracle.py` — Phase 3에서 확정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_C.md:249:.\docs\bollrev_260420.md
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_C.md:273:.\docs\bollrev_260420.md
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_C.md:3512:2. **쟁점 1 답**: `B` 신규 `oracle.py`입니다. 덮어쓰기로 절감되는 건 사실상 `v2.py`의 `~4.1 calls/min`뿐인데, 대신 롤백과 베이스라인을 잃습니다. 비용/속도 관점의 타협점은 `코드는 분리, 운영은 동시 실행 금지`입니다. 즉 Oracle 활성 시 V2 프로세스는 내리되, 파일은 남겨야 합니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_C.md:3517:[POSITION: Phase 1 진입은 가능하지만, `oracle.py` 분리 유지와 48시간 Rule2 반증 실험, 그리고 공유 폴링·bounded memory·sub-500ms state API를 Charter 전제조건으로 올려야 한다.]
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_C.md:3523:2. **쟁점 1 답**: `B` 신규 `oracle.py`입니다. 덮어쓰기로 절감되는 건 사실상 `v2.py`의 `~4.1 calls/min`뿐인데, 대신 롤백과 베이스라인을 잃습니다. 비용/속도 관점의 타협점은 `코드는 분리, 운영은 동시 실행 금지`입니다. 즉 Oracle 활성 시 V2 프로세스는 내리되, 파일은 남겨야 합니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_C.md:3528:[POSITION: Phase 1 진입은 가능하지만, `oracle.py` 분리 유지와 48시간 Rule2 반증 실험, 그리고 공유 폴링·bounded memory·sub-500ms state API를 Charter 전제조건으로 올려야 한다.]
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:30:- 입장 B **신규 oracle.py**: sonnet / Codex A / Codex C / sonnet-찬성 (4명)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:110:- **v2.py 처리**: 덮어쓰기 vs 신규 `oracle.py` — Phase 3에서 확정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:335:docs\triarb_review_request_260420.md:82:- `dashboard_unified.py` still uses the existing `tournament`, `v2`, `v3` keys. I added `triarb` without renaming those existing models to avoid breaking the current dashboard while BollRev/rename work is incomplete.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:338:docs\triarb_review_request_260420.md:138:- 기존 `tournament`, `v2`, `v3` 키는 유지됨. architecture 문서의 rename 목표(`bollrev`, `oracle`, `brooks`)와 현재 repo 상태가 다르므로, 여기서는 기존 대시보드 호환성을 우선함.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:341:docs\triarb_fix_260420.md:13:2. **절대** `scripts/brooks.py`, `scripts/v3.py`, `scripts/dashboard_unified.py`, `scripts/bollrev.py`를 수정하지 마라.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:343:docs\triarb_260420.md:246:1. **절대** `scripts/brooks.py`, `scripts/bollrev.py`(존재 시), `scripts/oracle.py`를 수정하지 마라. 읽기만 허용. 구조 템플릿으로 사용.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:354:docs\models_architecture_260420.md:44:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 리네임만 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:360:docs\models_architecture_260420.md:245:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:363:docs\models_architecture_260420.md:266:1. `v2.py` → `oracle.py` (Engine 클래스명 `V2Engine` → `OracleEngine`)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:367:docs\bollrev_260420.md:162:3. **`scripts/dashboard_unified.py`** 수정 — `renderBollRev` 추가 + `MODELS` 리스트에 bollrev 추가
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:368:docs\bollrev_260420.md:561:### B.4 `dashboard_unified.py` 수정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:369:docs\bollrev_260420.md:568:    {"id": "oracle",  "name": "Oracle (LSTM Prediction)",     "port": 8897, "color": "#44aaff"},
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:370:docs\bollrev_260420.md:653:- scripts/dashboard_unified.py (renderBollRev 추가, MODELS 업데이트)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:371:docs\bollrev_260420.md:675:1. **Phase 0 — Plan**: 본 문서를 정독 + `scripts/brooks.py` 구조 파악 + 플랜 수립
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:372:docs\bollrev_260420.md:676:2. **Phase 1 — Indicator**: `IndicatorEngine` 구현 + 단위 테스트 (BB/RSI)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:373:docs\bollrev_260420.md:685:11. **Phase 10 — Review request**: 리뷰 요청서 작성
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:396:docs\triarb_review_request_260420.md:82:- `dashboard_unified.py` still uses the existing `tournament`, `v2`, `v3` keys. I added `triarb` without renaming those existing models to avoid breaking the current dashboard while BollRev/rename work is incomplete.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:399:docs\triarb_review_request_260420.md:138:- 기존 `tournament`, `v2`, `v3` 키는 유지됨. architecture 문서의 rename 목표(`bollrev`, `oracle`, `brooks`)와 현재 repo 상태가 다르므로, 여기서는 기존 대시보드 호환성을 우선함.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:402:docs\triarb_fix_260420.md:13:2. **절대** `scripts/brooks.py`, `scripts/v3.py`, `scripts/dashboard_unified.py`, `scripts/bollrev.py`를 수정하지 마라.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:404:docs\triarb_260420.md:246:1. **절대** `scripts/brooks.py`, `scripts/bollrev.py`(존재 시), `scripts/oracle.py`를 수정하지 마라. 읽기만 허용. 구조 템플릿으로 사용.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:415:docs\models_architecture_260420.md:44:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 리네임만 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:421:docs\models_architecture_260420.md:245:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:424:docs\models_architecture_260420.md:266:1. `v2.py` → `oracle.py` (Engine 클래스명 `V2Engine` → `OracleEngine`)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:428:docs\bollrev_260420.md:162:3. **`scripts/dashboard_unified.py`** 수정 — `renderBollRev` 추가 + `MODELS` 리스트에 bollrev 추가
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:429:docs\bollrev_260420.md:561:### B.4 `dashboard_unified.py` 수정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:430:docs\bollrev_260420.md:568:    {"id": "oracle",  "name": "Oracle (LSTM Prediction)",     "port": 8897, "color": "#44aaff"},
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:431:docs\bollrev_260420.md:653:- scripts/dashboard_unified.py (renderBollRev 추가, MODELS 업데이트)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:432:docs\bollrev_260420.md:675:1. **Phase 0 — Plan**: 본 문서를 정독 + `scripts/brooks.py` 구조 파악 + 플랜 수립
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:433:docs\bollrev_260420.md:676:2. **Phase 1 — Indicator**: `IndicatorEngine` 구현 + 단위 테스트 (BB/RSI)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:434:docs\bollrev_260420.md:685:11. **Phase 10 — Review request**: 리뷰 요청서 작성
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1059:> **媛쒗렪 ?붿?**: V1/V2/V3 ?レ옄 ?ㅼ씠諛??먭린. 媛?紐⑤뜽??"留ㅻℓ 湲곕쾿 ?대쫫"?쇰줈 蹂寃쏀븯怨? Tournament(V1)瑜??먭린????**BollRev**쨌**TriArb**濡??泥댄븳??
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1079:| 1 | **BollRev** | Bollinger Band Reversion | ?됯퇏?뚭? (洹밸떒媛?諛섎벑) | 70%+ | 1:1 | ?〓낫쨌?덉씤吏 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1085:- **BollRev ??Brooks**: ?뺣컲? 泥좏븰. Brooks媛 `VWAP_CHOP` 李⑤떒?섎뒗 援ш컙??BollRev媛 硫붿?.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1098:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 由щ꽕?꾨쭔 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1107:| `scripts/bollrev.py` | 8895 (Tournament ?ы듃 ?ъ궗?? | Bollinger Reversion ?붿쭊 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1114:?쒋?? bollrev.jsonl           # tick log
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1115:?쒋?? bollrev_state.npz       # ?먮낯/?ъ????쇳겕/tick_count ???쒋?? bollrev_memory.json     # ContextMemory + trade_log
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1183:  "model": "BollRev",
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1215:- BollRev: `bb_width_atr, rsi_14, dist_to_mid_atr, time_in_band, session_hour_bucket, vol_regime`
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1235:    self.signals_blocked_chop: int    # BollRev/Brooks ?대떦
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1249:- ?? **紐⑤뜽 媛?delta-neutral??湲곕??섏? 留?寃?* ??Brooks long + BollRev short ?숈떆 諛쒖깮 媛??
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1260:    {"id": "bollrev", "name": "BollRev (Bollinger Reversion)", "port": 8895, "color": "#ffaa44"},
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1268:- `renderBollRev(id,d,color)`
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1273:怨듯넻 ?ㅽ궎留?以?섑븯誘濡?BollRev/TriArb??renderBrooks 援ъ“ 李몄“ 媛??
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1277:- BollRev: **BB ??/ RSI** ?곹깭 ?쒖떆 (?먯궛蹂??꾩옱 ????꾩튂)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1291:echo [1/5] Starting BollRev (port 8895)...
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1292:start /min "" py -3.12 -u scripts\bollrev.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:1295:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2479:docs\bollrev_260420.md:132:- 일 5 신호 × 5 variants = 25 신호 / 일 → 일 수익 기대 ≈ +0.34% (variants 합산). 월 ~10%.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2480:docs\bollrev_260420.md:568:    {"id": "oracle",  "name": "Oracle (LSTM Prediction)",     "port": 8897, "color": "#44aaff"},
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2481:docs\bollrev_260420.md:675:1. **Phase 0 — Plan**: 본 문서를 정독 + `scripts/brooks.py` 구조 파악 + 플랜 수립
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2482:docs\bollrev_260420.md:676:2. **Phase 1 — Indicator**: `IndicatorEngine` 구현 + 단위 테스트 (BB/RSI)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2483:docs\bollrev_260420.md:685:11. **Phase 10 — Review request**: 리뷰 요청서 작성
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2484:docs\bollrev_260420.md:719:  [tick N] 5m=+0.1%/3t | 15m=-0.2%/1t | tight=+0.3%/2t | wide=0%/0t | control=-0.4%/5t
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2489:docs\models_architecture_260420.md:44:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 리네임만 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2495:docs\models_architecture_260420.md:245:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2497:docs\models_architecture_260420.md:266:1. `v2.py` → `oracle.py` (Engine 클래스명 `V2Engine` → `OracleEngine`)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2501:docs\triarb_review_request_260420.md:138:- 기존 `tournament`, `v2`, `v3` 키는 유지됨. architecture 문서의 rename 목표(`bollrev`, `oracle`, `brooks`)와 현재 repo 상태가 다르므로, 여기서는 기존 대시보드 호환성을 우선함.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2505:docs\triarb_260420.md:246:1. **절대** `scripts/brooks.py`, `scripts/bollrev.py`(존재 시), `scripts/oracle.py`를 수정하지 마라. 읽기만 허용. 구조 템플릿으로 사용.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2614:2. **쟁점 1 답**: 저는 이제 **B, 신규 `oracle.py`**입니다. V2는 `global linear SGD ridge + entropy equalization`이고, Oracle은 최소한 `online ridge/logistic + Bayesian reliability head` 같은 별도 실험단위여야 합니다. 양보점은 있습니다: 운영 포트 `8897` 승계는 나중에 해도 되지만, 파일/로그/상태는 처음부터 분리해 baseline과 rollback을 보존해야 합니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_B.md:2629:2. **쟁점 1 답**: 저는 이제 **B, 신규 `oracle.py`**입니다. V2는 `global linear SGD ridge + entropy equalization`이고, Oracle은 최소한 `online ridge/logistic + Bayesian reliability head` 같은 별도 실험단위여야 합니다. 양보점은 있습니다: 운영 포트 `8897` 승계는 나중에 해도 되지만, 파일/로그/상태는 처음부터 분리해 baseline과 rollback을 보존해야 합니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_A.md:30:- 입장 B **신규 oracle.py**: sonnet / Codex A / Codex C / sonnet-찬성 (4명)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_A.md:110:- **v2.py 처리**: 덮어쓰기 vs 신규 `oracle.py` — Phase 3에서 확정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_A.md:1603:2. **쟁점 1 답**: 저는 **B, 신규 `oracle.py`**입니다. Python 3.12 + `ccxt/numpy/pandas`만으로 구현은 가능합니다. 하지만 새 예측엔진을 `v2.py`에 덮어쓰면 롤백, 베이스라인 비교, 장애 분리가 동시에 어려워집니다. 또 context-aware 학습은 `npz + jsonl` 단독보다 V3/TriArb처럼 `npz + memory.json`이 더 맞습니다. 양보점은 있습니다. Oracle이 검증되면 그때 `8897`을 넘기고 `v2.py`를 deprecated 하면 됩니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_A.md:1606:5. **Updated position**: `oracle.py` 분리 선호는 유지합니다. 바뀐 점은 "즉시 풀 재설계"보다 "48시간 절삭 실험 후 go/no-go"를 더 지지한다는 점입니다. 대신 그 실험 결과가 경계선이면 Phase 3까지 미루지 말고 Charter 전에 파일명, 포트, 상태 스키마, Oracle/V3 경계를 확정해야 합니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_A.md:1608:[POSITION: Phase 1 문서 진입은 가능하지만 구현 기준선은 아직 미정이며, `oracle.py` 분리 + 48시간 반증 실험 + Oracle/V3 경계 확정이 Charter 전 필수입니다.]
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_A.md:1613:2. **쟁점 1 답**: 저는 **B, 신규 `oracle.py`**입니다. Python 3.12 + `ccxt/numpy/pandas`만으로 구현은 가능합니다. 하지만 새 예측엔진을 `v2.py`에 덮어쓰면 롤백, 베이스라인 비교, 장애 분리가 동시에 어려워집니다. 또 context-aware 학습은 `npz + jsonl` 단독보다 V3/TriArb처럼 `npz + memory.json`이 더 맞습니다. 양보점은 있습니다. Oracle이 검증되면 그때 `8897`을 넘기고 `v2.py`를 deprecated 하면 됩니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_A.md:1616:5. **Updated position**: `oracle.py` 분리 선호는 유지합니다. 바뀐 점은 "즉시 풀 재설계"보다 "48시간 절삭 실험 후 go/no-go"를 더 지지한다는 점입니다. 대신 그 실험 결과가 경계선이면 Phase 3까지 미루지 말고 Charter 전에 파일명, 포트, 상태 스키마, Oracle/V3 경계를 확정해야 합니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-2\codex_A.md:1618:[POSITION: Phase 1 문서 진입은 가능하지만 구현 기준선은 아직 미정이며, `oracle.py` 분리 + 48시간 반증 실험 + Oracle/V3 경계 확정이 Charter 전 필수입니다.]
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\discussion-manifest.md:29:- **핵심 합의**: 신규 oracle.py 분리, V3=setup/Oracle=prediction 레이어 분리, 48h Rule 2 ablation Charter 태스크 1번 편입
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\context.md:34:- **v2.py 처리**: 덮어쓰기 vs 신규 `oracle.py` — Phase 3에서 확정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\conclusion.md:14:### 1. v2.py 처리 — **신규 `oracle.py` 분리** (8/8 합의)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\conclusion.md:28:- 실행 환경: **신규 oracle.py 격리** (운영 sonnet), v2.py live 환경 수술 금지
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\conclusion.md:52:| E | v2.py 처리: 신규 oracle.py + 선셋 조항 (3주 우위 시 archive) | opus | **확정** |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\conclusion.md:70:- **BollRev 스코프 진입 경위**: 반대 sonnet 지적, 누락됨. → Charter에 명시 필요
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\moderator-summary.md:7:| 2 | Claude sonnet | 운영 리스크 | oracle.py 신규+포트 8901 즉시 확정, dashboard graceful fallback 검증 후 Phase 1 착수 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\moderator-summary.md:29:| v2.py 처리 | 덮어쓰기(Oracle=후계자): opus | 신규 oracle.py(롤백 유지): sonnet, Codex A, Codex C, sonnet-찬성 (4명) | Phase 3 지연 OK: Codex B, flash (2명) |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\moderator-summary.md:47:G. **BollRev 스코프 진입 경위** (반대 sonnet)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:9:- Topic 1: Charter Differentiation Thesis("V3=setup/Oracle=prediction")가 Oracle variants 구성에 강제하는 제약. BollRev는 stock/crypto 거래에서 분명 의미가 있으나, 레이어 분리 원칙 위배 시 어떤 구조적 문제가 생길까
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:10:- Topic 2: Charter 원문 "신규 oracle.py 격리"가 반드시 Oracle 최종 구현 파일을 의미하는가, 아니면 "v2.py 프로세스로부터 격리된 검증 파일"로도 해석 가능한가 (문맥 해석). 다른 설계 방법론(SE/ML)에서 ablation 도구의 수명 처리 관습
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:28:## Topic 1: BollRev(Bollinger Reversion) variant 편입 여부
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:35:2. BollRev는 setup quality 영역 → V3 소관 (meta-decision layer)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:44:- `scripts/dl_features.py:163-164` — `feat["bb_pos"]` 컬럼 생성 (V3 feature set에 이미 포함)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:45:- **"BollRev variant"는 어디에도 구현 안 됨** — V3/TriArb 모든 variant 검색해도 없음
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:46:- 즉 "편입"이 의미하는 것: Oracle에 신규로 BollRev variant를 추가 vs V3 영역에 남기기
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:58:> 실행 환경: **신규 oracle.py 격리** (운영 sonnet), v2.py live 환경 수술 금지
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:69:| **A** (현 제안) | `scripts/v2_ablation.py` — V2 포크 + `--no-rule2` flag. Oracle 완성 후 archive | - 즉시 실행 가능<br>- V2 구조 유지로 정확한 변수 분리<br>- 최소 개발 비용 | - "신규 oracle.py 격리" Charter 원문 위배<br>- 임시 파일 추가 관리 부담 |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_gemini_prompt.md:70:| **B** | `scripts/oracle_v0.py` — Oracle 최소 골격 선구현 + Rule 2 toggle | - Charter 원문 충실<br>- Oracle 구현을 앞당김 | - Phase 3 Decision Card 선행 필요<br>- Oracle 설계 미확정 상태에서 코드화 위험<br>- "Rule 2가 원인인지"의 순수 검증에서 변수 증가 |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:9:- Topic 1: BollRev를 별도 variant로 구현하는 개발 공수 vs V3 feature 재사용. mean-reversion 모델이 prediction layer와 setup layer 중 어디에 더 자연스러운가 (구현 관점)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:28:## Topic 1: BollRev(Bollinger Reversion) variant 편입 여부
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:35:2. BollRev는 setup quality 영역 → V3 소관 (meta-decision layer)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:44:- `scripts/dl_features.py:163-164` — `feat["bb_pos"]` 컬럼 생성 (V3 feature set에 이미 포함)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:45:- **"BollRev variant"는 어디에도 구현 안 됨** — V3/TriArb 모든 variant 검색해도 없음
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:46:- 즉 "편입"이 의미하는 것: Oracle에 신규로 BollRev variant를 추가 vs V3 영역에 남기기
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:58:> 실행 환경: **신규 oracle.py 격리** (운영 sonnet), v2.py live 환경 수술 금지
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:69:| **A** (현 제안) | `scripts/v2_ablation.py` — V2 포크 + `--no-rule2` flag. Oracle 완성 후 archive | - 즉시 실행 가능<br>- V2 구조 유지로 정확한 변수 분리<br>- 최소 개발 비용 | - "신규 oracle.py 격리" Charter 원문 위배<br>- 임시 파일 추가 관리 부담 |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\_codex_prompt.md:70:| **B** | `scripts/oracle_v0.py` — Oracle 최소 골격 선구현 + Rule 2 toggle | - Charter 원문 충실<br>- Oracle 구현을 앞당김 | - Phase 3 Decision Card 선행 필요<br>- Oracle 설계 미확정 상태에서 코드화 위험<br>- "Rule 2가 원인인지"의 순수 검증에서 변수 증가 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_C.md:59:- **v2.py 처리**: 덮어쓰기 vs 신규 `oracle.py` — Phase 3에서 확정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_C.md:3192:- Oracle은 `v2.py` 덮어쓰기보다 신규 `oracle.py`가 안전합니다. V2와 운용 모델이 다르고, rollback도 쉬워집니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_C.md:3214:- Oracle은 `v2.py` 덮어쓰기보다 신규 `oracle.py`가 안전합니다. V2와 운용 모델이 다르고, rollback도 쉬워집니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:59:- **v2.py 처리**: 덮어쓰기 vs 신규 `oracle.py` — Phase 3에서 확정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:217:docs\triarb_review_request_260420.md:138:- 기존 `tournament`, `v2`, `v3` 키는 유지됨. architecture 문서의 rename 목표(`bollrev`, `oracle`, `brooks`)와 현재 repo 상태가 다르므로, 여기서는 기존 대시보드 호환성을 우선함.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:229:docs\triarb_260420.md:246:1. **절대** `scripts/brooks.py`, `scripts/bollrev.py`(존재 시), `scripts/oracle.py`를 수정하지 마라. 읽기만 허용. 구조 템플릿으로 사용.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:239:docs\bollrev_260420.md:254:        Returns array of same length as values, with NaN for insufficient warmup.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:240:docs\bollrev_260420.md:407:- `signals_blocked_memory`: 사용 (blacklist 차단)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:241:docs\bollrev_260420.md:422:      2. if cfg['memory'] and memory.is_blacklisted(ctx, direction) → blocked_memory++, 'memory_blacklist'
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:242:docs\bollrev_260420.md:509:      if result == 'memory_blacklist':
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:243:docs\bollrev_260420.md:568:    {"id": "oracle",  "name": "Oracle (LSTM Prediction)",     "port": 8897, "color": "#44aaff"},
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:244:docs\bollrev_260420.md:615:def test_context_memory_blacklist():
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:245:docs\bollrev_260420.md:616:    """Insert 25 losing records with EV=-0.8 in same context cluster → is_blacklisted=True.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:246:docs\bollrev_260420.md:624:    variant_configs, memory_warmup, memory_full_activation,
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:247:docs\bollrev_260420.md:675:1. **Phase 0 — Plan**: 본 문서를 정독 + `scripts/brooks.py` 구조 파악 + 플랜 수립
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:248:docs\bollrev_260420.md:692:| RSI all NaN | warmup 부족 | `HISTORY_BARS >= 500` 확인, `rsi_period=14`는 14봉 후 유효 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:249:docs\bollrev_260420.md:711:[BollRev] Memory warmup: 30 trades
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:250:docs\models_architecture_260420.md:44:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 리네임만 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:256:docs\models_architecture_260420.md:245:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:257:docs\models_architecture_260420.md:266:1. `v2.py` → `oracle.py` (Engine 클래스명 `V2Engine` → `OracleEngine`)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:353:docs\triarb_review_request_260420.md:138:- 기존 `tournament`, `v2`, `v3` 키는 유지됨. architecture 문서의 rename 목표(`bollrev`, `oracle`, `brooks`)와 현재 repo 상태가 다르므로, 여기서는 기존 대시보드 호환성을 우선함.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:365:docs\triarb_260420.md:246:1. **절대** `scripts/brooks.py`, `scripts/bollrev.py`(존재 시), `scripts/oracle.py`를 수정하지 마라. 읽기만 허용. 구조 템플릿으로 사용.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:375:docs\bollrev_260420.md:254:        Returns array of same length as values, with NaN for insufficient warmup.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:376:docs\bollrev_260420.md:407:- `signals_blocked_memory`: 사용 (blacklist 차단)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:377:docs\bollrev_260420.md:422:      2. if cfg['memory'] and memory.is_blacklisted(ctx, direction) → blocked_memory++, 'memory_blacklist'
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:378:docs\bollrev_260420.md:509:      if result == 'memory_blacklist':
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:379:docs\bollrev_260420.md:568:    {"id": "oracle",  "name": "Oracle (LSTM Prediction)",     "port": 8897, "color": "#44aaff"},
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:380:docs\bollrev_260420.md:615:def test_context_memory_blacklist():
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:381:docs\bollrev_260420.md:616:    """Insert 25 losing records with EV=-0.8 in same context cluster → is_blacklisted=True.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:382:docs\bollrev_260420.md:624:    variant_configs, memory_warmup, memory_full_activation,
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:383:docs\bollrev_260420.md:675:1. **Phase 0 — Plan**: 본 문서를 정독 + `scripts/brooks.py` 구조 파악 + 플랜 수립
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:384:docs\bollrev_260420.md:692:| RSI all NaN | warmup 부족 | `HISTORY_BARS >= 500` 확인, `rsi_period=14`는 14봉 후 유효 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:385:docs\bollrev_260420.md:711:[BollRev] Memory warmup: 30 trades
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:386:docs\models_architecture_260420.md:44:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 리네임만 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:392:docs\models_architecture_260420.md:245:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:393:docs\models_architecture_260420.md:266:1. `v2.py` → `oracle.py` (Engine 클래스명 `V2Engine` → `OracleEngine`)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:964:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:985:1. `v2.py` ??`oracle.py` (Engine ?대옒?ㅻ챸 `V2Engine` ??`OracleEngine`)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:993:### Phase 2 ??BollRev 援ы쁽 (Codex ?대떦)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:994:- 吏?쒖꽌: `docs/bollrev_260420.md`
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_B.md:995:- ?곗텧臾? `scripts/bollrev.py` + ??쒕낫??`renderBollRev` 異붽?
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:59:- **v2.py 처리**: 덮어쓰기 vs 신규 `oracle.py` — Phase 3에서 확정
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:2623:docs\triarb_review_request_260420.md:138:- 기존 `tournament`, `v2`, `v3` 키는 유지됨. architecture 문서의 rename 목표(`bollrev`, `oracle`, `brooks`)와 현재 repo 상태가 다르므로, 여기서는 기존 대시보드 호환성을 우선함.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:2624:docs\triarb_260420.md:246:1. **절대** `scripts/brooks.py`, `scripts/bollrev.py`(존재 시), `scripts/oracle.py`를 수정하지 마라. 읽기만 허용. 구조 템플릿으로 사용.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:2627:docs\models_architecture_260420.md:44:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 리네임만 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:2631:docs\models_architecture_260420.md:245:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:2632:docs\models_architecture_260420.md:266:1. `v2.py` → `oracle.py` (Engine 클래스명 `V2Engine` → `OracleEngine`)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:2634:docs\bollrev_260420.md:568:    {"id": "oracle",  "name": "Oracle (LSTM Prediction)",     "port": 8897, "color": "#44aaff"},
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4800:    {"id": "bollrev", "name": "BollRev (Bollinger Reversion)", "port": 8895, "color": "#ffaa44"},
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4808:- `renderBollRev(id,d,color)`
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4813:怨듯넻 ?ㅽ궎留?以?섑븯誘濡?BollRev/TriArb??renderBrooks 援ъ“ 李몄“ 媛??
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4817:- BollRev: **BB ??/ RSI** ?곹깭 ?쒖떆 (?먯궛蹂??꾩옱 ????꾩튂)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4831:echo [1/5] Starting BollRev (port 8895)...
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4832:start /min "" py -3.12 -u scripts\bollrev.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4835:start /min "" py -3.12 -u scripts\oracle.py
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4856:1. `v2.py` ??`oracle.py` (Engine ?대옒?ㅻ챸 `V2Engine` ??`OracleEngine`)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4864:### Phase 2 ??BollRev 援ы쁽 (Codex ?대떦)
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4865:- 吏?쒖꽌: `docs/bollrev_260420.md`
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4866:- ?곗텧臾? `scripts/bollrev.py` + ??쒕낫??`renderBollRev` 異붽?
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4890:| `scripts/v2.py` | `scripts/oracle.py` | 8897 | 由щ꽕?꾨쭔 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4899:| `scripts/bollrev.py` | 8895 (Tournament ?ы듃 ?ъ궗?? | Bollinger Reversion ?붿쭊 |
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4906:?쒋?? bollrev.jsonl           # tick log
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4907:?쒋?? bollrev_state.npz       # ?먮낯/?ъ????쇳겕/tick_count ???쒋?? bollrev_memory.json     # ContextMemory + trade_log
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:4949:- 湲곗〈 `tournament`, `v2`, `v3` ?ㅻ뒗 ?좎??? architecture 臾몄꽌??rename 紐⑺몴(`bollrev`, `oracle`, `brooks`)? ?꾩옱 repo ?곹깭媛 ?ㅻⅤ誘濡? ?ш린?쒕뒗 湲곗〈 ??쒕낫???명솚?깆쓣 ?곗꽑??
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:5194:?쒋?? bollrev.jsonl           # tick log
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:5195:?쒋?? bollrev_state.npz       # ?먮낯/?ъ????쇳겕/tick_count ???쒋?? bollrev_memory.json     # ContextMemory + trade_log
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:5431:- 구현은 `V2 feature engine` 위에 `V3 ContextMemory`를 이식하는 방향이 가장 현실적입니다. V2 수정만으로 끝내지 말고, 새 `oracle.py`로 병행 검증한 뒤 8897 교체를 결정하는 게 안전합니다.
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\round-1\codex_A.md:5453:- 구현은 `V2 feature engine` 위에 `V3 ContextMemory`를 이식하는 방향이 가장 현실적입니다. V2 수정만으로 끝내지 말고, 새 `oracle.py`로 병행 검증한 뒤 8897 교체를 결정하는 게 안전합니다.
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:21:- Topic 1: BollRev를 별도 variant로 구현하는 개발 공수 vs V3 feature 재사용. mean-reversion 모델이 prediction layer와 setup layer 중 어디에 더 자연스러운가 (구현 관점)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:40:## Topic 1: BollRev(Bollinger Reversion) variant 편입 여부
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:47:2. BollRev는 setup quality 영역 → V3 소관 (meta-decision layer)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:56:- `scripts/dl_features.py:163-164` — `feat["bb_pos"]` 컬럼 생성 (V3 feature set에 이미 포함)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:57:- **"BollRev variant"는 어디에도 구현 안 됨** — V3/TriArb 모든 variant 검색해도 없음
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:58:- 즉 "편입"이 의미하는 것: Oracle에 신규로 BollRev variant를 추가 vs V3 영역에 남기기
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:70:> 실행 환경: **신규 oracle.py 격리** (운영 sonnet), v2.py live 환경 수술 금지
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:81:| **A** (현 제안) | `scripts/v2_ablation.py` — V2 포크 + `--no-rule2` flag. Oracle 완성 후 archive | - 즉시 실행 가능<br>- V2 구조 유지로 정확한 변수 분리<br>- 최소 개발 비용 | - "신규 oracle.py 격리" Charter 원문 위배<br>- 임시 파일 추가 관리 부담 |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:82:| **B** | `scripts/oracle_v0.py` — Oracle 최소 골격 선구현 + Rule 2 toggle | - Charter 원문 충실<br>- Oracle 구현을 앞당김 | - Phase 3 Decision Card 선행 필요<br>- Oracle 설계 미확정 상태에서 코드화 위험<br>- "Rule 2가 원인인지"의 순수 검증에서 변수 증가 |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:332:"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"_bollinger_position|bb_pos|_rebalance_memory|rebalance_memory|update\\(\" scripts/dl_features.py scripts/v2.py" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:345:scripts/dl_features.py:164:    feat["bb_pos"] = _bollinger_position(c, 20)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:511:    feat["bb_pos"] = _bollinger_position(c, 20)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:972:핵심 코드 확인 결과, `bb_pos`는 현재 feature로만 존재하고 V2의 Rule 2는 학습 루프 말단의 단일 호출이라 분리가 쉬운 구조입니다. 워크스페이스 규칙 문서 위치만 한 번 더 확인한 뒤, 그 기준까지 반영해 최종 판단을 정리하겠습니다.
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1123:- ??**v2.py ??뼱?곌린** (opus 珥덇린 ?쒖븞, Round 2?먯꽌 泥좏쉶) ??濡ㅻ갚 遺덇?. ???泥? **?좉퇋 `scripts/oracle.py` 遺꾨━ + ?좎뀑 議고빆** ??Oracle??v2.py ?鍮?**3二??곗냽 二쇨컙 ?밸쪧 ?곗쐞 ??v2.py ??`scripts/archive/`**. (**議고빆 E**)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1185:- **?좉퇋 `scripts/oracle.py` 寃⑸━** (v2.py live ?섍꼍 ?섏닠 湲덉?)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1214:### 2. BollRev ?ㅼ퐫???몄엯 寃쎌쐞 (諛섎? sonnet 吏??
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1216:- Phase 0 ?붿빟 ?대뵒?먮룄 BollRev(Bollinger Reversion) variant ?몄엯 洹쇨굅 ?놁쓬
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1217:- Oracle 湲곕낯 variant(control / aggressive / conservative) ??BollRev ?몄엯 ?댁쑀 誘몄꽕紐?- **Charter 寃곗젙**: Phase 2 Component Map?먯꽌 Oracle variants 理쒖쥌 紐⑸줉 ?뺤젙 ??BollRev ?몄엯 ?щ? ?ы룊媛. ?몄엯 ??洹쇨굅(?? "V3 aggressive variant ???) Component Map??紐낆떆 ?꾩닔.
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1376:### 1. v2.py 泥섎━ ??**?좉퇋 `oracle.py` 遺꾨━** (8/8 ?⑹쓽)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1389:- ?ㅽ뻾 ?섍꼍: **?좉퇋 oracle.py 寃⑸━** (?댁쁺 sonnet), v2.py live ?섍꼍 ?섏닠 湲덉?
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1412:| E | v2.py 泥섎━: ?좉퇋 oracle.py + ?좎뀑 議고빆 (3二??곗쐞 ??archive) | opus | **?뺤젙** |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1430:- **BollRev ?ㅼ퐫??吏꾩엯 寃쎌쐞**: 諛섎? sonnet 吏?? ?꾨씫?? ??Charter??紐낆떆 ?꾩슂
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1552:| E v2.py 遺꾨━ + ?좎뀑 | `oracle-core` ?ㅽ뻾 寃쎈줈(`scripts/oracle.py`) ??Phase 6 蹂寃쎄?由?|
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1561:## BollRev ?ы룊媛 寃곌낵 (Phase 1 誘명빐寃?#2)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1563:**寃곗젙**: **BollRev??Oracle 珥덇린 variants?먯꽌 ?쒖쇅.**
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1567:- Oracle Core 4媛쒓? 紐⑤몢 prediction layer??吏묒쨷 ??BollRev(Bollinger Reversion)? setup quality??媛源뚯썙 V3 ?곸뿭
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1571:?ν썑 Phase 6?먯꽌 ?ъ슜?먭? BollRev ?몄엯???ъ슂泥?븯硫?Tier 3 蹂寃?而댄룷?뚰듃 ?좎꽕)?쇰줈 泥섎━.
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1615:**?댁뒋**: Oracle? ?꾩쭅 援ы쁽?섏? ?딆쓬. Charter??"?좉퇋 `oracle.py` 寃⑸━"瑜?紐낆떆?섎굹, Oracle 吏꾩쭨 援ы쁽? Phase 3 Decision Card ?댄썑.
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1622:?쒋?? v2_ablation.py     ?????좉퇋. V2 蹂듭젣 + --no-rule2 flag
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1623:?쒋?? oracle.py          ??(Phase 3 ?댄썑 ?묒꽦)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1628:**`v2_ablation.py`??Phase 4 ?듦낵 ??Oracle???꾩꽦?섎㈃ `archive/` ?대룞.** ?꾩떆 寃利??꾧뎄.
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1636:| `v2_abl_control` | `v2_ablation.py --variant control` | 8902 | ???좎? | paper trades (observe-only ?꾨떂) |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1637:| `v2_abl_no_rule2` | `v2_ablation.py --variant no_rule2` | 8903 | ???쒓굅 | paper trades |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1650:**?뚯씪**: `data/v2_ablation.jsonl` (蹂?대퀎 ?뚯씪濡?遺꾨━ 沅뚯옣)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1678:- `data/v2_ablation_state_{variant}.npz` ??媛?variant???대? 媛以묒튂/?뷀듃濡쒗뵾 ?ㅻ깄??(?붾쾭洹몄슜)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1679:- `data/v2_ablation_summary.csv` ???섎（ ?⑥쐞 吏묎퀎
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1687:| **Day 1 (2026-04-22)** | `v2_ablation.py` ?묒꽦 (Codex 吏?쒖꽌 `/spec`) + ?ы듃 8902/8903 諛붿씤??寃利?| Codex (援ы쁽) + Claude (由щ럭) | `scripts/v2_ablation.py`, 湲곕룞 ?뚯뒪??濡쒓렇 |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1689:| **Day 1~3 (48h)** | 2 variant 蹂묐젹 ?ㅽ뻾. 以묎컙 ?먭? (24h 吏?? ???섑뵆 ??遺議??щ옒??媛먯? | ?먮룞 + Claude 紐⑤땲??| `data/v2_ablation.jsonl` |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1711:1. **Day 1 ?쒖옉 ??*: `scripts/v2_ablation.py` 肄붾뱶 由щ럭 (Codex ?묒꽦 ??Claude ??User ?뺤씤 ??湲곕룞)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1722:| `v2_ablation.py` 踰꾧렇濡?Rule 2 ???ㅻⅨ ?붿냼源뚯? 蹂寃?| v2.py???diff 泥댄겕由ъ뒪??由щ럭 ??Claude媛 Phase 4 1?④퀎 寃利?|
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1745:1. **`/spec`?쇰줈 Codex 援ы쁽 吏?쒖꽌 ?묒꽦** ??`scripts/v2_ablation.py` + 濡쒓렇 ?ㅽ궎留?援ы쁽
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1749:문서 기준도 확인했습니다. 이제 마지막으로 `BollRev`와 Oracle 관련 구현 흔적이 실제로 없는지 짧게 재검증하고, Topic 2는 공수와 운영 리스크를 숫자로 묶어 최종 판단으로 수렴하겠습니다.
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\round-1\_codex_raw.log:1751:"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"BollRev|bollrev|bollinger reversion|bb_pos|oracle.py|oracle_v0|v2_ablation\" scripts tests docs ..\\..\\subagent-runs ..\\..\\project-status" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\role_gemini.md:9:- Topic 1: Charter Differentiation Thesis("V3=setup/Oracle=prediction")가 Oracle variants 구성에 강제하는 제약. BollRev는 stock/crypto 거래에서 분명 의미가 있으나, 레이어 분리 원칙 위배 시 어떤 구조적 문제가 생길까
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\role_gemini.md:10:- Topic 2: Charter 원문 "신규 oracle.py 격리"가 반드시 Oracle 최종 구현 파일을 의미하는가, 아니면 "v2.py 프로세스로부터 격리된 검증 파일"로도 해석 가능한가 (문맥 해석). 다른 설계 방법론(SE/ML)에서 ablation 도구의 수명 처리 관습
+..\..\subagent-runs\discuss\oracle-phase0-intake-2026-04-21\role_gemini_B.md:6:- 5일 내 Oracle + V3 + TriArb + BollRev 4모델 체제 목표는 비현실적 스코프 창궐 아닌가?
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\role_codex.md:9:- Topic 1: BollRev를 별도 variant로 구현하는 개발 공수 vs V3 feature 재사용. mean-reversion 모델이 prediction layer와 setup layer 중 어디에 더 자연스러운가 (구현 관점)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\context.md:12:## Topic 1: BollRev(Bollinger Reversion) variant 편입 여부
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\context.md:19:2. BollRev는 setup quality 영역 → V3 소관 (meta-decision layer)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\context.md:28:- `scripts/dl_features.py:163-164` — `feat["bb_pos"]` 컬럼 생성 (V3 feature set에 이미 포함)
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\context.md:29:- **"BollRev variant"는 어디에도 구현 안 됨** — V3/TriArb 모든 variant 검색해도 없음
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\context.md:30:- 즉 "편입"이 의미하는 것: Oracle에 신규로 BollRev variant를 추가 vs V3 영역에 남기기
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\context.md:42:> 실행 환경: **신규 oracle.py 격리** (운영 sonnet), v2.py live 환경 수술 금지
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\context.md:53:| **A** (현 제안) | `scripts/v2_ablation.py` — V2 포크 + `--no-rule2` flag. Oracle 완성 후 archive | - 즉시 실행 가능<br>- V2 구조 유지로 정확한 변수 분리<br>- 최소 개발 비용 | - "신규 oracle.py 격리" Charter 원문 위배<br>- 임시 파일 추가 관리 부담 |
+..\..\subagent-runs\discuss\oracle-design-decisions-2026-04-21\context.md:54:| **B** | `scripts/oracle_v0.py` — Oracle 최소 골격 선구현 + Rule 2 toggle | - Charter 원문 충실<br>- Oracle 구현을 앞당김 | - Phase 3 Decision Card 선행 필요<br>- Oracle 설계 미확정 상태에서 코드화 위험<br>- "Rule 2가 원인인지"의 순수 검증에서 변수 증가 |
+
+ succeeded in 336ms:
+scripts\auto_train.py:18:import sys, json, time, random, argparse, shutil, threading, http.server
+scripts\auto_train.py:770:class DashHandler(http.server.BaseHTTPRequestHandler):
+scripts\auto_train.py:787:    server = http.server.HTTPServer(("0.0.0.0", port), DashHandler)
+scripts\dashboard_unified.py:17:import http.server
+scripts\dashboard_unified.py:26:MODELS = {
+scripts\dashboard_unified.py:36:            f"http://127.0.0.1:{port}/api/state",
+scripts\dashboard_unified.py:45:class Handler(http.server.BaseHTTPRequestHandler):
+scripts\dashboard_unified.py:73:            for model_id, info in MODELS.items():
+scripts\dashboard_unified.py:82:        elif key in MODELS:
+scripts\dashboard_unified.py:83:            state = fetch_model_state(MODELS[key]["port"])
+scripts\dashboard_unified.py:695:    server = http.server.HTTPServer(("0.0.0.0", args.port), Handler)
+scripts\dashboard_unified.py:697:    proxy_desc = ", ".join(f"{v['name']} :{v['port']}" for v in MODELS.values())
+scripts\run_sim.py:42:RL_MODELS = [
+scripts\run_sim.py:138:        for m in RL_MODELS:
+scripts\run_sim.py:182:            for m in RL_MODELS:
+scripts\run_paper_all.py:31:RL_MODELS = [
+scripts\run_paper_all.py:38:ENSEMBLE_MODELS = [
+scripts\run_paper_all.py:134:        for m in RL_MODELS:
+scripts\run_paper_all.py:146:            model_path=ENSEMBLE_MODELS[0]["m2"], symbol=eth_symbol,
+scripts\run_paper_all.py:151:        d_trader.model = EnsembleTrader(ENSEMBLE_MODELS[0]["m1"], ENSEMBLE_MODELS[0]["m2"])
+scripts\run_paper_all.py:158:            model_path=ENSEMBLE_MODELS[1]["m2"], symbol=eth_symbol,
+scripts\run_paper_all.py:163:        e_trader.model = EnsembleTrader(ENSEMBLE_MODELS[1]["m1"], ENSEMBLE_MODELS[1]["m2"])
+scripts\run_paper_all.py:187:            for m in RL_MODELS:
+scripts\triarb.py:17:import http.server
+scripts\triarb.py:46:STATE_PATH = DATA_DIR / "triarb_state.npz"
+scripts\triarb.py:47:LOG_PATH = DATA_DIR / "triarb.jsonl"
+scripts\triarb.py:50:DASH_PORT = 8899
+scripts\triarb.py:765:    def __init__(self, port: int = DASH_PORT):
+scripts\triarb.py:849:        print(f"[TriArb] Dashboard API: http://localhost:{self.port}/api/state")
+scripts\triarb.py:1116:        with open(LOG_PATH, "a", encoding="utf-8") as f:
+scripts\triarb.py:1218:            np.savez_compressed(STATE_PATH, **state)
+scripts\triarb.py:1232:        if not STATE_PATH.exists():
+scripts\triarb.py:1235:            d = np.load(STATE_PATH, allow_pickle=True)
+scripts\triarb.py:1278:        server = http.server.HTTPServer(("0.0.0.0", self.port), DashboardHandler)
+scripts\triarb.py:1299:class DashboardHandler(http.server.BaseHTTPRequestHandler):
+scripts\triarb.py:1306:        if self.path.startswith("/api/state"):
+scripts\triarb.py:1314:            msg = b"TriArb API running. Use /api/state."
+scripts\triarb.py:1324:    parser.add_argument("--port", type=int, default=DASH_PORT)
+scripts\v2.py:19:import http.server
+scripts\v2.py:46:STATE_PATH = DATA_DIR / "v2_state.npz"
+scripts\v2.py:47:LOG_PATH = DATA_DIR / "v2.jsonl"
+scripts\v2.py:48:DASH_PORT = 8897
+scripts\v2.py:115:class FeatureEngine:
+scripts\v2.py:245:class OnlinePredictor:
+scripts\v2.py:480:class DashboardHandler(http.server.BaseHTTPRequestHandler):
+scripts\v2.py:487:        if self.path == "/api/state":
+scripts\v2.py:570:    const d=await(await fetch('/api/state')).json();
+scripts\v2.py:605:    def __init__(self, assets: list[str], port: int = DASH_PORT):
+scripts\v2.py:790:        with open(LOG_PATH, "a") as f:
+scripts\v2.py:852:            np.savez_compressed(STATE_PATH, **state)
+scripts\v2.py:853:            print(f"  [save] state → {STATE_PATH}")
+scripts\v2.py:858:        if not STATE_PATH.exists():
+scripts\v2.py:861:            d = np.load(STATE_PATH, allow_pickle=True)
+scripts\v2.py:882:        server = http.server.HTTPServer(("0.0.0.0", self.port), DashboardHandler)
+scripts\v2.py:901:    parser.add_argument("--port", type=int, default=DASH_PORT)
+scripts\v3.py:21:import http.server
+scripts\v3.py:48:STATE_PATH = DATA_DIR / "v3_state.npz"
+scripts\v3.py:49:LOG_PATH = DATA_DIR / "v3.jsonl"
+scripts\v3.py:51:DASH_PORT = 8898
+scripts\v3.py:707:    def __init__(self, assets: list[str], port: int = DASH_PORT):
+scripts\v3.py:915:        print(f"[V3] Dashboard API: http://localhost:{self.port}/api/state")
+scripts\v3.py:999:        with open(LOG_PATH, "a") as f:
+scripts\v3.py:1062:            np.savez_compressed(STATE_PATH, **state)
+scripts\v3.py:1076:        if not STATE_PATH.exists():
+scripts\v3.py:1079:            d = np.load(STATE_PATH, allow_pickle=True)
+scripts\v3.py:1109:        server = http.server.HTTPServer(("0.0.0.0", self.port), DashboardHandler)
+scripts\v3.py:1130:class DashboardHandler(http.server.BaseHTTPRequestHandler):
+scripts\v3.py:1137:        if self.path.startswith("/api/state"):
+scripts\v3.py:1145:            msg = b"V3 API running. Use /api/state."
+scripts\v3.py:1156:    parser.add_argument("--port", type=int, default=DASH_PORT)
+scripts\_smoke_triarb.py:278:    original = (t.DATA_DIR, t.STATE_PATH, t.MEMORY_PATH, t.LOG_PATH)
+scripts\_smoke_triarb.py:282:        t.STATE_PATH = tmp_path / "triarb_state.npz"
+scripts\_smoke_triarb.py:284:        t.LOG_PATH = tmp_path / "triarb.jsonl"
+scripts\_smoke_triarb.py:304:    t.DATA_DIR, t.STATE_PATH, t.MEMORY_PATH, t.LOG_PATH = original
+scripts\_smoke_triarb.py:388:    original = (t.DATA_DIR, t.STATE_PATH, t.MEMORY_PATH, t.LOG_PATH)
+scripts\_smoke_triarb.py:392:        t.STATE_PATH = tmp_path / "triarb_state.npz"
+scripts\_smoke_triarb.py:394:        t.LOG_PATH = tmp_path / "triarb.jsonl"
+scripts\_smoke_triarb.py:408:    t.DATA_DIR, t.STATE_PATH, t.MEMORY_PATH, t.LOG_PATH = original
+
+codex
+`BollRev`는 설계 문서와 리뷰 문맥에는 강하게 등장하지만, 실제 Oracle/V2 경로에 붙은 구현 흔적은 없고 `scripts/bollrev.py` 실체 여부도 분리 확인이 필요해 보입니다. Topic 1 판단 정확도를 위해 V3의 실제 variant 구조와 BollRev 파일 존재만 짧게 확인하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Test-Path scripts/bollrev.py; if (Test-Path scripts/bollrev.py) { Get-Item scripts/bollrev.py | Select-Object FullName,Length,LastWriteTime }' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'rg -n "VARIANT|variant|ContextMemory|memory|setup|vwap_slope|ema_dist|vp_clearance|rr_estimate|vol_regime|bb_pos" scripts/v3.py' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content scripts/v3.py | Select-Object -First 260' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 371ms:
+False
+
+ succeeded in 338ms:
+7:  4. Multi-variant paper trading (5 variants concurrently)
+50:MEMORY_PATH = DATA_DIR / "v3_memory.json"
+68:MEMORY_WARMUP_TRADES = 30              # trades before memory activates
+69:MEMORY_FULL_ACTIVATION = 100           # trades before memory at full weight
+84:# Execution TFs expanded per WebSearch findings: 3m/5m/15m/30m + 5m param variants.
+86:VARIANTS_CONFIG = {
+87:    "v3-3m":              dict(rr_min=1.5, chop_strict=1.0, memory=True,  timeframe="3m",  htf_filter=True),
+88:    "v3-5m":              dict(rr_min=1.5, chop_strict=1.0, memory=True,  timeframe="5m",  htf_filter=True),
+89:    "v3-15m":             dict(rr_min=1.5, chop_strict=1.0, memory=True,  timeframe="15m", htf_filter=True),
+90:    "v3-30m":             dict(rr_min=1.5, chop_strict=1.0, memory=True,  timeframe="30m", htf_filter=True),
+91:    "v3-5m-aggressive":   dict(rr_min=1.2, chop_strict=0.8, memory=True,  timeframe="5m",  htf_filter=True),
+92:    "v3-5m-conservative": dict(rr_min=2.0, chop_strict=1.2, memory=True,  timeframe="5m",  htf_filter=True),
+93:    "v3-control":         dict(rr_min=1.5, chop_strict=1.0, memory=False, timeframe="5m",  htf_filter=False),
+205:    vwap_slope_3: float       # vwap_now - vwap_3bars_ago
+206:    ema_dist_atr: float       # (close - ema9) / atr14
+210:    vol_regime: float         # atr14 / atr60
+253:    vwap_rising = snap.vwap_slope_3 > 0
+254:    vwap_falling = snap.vwap_slope_3 < 0
+336:def vp_clearance(df: pd.DataFrame, entry: float, direction: str, atr_val: float,
+338:    """Returns (clear, first_hvn_price, rr_estimate)."""
+377:    vwap_slope: float           # normalized by ATR
+378:    ema_dist_atr: float         # (close - ema9) / ATR
+379:    vp_clearance_atr: float     # distance to first HVN / ATR
+380:    rr_estimate: float
+382:    vol_regime: float           # atr14 / atr60
+386:            self.vwap_slope, self.ema_dist_atr, self.vp_clearance_atr,
+387:            self.rr_estimate, float(self.session_hour_bucket), self.vol_regime,
+403:class ContextMemory:
+411:    def __init__(self, variant_name: str):
+412:        self.variant_name = variant_name
+458:        Warmup: no memory effect until MEMORY_WARMUP_TRADES.
+505:                vwap_slope=arr[0], ema_dist_atr=arr[1], vp_clearance_atr=arr[2],
+506:                rr_estimate=arr[3], session_hour_bucket=int(arr[4]), vol_regime=arr[5],
+521:# Position + Position Manager (per-variant)
+539:    """Position manager per variant."""
+541:    def __init__(self, variant_name: str, config: dict):
+542:        self.name = variant_name
+550:        self.memory = ContextMemory(variant_name)
+554:        self.signals_blocked_memory = 0
+564:        # Memory blacklist check (only if memory enabled)
+565:        if self.config["memory"] and self.memory.is_blacklisted(ctx, direction):
+566:            self.signals_blocked_memory += 1
+567:            return "memory_blacklist"
+582:        if self.config["memory"]:
+583:            mult = self.memory.size_multiplier(ctx, direction,
+584:                                               len(self.memory.records))
+670:        self.memory.add(record)
+704:# V3 Engine (main loop, manages all variants)
+711:        # Execution timeframes used by any variant (derived from config)
+712:        self.exec_timeframes: list[str] = sorted({cfg["timeframe"] for cfg in VARIANTS_CONFIG.values()})
+719:        self.variants: dict[str, VariantPM] = {
+720:            name: VariantPM(name, cfg) for name, cfg in VARIANTS_CONFIG.items()
+764:        vwap_slope_3 = 0.0
+766:            vwap_slope_3 = float(vwap_arr[-1] - vwap_arr[-4])
+776:            vwap_slope_3=vwap_slope_3,
+777:            ema_dist_atr=(float(c[-1]) - float(ema_arr[-1])) / atr14_now,
+781:            vol_regime=atr14_now / max(atr60_now, 1e-9),
+786:            vwap_slope=snap.vwap_slope_3 / max(snap.atr14, 1e-9),
+787:            ema_dist_atr=snap.ema_dist_atr,
+788:            vp_clearance_atr=vp_distance / max(snap.atr14, 1e-9),
+789:            rr_estimate=rr,
+791:            vol_regime=snap.vol_regime,
+794:    def _process_variant_on_bar(self, variant_name: str, asset: str,
+796:        """Evaluate entries+exits for one variant on a new bar.
+799:        If variant has htf_filter=True, neutral blocks all entries and
+802:        pm = self.variants[variant_name]
+866:        clear, first_hvn, rr = vp_clearance(
+885:            print(f"  [{variant_name} {asset}] {direction.upper()} @{entry_price:.2f} "
+891:              f"| {len(VARIANTS_CONFIG)} variants")
+940:        # --- Execution TF refresh (each variant uses its own TF) ---
+955:                # New closed bar — append and fire variants
+967:                for name, cfg in VARIANTS_CONFIG.items():
+969:                        self._process_variant_on_bar(
+983:            "variants": {},
+985:        for name, pm in self.variants.items():
+986:            log_entry["variants"][name] = {
+991:                "mem_trades": len(pm.memory.records),
+994:                "blocked_mem": pm.signals_blocked_memory,
+1003:        for name, pm in self.variants.items():
+1008:        variants_data = {}
+1009:        for name, pm in self.variants.items():
+1010:            ms = pm.memory.snapshot()
+1011:            variants_data[name] = {
+1031:                "memory": ms,
+1036:                    "blocked_memory": pm.signals_blocked_memory,
+1043:            "variants": variants_data,
+1045:            "variant_configs": VARIANTS_CONFIG,
+1046:            "memory_warmup": MEMORY_WARMUP_TRADES,
+1047:            "memory_full_activation": MEMORY_FULL_ACTIVATION,
+1058:            for name, pm in self.variants.items():
+1064:            memory_blob = {}
+1066:            for name, pm in self.variants.items():
+1067:                memory_blob[name] = [asdict(r) for r in pm.memory.records[-500:]]
+1070:                json.dump({"memory": memory_blob, "trade_logs": trade_logs}, f)
+1071:            print(f"  [save] state + memory persisted")
+1081:            for name, pm in self.variants.items():
+1094:                mem = blob.get("memory", {})
+1096:                for name, pm in self.variants.items():
+1098:                        pm.memory.records.append(TradeRecord(**rec))
+1100:            print(f"  [load] tick={self.tick_count} variants restored")
+
+ succeeded in 472ms:
+"""V3 ??Parker Brooks Rule Engine + Self-Learning Context Memory.
+
+Design:
+  1. Parker Brooks rule engine (VWAP/EMA9/Volume Profile) ??deterministic entry gate
+  2. Context Memory (k-NN based EV tracking) ??learns good/bad contexts
+  3. Kill Switch ??auto-blacklist bad context clusters
+  4. Multi-variant paper trading (5 variants concurrently)
+
+Core principle (user requirement):
+  "??醫뗭? 嫄??뚭굅, 醫뗭? 嫄?諛쏆븘?ㅼ엫. ?ㅼ뒪濡?諛쒖쟾?섎뒗 ?뚭퀬由ъ쬁."
+
+Usage:
+    py -3.12 scripts/v3.py [--assets ETH,BTC,SOL,XRP] [--port 8898]
+
+Dashboard:
+    http://localhost:8898
+"""
+from __future__ import annotations
+
+import argparse
+import http.server
+import json
+import math
+import sys
+import threading
+import time
+from dataclasses import dataclass, field, asdict
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import pandas as pd
+
+for _pkg, _imp in [("ccxt", "ccxt")]:
+    try:
+        __import__(_imp)
+    except ImportError:
+        import subprocess as _sp
+        _sp.check_call([sys.executable, "-m", "pip", "install", _pkg])
+
+import ccxt
+
+# ===================================================================
+# Constants
+# ===================================================================
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+STATE_PATH = DATA_DIR / "v3_state.npz"
+LOG_PATH = DATA_DIR / "v3.jsonl"
+MEMORY_PATH = DATA_DIR / "v3_memory.json"
+DASH_PORT = 8898
+TICK_SEC = 60
+HISTORY_BARS = 500
+INITIAL_CAPITAL = 10_000.0
+SAVE_INTERVAL = 1800
+
+# Cost model (Bybit USDT perp)
+TAKER_FEE = 0.00055
+SLIPPAGE = 0.0005
+ROUND_TRIP_COST = (TAKER_FEE * 2) + (SLIPPAGE * 2)  # ~0.21%
+
+# Context Memory policy
+CTX_DIM = 6
+KNN_K = 5
+MEMORY_MIN_SAMPLES_FOR_BLACKLIST = 20
+MEMORY_BLACKLIST_EV_THRESHOLD = -0.5   # in R units
+MEMORY_BOOST_EV_THRESHOLD = 0.3        # in R units
+MEMORY_WARMUP_TRADES = 30              # trades before memory activates
+MEMORY_FULL_ACTIVATION = 100           # trades before memory at full weight
+
+# Risk
+RISK_PER_TRADE = 0.005  # 0.5% of equity per trade (hard stop distance)
+
+# HTF bias filter (higher-timeframe context)
+# Research (Parker Brooks / intraday scalping multi-TF analysis):
+#   - Execution TFs: 1m??0m. Core: 5m, 15m. 30m is upper bound.
+#   - HTF context: 1h (standard for scalping confluence). Daily for swing.
+#   - 60m/120m as execution TF ??unsuitable (VWAP is session-anchored; beyond 30m it smooths out).
+HTF_TIMEFRAME = "1h"
+HTF_MIN_BARS = 60          # need enough bars for EMA50
+HTF_REFRESH_TICKS = 15     # refresh 1h bias every 15 minutes (tick = 60s)
+
+# Variants ??user said: "?ㅼ뼇?섍쾶 紐⑤뜽??留뚮뱾?댁꽌 蹂묓뻾 ?섏씠???몃젅?대뵫 ?뚯뒪??
+# Execution TFs expanded per WebSearch findings: 3m/5m/15m/30m + 5m param variants.
+# htf_filter=True ??block entries against 1h EMA20/50 bias; neutral ??NO_TRADE.
+VARIANTS_CONFIG = {
+    "v3-3m":              dict(rr_min=1.5, chop_strict=1.0, memory=True,  timeframe="3m",  htf_filter=True),
+    "v3-5m":              dict(rr_min=1.5, chop_strict=1.0, memory=True,  timeframe="5m",  htf_filter=True),
+    "v3-15m":             dict(rr_min=1.5, chop_strict=1.0, memory=True,  timeframe="15m", htf_filter=True),
+    "v3-30m":             dict(rr_min=1.5, chop_strict=1.0, memory=True,  timeframe="30m", htf_filter=True),
+    "v3-5m-aggressive":   dict(rr_min=1.2, chop_strict=0.8, memory=True,  timeframe="5m",  htf_filter=True),
+    "v3-5m-conservative": dict(rr_min=2.0, chop_strict=1.2, memory=True,  timeframe="5m",  htf_filter=True),
+    "v3-control":         dict(rr_min=1.5, chop_strict=1.0, memory=False, timeframe="5m",  htf_filter=False),
+}
+
+
+# ===================================================================
+# Indicator Engine
+# ===================================================================
+class IndicatorEngine:
+    """Computes VWAP (session-anchored UTC 00:00), EMA9, ATR14, Volume Profile."""
+
+    @staticmethod
+    def session_vwap(df: pd.DataFrame) -> np.ndarray:
+        """VWAP anchored at UTC 00:00 (daily reset)."""
+        # Ensure ts is datetime
+        ts = pd.to_datetime(df["ts"])
+        date = ts.dt.date
+        tp = (df["high"] + df["low"] + df["close"]) / 3.0
+        vol = df["volume"]
+        tpv = tp * vol
+        # Cumulative within each day
+        cum_tpv = tpv.groupby(date).cumsum()
+        cum_vol = vol.groupby(date).cumsum()
+        vwap = cum_tpv / cum_vol.replace(0, np.nan)
+        return vwap.ffill().bfill().values.astype(float)
+
+    @staticmethod
+    def ema(values: np.ndarray, period: int) -> np.ndarray:
+        s = pd.Series(values)
+        return s.ewm(span=period, adjust=False).mean().values.astype(float)
+
+    @staticmethod
+    def atr(df: pd.DataFrame, period: int = 14) -> np.ndarray:
+        h = df["high"].values.astype(float)
+        lo = df["low"].values.astype(float)
+        c = df["close"].values.astype(float)
+        if len(c) < 2:
+            return np.zeros_like(c)
+        prev_c = np.concatenate([[c[0]], c[:-1]])
+        tr = np.maximum.reduce([
+            h - lo,
+            np.abs(h - prev_c),
+            np.abs(lo - prev_c),
+        ])
+        return pd.Series(tr).rolling(period, min_periods=1).mean().values.astype(float)
+
+    @staticmethod
+    def volume_profile(df: pd.DataFrame, lookback: int = 120, nbins: int = 30) -> tuple[np.ndarray, np.ndarray]:
+        """Fixed-range volume profile. Returns (price_midpoints, volumes)."""
+        if len(df) < lookback:
+            return np.array([]), np.array([])
+        recent = df.iloc[-lookback:]
+        lo = float(recent["low"].min())
+        hi = float(recent["high"].max())
+        if hi <= lo:
+            return np.array([]), np.array([])
+        bins = np.linspace(lo, hi, nbins + 1)
+        mids = (bins[:-1] + bins[1:]) / 2.0
+        volumes = np.zeros(nbins)
+        for _, row in recent.iterrows():
+            bar_lo, bar_hi = float(row["low"]), float(row["high"])
+            bar_vol = float(row["volume"])
+            if bar_hi <= bar_lo:
+                continue
+            # distribute bar volume across overlapping bins
+            for i in range(nbins):
+                b_lo, b_hi = bins[i], bins[i + 1]
+                overlap = max(0.0, min(bar_hi, b_hi) - max(bar_lo, b_lo))
+                if overlap > 0:
+                    volumes[i] += bar_vol * overlap / (bar_hi - bar_lo)
+        return mids, volumes
+
+    @staticmethod
+    def hvn_indices(volumes: np.ndarray, percentile: float = 70.0) -> np.ndarray:
+        """Returns indices of bins with volume >= given percentile. HVN = top 30%."""
+        if len(volumes) == 0:
+            return np.array([], dtype=int)
+        threshold = np.percentile(volumes, percentile)
+        return np.where(volumes >= threshold)[0]
+
+
+def htf_bias(df_htf: pd.DataFrame) -> str:
+    """Higher-timeframe directional bias from 1h EMA20/50.
+
+    Returns 'bullish' / 'bearish' / 'neutral'.
+    bullish  = close > EMA20 > EMA50
+    bearish  = close < EMA20 < EMA50
+    else     = neutral (block new entries)
+    """
+    if df_htf is None or len(df_htf) < HTF_MIN_BARS:
+        return "neutral"
+    c = df_htf["close"].values.astype(float)
+    ema20 = IndicatorEngine.ema(c, 20)
+    ema50 = IndicatorEngine.ema(c, 50)
+    close = c[-1]
+    e20 = ema20[-1]
+    e50 = ema50[-1]
+    if close > e20 > e50:
+        return "bullish"
+    if close < e20 < e50:
+        return "bearish"
+    return "neutral"
+
+
+# ===================================================================
+# Market State Classifier (Parker Brooks rule sections A/B/C)
+# ===================================================================
+@dataclass
+class MarketSnapshot:
+    close: float
+    vwap: float
+    ema9: float
+    atr14: float
+    vwap_slope_3: float       # vwap_now - vwap_3bars_ago
+    ema_dist_atr: float       # (close - ema9) / atr14
+    recent_vwap_crosses: int  # count in last 20 bars
+    close_vwap_dist_atr: float  # abs(close - vwap) / atr14
+    session_hour: int
+    vol_regime: float         # atr14 / atr60
+
+
+def classify_state(df: pd.DataFrame, snap: MarketSnapshot, chop_strict: float) -> str:
+    """A/B/C classification. chop_strict>1.0 = stricter chop detection."""
+    if len(df) < 20:
+        return "INSUFFICIENT_DATA"
+
+    c = df["close"].values
+    vwap_arr = IndicatorEngine.session_vwap(df)
+    atr_val = snap.atr14
+    if atr_val <= 0:
+        return "INSUFFICIENT_DATA"
+
+    # A. VWAP_CHOP ??any of these conditions
+    # (1) > 3 VWAP crosses in last 20 bars  (tightened by chop_strict)
+    max_crosses = max(1, int(round(3 / chop_strict)))
+    if snap.recent_vwap_crosses > max_crosses:
+        return "VWAP_CHOP"
+
+    # (2) 4+ of last 10 bars have abs(close - vwap) <= 0.15 * ATR
+    hug_threshold = 0.15 * atr_val * chop_strict
+    last10 = min(10, len(c))
+    hug_count = sum(
+        1 for i in range(-last10, 0)
+        if abs(c[i] - vwap_arr[i]) <= hug_threshold
+    )
+    if hug_count >= 4:
+        return "VWAP_CHOP"
+
+    # (3) ema9/vwap distance <= 0.10 * ATR for 3+ of last 5 bars
+    ema_arr = IndicatorEngine.ema(c, 9)
+    close_threshold = 0.10 * atr_val * chop_strict
+    close_count = sum(
+        1 for i in range(-min(5, len(c)), 0)
+        if abs(ema_arr[i] - vwap_arr[i]) <= close_threshold
+    )
+    if close_count >= 3:
+        return "VWAP_CHOP"
+
+    # B/C bias
+    last2_above = all(c[i] > vwap_arr[i] for i in [-1, -2])
+    last2_below = all(c[i] < vwap_arr[i] for i in [-1, -2])
+    vwap_rising = snap.vwap_slope_3 > 0
+    vwap_falling = snap.vwap_slope_3 < 0
+    ema_above_vwap = snap.ema9 > snap.vwap
+    ema_below_vwap = snap.ema9 < snap.vwap
+
+    if last2_above and vwap_rising and ema_above_vwap:
+        return "LONG_BIAS"
+    if last2_below and vwap_falling and ema_below_vwap:
+
+codex
+V3 구조를 보면 현재 variant는 모두 동일한 setup evaluator 위에서 파라미터만 달리하고, `ContextMemory`도 setup-context 기준입니다. BollRev가 Oracle 안으로 들어가면 “새 예측 변종”이라기보다 사실상 별도 규칙 엔진을 얹는 꼴이라, 관련 설계 문서의 실제 구현 범위를 확인해 공수 추정을 고정하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content docs/bollrev_260420.md | Select-Object -Skip 150 -First 40' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content docs/models_architecture_260420.md | Select-Object -Skip 150 -First 40' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 404ms:
+3. 怨듯넻 洹쒖빟? `docs/models_architecture_260420.md` ??洹??덉쓽 section 4(怨듯넻 ?꾪궎?띿쿂)瑜?諛섎뱶??以??
+4. 蹂?臾몄꽌??Part A ?댁슜??肄붾뱶濡?**洹몃?濡?* 援ы쁽. 洹쒖튃???꾩쓽 蹂寃?湲덉?.
+5. 援ы쁽 ??**?뚮옖 紐⑤뱶**濡??뚯씪蹂??묒뾽 怨꾪쉷 癒쇱? ?섎┰.
+6. 援ы쁽 以?紐⑤Ⅴ??嫄?**異붿륫?섏? 留먭퀬** ??臾몄꽌?먯꽌 寃?????놁쑝硫?`scripts/brooks.py`???숈씪 湲곕뒫??蹂듭궗.
+
+### B.2 ?곗텧臾?
+1. **`scripts/bollrev.py`** (?좉퇋, ~900 LOC ?덉긽)
+2. **`scripts/_smoke_bollrev.py`** (?ㅻえ???뚯뒪?? ~100 LOC)
+3. **`scripts/dashboard_unified.py`** ?섏젙 ??`renderBollRev` 異붽? + `MODELS` 由ъ뒪?몄뿉 bollrev 異붽?
+4. **由щ럭 ?붿껌??*: `docs/bollrev_review_request_260420.md` (援ы쁽 ??Codex媛 ?묒꽦)
+
+### B.3 `bollrev.py` ?곸꽭 ?쒕갑
+
+#### B.3.1 Imports + Constants (?곷떒 釉붾줉)
+
+```python
+from __future__ import annotations
+import argparse, http.server, json, math, sys, threading, time
+from dataclasses import dataclass, field, asdict
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import pandas as pd
+
+# ccxt ?먮룞?ㅼ튂 媛??(brooks.py? ?숈씪 ?⑦꽩 蹂듭궗)
+for _pkg, _imp in [("ccxt", "ccxt")]:
+    try: __import__(_imp)
+    except ImportError:
+        import subprocess as _sp
+        _sp.check_call([sys.executable, "-m", "pip", "install", _pkg])
+import ccxt
+
+# Paths
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+STATE_PATH = DATA_DIR / "bollrev_state.npz"
+LOG_PATH = DATA_DIR / "bollrev.jsonl"
+MEMORY_PATH = DATA_DIR / "bollrev_memory.json"
+
+
+ succeeded in 479ms:
+}
+```
+
+**紐⑤뜽蹂?異붽? ?꾨뱶**???덉슜 (?? Brooks??`htf_bias`, TriArb??`spread_zscore`).
+
+### 4.4 ContextMemory ?ъ궗??洹쒖빟
+
+**?ъ궗???덉슜**. ??`ContextVector`??6媛??꾨뱶 ?섎???紐⑤뜽蹂꾨줈 ?ъ젙??
+
+- Brooks: `vwap_slope, ema_dist_atr, vp_clearance_atr, rr_estimate, session_hour_bucket, vol_regime`
+- BollRev: `bb_width_atr, rsi_14, dist_to_mid_atr, time_in_band, session_hour_bucket, vol_regime`
+- TriArb: `spread_zscore, spread_velocity, correlation_30d, leg_vol_ratio, session_hour_bucket, vol_regime`
+- Oracle: (?좏깮) ?대? LSTM ?쒖슜 ???꾩닔 ?꾨떂
+
+`ContextMemory` ?대옒???먯껜???숈씪 肄붾뱶 蹂듭궗. `_distance()`??媛以묒튂留?紐⑤뜽蹂꾨줈 override 媛??
+
+### 4.5 VariantPM 怨듯넻 ?꾨뱶
+
+```python
+class VariantPM:
+    self.name: str
+    self.config: dict
+    self.capital: float
+    self.initial_capital: float
+    self.positions: dict[str, Position]
+    self.trade_log: list[dict]
+    self.pnl_history: list[float]
+    self.peak_capital: float
+    self.memory: ContextMemory
+    self.signals_considered: int
+    self.signals_blocked_chop: int    # BollRev/Brooks ?대떦
+    self.signals_blocked_rr: int
+    self.signals_blocked_memory: int
+    self.signals_blocked_htf: int     # Brooks留??ㅼ젣 ?ъ슜. ?섎㉧吏??0?쇰줈 ??    self.signals_executed: int
+```
+
+??쒕낫?쒓? ?꾨뱶瑜?怨듯넻 李몄“?섎?濡?**紐⑤뱺 紐⑤뜽?????꾨뱶瑜??ы븿**. ?ъ슜?섏? ?딅뒗 移댁슫?곕뒗 `0` 怨좎젙.
+
+---
+
+
+codex
+수치 추정은 코드 크기와 변경 반경을 기준으로 잡는 편이 정확합니다. `v2.py` 규모와 대시보드 파일 크기만 확인해서 A/B/C의 실제 편집량과 회귀면적을 보정하겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '(Get-Content scripts/v2.py | Measure-Object -Line).Lines; (Get-Content scripts/v3.py | Measure-Object -Line).Lines; (Get-Content scripts/dashboard_unified.py | Measure-Object -Line).Lines' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content scripts/v2.py | Select-Object -Skip 260 -First 90' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 441ms:
+795
+1022
+628
+
+ succeeded in 502ms:
+        self.norm = EMANormalizer(n)
+
+        # Tracking
+        self.predictions: list[float] = []
+        self.actuals: list[float] = []
+        self.accuracy_history: list[float] = []
+        self.entropy_history: list[float] = []
+        self.feature_importance = np.ones(n) / n
+
+    def predict(self, x: np.ndarray) -> float:
+        """Predict next-bar return."""
+        x_n = self.norm.normalize(x)
+        return float(np.dot(self.w, x_n) + self.b)
+
+    def update(self, x_prev: np.ndarray, y_true: float):
+        """Learn from previous features ??actual return. Proper t+1 labeling."""
+        # Update normalizer with previous features
+        self.norm.update(x_prev)
+        x_n = self.norm.normalize(x_prev)
+
+        y_pred = float(np.dot(self.w, x_n) + self.b)
+        error = y_pred - y_true
+
+        # SGD with per-feature L2
+        grad_w = error * x_n + self.l2_per_feat * self.w
+        grad_b = error
+
+        # Gradient clipping (protect against outliers)
+        grad_norm = np.linalg.norm(grad_w)
+        if grad_norm > 1.0:
+            grad_w = grad_w / grad_norm
+        grad_b = np.clip(grad_b, -1.0, 1.0)  # clip bias gradient too
+
+        self.w -= self.lr * grad_w
+        self.b -= self.lr * grad_b
+
+        # Track
+        self.predictions.append(y_pred)
+        self.actuals.append(y_true)
+
+        # Rule 2: rebalance memory
+        self._rebalance_memory()
+
+        # Direction accuracy (rolling 50)
+        if len(self.predictions) >= 10:
+            recent_p = self.predictions[-50:]
+            recent_a = self.actuals[-50:]
+            correct = sum(
+                1 for p, a in zip(recent_p, recent_a)
+                if (p > 0) == (a > 0)
+            )
+            self.accuracy_history.append(correct / len(recent_p))
+
+    def _rebalance_memory(self):
+        """Rule 2: Adaptive L2 + exploration noise to keep entropy high."""
+        # FIX: importance = |w| only (normalized model, sqrt(var) was wrong)
+        imp = np.abs(self.w)
+        imp_sum = imp.sum()
+        if imp_sum < 1e-10:
+            self.feature_importance = np.ones(self.n) / self.n
+            self.entropy_history.append(1.0)
+            return
+
+        p = imp / imp_sum
+        self.feature_importance = p
+
+        # Entropy (NaN-safe)
+        safe_p = np.clip(p, 1e-10, 1.0)
+        entropy = -np.sum(safe_p * np.log(safe_p))
+        max_entropy = np.log(self.n)
+        self.entropy_history.append(entropy / max_entropy)
+
+        # Adaptive L2: penalize overused features
+        uniform = 1.0 / self.n
+        excess = np.maximum(p - uniform, 0)
+        self.l2_per_feat = self.base_l2 * (1.0 + self.memory_alpha * excess * self.n)
+
+        # FIX: exploration noise for underused features (L2 only shrinks, can't grow)
+        deficit = np.maximum(uniform - p, 0)
+        if deficit.sum() > 0:
+            noise_scale = self.lr * 0.1 * deficit * self.n
+            self.w += np.random.randn(self.n) * noise_scale
+
+    def memory_entropy(self) -> float:
+        if not self.entropy_history:
+            return 1.0
+        return self.entropy_history[-1]
+
+    def direction_accuracy(self) -> float:
+        if not self.accuracy_history:
+
+codex
+A/B/C 외에 더 나은 D가 성립하는지 확인하려면, `v2.py`가 라이브러리처럼 import 가능한지와 엔진 진입점 구조를 봐야 합니다. 이게 되면 “분리 파일 + 동일 코드경로 + 최소 차이”라는 ablation 정석을 더 깔끔하게 만족시킬 수 있습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content scripts/v2.py | Select-Object -Skip 560 -First 260' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"class .*Engine|def main|if __name__ == '__main__'|parser = argparse|ArgumentParser\" scripts/v2.py" in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 386ms:
+  const mx=Math.max(...imp);
+  el.innerHTML=imp.map((v,i)=>{
+    const h=Math.max(3,(v/mx)*36);
+    const hue=120*(1-v*imp.length);
+    return `<div><div class="bar" style="height:${h}px;width:18px;background:hsl(${Math.max(0,hue)},70%,45%)" title="${names[i]}: ${(v*100).toFixed(1)}%"></div><div class="bar-l">${names[i].slice(0,3)}</div></div>`;
+  }).join('');
+}
+async function tick(){
+  try{
+    const d=await(await fetch('/api/state')).json();
+    q('#acc').textContent=fmt(d.accuracy);
+    q('#acc').className='big '+(d.accuracy>0.52?'grn':d.accuracy>0.48?'ylw':'red');
+    q('#acc-d').textContent=d.total_predictions+' predictions';
+    q('#ent').textContent=fmt(d.entropy,1);
+    q('#ent').className='big '+(d.entropy>0.8?'grn':d.entropy>0.6?'ylw':'red');
+    q('#ent-d').textContent=d.entropy>0.8?'balanced':'rebalancing...';
+    q('#ret').textContent=fmt(d.total_return);
+    q('#ret').className='big '+(d.total_return>0?'grn':'red');
+    q('#ret-d').textContent=`$${d.capital.toFixed(0)} | DD ${fmt(d.drawdown)} | Kelly ${fmt(d.kelly)} | Exp ${fmt(d.exposure)}`;
+    renderMM(d.feature_importance,d.feature_names);
+    let ph='';
+    if(!d.positions.length)ph='<span style="color:#444">no positions</span>';
+    else d.positions.forEach(p=>{
+      ph+=`<div><span class="${p.dir==='long'?'grn':'red'}">${p.dir.toUpperCase()}</span> ${p.asset} @${p.entry} (${(p.size*100).toFixed(1)}%) ${p.time}</div>`;
+    });
+    q('#pos').innerHTML=ph;
+    q('#kelly').textContent=`Kelly: ${fmt(d.kelly)} | Exposure: ${fmt(d.exposure)} / ${fmt(d.exposure_cap)}`;
+    line('cv-pnl',d.pnl_history,'#00ff88',d.initial_capital);
+    line('cv-acc',d.accuracy_history,'#00ccff',0.5);
+    let lh='';
+    (d.trade_log||[]).slice(-30).reverse().forEach(t=>{
+      lh+=`<div class="log-e"><span class="${t.net>0?'grn':'red'}">${t.dir}</span> ${t.asset} ${t.entry}->${t.exit} sz=${(t.size*100).toFixed(1)}% raw=${fmt(t.raw)} <span class="cost-tag">-${fmt(t.cost)}</span> net=${fmt(t.net)} $${t.capital.toFixed(0)}</div>`;
+    });
+    q('#log').innerHTML=lh||'<span style="color:#444">no trades yet</span>';
+  }catch(e){}
+}
+setInterval(tick,5000);tick();
+</script></body></html>"""
+
+
+# ===================================================================
+# V2 Engine (main loop)
+# ===================================================================
+class V2Engine:
+    def __init__(self, assets: list[str], port: int = DASH_PORT):
+        self.assets = assets
+        self.port = port
+        self.exchange = ccxt.bybit({"enableRateLimit": True})
+        self.feature_engines: dict[str, FeatureEngine] = {
+            a: FeatureEngine() for a in assets
+        }
+        # Per-asset predictors (Rule 1: each asset gets its own model)
+        self.predictors: dict[str, OnlinePredictor] = {
+            a: OnlinePredictor() for a in assets
+        }
+        self.pm = PositionManager()
+        self.history: dict[str, pd.DataFrame] = {}
+        self.prices: dict[str, float] = {}
+        self.tick_count = 0
+        self.last_save = time.time()
+
+        # t+1 labeling: store previous tick's features per asset
+        self.prev_features: dict[str, np.ndarray] = {}
+        # Cache funding rates between fetches
+        self._last_funding: dict[str, float] = {a: 0.0 for a in assets}
+
+    def _symbol(self, asset: str) -> str:
+        return f"{asset}/USDT:USDT"
+
+    def _fetch_funding(self, asset: str) -> float:
+        """Fetch funding rate. Returns 0 on failure."""
+        try:
+            info = self.exchange.fetch_funding_rate(self._symbol(asset))
+            return float(info.get("fundingRate", 0) or 0)
+        except Exception:
+            return 0.0
+
+    def _fetch_history(self, asset: str) -> pd.DataFrame | None:
+        try:
+            ohlcv = self.exchange.fetch_ohlcv(self._symbol(asset), "1m", limit=HISTORY_BARS)
+            df = pd.DataFrame(ohlcv, columns=["ts", "open", "high", "low", "close", "volume"])
+            df["ts"] = pd.to_datetime(df["ts"], unit="ms")
+            return df
+        except Exception as e:
+            print(f"  [{asset}] fetch error: {e}")
+            return None
+
+    def _fetch_latest(self, asset: str) -> dict | None:
+        """Fetch the most recent CLOSED bar (not the open candle)."""
+        try:
+            ohlcv = self.exchange.fetch_ohlcv(self._symbol(asset), "1m", limit=3)
+            if len(ohlcv) < 2:
+                return None
+            # Use [-2] = last fully closed bar. [-1] may be an open candle.
+            bar = ohlcv[-2]
+            return {
+                "ts": pd.Timestamp(bar[0], unit="ms"),
+                "open": bar[1], "high": bar[2], "low": bar[3],
+                "close": bar[4], "volume": bar[5],
+            }
+        except Exception:
+            return None
+
+    def init(self):
+        print(f"[V2] Initializing {len(self.assets)} assets...")
+        print(f"[V2] Cost model: {ROUND_TRIP_COST*100:.2f}% round-trip")
+        print(f"[V2] Kelly cap: {KELLY_CAP*100:.0f}% | Exposure cap: {TOTAL_EXPOSURE_CAP*100:.0f}%")
+        for asset in self.assets:
+            df = self._fetch_history(asset)
+            if df is not None:
+                self.history[asset] = df
+                self.prices[asset] = float(df["close"].iloc[-1])
+                print(f"  [{asset}] {len(df)} bars, ${self.prices[asset]:,.2f}")
+        print(f"[V2] Dashboard: http://localhost:{self.port}")
+
+    def tick(self):
+        self.tick_count += 1
+
+        for asset in self.assets:
+            if asset not in self.history:
+                continue
+
+            # Fetch new bar
+            bar = self._fetch_latest(asset)
+            if bar is None:
+                # API error ??do NOT skip position management
+                # Close positions if we can't get price (safety)
+                if asset in self.pm.positions and self.tick_count % 5 == 0:
+                    print(f"  [{asset}] WARNING: API error, keeping position")
+                continue
+
+            # Update history
+            new_row = pd.DataFrame([bar])
+            self.history[asset] = pd.concat(
+                [self.history[asset], new_row], ignore_index=True
+            ).tail(HISTORY_BARS)
+
+            price = float(bar["close"])
+            self.prices[asset] = price
+
+            # Fetch funding (every 30 ticks to avoid rate limits), cache between fetches
+            if self.tick_count % 30 == 1:
+                fr = self._fetch_funding(asset)
+                if fr != 0.0:
+                    self._last_funding[asset] = fr
+            funding = self._last_funding.get(asset, 0.0)
+
+            # Compute features
+            fe = self.feature_engines[asset]
+            features = fe.compute(self.history[asset], funding)
+            if features is None:
+                continue
+
+            predictor = self.predictors[asset]
+
+            # === PROPER t+1 LABELING ===
+            # Update model: previous features ??current return (features[0])
+            if asset in self.prev_features:
+                actual_return = features[0]  # ret_1 of current bar
+                predictor.update(self.prev_features[asset], actual_return)
+
+            # Predict NEXT bar's return from current features
+            prediction = predictor.predict(features)
+
+            # Store for next tick's update
+            self.prev_features[asset] = features.copy()
+
+            # === POSITION MANAGEMENT ===
+            if asset in self.pm.positions:
+                pos = self.pm.positions[asset]
+                should_exit = False
+
+                # Exit if prediction flips direction
+                if pos.direction == "long" and prediction < -MIN_EDGE_THRESHOLD:
+                    should_exit = True
+                elif pos.direction == "short" and prediction > MIN_EDGE_THRESHOLD:
+                    should_exit = True
+                # Exit if prediction drops to noise level
+                elif abs(prediction) < MIN_EDGE_THRESHOLD * 0.5:
+                    should_exit = True
+
+                if should_exit:
+                    ret = self.pm.close_position(asset, price)
+                    if ret is not None:
+                        tag = "WIN" if ret > 0 else "LOSS"
+                        print(f"  [{asset}] CLOSE {tag} net={ret:+.4%} cap=${self.pm.capital:,.0f}")
+
+            # === ENTRY: pure prediction-based ===
+            elif abs(prediction) > MIN_EDGE_THRESHOLD and predictor.norm.is_warm():
+                direction = "long" if prediction > 0 else "short"
+                cal = predictor.calibration()
+                if cal > 0.05:  # minimum trust
+                    pred_strength = min(abs(prediction) / MIN_EDGE_THRESHOLD, 3.0) / 3.0
+                    self.pm.open_position(asset, direction, price, pred_strength, cal)
+                    pos = self.pm.positions.get(asset)
+                    lev = pos.leverage if pos else 1
+                    print(f"  [{asset}] OPEN {direction} @${price:,.2f} "
+                          f"pred={prediction:+.6f} cal={cal:.2f} "
+                          f"lev={lev:.0f}x kelly={self.pm.kelly_fraction():.2f}")
+
+        # Periodic log
+        if self.tick_count % 5 == 0:
+            self._log_tick()
+
+        # Save state
+        if time.time() - self.last_save > SAVE_INTERVAL:
+            self._save_state()
+            self.last_save = time.time()
+
+    def _log_tick(self):
+        # Aggregate metrics across all asset predictors
+        accs = [p.direction_accuracy() for p in self.predictors.values()]
+        ents = [p.memory_entropy() for p in self.predictors.values()]
+        avg_acc = np.mean(accs) if accs else 0.5
+        avg_ent = np.mean(ents) if ents else 1.0
+        total_preds = sum(len(p.predictions) for p in self.predictors.values())
+
+        log_entry = {
+            "tick": self.tick_count,
+            "t": datetime.now(timezone.utc).strftime("%H:%M:%S"),
+            "acc": round(avg_acc, 4),
+            "entropy": round(avg_ent, 4),
+            "ret": round(self.pm.total_return(), 6),
+            "capital": round(self.pm.capital, 2),
+            "trades": len(self.pm.trade_returns),
+            "positions": len(self.pm.positions),
+            "exposure": round(self.pm.current_exposure(), 4),
+            "predictions": total_preds,
+        }
+        with open(LOG_PATH, "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
+        print(f"  [tick {self.tick_count}] acc={avg_acc:.1%} ent={avg_ent:.1%} "
+              f"ret={self.pm.total_return():+.2%} trades={len(self.pm.trade_returns)} "
+              f"exp={self.pm.current_exposure():.1%}")
+
+    def snapshot(self) -> dict:
+        accs = [p.direction_accuracy() for p in self.predictors.values()]
+        ents = [p.memory_entropy() for p in self.predictors.values()]
+        # Use first predictor's feature importance for display (or average)
+        fi = np.mean(
+            [p.feature_importance for p in self.predictors.values()], axis=0
+        ).tolist() if self.predictors else [1 / N_FEATURES] * N_FEATURES
+
+        # Aggregate accuracy history: average across assets per time step
+        max_len = max((len(p.accuracy_history) for p in self.predictors.values()), default=0)
+        all_acc = []
+        for i in range(max(0, max_len - 500), max_len):
+            vals = [p.accuracy_history[i] for p in self.predictors.values()
+                    if i < len(p.accuracy_history)]
+            if vals:
+                all_acc.append(float(np.mean(vals)))
+
+        return {
+            "tick": self.tick_count,
+            "accuracy": float(np.mean(accs)) if accs else 0.5,
+            "entropy": float(np.mean(ents)) if ents else 1.0,
+            "total_return": self.pm.total_return(),
+            "capital": self.pm.capital,
+            "initial_capital": self.pm.initial_capital,
+            "drawdown": self.pm.drawdown(),
+
+ succeeded in 304ms:
+115:class FeatureEngine:
+604:class V2Engine:
+898:def main():
+899:    parser = argparse.ArgumentParser(description="V2 Prediction Engine")
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content scripts/v2.py | Select-Object -Skip 890 -First 30' in C:\Users\haj\projects\subagent-orchestrator\Projects\Trading Value
+ succeeded in 412ms:
+                print("\n[V2] Stopped. State saved.")
+                break
+            except Exception as e:
+                print(f"  [error] {e}")
+            time.sleep(TICK_SEC)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="V2 Prediction Engine")
+    parser.add_argument("--assets", default="ETH,BTC,SOL,XRP")
+    parser.add_argument("--port", type=int, default=DASH_PORT)
+    args = parser.parse_args()
+    assets = [a.strip().upper() for a in args.assets.split(",")]
+    V2Engine(assets=assets, port=args.port).run()
+
+
+if __name__ == "__main__":
+    main()
+
+codex
+### Topic 1 응답
+- **Position**: 제외
+- **Reasoning**:
+  - 현재 repo 기준 BollRev는 "variant"가 아니라 별도 엔진급 작업입니다. 설계 문서도 `scripts/bollrev.py` 약 900 LOC + smoke test + dashboard 수정까지 잡고 있어, Oracle variant 추가보다 모델 신설에 가깝습니다.
+  - 구현 관점에서 mean-reversion은 지금 구조상 prediction layer보다 setup layer에 더 자연스럽습니다. `scripts/v3.py`는 `VARIANTS_CONFIG`와 `ContextMemory`로 setup/regime를 파라미터화하고, Oracle charter는 `predicted_edge / uncertainty / regime` 학습에 집중합니다.
+  - Oracle 쪽에는 이미 feature 재사용 경로가 있습니다. `scripts/dl_features.py:93,164`의 `bb_pos`를 비롯해 `bb_width`, `dist_to_mid`, `rsi`를 얹으면 mean-reversion 정보는 prediction input으로 넣을 수 있습니다.
+  - 공수/효율 기준으로 별도 BollRev 편입은 대략 20-35h, feature reuse ablation은 4-10h 수준입니다. 초기 Oracle에선 후자가 훨씬 효율적입니다.
+- **Concerns**:
+  - 제외만 하면 low-vol/range regime blind spot이 남을 수 있습니다.
+  - `bb_pos` 하나만으로는 BollRev 성격이 약합니다. `bb_width`, `dist_to_mid`, `time_in_band`류 보강이 필요합니다.
+  - V3 런타임은 아직 bb 계열 context를 쓰지 않으므로 "V3 소관"도 무공수는 아닙니다.
+- **Recommendation**:
+  - Oracle 초기 variants는 `control / aggressive / conservative`만 유지하십시오.
+  - Phase 3 전에 `bb_pos + bb_width + dist_to_mid + rsi14`를 Oracle 입력 또는 V3 context에 추가하는 1회 ablation만 먼저 돌리고, low-vol/range slice에서 유의미한 uplift가 있을 때만 Phase 6 별도 BollRev 엔진으로 승격하는 쪽이 맞습니다.
+
+### Topic 2 응답
+- **Position**: D — `scripts/v2_rule2_ablation.py` 같은 얇은 분리 harness. `v2.py`를 import하고 predictor만 교체해 Rule 2 on/off를 비교
+- **Reasoning**:
+  - `scripts/v2.py`는 795 LOC이고 Rule 2 차이는 사실상 `update()` 말단의 `self._rebalance_memory()` 한 점(`scripts/v2.py:302`)입니다. full fork보다 wrapper/subclass가 더 정확한 one-variable ablation입니다.
+  - 대략 공수/운영리스크(1=낮음, 5=높음): A 8-12h/3, B 16-28h/4, C 2-4h/5, D 6-10h/2.
+  - D는 live `v2.py` 무수정, 별도 포트/로그/상태파일 분리, 동일 코드경로 재사용을 동시에 만족합니다. 임베디드의 shadow binary, ML의 isolated experiment harness와 같은 정석 패턴입니다.
+  - B는 Charter 문구에는 예쁘지만, 실험이 Rule 2 ablation이 아니라 "미확정 Oracle skeleton + Rule 2" 복합 실험으로 바뀝니다.
+- **Concerns**:
+  - Charter를 글자 그대로 읽으면 `oracle.py` 명칭 불일치가 논점이 될 수 있습니다.
+  - import 기반 harness는 `LOG_PATH / STATE_PATH / DASH_PORT`를 variant별로 재바인딩하지 않으면 live 산출물 오염 위험이 있습니다.
+  - A보다 코드 중복은 적지만, `V2Engine` predictor 주입 방식은 스모크 테스트로 먼저 잠가야 합니다.
+- **Recommendation**:
+  - 새 파일 1개만 만들고 `OnlinePredictor`를 subclass/no-op override해 Rule 2를 끄십시오. 포트는 8902/8903, 산출물은 `data/v2_ablation_{variant}.*`로 분리하면 됩니다.
+  - 문서 정합성이 필요하면 파일명만 `oracle_rule2_ablation.py`로 두고 내부는 `v2.py` 재사용으로 구현하십시오. 핵심은 “future Oracle 선구현”이 아니라 “same V2 path, one toggle, isolated artifacts”입니다.
+
+[POSITION: T1=제외, T2=D]
+tokens used
+107,238
+### Topic 1 응답
+- **Position**: 제외
+- **Reasoning**:
+  - 현재 repo 기준 BollRev는 "variant"가 아니라 별도 엔진급 작업입니다. 설계 문서도 `scripts/bollrev.py` 약 900 LOC + smoke test + dashboard 수정까지 잡고 있어, Oracle variant 추가보다 모델 신설에 가깝습니다.
+  - 구현 관점에서 mean-reversion은 지금 구조상 prediction layer보다 setup layer에 더 자연스럽습니다. `scripts/v3.py`는 `VARIANTS_CONFIG`와 `ContextMemory`로 setup/regime를 파라미터화하고, Oracle charter는 `predicted_edge / uncertainty / regime` 학습에 집중합니다.
+  - Oracle 쪽에는 이미 feature 재사용 경로가 있습니다. `scripts/dl_features.py:93,164`의 `bb_pos`를 비롯해 `bb_width`, `dist_to_mid`, `rsi`를 얹으면 mean-reversion 정보는 prediction input으로 넣을 수 있습니다.
+  - 공수/효율 기준으로 별도 BollRev 편입은 대략 20-35h, feature reuse ablation은 4-10h 수준입니다. 초기 Oracle에선 후자가 훨씬 효율적입니다.
+- **Concerns**:
+  - 제외만 하면 low-vol/range regime blind spot이 남을 수 있습니다.
+  - `bb_pos` 하나만으로는 BollRev 성격이 약합니다. `bb_width`, `dist_to_mid`, `time_in_band`류 보강이 필요합니다.
+  - V3 런타임은 아직 bb 계열 context를 쓰지 않으므로 "V3 소관"도 무공수는 아닙니다.
+- **Recommendation**:
+  - Oracle 초기 variants는 `control / aggressive / conservative`만 유지하십시오.
+  - Phase 3 전에 `bb_pos + bb_width + dist_to_mid + rsi14`를 Oracle 입력 또는 V3 context에 추가하는 1회 ablation만 먼저 돌리고, low-vol/range slice에서 유의미한 uplift가 있을 때만 Phase 6 별도 BollRev 엔진으로 승격하는 쪽이 맞습니다.
+
+### Topic 2 응답
+- **Position**: D — `scripts/v2_rule2_ablation.py` 같은 얇은 분리 harness. `v2.py`를 import하고 predictor만 교체해 Rule 2 on/off를 비교
+- **Reasoning**:
+  - `scripts/v2.py`는 795 LOC이고 Rule 2 차이는 사실상 `update()` 말단의 `self._rebalance_memory()` 한 점(`scripts/v2.py:302`)입니다. full fork보다 wrapper/subclass가 더 정확한 one-variable ablation입니다.
+  - 대략 공수/운영리스크(1=낮음, 5=높음): A 8-12h/3, B 16-28h/4, C 2-4h/5, D 6-10h/2.
+  - D는 live `v2.py` 무수정, 별도 포트/로그/상태파일 분리, 동일 코드경로 재사용을 동시에 만족합니다. 임베디드의 shadow binary, ML의 isolated experiment harness와 같은 정석 패턴입니다.
+  - B는 Charter 문구에는 예쁘지만, 실험이 Rule 2 ablation이 아니라 "미확정 Oracle skeleton + Rule 2" 복합 실험으로 바뀝니다.
+- **Concerns**:
+  - Charter를 글자 그대로 읽으면 `oracle.py` 명칭 불일치가 논점이 될 수 있습니다.
+  - import 기반 harness는 `LOG_PATH / STATE_PATH / DASH_PORT`를 variant별로 재바인딩하지 않으면 live 산출물 오염 위험이 있습니다.
+  - A보다 코드 중복은 적지만, `V2Engine` predictor 주입 방식은 스모크 테스트로 먼저 잠가야 합니다.
+- **Recommendation**:
+  - 새 파일 1개만 만들고 `OnlinePredictor`를 subclass/no-op override해 Rule 2를 끄십시오. 포트는 8902/8903, 산출물은 `data/v2_ablation_{variant}.*`로 분리하면 됩니다.
+  - 문서 정합성이 필요하면 파일명만 `oracle_rule2_ablation.py`로 두고 내부는 `v2.py` 재사용으로 구현하십시오. 핵심은 “future Oracle 선구현”이 아니라 “same V2 path, one toggle, isolated artifacts”입니다.
+
+[POSITION: T1=제외, T2=D]

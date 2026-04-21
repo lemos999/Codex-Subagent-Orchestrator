@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Oracle 48h Ablation Timer</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Courier New',monospace;background:#0a0a0a;color:#e0e0e0;padding:30px;max-width:900px;margin:0 auto}
+  h1{color:#ff9800;border-bottom:1px solid #333;padding-bottom:10px;margin-bottom:20px}
+  h2{color:#ffc107;margin-top:30px;margin-bottom:12px;font-size:18px}
+  h3{color:#888;font-size:13px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+  .status{display:inline-block;padding:6px 14px;border-radius:4px;font-weight:bold;margin-bottom:20px}
+  .status.running{background:#2d4a1a;color:#8bc34a;border:1px solid #558b2f}
+  .status.done{background:#5a1a1a;color:#ff5722;border:1px solid #d84315;animation:blink 1s infinite}
+  @keyframes blink{0%,50%{opacity:1}51%,100%{opacity:.5}}
+  .timer-box{background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:24px;margin-bottom:20px;text-align:center}
+  .label{color:#888;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+  .countdown{font-size:54px;font-weight:bold;color:#ff9800;letter-spacing:3px;margin:10px 0;font-variant-numeric:tabular-nums}
+  .progress-bar{width:100%;height:8px;background:#222;border-radius:4px;overflow:hidden;margin-top:16px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#ff9800,#ffc107);transition:width 1s linear}
+  .times{display:flex;justify-content:space-between;background:#1a1a1a;padding:12px 16px;border-radius:4px;font-size:13px;margin-bottom:20px}
+  .times span{color:#888}
+  .dashboards{display:flex;gap:10px;margin-bottom:30px}
+  .dashboards a{flex:1;display:block;padding:12px;text-align:center;background:#1a1a1a;border:1px solid #333;color:#4fc3f7;text-decoration:none;border-radius:4px;transition:background .2s}
+  .dashboards a:hover{background:#252525;border-color:#4fc3f7}
+  .dashboards a .port{font-size:18px;font-weight:bold;display:block;margin-bottom:4px}
+  .dashboards a .variant{color:#888;font-size:12px}
+  .msg-box{background:#1a1a1a;border:1px solid #333;border-radius:4px;padding:16px;margin-bottom:12px}
+  .msg-box pre{background:#0a0a0a;padding:12px;border-radius:3px;white-space:pre-wrap;word-wrap:break-word;color:#c8e6c9;font-size:13px;line-height:1.5;margin:8px 0}
+  .msg-box button{background:#2d4a1a;color:#8bc34a;border:1px solid #558b2f;padding:6px 14px;border-radius:3px;cursor:pointer;font-family:inherit;font-size:12px}
+  .msg-box button:hover{background:#3d5a2a}
+  .msg-box button.copied{background:#1a2d4a;color:#4fc3f7;border-color:#0277bd}
+  ol{padding-left:20px;line-height:1.8}
+  ol li{margin-bottom:4px}
+  code{background:#000;padding:2px 6px;border-radius:2px;color:#ffc107;font-size:12px}
+  .warn{background:#3e2723;border-left:3px solid #ff5722;padding:10px 14px;margin:16px 0;color:#ffab91;font-size:13px}
+</style>
+</head>
+<body>
+<h1>Oracle 48h Rule 2 Ablation</h1>
+<div id="status" class="status running">⬤ 진행 중</div>
+
+<div class="timer-box">
+  <div class="label">남은 시간</div>
+  <div id="countdown" class="countdown">--:--:--</div>
+  <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
+  <div id="progress-text" style="color:#888;font-size:12px;margin-top:8px">0.00% 경과</div>
+</div>
+
+<div class="times">
+  <span>시작: <strong style="color:#e0e0e0">2026-04-21 17:04:11 KST</strong></span>
+  <span>종료: <strong style="color:#ff9800">2026-04-23 17:04:11 KST</strong></span>
+</div>
+
+<div class="dashboards">
+  <a href="http://127.0.0.1:8902/" target="_blank">
+    <span class="port">:8902</span>
+    <span class="variant">control (Rule 2 ON)</span>
+  </a>
+  <a href="http://127.0.0.1:8903/" target="_blank">
+    <span class="port">:8903</span>
+    <span class="variant">no_rule2 (Rule 2 OFF)</span>
+  </a>
+</div>
+
+<h2>종료 후 Claude에게 던질 메시지</h2>
+
+<div class="msg-box">
+  <h3>짧게</h3>
+  <pre id="msg-short">48h Rule 2 ablation 종료. 분석 후 PASS/FAIL 판정해줘.</pre>
+  <button onclick="copyMsg('msg-short', this)">복사</button>
+</div>
+
+<div class="msg-box">
+  <h3>자세히 (권장)</h3>
+  <pre id="msg-long">48h Rule 2 ablation 종료됐습니다. data/v2_ablation_control.jsonl 과 data/v2_ablation_no_rule2.jsonl 을 Walk-forward + Wilson 95% CI + calibration 기준으로 분석해서 PASS/FAIL/INCONCLUSIVE 판정해주세요. Spec은 subagent-runs/spec/oracle-v2-ablation-2026-04-21/spec.md. 판정 끝나면 scripts/archive/ 로 이관도 부탁합니다.</pre>
+  <button onclick="copyMsg('msg-long', this)">복사</button>
+</div>
+
+<h2>종료 전 체크리스트</h2>
+<ol>
+  <li>두 PowerShell 창에서 <code>Ctrl+C</code> (프로세스 종료)</li>
+  <li><code>netstat -ano | findstr ":8902 :8903"</code> 결과 비어있는지 확인</li>
+  <li>위 메시지 복사 → Claude에게 전달</li>
+</ol>
+
+<div class="warn">
+  ※ 타이머가 빨간색으로 깜빡이면 종료 시각 도달. 빠르게 Ctrl+C → 위 메시지 전달. 너무 늦게 끊어도 데이터는 여분으로 남으니 괜찮습니다.
+</div>
+
+<script>
+  const startTime = new Date('2026-04-21T17:04:11+09:00');
+  const endTime   = new Date('2026-04-23T17:04:11+09:00');
+  const totalMs   = endTime - startTime;
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function tick(){
+    const now = new Date();
+    const remaining = endTime - now;
+    const elapsed   = now - startTime;
+
+    if (remaining <= 0) {
+      document.getElementById('status').textContent = '⬤ 종료 - 지금 메시지 복사하세요';
+      document.getElementById('status').className = 'status done';
+      document.getElementById('countdown').textContent = '00:00:00';
+      document.getElementById('countdown').style.color = '#ff5722';
+      document.getElementById('progress-fill').style.width = '100%';
+      document.getElementById('progress-text').textContent = '100.00% — 종료 시각 도달';
+      document.title = '● 종료됨 · 메시지 복사';
+      return;
+    }
+
+    const h = Math.floor(remaining / 3600000);
+    const m = Math.floor((remaining % 3600000) / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('countdown').textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+
+    const pct = (elapsed / totalMs * 100);
+    document.getElementById('progress-fill').style.width = pct.toFixed(4) + '%';
+    document.getElementById('progress-text').textContent = pct.toFixed(2) + '% 경과';
+
+    document.title = pad(h) + ':' + pad(m) + ':' + pad(s) + ' · Ablation';
+  }
+
+  function copyMsg(id, btn){
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.textContent;
+      btn.textContent = '✓ 복사됨';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  tick();
+  setInterval(tick, 1000);
+</script>
+</body>
+</html>
