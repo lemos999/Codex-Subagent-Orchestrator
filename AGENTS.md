@@ -56,12 +56,6 @@ For this workspace, prefer local skills over globally installed skills when both
 - Never permanently delete files with `rm`, `del`, or equivalent direct removal; move files to the system recycle bin / trash instead.
 - Keep progress updates brief and report changes after execution rather than blocking beforehand.
 
-## Agent Directives (압축)
+## Agent Directives
 
-1. **PHASED EXECUTION**: 5파일 초과 금지. 단계별 실행 + 검증 대기.
-2. **FORCED VERIFICATION**: tsc + eslint 통과 전 완료 보고 금지.
-3. **EDIT INTEGRITY**: 편집 전후 파일 재읽기. 3회마다 검증.
-4. **CONTEXT DECAY**: 10+ 메시지 후 파일 재읽기 의무.
-5. **BREAKTHROUGH**: "불가능" 금지. 3회 실패 시 차원 전환.
-
-> 전체 규칙: CLAUDE.md "Agent Directives: Mechanical Overrides" 참조.
+규칙 원본은 `CLAUDE.md` §"Agent Directives" 단일 소스 — Pre-Work, Code Quality, Context Management, Edit Safety, Breakthrough Protocol, Root Cause First, 충돌 시 우선순위 포함. 본 파일에는 중복 기재하지 않는다 (규칙 드리프트 방지). 비-Claude 엔진(Codex/GPT, Gemini)도 동일 규칙을 따른다.
