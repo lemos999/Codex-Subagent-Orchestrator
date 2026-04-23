@@ -141,40 +141,53 @@ class TickEngine:
         return entry
 
     def _compute_reward(self, action: str, energy: float, prev_energy: float) -> float:
-        """행동 결과 → 보상 신호 (Nomos 등가)."""
+        """행동 결과 → 보상 신호 (Nomos 등가).
+
+        v2: eat 편향 교정 — 중립 지대 제거, work 보상 완화, idle 벌점 강화.
+        원칙: 적절한 때에 적절한 행동 = 보상, 부적절하면 = 벌점 (빈틈 없이).
+        """
         reward = 0.0
         hunger = float(self.inner.oyok[0])
+        sleepiness = float(self.inner.oyok[1])
 
-        # 생존 보상/벌점
+        # ── 생존 보상/벌점 ──
         if energy < 0.1:
             reward -= 0.5  # 에너지 고갈 = 큰 벌점
-        elif energy < prev_energy - 0.1:
-            reward -= 0.1  # 에너지 급락
 
-        # 행동별 보상
-        if action == "eat" and hunger > 0.5:
-            reward += 0.5  # 배고플 때 먹음 = 큰 보상
-        elif action == "eat" and hunger < 0.2:
-            reward -= 0.2  # 안 배고픈데 먹음 = 벌점 (낭비)
+        # ── eat: 배고픔 연속 스케일 보상 ──
+        if action == "eat":
+            # hunger 0.0→-0.3, 0.3→0.0(중립), 0.5→+0.2, 0.7→+0.5, 1.0→+0.8
+            reward += (hunger - 0.3) * 1.2  # 연속 함수: 배고프면 보상, 안 배고프면 벌점
 
-        if action == "sleep" and energy < 0.3:
-            reward += 0.3  # 피곤할 때 잠 = 보상
-        elif action == "sleep" and energy > 0.7:
-            reward -= 0.2  # 에너지 충분한데 잠 = 벌점
+        # ── sleep: 피로도 연속 스케일 ──
+        elif action == "sleep":
+            if energy < 0.3:
+                reward += 0.3  # 피곤할 때 잠 = 보상
+            elif energy > 0.7:
+                reward -= 0.3  # 에너지 충분한데 잠 = 강한 벌점
 
-        if action == "work" and energy > 0.5 and hunger < 0.5:
-            reward += 0.2  # 여유 있을 때 일 = 보상
+        # ── work: 조건 완화 (에너지만 체크) ──
+        elif action == "work":
+            if energy > 0.3:
+                reward += 0.3  # 에너지 있으면 일 = 보상 (주요 행동)
+            else:
+                reward -= 0.1  # 에너지 부족한데 일 = 약한 벌점
 
-        if action == "explore" and energy > 0.6:
-            reward += 0.1  # 여유 있을 때 탐험 = 소량 보상
+        # ── explore: 여유가 있으면 보상 ──
+        elif action == "explore":
+            if energy > 0.5 and hunger < 0.5:
+                reward += 0.2  # 여유 있을 때 탐험
+            else:
+                reward -= 0.05
 
-        if action == "idle":
-            reward -= 0.05  # 아무것도 안 함 = 미세 벌점
+        # ── idle: 강한 벌점 (무행동 억제) ──
+        elif action == "idle":
+            reward -= 0.15  # 아무것도 안 함 = 더 강한 벌점
 
         return np.clip(reward, -1.0, 1.0)
 
     def _sleep_tick(self) -> dict:
-        """수면 중 처리 + Phase 3 꿈 replay."""
+        """수면 중 처리 + Phase 3 꿈 replay + 기억 상태기계."""
         self.inner.sleep_ticks_remaining -= 1
         sleep_phase = "nrem" if self.inner.sleep_ticks_remaining > 1 else "rem"
 
@@ -187,38 +200,70 @@ class TickEngine:
         # 수면욕 감소
         self.inner.oyok[1] = max(0.0, self.inner.oyok[1] - 0.15)
 
-        # ── Phase 3: 꿈 ──
+        # ── Phase 3: 꿈 + 기억 상태기계 ──
         dream_action = None
+        memory_events = []
+
         if sleep_phase == "nrem":
-            # NREM: 시냅스 하향 정규화 (SHY) — 약한 연결 약화
-            self.brain.snn.weights[:self.brain.snn.n_exc, :] *= 0.998  # 0.2% 감쇠
-            # 약한 시냅스 pruning (0.001 이하 제거)
-            mask = np.abs(self.brain.snn.weights) < 0.001
-            self.brain.snn.weights[mask] = 0
+            # NREM: 시냅스 하향 정규화 (SHY) — 약한 연결만 약화
+            exc_w = self.brain.snn.weights[:self.brain.snn.n_exc, :]
+            weak_mask = (exc_w > 0) & (exc_w < 0.05)
+            exc_w[weak_mask] *= 0.995
+            prune_mask = (np.abs(self.brain.snn.weights) < 0.0005) & (self.brain.snn.weights != 0)
+            self.brain.snn.weights[prune_mask] = 0
+
+            # ── 기억 안정화: FRESH/LABILE → CONSOLIDATED/RECONSOLIDATED ──
+            for ep in self.inner.episodes:
+                if ep.state in ("FRESH", "LABILE"):
+                    old_state = ep.state
+                    ep.consolidate()
+                    if old_state != ep.state:
+                        memory_events.append(f"{old_state}→{ep.state}")
+
+            # ── 트라우마 억압 판정 ──
+            self.inner.try_suppress_traumatic()
+
         else:
-            # REM: 기억 replay — 감정 강도 높은 에피소드 재생
-            if self.inner.episodes:
-                # salience 상위 3개 에피소드 선택
-                sorted_eps = sorted(self.inner.episodes, key=lambda e: e.salience, reverse=True)
+            # REM: 기억 replay — 인출 가능한 기억만 대상
+            recallable = self.inner.get_recallable_episodes()
+            if recallable:
+                sorted_eps = sorted(recallable, key=lambda e: e.salience, reverse=True)
                 top_eps = sorted_eps[:3]
                 for ep in top_eps:
-                    # 에피소드의 감정을 재활성화 (꿈 = 기억의 재경험)
+                    # ── 기억 재통합: 인출 시 현재 감정이 과거를 오염 ──
+                    ep.recall(current_tick=self.time.tick,
+                              current_emotion=self.inner.chiljeong)
+                    # 꿈 = 기억의 재경험
                     self.inner.chiljeong = (
                         self.inner.chiljeong * 0.5 + ep.emotion_snapshot * 0.5
                     ).astype(np.float16)
-                    ep.recall_count += 1
                     dream_action = ep.action
 
-                # 에피소드 → 의미 기억 승격 (수면 중 통합)
-                # salience 낮은 것 자연 망각
+                # 수면 중 망각 (EXTINCT 우선 제거)
                 if len(self.inner.episodes) > 30:
-                    self.inner.episodes.sort(key=lambda e: e.salience, reverse=True)
-                    self.inner.episodes = self.inner.episodes[:30]
+                    self.inner.episodes.sort(
+                        key=lambda e: (
+                            0 if e.state == "EXTINCT" else 2,
+                            e.salience
+                        )
+                    )
+                    self.inner.episodes = self.inner.episodes[-30:]
+
+            # ── 억압 기억 재출현 판정 ──
+            resurfaced = self.inner.try_resurface_memories()
+            if resurfaced:
+                for ep in resurfaced:
+                    # 재출현 = 악몽 (두려움 급증)
+                    self.inner.chiljeong[3] = min(1.0, self.inner.chiljeong[3] + 0.4)
+                    dream_action = ep.action
+                    memory_events.append(f"RESURFACE:{ep.action}@{ep.tick}")
+
+        # ── LABILE 소멸 판정 ──
+        self.inner.check_memory_extinction(self.time.tick)
 
         # 기상 판정
         if self.inner.sleep_ticks_remaining <= 0:
             self.inner.is_sleeping = False
-            # 보상 신호 초기화 (새 날 시작)
             self.brain.snn.clear_reward()
 
         entry = {
@@ -233,6 +278,8 @@ class TickEngine:
             "sleeping": True,
             "firing_rate": 0.0,
         }
+        if memory_events:
+            entry["memory_events"] = memory_events
         self.log.append(entry)
         return entry
 

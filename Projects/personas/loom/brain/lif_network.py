@@ -43,6 +43,19 @@ class LIFNetwork:
         w[self.n_exc:, :] *= 1.5  # 억제가 흥분보다 1.5배 강함
 
         self.weights = w * 0.05  # 전체 스케일 (0.1→0.05)
+        self.conn_mask = self.weights != 0
+        self.conn_indices = np.argwhere(self.conn_mask)
+        self._conn_flat = np.flatnonzero(self.conn_mask.ravel())
+        self._conn_rows = self.conn_indices[:, 0]
+        self._conn_cols = self.conn_indices[:, 1]
+        self._exc_conn_mask = self._conn_rows < self.n_exc
+        self._exc_conn_flat = self._conn_flat[self._exc_conn_mask]
+        self._exc_conn_rows = self._conn_rows[self._exc_conn_mask]
+        self._exc_conn_cols = self._conn_cols[self._exc_conn_mask]
+        self._conn_pre_by_post = [
+            np.flatnonzero(self.conn_mask[row])
+            for row in range(n_neurons)
+        ]
 
         # 스파이크 기록
         self.spikes = np.zeros(n_neurons, dtype=np.bool_)
@@ -57,6 +70,11 @@ class LIFNetwork:
         self.rl_lr = 0.005  # RL 학습률 (강하게 → 벌점이 빠르게 반영)
         self.eligibility_trace = np.zeros((n_neurons, n_neurons), dtype=np.float32)  # 적격 흔적
         self.eligibility_decay = 0.9  # 적격 흔적 감쇠
+
+        # 항상성 가소성 (homeostatic plasticity)
+        self.target_firing_rate = 0.04  # 목표 발화율 4%
+        self.homeostatic_lr = 0.002  # 임계값 조정 속도 (0.001→0.002 빠른 수렴)
+        self.homeostatic_window = 100  # 측정 윈도우 (스텝)
 
         # 통계
         self.total_spikes_history = []
@@ -99,10 +117,19 @@ class LIFNetwork:
         if len(self.total_spikes_history) > 100:
             self.total_spikes_history.pop(0)
 
+        # 항상성 가소성: 발화율이 목표에서 벗어나면 임계값 조정
+        if len(self.total_spikes_history) >= self.homeostatic_window:
+            recent_rate = np.mean(self.total_spikes_history[-self.homeostatic_window:]) / self.n
+            error = recent_rate - self.target_firing_rate
+            # 발화율 높으면 임계값↑, 낮으면 임계값↓
+            self.threshold += self.homeostatic_lr * error
+            # 임계값 합리적 범위 유지
+            self.threshold = np.clip(self.threshold, 0.3, 2.0)
+
         return self.spikes.copy()
 
     def _stdp_update(self):
-        """3-factor STDP: pre × post × reward (도파민 RL)."""
+        """3-factor STDP: pre × post × reward (도파민 RL). 벡터화 버전."""
         # 흔적 감쇠
         self.spike_trace *= self.trace_decay
 
@@ -110,44 +137,58 @@ class LIFNetwork:
         self.spike_trace[self.spikes] = 1.0
 
         # 적격 흔적(eligibility trace) 감쇠
-        self.eligibility_trace *= self.eligibility_decay
+        elig_flat = self.eligibility_trace.ravel()
+        elig_flat[self._conn_flat] *= self.eligibility_decay
 
         if not np.any(self.spikes):
             return
 
-        # Pre-post: 적격 흔적 축적 (보상 도착 전까지 대기)
-        spike_idx = np.where(self.spikes)[0]
-        for post in spike_idx:
-            if post >= self.n_exc:
-                continue  # 억제 뉴런은 STDP 제외
-            pre_trace = self.spike_trace.copy()
-            pre_trace[post] = 0
-            # 적격 흔적에 추가 (보상이 올 때까지 축적)
-            mask = self.weights[post, :] != 0
-            self.eligibility_trace[post, :] += pre_trace * mask
+        # ── 벡터화된 Pre-post 적격 흔적 축적 ──
+        exc_spikes = self.spikes.copy()
+        exc_spikes[self.n_exc:] = False  # 억제 뉴런 제외
+        changed_rows: set[int] = set()
+        if np.any(exc_spikes):
+            # post가 발화한 흥분 뉴런 인덱스
+            post_idx = np.where(exc_spikes)[0]
+            for pidx in post_idx:
+                connected = self._conn_pre_by_post[pidx]
+                if connected.size == 0:
+                    continue
+                self.eligibility_trace[pidx, connected] += self.spike_trace[connected]
+                changed_rows.add(int(pidx))
 
         # 보상 신호가 있을 때만 실제 가중치 변경 (3rd factor)
         if abs(self.reward_signal) > 0.01:
-            # reward > 0: 적격 흔적 방향으로 강화
-            # reward < 0: 적격 흔적 반대 방향으로 약화
-            dw = self.rl_lr * self.reward_signal * self.eligibility_trace[:self.n_exc, :]
-            self.weights[:self.n_exc, :] += dw
-            # 보상 소비 후 적격 흔적 초기화
-            self.eligibility_trace *= 0.5  # 부분 소비 (완전 초기화 아님)
+            weights_flat = self.weights.ravel()
+            elig = elig_flat[self._exc_conn_flat]
+            active = np.abs(elig) > 0
+            if np.any(active):
+                active_flat = self._exc_conn_flat[active]
+                dw = self.rl_lr * self.reward_signal * elig[active]
+                weights_flat[active_flat] += dw
+                changed_rows.update(int(row) for row in np.unique(active_flat // self.n))
+            elig_flat[self._conn_flat] *= 0.5
             self.reward_history.append(self.reward_signal)
         else:
-            # 보상 없으면 기본 STDP만 (약하게)
-            for post in spike_idx:
-                if post >= self.n_exc:
-                    continue
-                pre_trace = self.spike_trace.copy()
-                pre_trace[post] = 0
-                dw = self.stdp_lr * pre_trace
-                self.weights[post, :] += dw * (self.weights[post, :] != 0)
+            # 보상 없으면 기본 STDP만 (벡터화)
+            if np.any(exc_spikes):
+                post_idx = np.where(exc_spikes)[0]
+                for pidx in post_idx:
+                    connected = self._conn_pre_by_post[pidx]
+                    if connected.size == 0:
+                        continue
+                    self.weights[pidx, connected] += self.stdp_lr * self.spike_trace[connected]
+                    changed_rows.add(int(pidx))
 
         # 가중치 클리핑 (발산 방지)
-        self.weights[:self.n_exc, :] = np.clip(self.weights[:self.n_exc, :], 0, 0.3)
-        self.weights[self.n_exc:, :] = np.clip(self.weights[self.n_exc:, :], -0.5, 0)
+        if changed_rows:
+            rows = np.array(sorted(changed_rows), dtype=np.int32)
+            exc_rows = rows[rows < self.n_exc]
+            inh_rows = rows[rows >= self.n_exc]
+            if exc_rows.size:
+                self.weights[exc_rows] = np.clip(self.weights[exc_rows], 0, 0.3)
+            if inh_rows.size:
+                self.weights[inh_rows] = np.clip(self.weights[inh_rows], -0.5, 0)
 
     def apply_reward(self, reward: float):
         """외부에서 보상 신호 주입. 다음 STDP 업데이트에 적용."""

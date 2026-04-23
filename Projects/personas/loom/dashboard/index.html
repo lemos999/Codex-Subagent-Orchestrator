@@ -12,7 +12,7 @@
   --energy-hi:#44ff88;--energy-mid:#ffaa22;--energy-lo:#ff4444;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consolas','Courier New',monospace;font-size:13px;overflow:hidden}
-#app{display:grid;grid-template-columns:var(--col-left,260px) 6px 1fr 6px var(--col-right,260px);grid-template-rows:1fr 6px 1fr;height:calc(100vh - 48px);padding:6px}
+#app{display:grid;grid-template-columns:var(--col-left,260px) 6px 1fr 6px var(--col-right,260px);grid-template-rows:1fr 6px 1fr;height:calc(100vh - 48px - 36px - 40px);padding:6px}
 #app>.panel:nth-child(1){grid-column:3;grid-row:1/4}
 #app>.panel:nth-child(2){grid-column:5;grid-row:1}
 #app>.panel:nth-child(3){grid-column:1;grid-row:1/4}
@@ -37,6 +37,25 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consol
 .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
 .status-dot.connected{background:#44ff88}
 .status-dot.disconnected{background:#ff4444}
+
+/* 페르소나 탭 바 */
+#persona-tabs{height:36px;display:flex;align-items:center;gap:6px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--border)}
+.persona-tab{display:flex;align-items:center;gap:5px;padding:4px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-family:inherit;background:#1a2040;border:1px solid var(--border);color:var(--text);transition:background .15s}
+.persona-tab:hover{background:#2a3060}
+.persona-tab.selected{background:var(--accent);color:#000;font-weight:bold}
+.persona-tab .region-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.region-dot.claude{background:#4488ff}
+.region-dot.codex{background:#44cc66}
+.region-dot.gemini{background:#ffaa22}
+
+/* 페르소나 상태 요약 바 (항상 표시) */
+#persona-summary-bar{height:40px;display:flex;align-items:center;gap:16px;padding:0 12px;background:#0c0e20;border-bottom:1px solid var(--border);overflow-x:auto}
+.summary-card{display:flex;align-items:center;gap:8px;padding:4px 10px;border-radius:4px;background:var(--panel);border:1px solid var(--border);flex-shrink:0}
+.summary-card .s-name{font-size:11px;font-weight:bold;color:var(--text);min-width:60px}
+.summary-card .s-energy-wrap{width:50px;height:8px;background:#111;border-radius:4px;overflow:hidden}
+.summary-card .s-energy-fill{height:100%;border-radius:4px;transition:width .3s,background .3s}
+.summary-card .s-action{font-size:10px;padding:1px 6px;border-radius:8px;background:#1a2040;color:var(--dim)}
+.summary-card .s-action.sleeping{background:#2a1040;color:#aa88ff}
 
 /* 좌상: 뉴런 네트워크 */
 #neuron-canvas{width:100%;flex:1;border-radius:4px}
@@ -65,6 +84,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consol
 .action-badge{display:inline-block;padding:2px 10px;border-radius:10px;background:#1a2040;font-size:12px;margin:4px 0}
 .sleeping-badge{background:#2a1040;color:#aa88ff}
 
+/* 관계 패널 */
+#relationship-section{margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+.rel-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px}
+.rel-names{min-width:100px;color:var(--text);font-size:10px}
+.rel-bar-wrap{flex:1;height:6px;background:#111;border-radius:3px;overflow:hidden}
+.rel-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.rel-trust{font-size:10px;color:var(--dim);min-width:35px;text-align:right}
+.rel-count{font-size:10px;color:var(--dim);min-width:20px;text-align:right}
+
+/* 인터랙션 로그 스타일 */
+.log-interaction{color:#44ccaa !important;font-weight:bold}
+.log-secret{display:inline-block;background:#cc2244;color:#fff;font-size:9px;padding:0 4px;border-radius:3px;margin-left:4px;font-weight:bold}
+.log-rumor{display:inline-block;background:#aa6600;color:#fff;font-size:9px;padding:0 4px;border-radius:3px;margin-left:4px;font-weight:bold}
+
 /* 툴팁 */
 .info-btn{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:#1a2040;color:var(--accent);font-size:9px;font-weight:bold;cursor:pointer;margin-left:4px;border:1px solid var(--border);vertical-align:middle;line-height:1;user-select:none;flex-shrink:0}
 .info-btn:hover{background:var(--accent);color:#000}
@@ -90,6 +123,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consol
   <label>속도 <input type="range" id="speed-slider" min="100" max="2000" value="500" step="100"><span id="speed-label">0.5s</span></label>
   <span class="info" id="tick-info">Tick 0</span>
 </div>
+<div id="persona-tabs"></div>
+<div id="persona-summary-bar"></div>
 <div id="app">
   <!-- 1: 뉴런 네트워크 (가운데, 2행) -->
   <div class="panel">
@@ -127,6 +162,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Consol
       </div>
     </div>
     <div class="stat-row"><span class="stat-label">행동 <span class="info-btn" data-tip="action">i</span></span><span id="p-action" class="action-badge">-</span></div>
+    <!-- 관계 섹션 -->
+    <div id="relationship-section">
+      <h2>관계 <span class="info-btn" data-tip="relationships">i</span></h2>
+      <div id="rel-rows"></div>
+    </div>
   </div>
   <!-- 우하: 시간+로그 -->
   <div class="panel" id="log-panel">
@@ -150,14 +190,18 @@ const TONE_KEYS = ['V','L','S','B','A','T','C','G','F','I','D','P'];
 const OYOK_LABELS = ['식','색','재','명','수'];
 const CHILJEONG_LABELS = ['희','노','애','구','애','오','경'];
 const MAX_HISTORY = 50;
-const MAX_LOG = 20;
+const MAX_LOG = 40;
+
+const REGION_COLORS = { claude: '#4488ff', codex: '#44cc66', gemini: '#ffaa22' };
 
 let ws = null;
 let paused = false;
-let firingHistory = [];   // {exc, inh, total}
-let energyHistory = [];
-let actionLog = [];
+let firingHistory = {};   // per-persona: { pid: [{exc, inh, total}] }
+let energyHistory = {};   // per-persona: { pid: [values] }
+let actionLog = [];       // shared log across all personas
 let lastState = null;
+let selectedPersonaId = null;
+let personaIds = [];
 
 // ============================================================
 // DOM
@@ -196,7 +240,6 @@ initBars('chiljeong-bars', CHILJEONG_LABELS, '#aa44ff');
 function resizeCanvas(canvas) {
   const r = canvas.parentElement ? canvas.getBoundingClientRect() : {width:300,height:200};
   const dpr = window.devicePixelRatio || 1;
-  // 뉴런 캔버스는 flex:1이므로 clientWidth/clientHeight 사용
   const w = canvas.clientWidth || r.width;
   const h = canvas.clientHeight || r.height;
   if (canvas.width !== w*dpr || canvas.height !== h*dpr) {
@@ -215,6 +258,72 @@ function resizeAll() {
 }
 window.addEventListener('resize', resizeAll);
 setTimeout(resizeAll, 50);
+
+// ============================================================
+// 페르소나 탭 렌더링
+// ============================================================
+function renderTabs(personas) {
+  const container = $('persona-tabs');
+  const ids = Object.keys(personas);
+
+  // 페르소나 ID 목록이 변경된 경우에만 DOM 재구성
+  if (ids.join(',') !== personaIds.join(',')) {
+    personaIds = ids;
+    if (!selectedPersonaId || !personas[selectedPersonaId]) {
+      selectedPersonaId = ids[0];
+    }
+    container.innerHTML = '';
+    ids.forEach(pid => {
+      const p = personas[pid];
+      const tab = document.createElement('button');
+      tab.className = 'persona-tab' + (pid === selectedPersonaId ? ' selected' : '');
+      tab.dataset.pid = pid;
+      const region = (p.meta && p.meta.region) || 'claude';
+      tab.innerHTML = `<span class="region-dot ${region}"></span>${p.name}`;
+      tab.onclick = () => selectPersona(pid);
+      container.appendChild(tab);
+    });
+  } else {
+    // 선택 상태만 갱신
+    container.querySelectorAll('.persona-tab').forEach(tab => {
+      tab.classList.toggle('selected', tab.dataset.pid === selectedPersonaId);
+    });
+  }
+}
+
+function selectPersona(pid) {
+  selectedPersonaId = pid;
+  // 선택 시 기존 데이터로 즉시 재렌더
+  if (lastState) {
+    renderTabs(lastState.personas);
+    renderSelectedPersona(lastState);
+    renderSummaryBar(lastState.personas);
+  }
+}
+
+// ============================================================
+// 페르소나 요약 바
+// ============================================================
+function renderSummaryBar(personas) {
+  const bar = $('persona-summary-bar');
+  const ids = Object.keys(personas);
+  bar.innerHTML = '';
+  ids.forEach(pid => {
+    const p = personas[pid];
+    const en = p.energy || 0;
+    const pct = (en * 100).toFixed(0);
+    const color = en > 0.5 ? 'var(--energy-hi)' : en > 0.2 ? 'var(--energy-mid)' : 'var(--energy-lo)';
+    const isSleeping = p.sleeping;
+    const actionText = isSleeping ? 'sleep' : (p.action || '-');
+    const actionClass = isSleeping ? 's-action sleeping' : 's-action';
+    const card = document.createElement('div');
+    card.className = 'summary-card';
+    card.innerHTML = `<span class="s-name">${p.name || pid}</span><div class="s-energy-wrap"><div class="s-energy-fill" style="width:${pct}%;background:${color}"></div></div><span class="${actionClass}">${actionText}</span>`;
+    card.style.cursor = 'pointer';
+    card.onclick = () => selectPersona(pid);
+    bar.appendChild(card);
+  });
+}
 
 // ============================================================
 // WebSocket
@@ -241,15 +350,235 @@ $('btn-step').onclick = () => { send({type:'step'}); };
 $('speed-slider').oninput = function() { const v=this.value/1000; $('speed-label').textContent=v.toFixed(1)+'s'; send({type:'set_speed',interval:v}); };
 
 // ============================================================
+// 데이터 호환 레이어: 멀티/싱글 페르소나 모두 처리
+// ============================================================
+function isMultiPersona(d) {
+  return d.personas && typeof d.personas === 'object';
+}
+
+function extractPersonaData(d, pid) {
+  // 멀티 페르소나 구조에서 단일 페르소나 데이터 추출
+  const p = d.personas[pid];
+  if (!p) return null;
+
+  // 서버가 보내는 구조: neurons, tone, oyok, emotions 등이 페르소나 객체 내부에 있음
+  return p;
+}
+
+// ============================================================
 // 메인 업데이트
 // ============================================================
 function update(d) {
   $('tick-info').textContent = 'Tick ' + d.tick;
-
-  // 시간
   $('time-display').textContent = `Day ${d.day}, ${d.hour}시`;
 
-  // 페르소나
+  if (isMultiPersona(d)) {
+    // 멀티 페르소나 모드
+    renderTabs(d.personas);
+    renderSummaryBar(d.personas);
+
+    // 모든 페르소나의 히스토리 갱신
+    for (const pid of Object.keys(d.personas)) {
+      const p = d.personas[pid];
+      updatePerPersonaHistory(pid, p);
+    }
+
+    // 인터랙션 로그 추가
+    if (d.interactions && d.interactions.length > 0) {
+      for (const ix of d.interactions) {
+        actionLog.unshift({
+          tick: d.tick, hour: d.hour, day: d.day,
+          type: 'interaction', interaction: ix
+        });
+      }
+    }
+
+    // 시크릿/루머 로그
+    if (d.secrets) {
+      for (const [key, secret] of Object.entries(d.secrets)) {
+        if (secret._new) {
+          actionLog.unshift({
+            tick: d.tick, hour: d.hour, day: d.day,
+            type: 'secret', secret: secret
+          });
+        }
+      }
+    }
+
+    // 각 페르소나 행동 로그
+    for (const pid of Object.keys(d.personas)) {
+      const p = d.personas[pid];
+      actionLog.unshift({
+        tick: d.tick, hour: d.hour, day: d.day,
+        type: 'action',
+        persona: p.name || pid,
+        action: p.action || '-',
+        sleeping: p.sleeping
+      });
+    }
+    if (actionLog.length > MAX_LOG) actionLog.length = MAX_LOG;
+
+    // 선택된 페르소나의 상세 패널 업데이트
+    renderSelectedPersona(d);
+    renderRelationships(d.relationships, d.personas);
+    renderLog();
+  } else {
+    // 레거시 단일 페르소나 모드 (하위 호환)
+    updateLegacySingle(d);
+  }
+}
+
+function updatePerPersonaHistory(pid, p) {
+  if (!firingHistory[pid]) firingHistory[pid] = [];
+  if (!energyHistory[pid]) energyHistory[pid] = [];
+
+  const en = p.energy || 0;
+  energyHistory[pid].push(en);
+  if (energyHistory[pid].length > MAX_HISTORY) energyHistory[pid].shift();
+
+  const neurons = p.neurons;
+  if (neurons) {
+    const excSpikes = neurons.exc_spikes || 0;
+    const inhSpikes = neurons.inh_spikes || 0;
+    const nExc = neurons.n_exc || 1;
+    const nInh = neurons.n_inh || 1;
+    firingHistory[pid].push({
+      total: neurons.firing_rate || 0,
+      exc: nExc > 0 ? excSpikes / nExc : 0,
+      inh: nInh > 0 ? inhSpikes / nInh : 0
+    });
+    if (firingHistory[pid].length > MAX_HISTORY) firingHistory[pid].shift();
+  }
+}
+
+function renderSelectedPersona(d) {
+  if (!selectedPersonaId || !d.personas[selectedPersonaId]) return;
+  const p = d.personas[selectedPersonaId];
+
+  // 이름
+  const region = (p.meta && p.meta.region) || '';
+  $('p-name').textContent = p.name + (region ? ` [${region}]` : '');
+
+  // 에너지
+  const en = p.energy || 0;
+  $('p-energy-val').textContent = en.toFixed(4);
+  const pct = (en * 100).toFixed(1);
+  const ebar = $('p-energy-bar');
+  ebar.style.width = pct + '%';
+  ebar.style.background = en > 0.5 ? 'var(--energy-hi)' : en > 0.2 ? 'var(--energy-mid)' : 'var(--energy-lo)';
+
+  // 오욕
+  if (p.oyok) {
+    const oyokKeys = ['hunger','lust','greed','fame','sleep'];
+    const oyokVals = Array.isArray(p.oyok) ? p.oyok : oyokKeys.map(k => p.oyok[k] || 0);
+    oyokVals.forEach((v,i) => {
+      const el = $('oyok-bars-f'+i);
+      if(el){el.style.height=(v*100)+'%';}
+      const vl = $('oyok-bars-v'+i);
+      if(vl) vl.textContent = (typeof v === 'number') ? v.toFixed(2) : '0';
+    });
+  }
+
+  // 칠정 (emotions)
+  if (p.emotions) {
+    const emotionKeys = ['joy','anger','sadness','fear','love','disgust','desire'];
+    const emotionVals = Array.isArray(p.emotions) ? p.emotions : emotionKeys.map(k => p.emotions[k] || 0);
+    emotionVals.forEach((v,i) => {
+      const el = $('chiljeong-bars-f'+i);
+      if(el){el.style.height=(Math.abs(v)*100)+'%';}
+      const vl = $('chiljeong-bars-v'+i);
+      if(vl) vl.textContent = (typeof v === 'number') ? v.toFixed(2) : '0';
+    });
+  }
+
+  // 행동
+  const ab = $('p-action');
+  if (p.sleeping) {
+    ab.textContent = 'sleeping';
+    ab.className = 'action-badge sleeping-badge';
+  } else {
+    ab.textContent = p.action || '-';
+    ab.className = 'action-badge';
+  }
+
+  // 뉴런 통계
+  const neurons = p.neurons;
+  if (neurons) {
+    const spikes = neurons.spikes || [];
+    const activeCount = spikes.reduce((a,b)=>a+b,0);
+    $('stat-active').textContent = `${activeCount} / ${neurons.n_neurons || spikes.length}`;
+    $('stat-fr').textContent = (neurons.firing_rate || 0).toFixed(4);
+    $('stat-exc').textContent = neurons.exc_spikes || 0;
+    $('stat-inh').textContent = neurons.inh_spikes || 0;
+
+    const total = (neurons.exc_spikes || 0) + (neurons.inh_spikes || 0);
+    const eiRatio = total > 0 ? (neurons.exc_spikes || 0) / total : 0.5;
+    $('ei-gauge').style.width = (eiRatio*100)+'%';
+    $('ei-label').textContent = eiRatio.toFixed(2);
+
+    drawNeurons(neurons);
+    drawFiringChart(selectedPersonaId);
+    drawVoltageHist(neurons.voltages, neurons.threshold);
+  } else {
+    $('stat-active').textContent = '- (수면)';
+    $('stat-fr').textContent = '-';
+  }
+
+  // 에너지 히스토리
+  drawEnergyChart(selectedPersonaId);
+
+  // 톤 레이더
+  if (p.tone) {
+    drawRadar(p.tone);
+  }
+}
+
+// ============================================================
+// 관계 패널 렌더링
+// ============================================================
+function renderRelationships(relationships, personas) {
+  const container = $('rel-rows');
+  if (!relationships || !container) {
+    if (container) container.innerHTML = '<div style="color:var(--dim);font-size:11px">관계 데이터 없음</div>';
+    return;
+  }
+
+  const nameMap = {};
+  if (personas) {
+    for (const [pid, p] of Object.entries(personas)) {
+      nameMap[pid] = p.name || pid;
+    }
+  }
+
+  let html = '';
+  for (const [key, rel] of Object.entries(relationships)) {
+    const parts = key.split('-');
+    const n1 = nameMap[parts[0]] || parts[0];
+    const n2 = nameMap[parts[1]] || parts[1];
+    const fam = (rel.familiarity || 0);
+    const trust = (rel.trust || 0);
+    const count = rel.interactions || 0;
+    const famPct = (fam * 100).toFixed(0);
+    const famColor = `hsl(${120 * fam}, 70%, 50%)`;
+
+    html += `<div class="rel-row">
+      <span class="rel-names">${n1} - ${n2}</span>
+      <div class="rel-bar-wrap"><div class="rel-bar-fill" style="width:${famPct}%;background:${famColor}"></div></div>
+      <span class="rel-trust">T:${trust.toFixed(2)}</span>
+      <span class="rel-count">${count}x</span>
+    </div>`;
+  }
+  container.innerHTML = html || '<div style="color:var(--dim);font-size:11px">관계 없음</div>';
+}
+
+// ============================================================
+// 레거시 단일 페르소나 모드 (하위 호환)
+// ============================================================
+function updateLegacySingle(d) {
+  // 탭/요약 숨기기
+  $('persona-tabs').innerHTML = '';
+  $('persona-summary-bar').innerHTML = '';
+
   $('p-name').textContent = d.persona.name + ` (Class ${d.persona.class})`;
   const en = d.inner.energy;
   $('p-energy-val').textContent = en.toFixed(4);
@@ -258,14 +587,12 @@ function update(d) {
   ebar.style.width = pct + '%';
   ebar.style.background = en > 0.5 ? 'var(--energy-hi)' : en > 0.2 ? 'var(--energy-mid)' : 'var(--energy-lo)';
 
-  // 오욕
   d.inner.oyok.forEach((v,i) => {
     const el = $('oyok-bars-f'+i);
     if(el){el.style.height=(v*100)+'%';}
     const vl = $('oyok-bars-v'+i);
     if(vl) vl.textContent = v.toFixed(2);
   });
-  // 칠정
   d.inner.chiljeong.forEach((v,i) => {
     const el = $('chiljeong-bars-f'+i);
     if(el){el.style.height=(Math.abs(v)*100)+'%';}
@@ -273,7 +600,6 @@ function update(d) {
     if(vl) vl.textContent = v.toFixed(2);
   });
 
-  // 행동
   const ab = $('p-action');
   if (d.inner.sleeping) {
     ab.textContent = 'sleeping';
@@ -283,7 +609,6 @@ function update(d) {
     ab.className = 'action-badge';
   }
 
-  // 통계
   const neurons = d.brain.neurons;
   if (neurons) {
     const activeCount = neurons.spikes.reduce((a,b)=>a+b,0);
@@ -297,31 +622,30 @@ function update(d) {
     $('ei-gauge').style.width = (eiRatio*100)+'%';
     $('ei-label').textContent = eiRatio.toFixed(2);
 
-    firingHistory.push({
+    if (!firingHistory['_legacy']) firingHistory['_legacy'] = [];
+    firingHistory['_legacy'].push({
       total: neurons.firing_rate,
       exc: neurons.n_exc > 0 ? neurons.exc_spikes / neurons.n_exc : 0,
       inh: neurons.n_inh > 0 ? neurons.inh_spikes / neurons.n_inh : 0
     });
-    if (firingHistory.length > MAX_HISTORY) firingHistory.shift();
+    if (firingHistory['_legacy'].length > MAX_HISTORY) firingHistory['_legacy'].shift();
 
     drawNeurons(neurons);
-    drawFiringChart();
+    drawFiringChart('_legacy');
     drawVoltageHist(neurons.voltages, neurons.threshold);
   } else {
     $('stat-active').textContent = '- (수면)';
     $('stat-fr').textContent = '-';
   }
 
-  // 에너지 히스토리
-  energyHistory.push(en);
-  if (energyHistory.length > MAX_HISTORY) energyHistory.shift();
-  drawEnergyChart();
+  if (!energyHistory['_legacy']) energyHistory['_legacy'] = [];
+  energyHistory['_legacy'].push(en);
+  if (energyHistory['_legacy'].length > MAX_HISTORY) energyHistory['_legacy'].shift();
+  drawEnergyChart('_legacy');
 
-  // 톤 레이더
   drawRadar(d.inner.tone);
 
-  // 행동 로그
-  actionLog.unshift({tick:d.tick, hour:d.hour, day:d.day, action:d.action.type, intensity:d.action.intensity, sleeping:d.inner.sleeping});
+  actionLog.unshift({tick:d.tick, hour:d.hour, day:d.day, type:'action', action:d.action.type, intensity:d.action.intensity, sleeping:d.inner.sleeping});
   if (actionLog.length > MAX_LOG) actionLog.pop();
   renderLog();
 }
@@ -389,7 +713,7 @@ function drawNeurons(neurons) {
     const p = pos[i];
     const isExc = i < nExc;
     const spiking = neurons.spikes[i] === 1;
-    const refr = neurons.refractory[i] > 0;
+    const refr = neurons.refractory ? neurons.refractory[i] > 0 : false;
     let r = 3;
     let color;
 
@@ -409,7 +733,6 @@ function drawNeurons(neurons) {
       r = 2.5;
     } else {
       color = isExc ? '#4488ff' : '#ff4466';
-      // 전위에 따른 밝기
       const v = Math.max(0, Math.min(1, neurons.voltages[i] / neurons.threshold));
       const bright = 0.3 + v * 0.7;
       if (isExc) {
@@ -436,16 +759,16 @@ function drawNeurons(neurons) {
 // ============================================================
 // 발화율 그래프
 // ============================================================
-function drawFiringChart() {
+function drawFiringChart(pid) {
   const {w,h} = resizeCanvas(firingCanvas);
   const ctx = fCtx;
   ctx.clearRect(0,0,w,h);
-  if (firingHistory.length < 2) return;
+  const hist = firingHistory[pid] || [];
+  if (hist.length < 2) return;
 
-  const n = firingHistory.length;
+  const n = hist.length;
   const xStep = w / (MAX_HISTORY - 1);
 
-  // 배경 그리드
   ctx.strokeStyle = '#1a2040';
   ctx.lineWidth = 0.5;
   for (let y=0;y<=4;y++){
@@ -467,11 +790,10 @@ function drawFiringChart() {
     ctx.stroke();
   }
 
-  drawLine(firingHistory, 'total', '#ffffff');
-  drawLine(firingHistory, 'exc', '#4488ff');
-  drawLine(firingHistory, 'inh', '#ff4466');
+  drawLine(hist, 'total', '#ffffff');
+  drawLine(hist, 'exc', '#4488ff');
+  drawLine(hist, 'inh', '#ff4466');
 
-  // 범례
   ctx.font = '10px Consolas';
   ctx.fillStyle='#fff';ctx.fillText('전체',w-120,12);
   ctx.fillStyle='#4488ff';ctx.fillText('흥분',w-80,12);
@@ -508,7 +830,6 @@ function drawVoltageHist(voltages, threshold) {
     ctx.fillRect(x+1, h-barH-12, barW-2, barH);
   }
 
-  // threshold 라인
   const thX = ((threshold - minV)/range)*w;
   ctx.strokeStyle = '#ffdd44';
   ctx.lineWidth = 1;
@@ -534,7 +855,6 @@ function drawRadar(tone) {
   const n = TONE_KEYS.length;
   const angleStep = (2*Math.PI)/n;
 
-  // 격자
   for (let ring=1;ring<=4;ring++){
     const rr = r*ring/4;
     ctx.beginPath();
@@ -546,21 +866,18 @@ function drawRadar(tone) {
     ctx.strokeStyle='#1a2040';ctx.lineWidth=0.5;ctx.stroke();
   }
 
-  // 축
   for(let i=0;i<n;i++){
     const a = angleStep*i - Math.PI/2;
     ctx.beginPath();
     ctx.moveTo(cx,cy);
     ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
     ctx.strokeStyle='#1a2040';ctx.lineWidth=0.5;ctx.stroke();
-    // 레이블
     const lx=cx+(r+14)*Math.cos(a);
     const ly=cy+(r+14)*Math.sin(a);
     ctx.font='10px Consolas';ctx.fillStyle='#889';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(TONE_KEYS[i],lx,ly);
   }
 
-  // 데이터 다각형
   ctx.beginPath();
   for(let i=0;i<=n;i++){
     const idx = i%n;
@@ -573,7 +890,6 @@ function drawRadar(tone) {
   ctx.fillStyle='rgba(68,136,255,0.2)';ctx.fill();
   ctx.strokeStyle='#4488ff';ctx.lineWidth=1.5;ctx.stroke();
 
-  // 점
   for(let i=0;i<n;i++){
     const a = angleStep*i - Math.PI/2;
     const val = Math.max(0, Math.min(1, tone[TONE_KEYS[i]] || 0));
@@ -586,20 +902,20 @@ function drawRadar(tone) {
 // ============================================================
 // 에너지 히스토리
 // ============================================================
-function drawEnergyChart() {
+function drawEnergyChart(pid) {
   const {w,h} = resizeCanvas(energyCanvas);
   const ctx = eCtx;
   ctx.clearRect(0,0,w,h);
-  if (energyHistory.length < 2) return;
+  const hist = energyHistory[pid] || [];
+  if (hist.length < 2) return;
 
-  const n = energyHistory.length;
+  const n = hist.length;
   const xStep = w / (MAX_HISTORY - 1);
 
-  // 영역
   ctx.beginPath();
   for(let i=0;i<n;i++){
     const x = (MAX_HISTORY-n+i)*xStep;
-    const y = h - energyHistory[i] * (h-4);
+    const y = h - hist[i] * (h-4);
     if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
   }
   ctx.lineTo((MAX_HISTORY-1)*xStep, h);
@@ -608,11 +924,10 @@ function drawEnergyChart() {
   ctx.fillStyle = 'rgba(68,255,136,0.1)';
   ctx.fill();
 
-  // 선
   ctx.beginPath();
   for(let i=0;i<n;i++){
     const x = (MAX_HISTORY-n+i)*xStep;
-    const y = h - energyHistory[i] * (h-4);
+    const y = h - hist[i] * (h-4);
     if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
   }
   ctx.strokeStyle = '#44ff88';
@@ -626,10 +941,29 @@ function drawEnergyChart() {
 function renderLog() {
   const el = $('action-log');
   el.innerHTML = actionLog.map(l => {
-    const act = l.sleeping ? '<span style="color:#aa88ff">수면</span>' : `<span style="color:var(--accent)">${l.action}</span> (강도${l.intensity})`;
-    return `<div><span style="color:var(--dim)">D${l.day} ${l.hour}시 T${l.tick}</span> ${act}</div>`;
+    const prefix = `<span style="color:var(--dim)">D${l.day} ${l.hour}시 T${l.tick}</span>`;
+
+    if (l.type === 'interaction' && l.interaction) {
+      const ix = l.interaction;
+      const names = [ix.from_name || ix.from, ix.to_name || ix.to].join('\u2194');
+      const fam = ix.familiarity != null ? ` f=${ix.familiarity.toFixed(2)}` : '';
+      let extra = '';
+      if (ix.secret) extra += '<span class="log-secret">SECRET!</span>';
+      if (ix.rumor) extra += `<span class="log-rumor">RUMOR(${ix.rumor.tag}\u2192${ix.rumor.target} acc=${(ix.rumor.accuracy*100).toFixed(0)}%)</span>`;
+      return `<div class="log-interaction">${prefix} [${names}${fam}]${extra}</div>`;
+    }
+
+    if (l.type === 'secret' && l.secret) {
+      return `<div>${prefix} <span class="log-secret">SECRET!</span> ${l.secret.summary || 'shared'}</div>`;
+    }
+
+    // 일반 행동 로그
+    const pName = l.persona ? `<span style="color:var(--accent)">${l.persona}</span> ` : '';
+    const act = l.sleeping ? '<span style="color:#aa88ff">수면</span>' : `<span style="color:var(--accent)">${l.action}</span>${l.intensity != null ? ' (강도'+l.intensity+')' : ''}`;
+    return `<div>${prefix} ${pName}${act}</div>`;
   }).join('');
 }
+
 // ============================================================
 // 용어 툴팁
 // ============================================================
@@ -642,17 +976,17 @@ const TIPS = {
   "inh-fire": {t:"억제 발화 (Inhibitory)", b:"억제 뉴런(전체의 20%)의 발화 수. GABA 기반. 다른 뉴런의 활동을 억누름. E/I 균형의 핵심."},
   "ei-balance": {t:"E/I Balance (흥분/억제 균형)", b:"흥분 뉴런과 억제 뉴런의 발화 비율. 0.5=완벽 균형. 높으면 흥분 과다(발작 위험), 낮으면 억제 과다(무반응). 실제 뇌의 핵심 항상성."},
   "voltage-dist": {t:"막전위 분포", b:"각 뉴런의 막전위(membrane potential) 히스토그램. 임계값(0.5)에 가까울수록 발화 직전. 0 근처=안정 상태."},
-  "persona-state": {t:"페르소나 상태", b:"서하린의 현재 내면 상태. 에너지, 신경조절물질 12클러스터, 감정(오욕/칠정), 행동을 실시간 표시."},
+  "persona-state": {t:"페르소나 상태", b:"선택된 페르소나의 현재 내면 상태. 에너지, 신경조절물질 12클러스터, 감정(오욕/칠정), 행동을 실시간 표시."},
   "energy": {t:"에너지 (energy_pool)", b:"미토콘드리아가 공급하는 ATP 기반 체력. 1.0=만충, 0.1 미만=강제 수면. 행동할 때마다 소비되고, 수면 중 회복. 강도1=0.01/틱, 강도4=0.25/틱."},
   "tone-12": {t:"12클러스터 (Neuromodulator Tone)", b:"V=추구(DA), L=만족(β-END), S=안정(5-HT), B=유대(OXT), A=각성(NE), T=긴장(CORT), C=인지(ACh), G=성장(Glu), F=피로(ADO), I=억제(GABA), D=지배(T), P=보호(SP). 54종 신경화학물질을 12개 기능 클러스터로 압축. 각 값 1.0=기본. Mitotype(체질)에 따라 기저값이 다름."},
-  "oyok": {t:"오욕 (五慾)", b:"동양 철학 기반 5가지 기본 욕구. 식욕(배고픔), 수면욕(졸림), 색욕(관계 욕구), 재욕(재물 욕구), 명예욕(인정 욕구). 0~1 범위. 높을수록 해당 행동 동기↑. V(Drive) 클러스터와 연결."},
+  "oyok": {t:"오욕 (五慾)", b:"동양 철학 기반 5가지 기본 욕구. 식욕(배고픔), 수면욕(졸림), 색욕(관계 욕구), 재욕(재물 욕구), 명예욕(인정 욕구). 0~1 범위. 높을수록 해당 행동 동기. V(Drive) 클러스터와 연결."},
   "chiljeong": {t:"칠정 (七情)", b:"동양 철학 기반 7가지 감정. 희(기쁨), 노(분노), 애(슬픔), 구(두려움), 애(사랑), 오(싫음), 욕(갈망). -1~1 범위. 12클러스터 전체와 교차 영향."},
-  "action": {t:"행동 (Action)", b:"PersonaBrain이 이번 틱에 선택한 행동. idle=대기, work=작업, eat=식사, sleep=수면, explore=탐색. 강도 1~4. 강도가 높을수록 에너지 소비↑."},
+  "action": {t:"행동 (Action)", b:"PersonaBrain이 이번 틱에 선택한 행동. idle=대기, work=작업, eat=식사, sleep=수면, explore=탐색. 강도 1~4. 강도가 높을수록 에너지 소비 증가."},
   "time-log": {t:"시간 / 행동 로그", b:"게임 시간(1틱=게임 1시간=현실 30분)과 최근 행동 기록. 에너지 변화 그래프로 생활 패턴 확인 가능."},
+  "relationships": {t:"관계 (Relationships)", b:"페르소나 간 관계 상태. 친밀도(familiarity): 0~1 바, 신뢰(trust): 수치 표시, 상호작용 횟수도 함께 표시."},
 };
 
 (function(){
-  // 툴팁 DOM 생성
   const overlay = document.createElement('div');
   overlay.className = 'tooltip-overlay';
   const box = document.createElement('div');
@@ -672,7 +1006,6 @@ const TIPS = {
     const rect = btn.getBoundingClientRect();
     box.innerHTML = '<div class="tt-title">' + tip.t + '</div><div class="tt-body">' + tip.b + '</div>';
 
-    // 위치 계산 (버튼 아래, 화면 밖이면 조정)
     let left = rect.left;
     let top = rect.bottom + 8;
     box.style.display = 'block';
@@ -725,7 +1058,6 @@ const TIPS = {
       const pct = Math.max(20, Math.min(80, ((e.clientY - app.getBoundingClientRect().top) / app.clientHeight) * 100));
       app.style.gridTemplateRows = pct + '% 6px ' + (100 - pct) + '%';
     }
-    // canvas 리사이즈 트리거
     window.dispatchEvent(new Event('resize'));
   });
 
