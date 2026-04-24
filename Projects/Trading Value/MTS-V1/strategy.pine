@@ -1,0 +1,42 @@
+//@version=5
+strategy(
+    title="MTS-V1 v5.1",
+    shorttitle="MTS-V1",
+    overlay=true,
+    pyramiding=3,
+    calc_on_every_tick=false,
+    process_orders_on_close=true
+)
+
+groupExecution = "Execution"
+user_leverage = input.int(10, "User Leverage", minval=1, group=groupExecution)
+use_runner = input.bool(true, "Use Runner", group=groupExecution)
+
+groupMMR = "Maintenance Margin Rate"
+mmr_btc = input.float(0.0, "MMR BTCUSDT", minval=0.0, step=0.0001, group=groupMMR)
+mmr_eth = input.float(0.0, "MMR ETHUSDT", minval=0.0, step=0.0001, group=groupMMR)
+mmr_sol = input.float(0.0, "MMR SOLUSDT", minval=0.0, step=0.0001, group=groupMMR)
+mmr_xrp = input.float(0.0, "MMR XRPUSDT", minval=0.0, step=0.0001, group=groupMMR)
+mmr_bnb = input.float(0.0, "MMR BNBUSDT", minval=0.0, step=0.0001, group=groupMMR)
+mmr_doge = input.float(0.0, "MMR DOGEUSDT", minval=0.0, step=0.0001, group=groupMMR)
+
+groupTimeframes = "Timeframes"
+htf = input.timeframe("240", "HTF", group=groupTimeframes)
+entry_tf = input.timeframe("60", "Entry TF", group=groupTimeframes)
+ltf = input.timeframe("15", "LTF (CVD only)", group=groupTimeframes)
+
+// Section 1. Liquidation safeguard and leverage sizing
+// Section 2. Entry trigger and triple confluence promotion
+// Section 3. State machine (0, 1, 2, 3, 4, 5 + sub-state A/AB)
+// Section 4. TP A / TP B / TP C
+// Section 5. Hard SL and sub-state transitions
+// Section 6. Runner protection
+// Section 7. Ops and parity notes
+
+var int state = 0
+var string sub_state = ""
+var bool triple_confluence = false
+var float avg_entry = na
+var float hard_sl = na
+
+plot(na, title="MTS-V1 placeholder")

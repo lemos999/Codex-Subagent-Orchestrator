@@ -1,0 +1,29 @@
+{
+  "strategy": "MTS-V1",
+  "version": "v5.1",
+  "symbol": "BTC/USDT:USDT",
+  "state": 0,
+  "sub_state": null,
+  "avg_entry": 0.0,
+  "hard_sl": 0.0,
+  "entry_prices": {
+    "L1": 0.0,
+    "L2": 0.0,
+    "L3": null
+  },
+  "fill_qtys": {
+    "L1": 0.0,
+    "L2": 0.0,
+    "L3": 0.0
+  },
+  "triple_confluence": false,
+  "sizing_frame": 0.1,
+  "client_order_ids": {
+    "L1": "mtsv1_btcusdt_01_0000000000000",
+    "L2": "mtsv1_btcusdt_12_0000000000001",
+    "L3": "mtsv1_btcusdt_23_0000000000002"
+  },
+  "cvd_daily_start": "2026-04-24T00:00:00Z",
+  "created_ts": "2026-04-24T10:58:03+09:00",
+  "updated_ts": "2026-04-24T10:58:03+09:00"
+}
