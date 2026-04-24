@@ -197,13 +197,14 @@ def test_d4_affiliation_kernel_updates_innerworld_scores() -> None:
 
     expected_a = (
         layers.DECAY * 2.0
-        + layers.W_TERRITORY
+        + layers.W_TERRITORY_SAME
         + layers.W_TRUST
         + layers.W_GRIEVANCE
         + layers.W_PROXIMITY
     )
+    expected_b = layers.W_TERRITORY_DIFF
     assert abs(engine.inners[pid].affiliation_scores[fid_a] - expected_a) < 1e-6
-    assert engine.inners[pid].affiliation_scores[fid_b] == 0.0
+    assert abs(engine.inners[pid].affiliation_scores[fid_b] - expected_b) < 1e-6
     assert getattr(engine.personas[pid], "affiliation_scores", None) is None
 
 

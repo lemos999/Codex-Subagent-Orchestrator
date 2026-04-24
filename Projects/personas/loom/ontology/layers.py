@@ -192,7 +192,10 @@ def create_default_territory(tid: str, name: str, region: str) -> 'Territory':
 
 MAX_TRACKED_FACTIONS_PER_PERSONA = 8
 
-W_TERRITORY = 1.0
+# ── Phase 17 affiliation_score (v5: drift 봉쇄 해소 패치 2026-04-23) ──
+# 고정점 분석 근거: PHASE-17-AFFILIATION-TUNE-SPEC.md 참조
+W_TERRITORY_SAME = 0.3   # 같은 territory 거주 시 (v4: 1.0 → v5: 0.3, 비대칭 완화)
+W_TERRITORY_DIFF = 0.1   # 다른 territory 거주 시 (v4: 0.0 → v5: 0.1, 완전 차단 제거)
 W_TRUST = 0.8
 W_GRIEVANCE = 0.6
 W_PROXIMITY = 0.4
@@ -203,7 +206,15 @@ PROXIMITY_DECAY_SCALE = 10.0
 FACTION_COOLDOWN_TICKS = 48
 FACTION_COMMIT_EVERY = 48
 THETA_JOIN = 2.5
-DRIFT_MARGIN = 1.2
+
+# DRIFT_MARGIN: v4까지 고정 1.2 → v5 동적 계산의 하한으로 재해석
+# actual_margin = max(DRIFT_MARGIN_MIN, gap × DRIFT_MARGIN_RATIO)
+DRIFT_MARGIN_MIN = 0.3
+DRIFT_MARGIN_RATIO = 0.15
+
+# 하위 호환 (기존 import 유지용, 실제 경로는 동적 계산이 우선)
+DRIFT_MARGIN = DRIFT_MARGIN_MIN  # deprecated: 동적 계산 사용
+W_TERRITORY = W_TERRITORY_SAME   # deprecated: same territory weight alias
 
 NORM_PRIMITIVE_CATALOG: tuple[str, ...] = (
     # 자원·경제 (3)

@@ -1,0 +1,130 @@
+{"tick": 0, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 1, "b7bf5679ed288c14cd4390c2b62f20ab": 1, "dd418852db2c8dc16f54c47a790837ff": 1}}
+{"tick": 0, "type": "contact", "pairs": [], "count": 0}
+{"tick": 0, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 2000.0, "mean": 2000.0, "gini": 0.0, "top_decile_share": 1.0}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 2000.0, "mean": 2000.0, "gini": 0.0, "top_decile_share": 1.0}, "dd418852db2c8dc16f54c47a790837ff": {"total": 2000.0, "mean": 2000.0, "gini": 0.0, "top_decile_share": 1.0}}}
+{"tick": 0, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {}, "b7bf5679ed288c14cd4390c2b62f20ab": {}, "dd418852db2c8dc16f54c47a790837ff": {}}, "shared_pairs": 0}
+{"tick": 0, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 0, "drift": 0, "conflict": 0}}
+{"tick": 100, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 100, "type": "contact", "pairs": [], "count": 0}
+{"tick": 200, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 200, "type": "contact", "pairs": [], "count": 0}
+{"tick": 300, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 300, "type": "contact", "pairs": [], "count": 0}
+{"tick": 400, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 400, "type": "contact", "pairs": [], "count": 0}
+{"tick": 500, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 500, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 500, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 5413.548828812718, "mean": 1804.516276270906, "gini": 0.18618707833633752, "top_decile_share": 0.4794820074377889}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 7824.858823367866, "mean": 1956.2147058419664, "gini": 0.14835031286029832, "top_decile_share": 0.3460113226050956}, "dd418852db2c8dc16f54c47a790837ff": {"total": 4710.68448443891, "mean": 1570.2281614796366, "gini": 0.3377874895183508, "top_decile_share": 0.593002022974635}}}
+{"tick": 500, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 2}, "b7bf5679ed288c14cd4390c2b62f20ab": {"persona_020": 3}, "dd418852db2c8dc16f54c47a790837ff": {"persona_001": 2}}, "shared_pairs": 0}
+{"tick": 600, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 600, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 700, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 700, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 800, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 800, "type": "contact", "pairs": [], "count": 0}
+{"tick": 900, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 900, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 1000, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 2}}
+{"tick": 1000, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 1000, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 4483.804686031606, "mean": 1494.6015620105354, "gini": 0.3397917372178567, "top_decile_share": 0.5692559032698596}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 6677.272089153955, "mean": 1669.3180222884887, "gini": 0.195315763061773, "top_decile_share": 0.38326800272773115}, "dd418852db2c8dc16f54c47a790837ff": {"total": 3611.1526343106434, "mean": 1805.5763171553217, "gini": 0.2664353624728091, "top_decile_share": 0.7664353624728089}}}
+{"tick": 1000, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 2}, "b7bf5679ed288c14cd4390c2b62f20ab": {"persona_020": 3}, "dd418852db2c8dc16f54c47a790837ff": {"persona_001": 2}}, "shared_pairs": 0}
+{"tick": 1000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 7, "drift": 0, "conflict": 0}}
+{"tick": 1100, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1100, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1200, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1200, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1300, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1300, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1400, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1400, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1500, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1500, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1500, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 2666.630981766794, "mean": 888.8769939222647, "gini": 0.4870534935029318, "top_decile_share": 0.7369900552348188}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 5684.081349883987, "mean": 1421.0203374709968, "gini": 0.25369007128345333, "top_decile_share": 0.3667036786630863}, "dd418852db2c8dc16f54c47a790837ff": {"total": 2358.0794343106436, "mean": 786.0264781035479, "gini": 0.47522235080089326, "top_decile_share": 0.7510001794066888}}}
+{"tick": 1500, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 2}, "b7bf5679ed288c14cd4390c2b62f20ab": {"persona_020": 3}, "dd418852db2c8dc16f54c47a790837ff": {"persona_001": 2}}, "shared_pairs": 0}
+{"tick": 1600, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1600, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 1700, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1700, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 1800, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1800, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 1900, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 1900, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"]], "count": 1}
+{"tick": 2000, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2000, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 2000, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 1283.3822224888909, "mean": 427.7940741629636, "gini": 0.6520759287266822, "top_decile_share": 0.9781138930900231}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 5185.0446759068745, "mean": 1296.2611689767186, "gini": 0.19267931491310986, "top_decile_share": 0.3188195260480375}, "dd418852db2c8dc16f54c47a790837ff": {"total": 1348.5594343106432, "mean": 449.51981143688107, "gini": 0.6581828699813543, "top_decile_share": 0.9872743049720315}}}
+{"tick": 2000, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 2}, "b7bf5679ed288c14cd4390c2b62f20ab": {"persona_020": 3}, "dd418852db2c8dc16f54c47a790837ff": {"persona_001": 2}}, "shared_pairs": 0}
+{"tick": 2000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 10, "drift": 0, "conflict": 0}}
+{"tick": 2100, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2100, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 2}
+{"tick": 2200, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2200, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 2}
+{"tick": 2300, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2300, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 2}
+{"tick": 2400, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2400, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 2}
+{"tick": 2500, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2500, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 2}
+{"tick": 2500, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 994.8322224888907, "mean": 331.61074082963023, "gini": 0.6091238042712848, "top_decile_share": 0.9136857064069267}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 4831.125495410039, "mean": 1207.7813738525097, "gini": 0.3481242683650727, "top_decile_share": 0.43534857060630316}, "dd418852db2c8dc16f54c47a790837ff": {"total": 1001.3594343106428, "mean": 333.7864781035476, "gini": 0.6618989107255933, "top_decile_share": 0.9928483660883898}}}
+{"tick": 2500, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 2}, "b7bf5679ed288c14cd4390c2b62f20ab": {"persona_020": 3}, "dd418852db2c8dc16f54c47a790837ff": {"persona_001": 1}}, "shared_pairs": 0}
+{"tick": 2600, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2600, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 2}
+{"tick": 2700, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2700, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 2800, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2800, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 2900, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 2900, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 3000, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3000, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 3000, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 840.5494845115845, "mean": 280.1831615038615, "gini": 0.6130249590144061, "top_decile_share": 0.9384979665052225}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 3845.792422289714, "mean": 961.4481055724285, "gini": 0.35834927675817996, "top_decile_share": 0.46900605300297926}, "dd418852db2c8dc16f54c47a790837ff": {"total": 656.9394343106425, "mean": 218.97981143688082, "gini": 0.6593992731403602, "top_decile_share": 0.9890989097105404}}}
+{"tick": 3000, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 2}, "b7bf5679ed288c14cd4390c2b62f20ab": {"persona_020": 3}, "dd418852db2c8dc16f54c47a790837ff": {"persona_001": 1}}, "shared_pairs": 0}
+{"tick": 3000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 14, "drift": 0, "conflict": 0}}
+{"tick": 3100, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3100, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 3200, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3200, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 3300, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 2}}
+{"tick": 3300, "type": "contact", "pairs": [["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 3400, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3400, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3500, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3500, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3500, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 963.9251972570737, "mean": 321.30839908569124, "gini": 0.5370911279580302, "top_decile_share": 0.8648897075555904}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 2424.4394765357806, "mean": 606.1098691339452, "gini": 0.4354748640993449, "top_decile_share": 0.5205949436944622}, "dd418852db2c8dc16f54c47a790837ff": {"total": 68.5394343106422, "mean": 22.8464781035474, "gini": 0.5970098706907006, "top_decile_share": 0.8955148060360507}}}
+{"tick": 3500, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 2}, "b7bf5679ed288c14cd4390c2b62f20ab": {"persona_020": 3}, "dd418852db2c8dc16f54c47a790837ff": {"persona_001": 1}}, "shared_pairs": 0}
+{"tick": 3600, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3600, "type": "contact", "pairs": [["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 3700, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3700, "type": "contact", "pairs": [["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 3800, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3800, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 2}
+{"tick": 3900, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 3900, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 3}
+{"tick": 4000, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4000, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 3}
+{"tick": 4000, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 848.7601972570737, "mean": 282.9200657523579, "gini": 0.4960321413388784, "top_decile_share": 0.8113410409519485}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 678.8985732301223, "mean": 169.72464330753058, "gini": 0.5678046607878167, "top_decile_share": 0.6934467798808298}, "dd418852db2c8dc16f54c47a790837ff": {"total": 34.13943431064223, "mean": 11.379811436880743, "gini": 0.5268214264484867, "top_decile_share": 0.79023213967273}}}
+{"tick": 4000, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 2}, "b7bf5679ed288c14cd4390c2b62f20ab": {"persona_020": 2}, "dd418852db2c8dc16f54c47a790837ff": {"persona_001": 1}}, "shared_pairs": 0}
+{"tick": 4000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 19, "drift": 0, "conflict": 0}}
+{"tick": 4100, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4100, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 3}
+{"tick": 4200, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4200, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 3}
+{"tick": 4300, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 2, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4300, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 3}
+{"tick": 4400, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 2, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4400, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 3}
+{"tick": 4500, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4500, "type": "contact", "pairs": [["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 4500, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 528.5401972570739, "mean": 176.180065752358, "gini": 0.6374831962403034, "top_decile_share": 0.961921126528529}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 22.458573230122298, "mean": 5.614643307530574, "gini": 0.23252705611473923, "top_decile_share": 0.38761913536688236}, "dd418852db2c8dc16f54c47a790837ff": {"total": 52.69943431064223, "mean": 17.56647810354741, "gini": 0.5760729543330143, "top_decile_share": 0.8641094314995212}}}
+{"tick": 4500, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {"persona_021": 1}, "b7bf5679ed288c14cd4390c2b62f20ab": {}, "dd418852db2c8dc16f54c47a790837ff": {}}, "shared_pairs": 0}
+{"tick": 4600, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 2}}
+{"tick": 4600, "type": "contact", "pairs": [["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 4700, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 3, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4700, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 2}
+{"tick": 4800, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4800, "type": "contact", "pairs": [["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 4900, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 4900, "type": "contact", "pairs": [["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 1}
+{"tick": 5000, "type": "population", "data": {"279da009bd0345cb435f8833f62a680b": 3, "b7bf5679ed288c14cd4390c2b62f20ab": 4, "dd418852db2c8dc16f54c47a790837ff": 3}}
+{"tick": 5000, "type": "contact", "pairs": [["279da009bd0345cb435f8833f62a680b", "b7bf5679ed288c14cd4390c2b62f20ab"], ["279da009bd0345cb435f8833f62a680b", "dd418852db2c8dc16f54c47a790837ff"], ["b7bf5679ed288c14cd4390c2b62f20ab", "dd418852db2c8dc16f54c47a790837ff"]], "count": 3}
+{"tick": 5000, "type": "wealth", "data": {"279da009bd0345cb435f8833f62a680b": {"total": 18.210197257073887, "mean": 6.070065752357962, "gini": 0.18572895767357545, "top_decile_share": 0.4439261061818091}, "b7bf5679ed288c14cd4390c2b62f20ab": {"total": 33.08857323012229, "mean": 8.272143307530573, "gini": 0.39876986613994503, "top_decile_share": 0.5843519635180823}, "dd418852db2c8dc16f54c47a790837ff": {"total": 25.339434310642233, "mean": 8.446478103547411, "gini": 0.5209628556390857, "top_decile_share": 0.7814442834586286}}}
+{"tick": 5000, "type": "grievance_targets", "raw": {"279da009bd0345cb435f8833f62a680b": {}, "b7bf5679ed288c14cd4390c2b62f20ab": {}, "dd418852db2c8dc16f54c47a790837ff": {}}, "shared_pairs": 0}
+{"tick": 5000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 33, "drift": 0, "conflict": 0}}

@@ -1,0 +1,130 @@
+{"tick": 0, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 1, "6f38d94a2f85d9517bd17bc2a67e393c": 1}}
+{"tick": 0, "type": "contact", "pairs": [], "count": 0}
+{"tick": 0, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 2000.0, "mean": 2000.0, "gini": 0.0, "top_decile_share": 1.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 2000.0, "mean": 2000.0, "gini": 0.0, "top_decile_share": 1.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 2000.0, "mean": 2000.0, "gini": 0.0, "top_decile_share": 1.0}}}
+{"tick": 0, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {}}, "shared_pairs": 0}
+{"tick": 0, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 0, "drift": 0, "conflict": 0}}
+{"tick": 100, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 2, "55d6b8568d809f9b785b45ce68e99aef": 1, "6f38d94a2f85d9517bd17bc2a67e393c": 7}}
+{"tick": 100, "type": "contact", "pairs": [], "count": 0}
+{"tick": 200, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 2, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 8}}
+{"tick": 200, "type": "contact", "pairs": [], "count": 0}
+{"tick": 300, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 2, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 8}}
+{"tick": 300, "type": "contact", "pairs": [], "count": 0}
+{"tick": 400, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 2, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 8}}
+{"tick": 400, "type": "contact", "pairs": [], "count": 0}
+{"tick": 500, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 2, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 8}}
+{"tick": 500, "type": "contact", "pairs": [], "count": 0}
+{"tick": 500, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 3648.0610327892236, "mean": 1824.0305163946118, "gini": 0.18008747599867148, "top_decile_share": 0.6800874759986716}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 14922.811366302481, "mean": 1865.3514207878102, "gini": 0.27876991571445053, "top_decile_share": 0.21002837436626023}}}
+{"tick": 500, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {"persona_020": 1}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_001": 2, "persona_020": 2, "persona_021": 2}}, "shared_pairs": 1}
+{"tick": 600, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 2, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 8}}
+{"tick": 600, "type": "contact", "pairs": [], "count": 0}
+{"tick": 700, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 700, "type": "contact", "pairs": [], "count": 0}
+{"tick": 800, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 800, "type": "contact", "pairs": [], "count": 0}
+{"tick": 900, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 900, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1000, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1000, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1000, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 262.2204127104933, "mean": 262.2204127104933, "gini": 0.0, "top_decile_share": 1.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 15444.954998257053, "mean": 1716.1061109174505, "gini": 0.3445339676508121, "top_decile_share": 0.2151167458270829}}}
+{"tick": 1000, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_001": 2, "persona_020": 3, "persona_021": 2}}, "shared_pairs": 0}
+{"tick": 1000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 7, "drift": 6, "conflict": 0}}
+{"tick": 1100, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1100, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1200, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1200, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1300, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1300, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1400, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1400, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1500, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1500, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1500, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 2.4729127104932616, "mean": 2.4729127104932616, "gini": 0.0, "top_decile_share": 1.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 10731.56119331087, "mean": 1192.3956881456522, "gini": 0.4342926813270582, "top_decile_share": 0.2603465129611315}}}
+{"tick": 1500, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_001": 2, "persona_020": 3, "persona_021": 2}}, "shared_pairs": 0}
+{"tick": 1600, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1600, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1700, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 1, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1700, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1800, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 1800, "type": "contact", "pairs": [], "count": 0}
+{"tick": 1900, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 1900, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2000, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2000, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2000, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 8868.383160040856, "mean": 886.8383160040855, "gini": 0.553064628199289, "top_decile_share": 0.32142761157441585}}}
+{"tick": 2000, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_001": 2, "persona_020": 3, "persona_021": 1}}, "shared_pairs": 0}
+{"tick": 2000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 11, "drift": 6, "conflict": 0}}
+{"tick": 2100, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2100, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2200, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2200, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2300, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2300, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2400, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2400, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2500, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2500, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2500, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 7031.701863533097, "mean": 703.1701863533096, "gini": 0.6092892251506763, "top_decile_share": 0.36815315380251085}}}
+{"tick": 2500, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_001": 2, "persona_020": 3, "persona_021": 1}}, "shared_pairs": 0}
+{"tick": 2600, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2600, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2700, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2700, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2800, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2800, "type": "contact", "pairs": [], "count": 0}
+{"tick": 2900, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 2900, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3000, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 3000, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3000, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 4171.818863533097, "mean": 417.1818863533097, "gini": 0.7042534516589414, "top_decile_share": 0.44032190220814177}}}
+{"tick": 3000, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_001": 1, "persona_020": 3, "persona_021": 1}}, "shared_pairs": 0}
+{"tick": 3000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 15, "drift": 6, "conflict": 0}}
+{"tick": 3100, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 3100, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3200, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 3200, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3300, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 3300, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3400, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 3400, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3500, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 3500, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3500, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 3009.323334885956, "mean": 300.9323334885956, "gini": 0.6959959771860313, "top_decile_share": 0.44227325200638146}}}
+{"tick": 3500, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_001": 1, "persona_020": 1, "persona_021": 1}}, "shared_pairs": 0}
+{"tick": 3600, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 3600, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3700, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 3700, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3800, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 3800, "type": "contact", "pairs": [], "count": 0}
+{"tick": 3900, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 3900, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4000, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 4000, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4000, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 1874.3649221754617, "mean": 187.43649221754617, "gini": 0.8001522102158287, "top_decile_share": 0.6633410617904792}}}
+{"tick": 4000, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_020": 1, "persona_021": 1}}, "shared_pairs": 0}
+{"tick": 4000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 23, "drift": 6, "conflict": 0}}
+{"tick": 4100, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 4100, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4200, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 4200, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4300, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 4300, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4400, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 9}}
+{"tick": 4400, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4500, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 4500, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4500, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 795.8209221754616, "mean": 79.58209221754616, "gini": 0.8350631781003264, "top_decile_share": 0.8422035648755226}}}
+{"tick": 4500, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {"persona_021": 1}}, "shared_pairs": 0}
+{"tick": 4600, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 8}}
+{"tick": 4600, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4700, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 4700, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4800, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 4800, "type": "contact", "pairs": [], "count": 0}
+{"tick": 4900, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 4900, "type": "contact", "pairs": [], "count": 0}
+{"tick": 5000, "type": "population", "data": {"41b743a3971a181d4e40961261601d3d": 0, "55d6b8568d809f9b785b45ce68e99aef": 0, "6f38d94a2f85d9517bd17bc2a67e393c": 10}}
+{"tick": 5000, "type": "contact", "pairs": [], "count": 0}
+{"tick": 5000, "type": "wealth", "data": {"41b743a3971a181d4e40961261601d3d": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "55d6b8568d809f9b785b45ce68e99aef": {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}, "6f38d94a2f85d9517bd17bc2a67e393c": {"total": 595.7249221754616, "mean": 59.57249221754616, "gini": 0.8470208123810539, "top_decile_share": 0.8565080940300419}}}
+{"tick": 5000, "type": "grievance_targets", "raw": {"41b743a3971a181d4e40961261601d3d": {}, "55d6b8568d809f9b785b45ce68e99aef": {}, "6f38d94a2f85d9517bd17bc2a67e393c": {}}, "shared_pairs": 0}
+{"tick": 5000, "type": "source_cumulative", "data": {"birth_founder": 3, "affiliation": 35, "drift": 6, "conflict": 0}}

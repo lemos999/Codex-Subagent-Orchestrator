@@ -53,10 +53,10 @@ from ontology.layers import (
     MOVE_CANDIDATE_K, MOVE_SOFTMAX_T, MIGRATION_COOLDOWN_DEFAULT,
     MOVE_DISALLOWED_BIOMES, score_move,
     MAX_TRACKED_FACTIONS_PER_PERSONA,
-    W_TERRITORY, W_TRUST, W_GRIEVANCE, W_PROXIMITY, DECAY,
+    W_TERRITORY_SAME, W_TERRITORY_DIFF, W_TRUST, W_GRIEVANCE, W_PROXIMITY, DECAY,
     GRIEVANCE_MIN_SHARED, PROXIMITY_DECAY_SCALE,
     FACTION_COOLDOWN_TICKS, FACTION_COMMIT_EVERY,
-    THETA_JOIN, DRIFT_MARGIN,
+    THETA_JOIN, DRIFT_MARGIN_MIN, DRIFT_MARGIN_RATIO,
     NORM_PRIMITIVE_CATALOG, CHARTER_PRIMITIVE_COUNT,
     FACTION_PROJECT_EVERY, FACTION_HYSTERESIS,
     FACTION_TELEMETRY_BIAS_OWN, FACTION_TELEMETRY_BIAS_NEIGHBOR,
@@ -691,6 +691,7 @@ class MultiTickEngine:
         if deaths:
             tick_result["deaths"] = deaths
             for death in deaths:
+                actions[death["pid"]] = "death"
                 if death.get("reincarnation"):
                     tick_result["personas"][death["pid"]]["action"] = "death"
 
@@ -718,10 +719,10 @@ class MultiTickEngine:
             ]
             if awake_others:
                 # 친밀도 최대인 상대
-                best = max(awake_others,
-                           key=lambda p: self.relationships[
-                               Relationship(persona_a=sid, persona_b=p).key()
-                           ].familiarity)
+                best = max(
+                    awake_others,
+                    key=lambda p: self._ensure_relationship(sid, p).familiarity,
+                )
                 interaction = self._process_interaction(sid, best, mutual=False)
                 interactions.append(interaction)
 
@@ -1090,6 +1091,8 @@ class MultiTickEngine:
             if pid not in self.inners:
                 continue
             persona = self.personas[pid]
+            if persona.id != pid:
+                continue
             if persona.faction is not None and persona.faction in cache:
                 cache[persona.faction].append(persona)
         self._faction_members_cache = cache
@@ -1113,6 +1116,51 @@ class MultiTickEngine:
         if not trusts:
             return 0.0
         return 2.0 * (sum(trusts) / len(trusts) - 0.5)
+
+    def _ensure_relationship(self, pid_a: str, pid_b: str) -> Relationship:
+        """Return a relationship row, recreating missing or stale keys when needed."""
+        rel_key = Relationship(persona_a=pid_a, persona_b=pid_b).key()
+        rel = self.relationships.get(rel_key)
+        if rel is None:
+            rel = Relationship(persona_a=rel_key[0], persona_b=rel_key[1])
+            self.relationships[rel_key] = rel
+            return rel
+        if rel.persona_a != rel_key[0] or rel.persona_b != rel_key[1]:
+            rel.persona_a = rel_key[0]
+            rel.persona_b = rel_key[1]
+        return rel
+
+    def _rekey_relationships(self, old_pid: str, new_pid: str) -> None:
+        """Rewrite relationship keys when reincarnation changes a persona id."""
+        rewritten: dict[tuple, Relationship] = {}
+        stale_keys: list[tuple] = []
+        for rel_key, rel in self.relationships.items():
+            if old_pid not in rel_key:
+                continue
+            stale_keys.append(rel_key)
+            rel.persona_a = new_pid if rel.persona_a == old_pid else rel.persona_a
+            rel.persona_b = new_pid if rel.persona_b == old_pid else rel.persona_b
+            new_key = rel.key()
+            rel.persona_a = new_key[0]
+            rel.persona_b = new_key[1]
+            rewritten[new_key] = rel
+        for rel_key in stale_keys:
+            del self.relationships[rel_key]
+        self.relationships.update(rewritten)
+
+    def _rekey_economic_references(self, old_pid: str, new_pid: str, new_persona: Persona) -> None:
+        """Rewrite employment/job references when reincarnation changes a persona id."""
+        old_persona = self.personas.get(old_pid)
+        if old_persona and old_persona.employment_id in self.employments:
+            new_persona.employment_id = old_persona.employment_id
+        for job in self.jobs.values():
+            if job.employer_id == old_pid:
+                job.employer_id = new_pid
+        for employment in self.employments.values():
+            if employment.employer_id == old_pid:
+                employment.employer_id = new_pid
+            if employment.employee_id == old_pid:
+                employment.employee_id = new_pid
 
     def _shared_grievance(self, persona: Persona, faction_id: str) -> float:
         """grievance·grievance_lord_id는 InnerWorld 소재."""
@@ -1156,8 +1204,13 @@ class MultiTickEngine:
             prev_scores = self.inners[pid].affiliation_scores
             scored: dict[str, float] = {}
             for fid in sorted(self.factions):
+                territory_weight = (
+                    W_TERRITORY_SAME
+                    if self._same_territory(persona, fid) > 0.5
+                    else W_TERRITORY_DIFF
+                )
                 score = (
-                    W_TERRITORY * self._same_territory(persona, fid)
+                    territory_weight
                     + W_TRUST * self._trust_density(persona, fid)
                     + W_GRIEVANCE * self._shared_grievance(persona, fid)
                     + W_PROXIMITY * self._spatial_proximity(persona, fid)
@@ -1194,7 +1247,9 @@ class MultiTickEngine:
                 if best_fid == cur_fid:
                     continue
                 current_score = scores.get(cur_fid, 0.0)
-                if best_score - current_score >= DRIFT_MARGIN:
+                gap = best_score - current_score
+                dynamic_margin = max(DRIFT_MARGIN_MIN, gap * DRIFT_MARGIN_RATIO)
+                if gap >= dynamic_margin:
                     self._change_persona_faction(pid, best_fid, source="drift")
         self._rebuild_faction_members_cache()
 
@@ -1412,7 +1467,11 @@ class MultiTickEngine:
             if not members:
                 result[fid] = {"total": 0.0, "mean": 0.0, "gini": 0.0, "top_decile_share": 0.0}
                 continue
-            gold_sorted = sorted(float(self.wallets[m.id].gold) for m in members if m.id in self.wallets)
+            gold_sorted = sorted(
+                float(self.wallets[m.id].gold)
+                for m in members
+                if m.id in self.wallets and m.id in self.inners
+            )
             n = len(gold_sorted)
             total = float(sum(gold_sorted))
             mean = total / n if n else 0.0
@@ -1438,11 +1497,11 @@ class MultiTickEngine:
         result: dict[tuple[str, str], float] = {}
         fids_sorted = sorted(self.factions)
         for i, fa in enumerate(fids_sorted):
-            mem_a = self._faction_members(fa)
+            mem_a = [pa for pa in self._faction_members(fa) if pa.id in self.inners]
             if not mem_a:
                 continue
             for fb in fids_sorted[i + 1:]:
-                mem_b = self._faction_members(fb)
+                mem_b = [pb for pb in self._faction_members(fb) if pb.id in self.inners]
                 if not mem_b:
                     continue
                 trusts = [
@@ -1461,6 +1520,8 @@ class MultiTickEngine:
         for fid in sorted(self.factions):
             counts: dict[str, int] = {}
             for member in self._faction_members(fid):
+                if member.id not in self.inners:
+                    continue
                 inner = self.inners[member.id]
                 if inner.grievance >= GRIEVANCE_MIN_SHARED and inner.grievance_lord_id is not None:
                     counts[inner.grievance_lord_id] = counts.get(inner.grievance_lord_id, 0) + 1
@@ -2380,8 +2441,7 @@ class MultiTickEngine:
 
     def _process_interaction(self, pid_a: str, pid_b: str, mutual: bool = True) -> dict:
         """두 페르소나 간 상호작용 처리."""
-        rel_key = Relationship(persona_a=pid_a, persona_b=pid_b).key()
-        rel = self.relationships[rel_key]
+        rel = self._ensure_relationship(pid_a, pid_b)
 
         inner_a = self.inners[pid_a]
         inner_b = self.inners[pid_b]
@@ -4636,6 +4696,7 @@ class MultiTickEngine:
                 neuron_count=persona.neuron_count,
                 personality=new_personality,
             )
+            self._rekey_economic_references(pid, new_pid, new_persona)
             new_persona.aptitude_map = compute_aptitude_map(new_personality, int(new_seed))
             new_inner = InnerWorld(persona_id=new_pid)
             old_inner = self.inners[pid]
@@ -4658,23 +4719,44 @@ class MultiTickEngine:
             new_inner.equipped_tool_durability = TOOL_MAX_DURABILITY
             new_inner.consecutive_hunger_ticks = 0
 
-            # 기존 대체
-            self.personas[pid] = new_persona
-            self.inners[pid] = new_inner
-            self._work_reward_history[pid] = []
+            old_wallet = self.wallets.pop(pid, None)
+
+            # ── identity rekey: pid → new_pid ──────────────────────
+            # 관계망은 old pid 기준으로 생성되었으므로 유지 (비밀 처리와 동일 패턴)
+            # dict key를 new_pid로 이전. 동일 dict의 기존 old pid 항목은 삭제.
+            # ───────────────────────────────────────────────────────
+            del self.personas[pid]
+            del self.inners[pid]
+            if pid in self.brains:
+                del self.brains[pid]
+            if pid in self._work_reward_history:
+                del self._work_reward_history[pid]
+
+            self.personas[new_pid] = new_persona
+            self.inners[new_pid] = new_inner
+            self.brains[new_pid] = new_brain
+            self._work_reward_history[new_pid] = []
+            if old_wallet is not None:
+                old_wallet.persona_id = new_pid
+                self.wallets[new_pid] = old_wallet
+
+            self._territory_residents_cache = None
+            self._faction_members_cache = {}
 
             # ── food_knowledge 70% 이식 ──
             # "전생에 독초에 혼났던 경험이 이번 생의 직관에 남는다"
             self._inherit_food_knowledge(new_pid, old_inner)
 
             # ── 태생 지역 초기 지식 추가 ──
-            self._init_regional_food_knowledge(pid)
-            self.brains[pid] = new_brain
+            self._init_regional_food_knowledge(new_pid)
             # 관계는 유지 (이름만 바뀜, 관계망에 잔존)
             # 비밀은 소실
             if pid in self.secrets:
+                self.secrets[pid].owner_id = new_pid
                 self.secrets[pid].known_by = {new_pid}
                 self.secrets[pid].revealed_tick = None
+                self.secrets[new_pid] = self.secrets.pop(pid)
+            self._rekey_relationships(pid, new_pid)
 
             death_event["reincarnation"] = {
                 "new_name": new_persona.name,

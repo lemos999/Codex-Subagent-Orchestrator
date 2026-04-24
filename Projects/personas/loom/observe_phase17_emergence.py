@@ -16,9 +16,8 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from core.multi_tick_engine import MultiTickEngine
-from ontology.layers import GRIEVANCE_MIN_SHARED
 
-OUT_ROOT = Path(__file__).resolve().parent / "data" / "phase17_probe"
+DEFAULT_OUT_ROOT = Path(__file__).resolve().parent / "data" / "phase17_probe"
 DEFAULT_SEEDS = (7, 13, 42)
 DEFAULT_TICKS = 5000
 QUICK_SEEDS = (42,)
@@ -42,6 +41,11 @@ def _parse_args() -> argparse.Namespace:
         "--quick",
         action="store_true",
         help="Smoke mode: seed 42 only, 500 ticks",
+    )
+    parser.add_argument(
+        "--out",
+        default="data/phase17_probe",
+        help="Output directory (default: data/phase17_probe)",
     )
     return parser.parse_args()
 
@@ -109,24 +113,6 @@ def _shared_grievance_pairs(raw: dict[str, dict[str, int]]) -> int:
     return len(shared_pairs)
 
 
-def _safe_grievance_targets(engine: MultiTickEngine) -> dict[str, dict[str, int]]:
-    try:
-        return engine.faction_grievance_targets()
-    except KeyError:
-        result: dict[str, dict[str, int]] = {fid: {} for fid in sorted(engine.factions)}
-        for pid in sorted(engine.personas):
-            if pid not in engine.inners:
-                continue
-            persona = engine.personas[pid]
-            if persona.faction is None or persona.faction not in result:
-                continue
-            inner = engine.inners[pid]
-            if inner.grievance >= GRIEVANCE_MIN_SHARED and inner.grievance_lord_id is not None:
-                counts = result[persona.faction]
-                counts[inner.grievance_lord_id] = counts.get(inner.grievance_lord_id, 0) + 1
-        return result
-
-
 def _dump_snapshot(handle, engine: MultiTickEngine, tick: int) -> None:
     if tick == 0 or tick % 100 == 0:
         _write_jsonl_line(
@@ -156,7 +142,7 @@ def _dump_snapshot(handle, engine: MultiTickEngine, tick: int) -> None:
                 "data": engine.faction_wealth_distribution(),
             },
         )
-        grievance_raw = _safe_grievance_targets(engine)
+        grievance_raw = engine.faction_grievance_targets()
         _write_jsonl_line(
             handle,
             {
@@ -357,9 +343,9 @@ def _build_seed_summary(seed: int, ticks: int, elapsed: float, jsonl_path: Path)
     return "\n".join(summary_lines) + "\n", result
 
 
-def run_seed(seed: int, ticks: int) -> dict[str, Any]:
+def run_seed(seed: int, ticks: int, out_root: Path) -> dict[str, Any]:
     engine = MultiTickEngine(seed=seed)
-    out_dir = OUT_ROOT / f"seed-{seed}"
+    out_dir = out_root / f"seed-{seed}"
     out_dir.mkdir(parents=True, exist_ok=True)
     jsonl_path = out_dir / "metrics.jsonl"
     summary_path = out_dir / "summary.md"
@@ -379,7 +365,7 @@ def run_seed(seed: int, ticks: int) -> dict[str, Any]:
     return result
 
 
-def _write_top_summary(results: list[dict[str, Any]]) -> None:
+def _write_top_summary(results: list[dict[str, Any]], out_root: Path) -> None:
     lines = [
         "# Phase 17 Emergence Probe — 전체 요약",
         "",
@@ -410,21 +396,24 @@ def _write_top_summary(results: list[dict[str, Any]]) -> None:
             "",
         ]
     )
-    OUT_ROOT.mkdir(parents=True, exist_ok=True)
-    (OUT_ROOT / "SUMMARY.md").write_text("\n".join(lines), encoding="utf-8")
+    out_root.mkdir(parents=True, exist_ok=True)
+    (out_root / "SUMMARY.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> int:
     args = _parse_args()
     seeds = list(QUICK_SEEDS if args.quick else _parse_seed_text(args.seeds))
     ticks = QUICK_TICKS if args.quick else int(args.ticks)
+    out_root = Path(args.out)
+    if not out_root.is_absolute():
+        out_root = (Path.cwd() / out_root).resolve()
 
-    OUT_ROOT.mkdir(parents=True, exist_ok=True)
+    out_root.mkdir(parents=True, exist_ok=True)
     results: list[dict[str, Any]] = []
     for seed in seeds:
         print(f"[run] seed={seed} ticks={ticks}", flush=True)
         try:
-            result = run_seed(seed, ticks)
+            result = run_seed(seed, ticks, out_root)
         except Exception as exc:  # pragma: no cover - runtime reporting path
             print(f"[fail] seed={seed}: {exc}", flush=True)
             results.append({"seed": seed, "error": str(exc)})
@@ -442,7 +431,7 @@ def main() -> int:
         )
         results.append(result)
 
-    _write_top_summary(results)
+    _write_top_summary(results, out_root)
     return 0
 
 
