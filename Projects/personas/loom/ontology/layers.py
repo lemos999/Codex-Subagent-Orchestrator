@@ -212,6 +212,24 @@ THETA_JOIN = 2.5
 DRIFT_MARGIN_MIN = 0.3
 DRIFT_MARGIN_RATIO = 0.15
 
+# ── Phase 17 v6: collapse 완화 (size tax + homeostasis, 2026-04-24) ──
+# 근거: v5 probe 3 seed 전원 active_end=1 붕괴 (PHASE-17-FACTION-COLLAPSE-MITIGATION-SPEC.md)
+# 1. Faction 규모 tax: size_ratio가 START를 넘기면 선형 감쇠, MIN이 하한
+FACTION_SIZE_TAX_START = 0.3     # 전체 활성 인구 대비 30% 초과분부터 tax 적용
+FACTION_SIZE_TAX_MIN = 0.3       # tax 하한 (점유 100%여도 30%는 남아 신규 가입 경로 보존)
+# 2. Homeostasis: active faction 수에 따라 drift margin_floor 조절
+HOMEOSTASIS_LOW_THRESHOLD = 2    # active 수 2 이하일 때 완화 모드 진입
+HOMEOSTASIS_DRIFT_MARGIN_SCALE = 0.5   # 완화 모드에서의 DRIFT_MARGIN_MIN 배수
+
+# ── Phase 17 Stage 3: anti-collapse (minority persistence + founder respawn, 2026-04-24) ──
+# 근거: v6 probe 3 seed 전원 active_end=1 붕괴 (absorbing state). B+C 조합으로 예방+치료.
+# B. Minority persistence: 소규모 faction의 territory 동거 가산을 줘서 멸종 직전 유지
+MINORITY_PERSISTENCE_MAX_MEMBERS = 2      # members <= 2일 때 boost 적용
+MINORITY_PERSISTENCE_BOOST = 0.15         # score 가산값 (= DRIFT_MARGIN_MIN * HOMEOSTASIS_DRIFT_MARGIN_SCALE 와 동일 규모)
+# C. Founder respawn: active < target이면 K틱 주기로 territory lord 기반 신규 faction 생성
+FOUNDER_RESPAWN_EVERY = 480               # FACTION_COMMIT_EVERY * 10 (48 * 10). commit 주기와 정합
+FOUNDER_RESPAWN_TARGET_ACTIVE = 2         # active 가 2 미만일 때만 발동 (overspawn 방지)
+
 # 하위 호환 (기존 import 유지용, 실제 경로는 동적 계산이 우선)
 DRIFT_MARGIN = DRIFT_MARGIN_MIN  # deprecated: 동적 계산 사용
 W_TERRITORY = W_TERRITORY_SAME   # deprecated: same territory weight alias

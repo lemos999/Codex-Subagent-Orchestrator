@@ -57,6 +57,10 @@ from ontology.layers import (
     GRIEVANCE_MIN_SHARED, PROXIMITY_DECAY_SCALE,
     FACTION_COOLDOWN_TICKS, FACTION_COMMIT_EVERY,
     THETA_JOIN, DRIFT_MARGIN_MIN, DRIFT_MARGIN_RATIO,
+    FACTION_SIZE_TAX_START, FACTION_SIZE_TAX_MIN,
+    HOMEOSTASIS_LOW_THRESHOLD, HOMEOSTASIS_DRIFT_MARGIN_SCALE,
+    MINORITY_PERSISTENCE_MAX_MEMBERS, MINORITY_PERSISTENCE_BOOST,
+    FOUNDER_RESPAWN_EVERY, FOUNDER_RESPAWN_TARGET_ACTIVE,
     NORM_PRIMITIVE_CATALOG, CHARTER_PRIMITIVE_COUNT,
     FACTION_PROJECT_EVERY, FACTION_HYSTERESIS,
     FACTION_TELEMETRY_BIAS_OWN, FACTION_TELEMETRY_BIAS_NEIGHBOR,
@@ -1196,6 +1200,8 @@ class MultiTickEngine:
     def _compute_affiliation_tick(self) -> None:
         """매 틱 affiliation score를 갱신한다."""
         self._rebuild_faction_members_cache()
+        # v6: 활성 인구 집계 (size tax 분모). inners 기준 = 살아있는 페르소나
+        total_active = max(1, sum(1 for pid in self.personas if pid in self.inners))
         new_scores: dict[str, dict[str, float]] = {}
         for pid in sorted(self.personas):
             if pid not in self.inners:
@@ -1215,6 +1221,18 @@ class MultiTickEngine:
                     + W_GRIEVANCE * self._shared_grievance(persona, fid)
                     + W_PROXIMITY * self._spatial_proximity(persona, fid)
                 )
+                # v6: 규모 tax — 이번 틱 가산분에만 적용 (누적 decay 결과는 불변)
+                size_ratio = len(self._faction_members_cache.get(fid, ())) / total_active
+                if size_ratio > FACTION_SIZE_TAX_START:
+                    excess = size_ratio - FACTION_SIZE_TAX_START
+                    span = 1.0 - FACTION_SIZE_TAX_START
+                    tax = max(FACTION_SIZE_TAX_MIN, 1.0 - excess / span)
+                    score *= tax
+                # Stage 3 B: minority persistence boost (2026-04-24)
+                member_count = len(self._faction_members_cache.get(fid, ()))
+                if 0 < member_count <= MINORITY_PERSISTENCE_MAX_MEMBERS:
+                    if self._same_territory(persona, fid) > 0.5:
+                        score += MINORITY_PERSISTENCE_BOOST
                 scored[fid] = DECAY * prev_scores.get(fid, 0.0) + score
             ranked = sorted(scored.items(), key=lambda kv: (-kv[1], kv[0]))
             new_scores[pid] = dict(ranked[:MAX_TRACKED_FACTIONS_PER_PERSONA])
@@ -1225,6 +1243,16 @@ class MultiTickEngine:
         """48틱마다 faction 가입/이적 commit."""
         if self.time.tick % FACTION_COMMIT_EVERY != 0:
             return
+        # v6: homeostasis — active faction 수에 따라 margin_floor 조절
+        active_count = sum(
+            1 for fid in self.factions
+            if len(self._faction_members_cache.get(fid, ())) > 0
+        )
+        margin_floor = (
+            DRIFT_MARGIN_MIN * HOMEOSTASIS_DRIFT_MARGIN_SCALE
+            if active_count <= HOMEOSTASIS_LOW_THRESHOLD
+            else DRIFT_MARGIN_MIN
+        )
         snapshot = {
             pid: (
                 self.personas[pid].faction,
@@ -1248,9 +1276,131 @@ class MultiTickEngine:
                     continue
                 current_score = scores.get(cur_fid, 0.0)
                 gap = best_score - current_score
-                dynamic_margin = max(DRIFT_MARGIN_MIN, gap * DRIFT_MARGIN_RATIO)
+                dynamic_margin = max(margin_floor, gap * DRIFT_MARGIN_RATIO)  # v6
                 if gap >= dynamic_margin:
                     self._change_persona_faction(pid, best_fid, source="drift")
+        self._rebuild_faction_members_cache()
+
+    def _respawn_faction_tick(self) -> None:
+        """Stage 3 C: active faction 수가 TARGET 미만이면 K틱 주기로 territory lord 기반 신규 faction 생성.
+
+        **Absorbing state 탈출 유일 경로**. 기존 `_init_founder_seeds`(tick=0)와 달리 매 K틱 검사.
+        불변 제약:
+            - RNG는 반드시 `_derive_rng("faction_respawn", ...)`로 격리 (기존 seed 스트림 오염 방지)
+            - SSoT: `_change_persona_faction(..., source="birth_founder")` 재사용 (신규 source 금지)
+            - 기존 territory의 lord를 founder로 재사용. lord 없으면 최고 trust persona.
+        """
+        if self.time.tick == 0:
+            return
+        if self.time.tick % FOUNDER_RESPAWN_EVERY != 0:
+            return
+
+        active_count = sum(
+            1 for fid in self.factions
+            if len(self._faction_members_cache.get(fid, ())) > 0
+        )
+        if active_count >= FOUNDER_RESPAWN_TARGET_ACTIVE:
+            return
+
+        # territory 우선순위: lord 존재 > faction 없는 거주자 수 많음 > sorted(id)
+        territory_priority: list[tuple[int, int, str]] = []
+        for territory in self.territories.values():
+            free_residents = [
+                persona for persona in self.personas.values()
+                if persona.territory == territory.id
+                and persona.faction is None
+                and persona.id in self.inners
+            ]
+            if len(free_residents) < 3:
+                continue
+            has_lord = 1 if territory.lord_id else 0
+            # 우선순위 = lord 있음 우선(-has_lord), 거주자 많음 우선(-count), id 오름차순(territory.id)
+            territory_priority.append((-has_lord, -len(free_residents), territory.id))
+
+        territory_priority.sort()
+
+        for _, _, territory_id in territory_priority:
+            if active_count >= FOUNDER_RESPAWN_TARGET_ACTIVE:
+                return  # 목표 달성 시 즉시 중단 (한 틱에 하나만 생성해도 target 도달하면 끝)
+            territory = self.territories[territory_id]
+            free_residents = [
+                persona for persona in self.personas.values()
+                if persona.territory == territory.id
+                and persona.faction is None
+                and persona.id in self.inners
+            ]
+            if len(free_residents) < 3:
+                continue
+            founder = self._pick_founder(free_residents, territory)
+            if founder is None:
+                continue
+            charter = self._sample_charter(territory.id)
+            # 격리된 RNG 스트림 사용 (기존 seed 결과 비호환 최소화)
+            rng = self._derive_rng("faction_respawn", territory.id, self.time.tick)
+            faction_id = uuid.UUID(bytes=rng.bytes(16)).hex
+            faction_name = f"{territory.name}_R{self.time.tick}"
+            faction = Faction(
+                id=faction_id,
+                name=faction_name,
+                founder_pid=founder.id,
+                charter=charter,
+                created_tick=self.time.tick,
+            )
+            self.factions[faction.id] = faction
+            self._change_persona_faction(founder.id, faction.id, source="birth_founder")
+            self.personas[founder.id].faction_cooldown = FOUNDER_RESPAWN_EVERY  # noqa: PHASE17_FACTION_SSOT_WRITE
+            active_count += 1
+
+        if active_count >= FOUNDER_RESPAWN_TARGET_ACTIVE:
+            self._rebuild_faction_members_cache()
+            return
+
+        # Stage 3 C fallback: collapse 이후 free resident가 0명이면 기존 거주자에서 founder를 분리한다.
+        # 신규 source 없이 birth_founder를 재사용하고, faction write는 SSoT helper만 통과한다.
+        territory_priority = []
+        for territory in self.territories.values():
+            residents = [
+                persona for persona in self.personas.values()
+                if persona.territory == territory.id
+                and persona.id in self.inners
+            ]
+            if len(residents) < 3:
+                continue
+            has_lord = 1 if territory.lord_id else 0
+            territory_priority.append((-has_lord, -len(residents), territory.id))
+
+        territory_priority.sort()
+
+        for _, _, territory_id in territory_priority:
+            if active_count >= FOUNDER_RESPAWN_TARGET_ACTIVE:
+                break
+            territory = self.territories[territory_id]
+            residents = [
+                persona for persona in self.personas.values()
+                if persona.territory == territory.id
+                and persona.id in self.inners
+            ]
+            if len(residents) < 3:
+                continue
+            founder = self._pick_founder(residents, territory)
+            if founder is None:
+                continue
+            charter = self._sample_charter(territory.id)
+            rng = self._derive_rng("faction_respawn", territory.id, self.time.tick)
+            faction_id = uuid.UUID(bytes=rng.bytes(16)).hex
+            faction_name = f"{territory.name}_R{self.time.tick}"
+            faction = Faction(
+                id=faction_id,
+                name=faction_name,
+                founder_pid=founder.id,
+                charter=charter,
+                created_tick=self.time.tick,
+            )
+            self.factions[faction.id] = faction
+            self._change_persona_faction(founder.id, faction.id, source="birth_founder")
+            self.personas[founder.id].faction_cooldown = FOUNDER_RESPAWN_EVERY  # noqa: PHASE17_FACTION_SSOT_WRITE
+            active_count += 1
+
         self._rebuild_faction_members_cache()
 
     def _pick_founder(self, candidates: list[Persona], territory: Territory) -> Persona | None:
@@ -2001,6 +2151,7 @@ class MultiTickEngine:
                 events.extend(tool_events)
 
         self._commit_faction_tick()
+        self._respawn_faction_tick()  # Stage 3 C: absorbing state 탈출
         self._project_faction_tick()
         self._pricing_cache = {}
         self._territory_residents_cache = None
