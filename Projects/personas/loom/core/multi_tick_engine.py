@@ -61,6 +61,7 @@ from ontology.layers import (
     HOMEOSTASIS_LOW_THRESHOLD, HOMEOSTASIS_DRIFT_MARGIN_SCALE,
     MINORITY_PERSISTENCE_MAX_MEMBERS, MINORITY_PERSISTENCE_BOOST,
     FOUNDER_RESPAWN_EVERY, FOUNDER_RESPAWN_TARGET_ACTIVE,
+    RESPAWN_GRACE_TICKS,
     NORM_PRIMITIVE_CATALOG, CHARTER_PRIMITIVE_COUNT,
     FACTION_PROJECT_EVERY, FACTION_HYSTERESIS,
     FACTION_TELEMETRY_BIAS_OWN, FACTION_TELEMETRY_BIAS_NEIGHBOR,
@@ -344,7 +345,9 @@ class MultiTickEngine:
         for pid in self.personas:
             inner = self.inners[pid]
             brain = self.brains[pid]
+            persona = self.personas[pid]
             self._tick_faction_cooldown(pid)
+            inner.residence_ticks[persona.territory] = inner.residence_ticks.get(persona.territory, 0) + 1
 
             if inner.is_sleeping:
                 entry = self._sleep_tick(pid)
@@ -1272,6 +1275,9 @@ class MultiTickEngine:
                 if best_score >= THETA_JOIN:
                     self._change_persona_faction(pid, best_fid, source="affiliation")
             else:
+                current_faction = self.factions.get(cur_fid)
+                if current_faction is not None and current_faction.grace_until_tick > self.time.tick:
+                    continue
                 if best_fid == cur_fid:
                     continue
                 current_score = scores.get(cur_fid, 0.0)
@@ -1345,6 +1351,7 @@ class MultiTickEngine:
                 founder_pid=founder.id,
                 charter=charter,
                 created_tick=self.time.tick,
+                grace_until_tick=self.time.tick + RESPAWN_GRACE_TICKS,
             )
             self.factions[faction.id] = faction
             self._change_persona_faction(founder.id, faction.id, source="birth_founder")
@@ -1395,6 +1402,7 @@ class MultiTickEngine:
                 founder_pid=founder.id,
                 charter=charter,
                 created_tick=self.time.tick,
+                grace_until_tick=self.time.tick + RESPAWN_GRACE_TICKS,
             )
             self.factions[faction.id] = faction
             self._change_persona_faction(founder.id, faction.id, source="birth_founder")

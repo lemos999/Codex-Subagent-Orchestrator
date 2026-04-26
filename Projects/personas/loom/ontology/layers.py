@@ -172,6 +172,7 @@ class Faction:
     founder_pid: str
     charter: tuple[str, ...]
     created_tick: int
+    grace_until_tick: int = 0
 
     def __post_init__(self) -> None:
         charter = tuple(self.charter)
@@ -192,11 +193,11 @@ def create_default_territory(tid: str, name: str, region: str) -> 'Territory':
 
 MAX_TRACKED_FACTIONS_PER_PERSONA = 8
 
-# ── Phase 17 affiliation_score (v5: drift 봉쇄 해소 패치 2026-04-23) ──
-# 고정점 분석 근거: PHASE-17-AFFILIATION-TUNE-SPEC.md 참조
-W_TERRITORY_SAME = 0.3   # 같은 territory 거주 시 (v4: 1.0 → v5: 0.3, 비대칭 완화)
+# ── Phase 17 affiliation_score (v6: Stage 5 Anti-Collapse 가중치 재균형 2026-04-25) ──
+# trust 누적 우위와 territory 동시성 비대칭을 0.5 동률로 재균형.
+W_TERRITORY_SAME = 0.5   # 같은 territory 거주 시 (v5: 0.3 → v6: 0.5, trust와 동률)
 W_TERRITORY_DIFF = 0.1   # 다른 territory 거주 시 (v4: 0.0 → v5: 0.1, 완전 차단 제거)
-W_TRUST = 0.8
+W_TRUST = 0.5            # (v3~v5: 0.8 → v6: 0.5, 누적 우위 비대칭 해소)
 W_GRIEVANCE = 0.6
 W_PROXIMITY = 0.4
 DECAY = 0.92
@@ -229,6 +230,11 @@ MINORITY_PERSISTENCE_BOOST = 0.15         # score 가산값 (= DRIFT_MARGIN_MIN 
 # C. Founder respawn: active < target이면 K틱 주기로 territory lord 기반 신규 faction 생성
 FOUNDER_RESPAWN_EVERY = 480               # FACTION_COMMIT_EVERY * 10 (48 * 10). commit 주기와 정합
 FOUNDER_RESPAWN_TARGET_ACTIVE = 2         # active 가 2 미만일 때만 발동 (overspawn 방지)
+
+# ── Phase 17 Stage 5: Respawn grace period (G, 2026-04-25) ──
+# 신생 faction이 trust 누적 우위에 즉시 재흡수되는 second-collapse pattern을 완화.
+# faction_cooldown(재가입 락)과 분리된 drift 면역 채널.
+RESPAWN_GRACE_TICKS = 200
 
 # 하위 호환 (기존 import 유지용, 실제 경로는 동적 계산이 우선)
 DRIFT_MARGIN = DRIFT_MARGIN_MIN  # deprecated: 동적 계산 사용
@@ -903,6 +909,7 @@ class InnerWorld:
     """페르소나의 내면 상태."""
     persona_id: str
     affiliation_scores: dict[str, float] = field(default_factory=dict)
+    residence_ticks: dict[str, int] = field(default_factory=dict)
 
     # 12클러스터 neuromodulator_tone (Phase 0: 기본값 1.0)
     # V  L  S  B  A  T  C  G  F  I  D  P
