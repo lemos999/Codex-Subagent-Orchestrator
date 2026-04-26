@@ -99,7 +99,7 @@ tests.append(("실제 강등 0건", t3, f"actual_demotions={len(actual_demotions
 # 환생한 persona는 class 리셋되므로 제외 (환생은 정상 동작)
 if promoted_pids:
     alive_promoted = [pid for pid in promoted_pids
-                      if engine.personas[pid].persona_class >= 2]
+                      if pid in engine.personas and engine.personas[pid].persona_class >= 2]
     reincarnated = len(promoted_pids) - len(alive_promoted)
     if alive_promoted:
         eff_classes = [engine.inners[pid].effective_class for pid in alive_promoted]
