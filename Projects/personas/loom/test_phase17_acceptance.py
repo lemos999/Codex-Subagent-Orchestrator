@@ -185,6 +185,34 @@ def test_phase17_phi2_determinism_500_ticks_stage4() -> None:
     assert h1 == h2, f"Phi-2 Stage 4 determinism hash mismatch ({h1} != {h2})"
 
 
+def _phase17_phi2_stage5_snapshot(seed: int = 42, ticks: int = 500) -> bytes:
+    from core.multi_tick_engine import MultiTickEngine
+
+    engine = MultiTickEngine(seed=seed)
+    for _ in range(ticks):
+        engine.tick()
+    snapshot = {
+        "p_faction": {pid: engine.personas[pid].faction for pid in sorted(engine.personas)},
+        "p_cooldown": {pid: engine.personas[pid].faction_cooldown for pid in sorted(engine.personas)},
+        "i_aff": {pid: dict(engine.inners[pid].affiliation_scores) for pid in sorted(engine.inners)},
+        "i_residence": {pid: dict(engine.inners[pid].residence_ticks) for pid in sorted(engine.inners)},
+        "factions": {
+            fid: (
+                engine.factions[fid].founder_pid,
+                engine.factions[fid].grace_until_tick,
+                tuple(engine.factions[fid].charter),
+            )
+            for fid in sorted(engine.factions)
+        },
+        "t_ref": {tid: engine.territories[tid].factionRef for tid in sorted(engine.territories)},
+    }
+    return pickle.dumps(snapshot, protocol=4)
+
+
+def _phase17_phi2_stage5_hash(seed: int = 42, ticks: int = 500) -> str:
+    return hashlib.sha256(_phase17_phi2_stage5_snapshot(seed=seed, ticks=ticks)).hexdigest()
+
+
 def test_phase17_phi2_perf_stage4() -> None:
     median, p95, samples = _measure_tick_ms_stable(seed=42)
     print(_format_tick_perf(median, p95, samples))
@@ -239,6 +267,14 @@ def main() -> int:
     print(f"[{status}] phi2_stage4_determinism_500: {determinism_a} / {determinism_b}")
     if not determinism_ok:
         failures.append("phi2_stage4_determinism_500")
+
+    stage5_a = _phase17_phi2_stage5_hash(seed=42, ticks=500)
+    stage5_b = _phase17_phi2_stage5_hash(seed=42, ticks=500)
+    stage5_ok = stage5_a == stage5_b
+    status = "PASS" if stage5_ok else "FAIL"
+    print(f"[{status}] phi2_stage5_determinism_500 (grace_until_tick+residence_ticks): {stage5_a[:16]}…")
+    if not stage5_ok:
+        failures.append("phi2_stage5_determinism_500")
 
     print()
     if failures:

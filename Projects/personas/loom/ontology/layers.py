@@ -173,6 +173,7 @@ class Faction:
     charter: tuple[str, ...]
     created_tick: int
     grace_until_tick: int = 0
+    founder_lineage: tuple[str, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         charter = tuple(self.charter)
@@ -235,6 +236,10 @@ FOUNDER_RESPAWN_TARGET_ACTIVE = 2         # active 가 2 미만일 때만 발동
 # 신생 faction이 trust 누적 우위에 즉시 재흡수되는 second-collapse pattern을 완화.
 # faction_cooldown(재가입 락)과 분리된 drift 면역 채널.
 RESPAWN_GRACE_TICKS = 200
+
+# ── Phase 17 Stage 6: H-lite founder lineage affinity (2026-04-26) ──
+# founder_lineage 공유 faction에 대한 소속 점수 가산. FactionChangeSource 4종 불변.
+W_LINEAGE = 0.2   # W_TRUST/W_TERRITORY_SAME(0.5)의 40% 수준
 
 # 하위 호환 (기존 import 유지용, 실제 경로는 동적 계산이 우선)
 DRIFT_MARGIN = DRIFT_MARGIN_MIN  # deprecated: 동적 계산 사용
@@ -909,7 +914,7 @@ class InnerWorld:
     """페르소나의 내면 상태."""
     persona_id: str
     affiliation_scores: dict[str, float] = field(default_factory=dict)
-    residence_ticks: dict[str, int] = field(default_factory=dict)
+    residence_ticks: dict[str, int] = field(default_factory=dict)  # Stage 5 D: read-only 누적. Stage 5.5+ affiliation 입력 격상 후보
 
     # 12클러스터 neuromodulator_tone (Phase 0: 기본값 1.0)
     # V  L  S  B  A  T  C  G  F  I  D  P
