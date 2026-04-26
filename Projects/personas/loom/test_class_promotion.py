@@ -34,7 +34,7 @@ for tick in range(TICKS):
     if "promotions" in result:
         for evt in result["promotions"]:
             promotion_events.append(evt)
-            print(f"  [tick {tick}] PROMOTION: {evt['persona_name']} → class {evt['new_class']} ({CLASS_TITLES.get(evt['new_class'], '?')}) skill={evt['skill_id']}")
+            print(f"  [tick {tick}] PROMOTION: {engine.personas[evt['pid']].name} → class {evt['new_class']} ({CLASS_TITLES.get(evt['new_class'], '?')}) skill={evt['skill_id']}")
     if "demotions" in result:
         for evt in result["demotions"]:
             demotion_events.append(evt)
