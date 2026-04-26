@@ -16,6 +16,11 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from core.multi_tick_engine import MultiTickEngine
+from test_phase17_acceptance import (
+    _format_observe_perf_line,
+    _measure_faction_kernel_ms,
+    _measure_tick_ms_stable,
+)
 
 DEFAULT_OUT_ROOT = Path(__file__).resolve().parent / "data" / "phase17_probe"
 DEFAULT_SEEDS = (7, 13, 42)
@@ -432,6 +437,9 @@ def main() -> int:
         results.append(result)
 
     _write_top_summary(results, out_root)
+    median, _p95, _samples = _measure_tick_ms_stable(seed=42)
+    kernel = _measure_faction_kernel_ms(seed=42)
+    print(_format_observe_perf_line(median, kernel["total"]), flush=True)
     return 0
 
 

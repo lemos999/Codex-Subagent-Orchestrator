@@ -365,6 +365,55 @@ Phase 17 Φ-2 구현 후 반드시 통과:
 
 ---
 
+## Stage 4 - Phi-3 Handoff (2026-04-25)
+
+Stage 4 measured the Stage 3 anti-collapse implementation without adding a new faction mechanism.
+
+Closure Report: `PHASE-17-FACTION-STAGE4-CLOSURE-REPORT.md`
+
+### Phi-3 Entry Trigger Candidates
+
+These triggers must be computed only through the D10 seven read-only APIs. They are OR conditions; any one condition can justify a future Phi-3 design cycle.
+
+1. **Geographic differentiation**: `len(factions_in_contact(radius=1)) >= 1`.
+   - Meaning: two different dominant factions are adjacent and can become a conflict/alliance substrate.
+
+2. **Population imbalance**: `max(faction_population_distribution().values()) / sum(...) >= 0.55`.
+   - Meaning: one faction owns at least 55% of faction population and the remainder becomes a meaningful opposition surface.
+
+3. **Shared grievance**: at least two factions have two or more members sharing the same `lord_id` in `faction_grievance_targets()`.
+   - Meaning: a common target exists and can produce coalition pressure.
+
+If none of these conditions is true, Phi-3 entry is deferred and Phi-2 continues operating.
+
+### Phi-3 Handoff Inputs
+
+| API | Purpose |
+|---|---|
+| `faction_population_distribution()` | faction scale, imbalance, strong/weak side ecology |
+| `faction_territory_distribution()` | territorial footprint and movement path substrate |
+| `faction_charter_primitives(faction_id)` | norm and charter comparison |
+| `factions_in_contact(radius=1)` | first-order contact and conflict candidates |
+| `faction_wealth_distribution()` | economic inequality and class pressure |
+| `faction_social_matrix()` | trust-based alliance or distance graph |
+| `faction_grievance_targets()` | shared-enemy coalition substrate |
+
+The Stage 4 freeze test `test_phase17_faction_handoff_contract.py` locks these APIs as read-only handoff surfaces.
+
+**D10 read-only definition**: domain mutation is forbidden for `persona.faction`, `persona.faction_cooldown`, `inner.affiliation_scores`, the `engine.factions` registry (`id`, `name`, `founder_pid`, `charter`, `created_tick`), and `territory.factionRef`. Internal cache refresh is allowed for `_faction_members_cache`, memoization dictionaries, and lazy lookup tables because these are invisible implementation details. Every returned `dict`, `list`, or `tuple` must be a fresh object; caller mutation must not affect internal state.
+
+### Stage 4 Decision
+
+The 2026-04-25 Stage 4 probe did not close Phi-2:
+
+- seed 7: `active_factions_end=2`
+- seed 13: `active_factions_end=1`
+- seed 42: `active_factions_end=1`
+
+Primary acceptance `active_factions_end >= 2` for all three seeds failed at 1/3. Therefore this section defines the handoff contract, but Phi-3 full Charter work remains deferred until Stage 5 or a later probe resolves faction persistence.
+
+---
+
 ## 다음 단계
 
 1. **사용자 Charter 검증** — 본 문서 수정 요청 or 확정
