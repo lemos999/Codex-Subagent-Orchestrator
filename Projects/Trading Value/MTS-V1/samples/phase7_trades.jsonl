@@ -1,0 +1,4 @@
+{"ts":"2026-04-20T00:30:00+00:00","symbol":"BTC/USDT:USDT","event":"ENTRY_L1"}
+{"ts":"2026-04-20T01:00:00+00:00","symbol":"BTC/USDT:USDT","event":"TP_B","rr":3.0,"win":true,"cvd_sign":1}
+{"ts":"2026-04-21T00:30:00+00:00","symbol":"ETH/USDT:USDT","event":"ENTRY_L1"}
+{"ts":"2026-04-21T01:00:00+00:00","symbol":"ETH/USDT:USDT","event":"HARD_SL","rr":-1.0,"win":false,"cvd_sign":-1}

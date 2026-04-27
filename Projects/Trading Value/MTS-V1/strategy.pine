@@ -1,16 +1,12 @@
 //@version=5
-strategy(
-    title="MTS-V1 v5.1",
-    shorttitle="MTS-V1",
-    overlay=true,
-    pyramiding=3,
-    calc_on_every_tick=false,
-    process_orders_on_close=true
-)
+strategy(title="MTS-V1 v5.2", shorttitle="MTS-V1", overlay=true, pyramiding=3, calc_on_every_tick=false, process_orders_on_close=true)
 
 groupExecution = "Execution"
 user_leverage = input.int(10, "User Leverage", minval=1, group=groupExecution)
+base_sizing_frame = input.float(0.05, "Base Equity Frame", minval=0.0, step=0.001, group=groupExecution)
+promoted_sizing_frame = input.float(0.10, "Triple Confluence Equity Frame", minval=0.0, step=0.001, group=groupExecution)
 use_runner = input.bool(true, "Use Runner", group=groupExecution)
+btc_filter_symbol = input.symbol("BINANCE:BTCUSDT.P", "BTC HTF Filter Symbol", group=groupExecution)
 
 groupMMR = "Maintenance Margin Rate"
 mmr_btc = input.float(0.0, "MMR BTCUSDT", minval=0.0, step=0.0001, group=groupMMR)
@@ -22,8 +18,144 @@ mmr_doge = input.float(0.0, "MMR DOGEUSDT", minval=0.0, step=0.0001, group=group
 
 groupTimeframes = "Timeframes"
 htf = input.timeframe("240", "HTF", group=groupTimeframes)
-entry_tf = input.timeframe("60", "Entry TF", group=groupTimeframes)
+entry_tf = input.timeframe("15", "Entry TF", group=groupTimeframes)
 ltf = input.timeframe("15", "LTF (CVD only)", group=groupTimeframes)
+
+groupPhase2 = "Phase 2 Indicators"
+profile_lookback = input.int(500, "Profile Lookback", minval=50, group=groupPhase2)
+profile_bins = input.int(50, "Profile Bins", minval=10, group=groupPhase2)
+pivot_length = input.int(2, "Pivot Length", minval=2, group=groupPhase2)
+
+groupRsm = "Reverse Spike Multipliers"
+rsm_default = input.float(3.0, "Default RSM", minval=0.1, step=0.1, group=groupRsm)
+rsm_btc = input.float(6.3, "BTC RSM", minval=0.1, step=0.1, group=groupRsm)
+rsm_eth = input.float(6.8, "ETH RSM", minval=0.1, step=0.1, group=groupRsm)
+rsm_sol = input.float(5.5, "SOL RSM", minval=0.1, step=0.1, group=groupRsm)
+rsm_xrp = input.float(6.3, "XRP RSM", minval=0.1, step=0.1, group=groupRsm)
+rsm_bnb = input.float(2.5, "BNB RSM", minval=0.1, step=0.1, group=groupRsm)
+
+l1_weight = 0.33
+l2_weight = 0.33
+l3_weight = 0.34
+base_l1_fraction = base_sizing_frame * l1_weight
+base_l2_fraction = base_sizing_frame * l2_weight
+base_l3_fraction = base_sizing_frame * l3_weight
+promoted_remaining_fraction = math.max(promoted_sizing_frame - base_l1_fraction, 0.0)
+promoted_l2_fraction = promoted_remaining_fraction * (l2_weight / (l2_weight + l3_weight))
+promoted_l3_fraction = promoted_remaining_fraction * (l3_weight / (l2_weight + l3_weight))
+promoted_l2_delta_fraction = math.max(promoted_l2_fraction - base_l2_fraction, 0.0)
+
+f_mmr_for_symbol() =>
+    syminfo.basecurrency == "BTC" ? mmr_btc :
+     syminfo.basecurrency == "ETH" ? mmr_eth :
+     syminfo.basecurrency == "SOL" ? mmr_sol :
+     syminfo.basecurrency == "XRP" ? mmr_xrp :
+     syminfo.basecurrency == "BNB" ? mmr_bnb :
+     syminfo.basecurrency == "DOGE" ? mmr_doge :
+     0.0
+
+f_effective_leverage() =>
+    float mmr = f_mmr_for_symbol()
+    float raw_cap = math.floor(1.0 / (0.20 + 0.01 + mmr))
+    math.max(1.0, math.min(float(user_leverage), raw_cap))
+
+f_qty_at_price(equity_fraction, price) =>
+    not na(price) and price > 0.0 ? math.max(strategy.equity * equity_fraction * f_effective_leverage() / price, 0.0) : 0.0
+
+f_volume_profile(lookback, bins) =>
+    float window_low = ta.lowest(low, lookback)
+    float window_high = ta.highest(high, lookback)
+    float price_range = window_high - window_low
+    float bin_size = price_range == 0.0 ? syminfo.mintick : price_range / bins
+    float[] histogram = array.new_float(bins, 0.0)
+    for bin_index = 0 to bins - 1
+        array.set(histogram, bin_index, 0.0)
+    for offset = 0 to lookback - 1
+        float raw_index = (close[offset] - window_low) / bin_size
+        int clamped_index = int(math.floor(math.max(0.0, math.min(float(bins - 1), raw_index))))
+        array.set(histogram, clamped_index, array.get(histogram, clamped_index) + volume[offset])
+    int poc_index = 0
+    float poc_volume = array.get(histogram, 0)
+    float total_volume = poc_volume
+    for bin_index = 1 to bins - 1
+        float bucket_volume = array.get(histogram, bin_index)
+        total_volume += bucket_volume
+        if bucket_volume > poc_volume
+            poc_volume := bucket_volume
+            poc_index := bin_index
+    int left_index = poc_index
+    int right_index = poc_index
+    float accumulated_volume = array.get(histogram, poc_index)
+    float target_volume = total_volume * 0.70
+    while accumulated_volume < target_volume and (left_index > 0 or right_index < bins - 1)
+        float left_candidate = left_index > 0 ? array.get(histogram, left_index - 1) : -1.0
+        float right_candidate = right_index < bins - 1 ? array.get(histogram, right_index + 1) : -1.0
+        if left_candidate >= right_candidate and left_index > 0
+            left_index -= 1
+            accumulated_volume += array.get(histogram, left_index)
+        else if right_index < bins - 1
+            right_index += 1
+            accumulated_volume += array.get(histogram, right_index)
+        else
+            break
+    float poc_price = window_low + bin_size * (poc_index + 0.5)
+    float vah_price = window_low + bin_size * (right_index + 1)
+    float val_price = window_low + bin_size * left_index
+    [poc_price, vah_price, val_price]
+
+f_active_rsm() =>
+    string ticker = str.upper(syminfo.ticker)
+    str.contains(ticker, "BTC") ? rsm_btc : str.contains(ticker, "ETH") ? rsm_eth : str.contains(ticker, "SOL") ? rsm_sol : str.contains(ticker, "XRP") ? rsm_xrp : str.contains(ticker, "BNB") ? rsm_bnb : rsm_default
+
+entry_open = request.security(syminfo.tickerid, entry_tf, open, barmerge.gaps_off, barmerge.lookahead_off)
+entry_high = request.security(syminfo.tickerid, entry_tf, high, barmerge.gaps_off, barmerge.lookahead_off)
+entry_low = request.security(syminfo.tickerid, entry_tf, low, barmerge.gaps_off, barmerge.lookahead_off)
+entry_close = request.security(syminfo.tickerid, entry_tf, close, barmerge.gaps_off, barmerge.lookahead_off)
+entry_close_prev = request.security(syminfo.tickerid, entry_tf, close[1], barmerge.gaps_off, barmerge.lookahead_off)
+entry_volume = request.security(syminfo.tickerid, entry_tf, volume, barmerge.gaps_off, barmerge.lookahead_off)
+
+atr_14 = request.security(syminfo.tickerid, entry_tf, ta.atr(14), barmerge.gaps_off, barmerge.lookahead_off)
+tenkan_sen = request.security(syminfo.tickerid, entry_tf, (ta.highest(high, 9) + ta.lowest(low, 9)) / 2.0, barmerge.gaps_off, barmerge.lookahead_off)
+kijun_sen = request.security(syminfo.tickerid, entry_tf, (ta.highest(high, 26) + ta.lowest(low, 26)) / 2.0, barmerge.gaps_off, barmerge.lookahead_off)
+kijun_sen_prev = request.security(syminfo.tickerid, entry_tf, ((ta.highest(high, 26) + ta.lowest(low, 26)) / 2.0)[1], barmerge.gaps_off, barmerge.lookahead_off)
+kijun_sen_prev2 = request.security(syminfo.tickerid, entry_tf, ((ta.highest(high, 26) + ta.lowest(low, 26)) / 2.0)[2], barmerge.gaps_off, barmerge.lookahead_off)
+senkou_b = request.security(syminfo.tickerid, entry_tf, (ta.highest(high, 52) + ta.lowest(low, 52)) / 2.0, barmerge.gaps_off, barmerge.lookahead_off)
+rsi_14 = request.security(syminfo.tickerid, entry_tf, ta.rsi(close, 14), barmerge.gaps_off, barmerge.lookahead_off)
+volume_sma_20 = request.security(syminfo.tickerid, entry_tf, ta.sma(volume, 20), barmerge.gaps_off, barmerge.lookahead_off)
+
+[poc, vah, val] = request.security(syminfo.tickerid, entry_tf, f_volume_profile(profile_lookback, profile_bins), barmerge.gaps_off, barmerge.lookahead_off)
+
+pivot_high_bar = request.security(syminfo.tickerid, entry_tf, ta.valuewhen(not na(ta.pivothigh(high, pivot_length, pivot_length)), bar_index - pivot_length, 0), barmerge.gaps_off, barmerge.lookahead_off)
+pivot_low_bar = request.security(syminfo.tickerid, entry_tf, ta.valuewhen(not na(ta.pivotlow(low, pivot_length, pivot_length)), bar_index - pivot_length, 0), barmerge.gaps_off, barmerge.lookahead_off)
+pivot_high = request.security(syminfo.tickerid, entry_tf, nz(ta.valuewhen(not na(ta.pivothigh(high, pivot_length, pivot_length)), ta.pivothigh(high, pivot_length, pivot_length), 0), ta.highest(high, 100)), barmerge.gaps_off, barmerge.lookahead_off)
+pivot_low = request.security(syminfo.tickerid, entry_tf, nz(ta.valuewhen(not na(ta.pivotlow(low, pivot_length, pivot_length)), ta.pivotlow(low, pivot_length, pivot_length), 0), ta.lowest(low, 100)), barmerge.gaps_off, barmerge.lookahead_off)
+fibo_temporal_valid_long = na(pivot_high_bar) or na(pivot_low_bar) or pivot_low_bar < pivot_high_bar
+fibo_temporal_valid_short = na(pivot_high_bar) or na(pivot_low_bar) or pivot_high_bar < pivot_low_bar
+price_range = pivot_high - pivot_low
+
+fibo_0618 = pivot_high - price_range * 0.618
+fibo_0786 = pivot_high - price_range * 0.786
+fibo_1000 = pivot_low + price_range * 1.0
+fibo_1500 = pivot_low + price_range * 1.5
+
+new_utc_day = ta.change(time("D", "0000-2359:1234567", "UTC")) != 0
+delta_bar = request.security(syminfo.tickerid, ltf, (close - open) * volume, barmerge.gaps_off, barmerge.lookahead_off)
+var float cvd_proxy = 0.0
+if barstate.isfirst or new_utc_day
+    cvd_proxy := delta_bar
+else
+    cvd_proxy += delta_bar
+
+active_rsm = f_active_rsm()
+cvd_abs_sma_20 = ta.sma(math.abs(delta_bar), 20)
+cvd_spike_signal = not na(cvd_abs_sma_20) and math.abs(delta_bar) > active_rsm * cvd_abs_sma_20
+reverse_spike_long = not na(cvd_abs_sma_20) and delta_bar < -active_rsm * cvd_abs_sma_20
+reverse_spike_short = not na(cvd_abs_sma_20) and delta_bar > active_rsm * cvd_abs_sma_20
+
+btc_htf_close = request.security(btc_filter_symbol, htf, close)
+btc_ema_50 = request.security(btc_filter_symbol, htf, ta.ema(close, 50))
+symbol_htf_close = request.security(syminfo.tickerid, htf, close)
+symbol_htf_kijun = request.security(syminfo.tickerid, htf, (ta.highest(high, 26) + ta.lowest(low, 26)) / 2.0)
 
 // Section 1. Liquidation safeguard and leverage sizing
 // Section 2. Entry trigger and triple confluence promotion
@@ -36,7 +168,353 @@ ltf = input.timeframe("15", "LTF (CVD only)", group=groupTimeframes)
 var int state = 0
 var string sub_state = ""
 var bool triple_confluence = false
+var bool triple_confluence_long = false
+var bool triple_confluence_short = false
+var int active_side = 0
+var int state_1_started_at = na
+var int cooldown_until = na
+var int last_hard_sl_ts = na
+var int last_runner_exit_ts = na
+var bool l2_filled = false
+var int first_fill_time = na
+var float peak_mfe = na
 var float avg_entry = na
 var float hard_sl = na
+var float l1_target_qty = na
+var float l2_target_qty = na
+var float l2_promo_target_qty = na
+var float l3_target_qty = na
+var float l2_position_threshold = na
+var float l3_position_threshold = na
+
+state_1_timeout_ms = 48 * 60 * 60 * 1000
+evasion_window_ms = 48 * 60 * 60 * 1000
+cooldown_ms = 24 * 60 * 60 * 1000
+position_abs = math.abs(strategy.position_size)
+previous_position_abs = nz(math.abs(strategy.position_size[1]), 0.0)
+current_mfe = active_side == 1 and not na(avg_entry) ? entry_high - avg_entry : active_side == -1 and not na(avg_entry) ? avg_entry - entry_low : na
+if state == 2 or state == 3
+    peak_mfe := na(peak_mfe) ? current_mfe : math.max(peak_mfe, nz(current_mfe, peak_mfe))
+
+long_l1_price = math.max(poc, kijun_sen) + 0.05 * atr_14
+long_l2_price = fibo_0618
+long_l3_price = math.min(fibo_0786, val)
+short_fibo_0618 = pivot_low + price_range * 0.618
+short_fibo_0786 = pivot_low + price_range * 0.786
+short_fibo_1000 = pivot_high - price_range * 1.0
+short_fibo_1500 = pivot_high - price_range * 1.5
+short_l1_price = math.min(poc, kijun_sen) - 0.05 * atr_14
+short_l2_price = short_fibo_0618
+short_l3_price = math.max(short_fibo_0786, vah)
+
+long_entry_trigger = not na(long_l1_price) and not na(long_l2_price) and not na(long_l3_price) and fibo_temporal_valid_long and btc_htf_close > btc_ema_50 and entry_close > kijun_sen and entry_close_prev <= kijun_sen_prev and delta_bar > 0
+short_entry_trigger = not na(short_l1_price) and not na(short_l2_price) and not na(short_l3_price) and fibo_temporal_valid_short and btc_htf_close < btc_ema_50 and entry_close < kijun_sen and entry_close_prev >= kijun_sen_prev and delta_bar < 0
+state_1_timed_out = state == 1 and not na(state_1_started_at) and time - state_1_started_at >= state_1_timeout_ms
+htf_cross_against_long = ta.crossunder(symbol_htf_close, symbol_htf_kijun)
+htf_cross_against_short = ta.crossover(symbol_htf_close, symbol_htf_kijun)
+state_2_abort = state == 2 and ((active_side == 1 and (reverse_spike_long or htf_cross_against_long)) or (active_side == -1 and (reverse_spike_short or htf_cross_against_short)))
+evasion_signal = state == 2 and ((active_side == 1 and (reverse_spike_long or htf_cross_against_long)) or (active_side == -1 and (reverse_spike_short or htf_cross_against_short))) and not na(first_fill_time) and time - first_fill_time <= evasion_window_ms and nz(peak_mfe, 0.0) < 0.1 * atr_14
+hard_sl_filled = state != 0 and state != 4 and previous_position_abs > 0 and position_abs == 0 and not na(hard_sl)
+hard_sl_touched = state != 0 and state != 4 and position_abs > 0 and not na(hard_sl) and ((active_side == 1 and entry_low <= hard_sl) or (active_side == -1 and entry_high >= hard_sl))
+hard_sl_priority_hit = hard_sl_filled or hard_sl_touched
+tp_a_hit = state == 3 and sub_state == "" and ((active_side == 1 and rsi_14 < 55 and kijun_sen - kijun_sen_prev <= 0 and kijun_sen_prev - kijun_sen_prev2 <= 0) or (active_side == -1 and rsi_14 > 45 and kijun_sen - kijun_sen_prev >= 0 and kijun_sen_prev - kijun_sen_prev2 >= 0))
+tp_b_hit = state == 3 and sub_state != "AB" and ((active_side == 1 and entry_close >= fibo_1000) or (active_side == -1 and entry_close <= short_fibo_1000))
+tp_c_hit = state == 3 and ((active_side == 1 and entry_close >= fibo_1500) or (active_side == -1 and entry_close <= short_fibo_1500)) and entry_volume > volume_sma_20 * 1.5
+runner_kijun_break = state == 4 and ((active_side == 1 and entry_close_prev < kijun_sen_prev and entry_open < kijun_sen) or (active_side == -1 and entry_close_prev > kijun_sen_prev and entry_open > kijun_sen))
+
+f_log_transition(message) =>
+    label.new(bar_index, high, message, style=label.style_label_down, color=color.new(color.black, 0), textcolor=color.white, size=size.small)
+
+cooldown_active = not na(cooldown_until) and time < cooldown_until
+
+if hard_sl_priority_hit
+    strategy.cancel_all()
+    if position_abs > 0
+        strategy.close_all(comment="HARD_SL_PRIORITY")
+    last_hard_sl_ts := time
+    cooldown_until := time + cooldown_ms
+    f_log_transition("Hard SL -> State 0 cooldown")
+    state := 0
+    sub_state := ""
+    triple_confluence := false
+    triple_confluence_long := false
+    triple_confluence_short := false
+    active_side := 0
+    state_1_started_at := na
+    l2_filled := false
+    first_fill_time := na
+    peak_mfe := na
+    avg_entry := na
+    hard_sl := na
+    l1_target_qty := na
+    l2_target_qty := na
+    l2_promo_target_qty := na
+    l3_target_qty := na
+    l2_position_threshold := na
+    l3_position_threshold := na
+else if state == 0 and strategy.position_size == 0 and not cooldown_active
+    if long_entry_trigger
+        l1_target_qty := f_qty_at_price(base_l1_fraction, long_l1_price)
+        strategy.order("L1", strategy.long, qty=l1_target_qty, limit=long_l1_price)
+        state := 1
+        active_side := 1
+        state_1_started_at := time
+        f_log_transition("State 0->1 L1 long")
+    else if short_entry_trigger
+        l1_target_qty := f_qty_at_price(base_l1_fraction, short_l1_price)
+        strategy.order("L1", strategy.short, qty=l1_target_qty, limit=short_l1_price)
+        state := 1
+        active_side := -1
+        state_1_started_at := time
+        f_log_transition("State 0->1 L1 short")
+else if state == 1
+    if position_abs > 0 and previous_position_abs == 0
+        avg_entry := strategy.position_avg_price
+        first_fill_time := time
+        peak_mfe := 0.0
+        state := 2
+        if active_side == 1
+            l2_target_qty := f_qty_at_price(base_l2_fraction, long_l2_price)
+            l2_position_threshold := position_abs + l2_target_qty * 0.999
+            strategy.order("L2", strategy.long, qty=l2_target_qty, limit=long_l2_price)
+        else if active_side == -1
+            l2_target_qty := f_qty_at_price(base_l2_fraction, short_l2_price)
+            l2_position_threshold := position_abs + l2_target_qty * 0.999
+            strategy.order("L2", strategy.short, qty=l2_target_qty, limit=short_l2_price)
+        f_log_transition("State 1->2 L1 fill")
+    else if state_1_timed_out
+        strategy.cancel_all()
+        f_log_transition("State 1->0 48h timeout")
+        state := 0
+        sub_state := ""
+        triple_confluence := false
+        triple_confluence_long := false
+        triple_confluence_short := false
+        active_side := 0
+        state_1_started_at := na
+        l2_filled := false
+        first_fill_time := na
+        peak_mfe := na
+        avg_entry := na
+        hard_sl := na
+        l1_target_qty := na
+        l2_target_qty := na
+        l2_promo_target_qty := na
+        l3_target_qty := na
+        l2_position_threshold := na
+        l3_position_threshold := na
+else if state == 2
+    if evasion_signal
+        strategy.cancel_all()
+        strategy.close_all()
+        f_log_transition("State 2->5 EVASION")
+        state := 5
+        cooldown_until := time + cooldown_ms
+        sub_state := ""
+        triple_confluence := false
+        triple_confluence_long := false
+        triple_confluence_short := false
+        active_side := 0
+        state_1_started_at := na
+        l2_filled := false
+        first_fill_time := na
+        peak_mfe := na
+        avg_entry := na
+        hard_sl := na
+        l1_target_qty := na
+        l2_target_qty := na
+        l2_promo_target_qty := na
+        l3_target_qty := na
+        l2_position_threshold := na
+        l3_position_threshold := na
+        state := 0
+    else if state_2_abort
+        strategy.cancel_all()
+        strategy.close_all()
+        f_log_transition("State 2->0 abort")
+        state := 0
+        sub_state := ""
+        triple_confluence := false
+        triple_confluence_long := false
+        triple_confluence_short := false
+        active_side := 0
+        state_1_started_at := na
+        l2_filled := false
+        first_fill_time := na
+        peak_mfe := na
+        avg_entry := na
+        hard_sl := na
+        l1_target_qty := na
+        l2_target_qty := na
+        l2_promo_target_qty := na
+        l3_target_qty := na
+        l2_position_threshold := na
+        l3_position_threshold := na
+    else if not l2_filled and position_abs > 0 and not na(l2_position_threshold) and position_abs >= l2_position_threshold
+        l2_filled := true
+        avg_entry := strategy.position_avg_price
+        hard_sl := active_side == 1 ? avg_entry - 2.0 * atr_14 : avg_entry + 2.0 * atr_14
+        bool new_l2_hard_sl_touched = (active_side == 1 and entry_low <= hard_sl) or (active_side == -1 and entry_high >= hard_sl)
+        if new_l2_hard_sl_touched
+            strategy.cancel_all()
+            strategy.close_all(comment="HARD_SL_PRIORITY_AFTER_L2")
+            last_hard_sl_ts := time
+            cooldown_until := time + cooldown_ms
+            f_log_transition("L2 fill + Hard SL same bar -> State 0 cooldown")
+            state := 0
+            sub_state := ""
+            triple_confluence := false
+            triple_confluence_long := false
+            triple_confluence_short := false
+            active_side := 0
+            state_1_started_at := na
+            l2_filled := false
+            first_fill_time := na
+            peak_mfe := na
+            avg_entry := na
+            hard_sl := na
+            l1_target_qty := na
+            l2_target_qty := na
+            l2_promo_target_qty := na
+            l3_target_qty := na
+            l2_position_threshold := na
+            l3_position_threshold := na
+        else
+            strategy.exit("HARD_SL", stop=hard_sl)
+            float confluence_high = active_side == 1 ? math.max(math.max(poc, kijun_sen), long_l2_price) : math.max(math.max(poc, kijun_sen), short_l2_price)
+            float confluence_low = active_side == 1 ? math.min(math.min(poc, kijun_sen), long_l2_price) : math.min(math.min(poc, kijun_sen), short_l2_price)
+            triple_confluence := barstate.isconfirmed and confluence_high - confluence_low <= 0.2 * atr_14
+            triple_confluence_long := active_side == 1 and triple_confluence
+            triple_confluence_short := active_side == -1 and triple_confluence
+            float l3_fraction = triple_confluence ? promoted_l3_fraction : base_l3_fraction
+            if triple_confluence and promoted_l2_delta_fraction > 0
+                if active_side == 1
+                    l2_promo_target_qty := f_qty_at_price(promoted_l2_delta_fraction, long_l2_price)
+                    strategy.order("L2_PROMO", strategy.long, qty=l2_promo_target_qty, limit=long_l2_price)
+                else if active_side == -1
+                    l2_promo_target_qty := f_qty_at_price(promoted_l2_delta_fraction, short_l2_price)
+                    strategy.order("L2_PROMO", strategy.short, qty=l2_promo_target_qty, limit=short_l2_price)
+            float pending_promo_qty = nz(l2_promo_target_qty, 0.0)
+            if active_side == 1
+                l3_target_qty := f_qty_at_price(l3_fraction, long_l3_price)
+                l3_position_threshold := position_abs + pending_promo_qty + l3_target_qty * 0.999
+                strategy.order("L3", strategy.long, qty=l3_target_qty, limit=long_l3_price)
+            else if active_side == -1
+                l3_target_qty := f_qty_at_price(l3_fraction, short_l3_price)
+                l3_position_threshold := position_abs + pending_promo_qty + l3_target_qty * 0.999
+                strategy.order("L3", strategy.short, qty=l3_target_qty, limit=short_l3_price)
+            f_log_transition(triple_confluence ? "L2 fill Triple Confluence=true" : "L2 fill Triple Confluence=false")
+    else if l2_filled and not na(l3_position_threshold) and position_abs >= l3_position_threshold
+        avg_entry := strategy.position_avg_price
+        hard_sl := active_side == 1 ? avg_entry - 2.0 * atr_14 : avg_entry + 2.0 * atr_14
+        bool new_l3_hard_sl_touched = (active_side == 1 and entry_low <= hard_sl) or (active_side == -1 and entry_high >= hard_sl)
+        if new_l3_hard_sl_touched
+            strategy.cancel_all()
+            strategy.close_all(comment="HARD_SL_PRIORITY_AFTER_L3")
+            last_hard_sl_ts := time
+            cooldown_until := time + cooldown_ms
+            f_log_transition("L3 fill + Hard SL same bar -> State 0 cooldown")
+            state := 0
+            sub_state := ""
+            triple_confluence := false
+            triple_confluence_long := false
+            triple_confluence_short := false
+            active_side := 0
+            state_1_started_at := na
+            l2_filled := false
+            first_fill_time := na
+            peak_mfe := na
+            avg_entry := na
+            hard_sl := na
+            l1_target_qty := na
+            l2_target_qty := na
+            l2_promo_target_qty := na
+            l3_target_qty := na
+            l2_position_threshold := na
+            l3_position_threshold := na
+        else
+            strategy.exit("HARD_SL", stop=hard_sl)
+            state := 3
+            f_log_transition("State 2->3 L3 fill")
+else if state == 3 and barstate.isconfirmed
+    if tp_a_hit
+        if active_side == 1
+            strategy.order("TP_A_CLOSE", strategy.short, qty=position_abs * 0.50)
+        else if active_side == -1
+            strategy.order("TP_A_CLOSE", strategy.long, qty=position_abs * 0.50)
+        sub_state := "A"
+        f_log_transition("TP A -> sub_state A")
+    else if tp_b_hit
+        if active_side == 1
+            strategy.order("TP_B_CLOSE", strategy.short, qty=position_abs * 0.50)
+        else if active_side == -1
+            strategy.order("TP_B_CLOSE", strategy.long, qty=position_abs * 0.50)
+        sub_state := "AB"
+        f_log_transition("TP B -> sub_state AB")
+    else if tp_c_hit
+        if use_runner
+            strategy.cancel("HARD_SL")
+            hard_sl := na
+            state := 4
+            f_log_transition("TP C -> Runner")
+        else
+            strategy.close_all()
+            state := 0
+            sub_state := ""
+            active_side := 0
+            state_1_started_at := na
+            l2_filled := false
+            first_fill_time := na
+            peak_mfe := na
+            avg_entry := na
+            hard_sl := na
+            l1_target_qty := na
+            l2_target_qty := na
+            l2_promo_target_qty := na
+            l3_target_qty := na
+            l2_position_threshold := na
+            l3_position_threshold := na
+            f_log_transition("TP C -> State 0")
+else if state == 4 and barstate.isconfirmed
+    if runner_kijun_break
+        strategy.close_all(comment="RUNNER_KIJUN_BREAK")
+        last_runner_exit_ts := time
+        cooldown_until := time + cooldown_ms
+        state := 0
+        sub_state := ""
+        triple_confluence := false
+        triple_confluence_long := false
+        triple_confluence_short := false
+        active_side := 0
+        state_1_started_at := na
+        l2_filled := false
+        first_fill_time := na
+        peak_mfe := na
+        avg_entry := na
+        hard_sl := na
+        l1_target_qty := na
+        l2_target_qty := na
+        l2_promo_target_qty := na
+        l3_target_qty := na
+        l2_position_threshold := na
+        l3_position_threshold := na
+        f_log_transition("Runner Kijun break -> State 0 cooldown")
+
+plot(kijun_sen, title="Kijun", color=color.orange, linewidth=2)
+plot(poc, title="POC", color=color.yellow)
+plot(vah, title="VAH", color=color.new(color.green, 0))
+plot(val, title="VAL", color=color.new(color.red, 0))
+plot(fibo_0618, title="Fibo 0.618", color=color.new(color.blue, 0))
+plot(fibo_0786, title="Fibo 0.786", color=color.new(color.blue, 35))
+plot(fibo_1000, title="Fibo 1.0", color=color.new(color.teal, 0))
+plot(fibo_1500, title="Fibo 1.5", color=color.new(color.teal, 35))
+
+plotchar(cvd_spike_signal, title="CVD Spike", char="S", location=location.top, color=color.fuchsia)
+plotchar(reverse_spike_long, title="Reverse Spike Long", char="L", location=location.bottom, color=color.red)
+plotchar(reverse_spike_short, title="Reverse Spike Short", char="H", location=location.top, color=color.green)
+plotchar(not fibo_temporal_valid_long, title="Fibo Temporal Skip Long", char="T", location=location.bottom, color=color.orange)
+plotchar(not fibo_temporal_valid_short, title="Fibo Temporal Skip Short", char="T", location=location.top, color=color.orange)
+plotchar(triple_confluence_long, title="Triple Confluence Long", char="C", location=location.bottom, color=color.lime)
+plotchar(triple_confluence_short, title="Triple Confluence Short", char="C", location=location.top, color=color.lime)
 
 plot(na, title="MTS-V1 placeholder")

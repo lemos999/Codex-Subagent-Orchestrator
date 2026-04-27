@@ -1,0 +1,118 @@
+{"coverage_days": 90, "coverage_end": "2026-04-24T05:15:00Z", "coverage_start": "2026-01-24T05:15:00Z", "event": "REPLAY_META", "source": "..\\predictive_runner_paper\\cache_180d", "symbols": ["BNB/USDT:USDT"], "ts": "2026-01-24T05:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 891.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-24T07:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 891.1899222, "reason": "L1_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-24T07:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 892.5506, "reason": "L2_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-24T07:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.22852, "price": 889.0, "r_multiple": 1.22852, "reason": "STATE_2_ABORT", "rr": 1.22852, "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-24T22:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 887.6, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-24T22:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 887.85832306, "reason": "L1_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-24T22:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.673739, "price": 885.1, "r_multiple": 1.673739, "reason": "STATE_2_ABORT", "rr": 1.673739, "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-27T15:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 885.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-27T17:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 903.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-01-28T11:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 903.64699305, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-01-28T11:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 904.7886, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-01-28T11:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 900.09191366, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-01-28T15:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 901.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-28T18:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 897.6, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-29T10:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 860.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-30T01:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 860.59547922, "reason": "L1_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-01-30T01:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 25.940374, "price": 618.7, "r_multiple": 25.940374, "reason": "STATE_2_ABORT", "rr": 25.940374, "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-02-25T14:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 632.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-25T22:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 631.56090987, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-25T23:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 633.9166, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-25T23:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 625.99921051, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-25T23:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 631.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T04:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 630.63644612, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T04:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 626.8988, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T05:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 623.33101182, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T11:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 627.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T13:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 626.64259113, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T13:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 625.6032, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T13:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 622.42536487, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T14:45:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 621.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T19:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 621.35923552, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-26T20:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 618.0256, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-27T10:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 615.01679272, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-02-27T11:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 610.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-02-27T18:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 625.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-01T08:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 627.53227241, "reason": "L1_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-01T13:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 625.2304, "reason": "L2_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-01T16:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 631.25077055, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-02T14:45:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 640.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T00:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 638.58420731, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T00:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 637.6044, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T01:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 632.38302884, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T05:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 629.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T12:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 627.9871851, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T12:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 624.9022, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T13:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 621.08865495, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T14:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 627.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-03T15:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 632.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-04T05:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 631.08672924, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-04T06:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 628.947, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-06T14:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 624.38188789, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-06T14:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 627.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-06T21:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 628.44524318, "reason": "L1_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-06T21:30:00Z"}
+{"cvd_sign": 0, "event": "ENTRY_L2", "price": 630.499, "reason": "L2_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-06T22:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 632.9214985, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-09T13:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 642.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-09T19:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 636.54631326, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-09T19:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 635.6696, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-09T23:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 7.263846, "price": 668.2, "r_multiple": 7.263846, "reason": "STATE_2_ABORT", "rr": 7.263846, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-18T11:15:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 652.4, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-19T03:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 652.30147303, "reason": "L1_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-19T03:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 651.2832, "reason": "L2_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-19T04:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.164454, "price": 647.0, "r_multiple": 1.164454, "reason": "STATE_2_ABORT", "rr": 1.164454, "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-23T11:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 640.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-23T21:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 632.6, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-24T13:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 635.80052212, "reason": "L1_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-24T20:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 638.0102, "reason": "L2_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-24T22:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 640.82928242, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-25T00:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 648.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-25T16:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 647.26745399, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-25T16:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 645.8402, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-25T17:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 642.21723974, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-03-26T02:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 628.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-27T03:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 629.03379905, "reason": "L1_FILL", "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-03-27T05:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 12.501446, "price": 594.2, "r_multiple": 12.501446, "reason": "STATE_2_ABORT", "rr": 12.501446, "side": "short", "symbol": "BNB/USDT:USDT", "ts": "2026-04-05T22:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 603.3, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-06T06:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 603.17810553, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-06T06:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 601.0212, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-06T06:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 598.73948009, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-06T23:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 600.3, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-07T08:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 599.01399607, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-07T10:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 598.8336, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-07T12:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 594.68360576, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-07T14:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 598.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-07T16:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 598.75377918, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-07T16:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 2.467587, "price": 608.9, "r_multiple": 2.467587, "reason": "STATE_2_ABORT", "rr": 2.467587, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-08T13:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 604.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-08T20:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 604.41558601, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-08T22:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 604.4146, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-08T22:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 601.48461721, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-08T23:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 602.2, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-09T02:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 601.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-09T15:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 600.80492056, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-09T15:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 600.001, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-10T03:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 597.21966595, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-10T08:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 600.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-10T08:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 600.79871803, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-10T09:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 2.603879, "price": 607.4, "r_multiple": 2.603879, "reason": "STATE_2_ABORT", "rr": 2.603879, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-11T23:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 594.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-12T10:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 594.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-13T00:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 597.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-13T12:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 605.70579998, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-13T16:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 4.447732, "price": 623.9, "r_multiple": 4.447732, "reason": "STATE_2_ABORT", "rr": 4.447732, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-19T02:15:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 622.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-19T11:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 620.57551044, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-19T17:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 619.655, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-19T18:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 616.38870739, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-19T22:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 620.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-20T00:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 622.86220937, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-20T06:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.605721, "price": 624.7, "r_multiple": 0.605721, "reason": "STATE_2_ABORT", "rr": 0.605721, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-21T19:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 629.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-21T20:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 630.27470302, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-21T23:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.841707, "price": 633.0, "r_multiple": 0.841707, "reason": "STATE_2_ABORT", "rr": 0.841707, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-23T09:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 634.3, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-23T13:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 634.31309396, "reason": "L1_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-23T13:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 632.2134, "reason": "L2_FILL", "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-23T17:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.303014, "price": 632.2, "r_multiple": -0.303014, "reason": "STATE_2_ABORT", "rr": -0.303014, "side": "long", "symbol": "BNB/USDT:USDT", "ts": "2026-04-24T05:00:00Z", "win": false}

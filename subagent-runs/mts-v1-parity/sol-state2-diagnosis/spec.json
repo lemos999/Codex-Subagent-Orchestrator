@@ -1,0 +1,57 @@
+{
+  "task_id": "mts-v1-sol-state2-diagnosis",
+  "title": "SOL STATE_2_ABORT timing root-cause diagnosis",
+  "objective": "Determine whether SOL semantic parity residuals are primarily caused by HTF cross pulse timing, reverse-spike pulse timing, same-bar close ordering, or unrelated entry-cycle drift before changing replay semantics.",
+  "scope": {
+    "allowed_write_paths": [
+      "Projects/Trading Value/MTS-V1/btc_parity_diff.py",
+      "Projects/Trading Value/MTS-V1/core5_parity_report.py",
+      "Projects/Trading Value/MTS-V1/tests/test_btc_parity_diff.py",
+      "Projects/Trading Value/MTS-V1/tests/test_core5_parity_report.py",
+      "Projects/Trading Value/MTS-V1/parity_reports/",
+      "Projects/Trading Value/MTS-V1/REPORT.md",
+      "project-status/current.md",
+      "subagent-runs/mts-v1-parity/sol-state2-diagnosis/"
+    ],
+    "forbidden_changes": [
+      "Do not change replay semantics in offline_replay.py for this diagnosis task.",
+      "Do not change strategy.py or strategy.pine in this diagnosis task.",
+      "Do not overwrite samples/ or runs/ artifacts.",
+      "Do not add live-ready claims."
+    ]
+  },
+  "baseline_invariants": {
+    "btc_entry_matches": "64/64",
+    "btc_exit_timestamp_matches": "64/64",
+    "btc_exit_price_within_0_15": "62/64",
+    "btc_exit_price_within_1_0": "64/64",
+    "btc_sha256": "BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D",
+    "profile_input_mismatch": 0
+  },
+  "acceptance": {
+    "row_selection": "Diagnostics use symbol SOL, common TV/Python coverage, matched rows only; outside-artifact tail rows are excluded from semantic timing residuals.",
+    "diagnostic_output": "SOL detail report identifies STATE_2_ABORT timing residuals with signed exit deltas plus candidate cause buckets: htf_cross_pulse, reverse_spike_pulse, same_bar_close_or_fill_ordering, entry_cycle_drift, or unknown_state2_abort.",
+    "first_fix_candidate": "A single replay-rule candidate is named for the next task, supported by residual count, representative trade numbers, signed delta distribution, and cause bucket share.",
+    "gate": "core5_parity_report.py --gate baseline passes.",
+    "tests": "Focused parity/report tests pass.",
+    "btc_evidence": "FINDINGS.md records BTC metrics and SHA after verification."
+  },
+  "verification_commands": [
+    "cwd: Projects/Trading Value/MTS-V1 | uv run --no-project --with pytest --with pandas --with pyyaml python -m pytest tests/test_core5_parity_report.py tests/test_btc_parity_diff.py tests/test_btc_parity_trace.py -q -p no:cacheprovider",
+    "cwd: Projects/Trading Value/MTS-V1 | uv run --no-project python core5_parity_report.py --runs-dir runs --samples-dir samples --report parity_reports/core5_parity.md --bar-seconds 900 --examples 32 --gate baseline",
+    "cwd: Projects/Trading Value/MTS-V1 | uv run --no-project --with ruff ruff check btc_parity_diff.py core5_parity_report.py tests/test_btc_parity_diff.py tests/test_core5_parity_report.py",
+    "cwd: Projects/Trading Value/MTS-V1 | uv run --no-project python -m py_compile btc_parity_diff.py core5_parity_report.py"
+  ],
+  "evidence_output_path": "subagent-runs/mts-v1-parity/sol-state2-diagnosis/",
+  "reviewer_quorum": {
+    "plan_validators": 2,
+    "final_reviewers": 2,
+    "watchdog": 1
+  },
+  "rollback_criteria": [
+    "Any BTC baseline regression.",
+    "Baseline gate fails after implementation.",
+    "Diagnostics mix outside-artifact tail rows into semantic residuals.",
+    "Tests fail without documented blocker."
+  ]
+}

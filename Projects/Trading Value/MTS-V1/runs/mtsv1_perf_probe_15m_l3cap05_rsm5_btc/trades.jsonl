@@ -1,0 +1,479 @@
+{"coverage_days": 90, "coverage_end": "2026-04-24T05:15:00Z", "coverage_start": "2026-01-24T05:15:00Z", "event": "REPLAY_META", "source": "..\\predictive_runner_paper\\cache_180d", "symbols": ["BTC/USDT:USDT"], "ts": "2026-01-24T05:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 89611.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T06:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 89487.28680323, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T12:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.462903, "price": 89430.0, "r_multiple": 0.462903, "reason": "STATE_2_ABORT", "rr": 0.462903, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T14:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 89360.4, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T15:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 89363.29161016, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T15:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.961193, "price": 89206.4, "r_multiple": 0.961193, "reason": "STATE_2_ABORT", "rr": 0.961193, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T16:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 89269.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T19:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 89303.46925522, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T19:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 89310.7746, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T20:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 89355.08204784, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-24T20:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.340762, "price": 88594.5, "r_multiple": 1.340762, "reason": "RUNNER_KIJUN_BREAK", "rr": 1.340762, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-25T10:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 88555.5, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-25T11:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 88571.30503538, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-25T11:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 88702.241, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-25T12:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 88770.19064617, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-25T13:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.398754, "price": 87023.7, "r_multiple": 1.398754, "reason": "RUNNER_KIJUN_BREAK", "rr": 1.398754, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T00:15:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 87626.8, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T09:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 87682.63876758, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T10:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.845587, "price": 88101.4, "r_multiple": -0.845587, "reason": "STATE_2_ABORT", "rr": -0.845587, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T14:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 87428.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T15:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 88070.16329615, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T18:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 87775.3206, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T20:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 87967.68763848, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T21:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.589024, "price": 88601.19804759, "r_multiple": -0.589024, "reason": "HARD_SL", "rr": -0.589024, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-26T23:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 88429.6, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T05:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 88459.3445652, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T05:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.514212, "price": 88244.3, "r_multiple": 0.514212, "reason": "STATE_2_ABORT", "rr": 0.514212, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T14:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 87634.8, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T14:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 87997.43633503, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T15:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 87970.7216, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T15:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 88515.08755429, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T16:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 87966.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T17:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 87610.7586946, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T17:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 88056.964, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T18:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 88224.03705402, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T19:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.661791, "price": 88704.13505251, "r_multiple": -0.661791, "reason": "HARD_SL", "rr": -0.661791, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-27T20:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 89043.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-28T03:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 89509.2, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-28T16:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 87816.35152175, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-29T02:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.197172, "price": 87937.3, "r_multiple": -0.197172, "reason": "STATE_2_ABORT", "rr": -0.197172, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-29T04:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 87913.2, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-29T08:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 87802.0801063, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-29T10:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 9.734473, "price": 83608.5, "r_multiple": 9.734473, "reason": "STATE_2_ABORT", "rr": 9.734473, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-30T14:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 82574.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-30T15:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 82903.01219993, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-30T15:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 83232.5036, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-30T15:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 83466.88160069, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-30T16:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.023071, "price": 84226.55677064, "r_multiple": -0.023071, "reason": "HARD_SL", "rr": -0.023071, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-30T19:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 84016.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-31T01:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 84054.9550406, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-31T02:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 84146.8434, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-01-31T02:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 14.641915, "price": 76268.9, "r_multiple": 14.641915, "reason": "STATE_2_ABORT", "rr": 14.641915, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-02T03:45:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 76139.4, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-02T04:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 76334.0257689, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-02T06:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 76798.6508, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-02T07:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 77184.39311101, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-02T09:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.766835, "price": 77952.90469621, "r_multiple": -0.766835, "reason": "HARD_SL", "rr": -0.766835, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-02T12:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 78389.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-02T18:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 78152.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-03T09:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 78301.93210969, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-03T09:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.820718, "price": 77698.3, "r_multiple": 0.820718, "reason": "STATE_2_ABORT", "rr": 0.820718, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-03T15:15:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 77324.2, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-03T16:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 76087.5, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-04T08:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 76311.9230801, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-04T08:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 2.395028, "price": 74819.0, "r_multiple": 2.395028, "reason": "STATE_2_ABORT", "rr": 2.395028, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-04T15:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 72752.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-04T22:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 72973.42411943, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-04T22:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 73245.6344, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-04T23:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 3.513723, "price": 68259.9, "r_multiple": 3.513723, "reason": "STATE_2_ABORT", "rr": 3.513723, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-06T14:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 70231.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T00:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70493.31018668, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T01:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 70981.9906, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T04:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 71582.88563685, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T04:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 70664.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T04:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70675.67469947, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T04:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 70438.6896, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T05:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.874334, "price": 68815.2, "r_multiple": 1.874334, "reason": "STATE_2_ABORT", "rr": 1.874334, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T12:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68617.2, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T14:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 68749.80301464, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T15:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 69122.4968, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T15:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 69371.46665363, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T15:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.009007, "price": 69217.4, "r_multiple": -0.009007, "reason": "RUNNER_KIJUN_BREAK", "rr": -0.009007, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-07T23:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 69006.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-08T00:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 69201.18238103, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-08T01:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 69169.2852, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-08T01:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 69322.46138968, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-08T01:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.277806, "price": 69836.3050702, "r_multiple": -0.277806, "reason": "HARD_SL", "rr": -0.277806, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-08T08:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 70381.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-08T16:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 70378.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-09T06:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70302.79202596, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-09T08:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.780655, "price": 70817.1, "r_multiple": -0.780655, "reason": "STATE_2_ABORT", "rr": -0.780655, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-09T17:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 70322.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-10T02:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 69367.25108475, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-10T03:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.318016, "price": 69158.0, "r_multiple": 0.318016, "reason": "STATE_2_ABORT", "rr": 0.318016, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-11T00:15:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68653.8, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-11T02:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 68777.44913717, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-11T14:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 2.155592, "price": 66958.2, "r_multiple": 2.155592, "reason": "STATE_2_ABORT", "rr": 2.155592, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-13T12:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68863.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-13T21:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 68883.94328848, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-13T22:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 68892.6398, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-13T22:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 69029.20691518, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-14T00:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.273562, "price": 69346.74098972, "r_multiple": -0.273562, "reason": "HARD_SL", "rr": -0.273562, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-14T08:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 69926.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-15T03:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 69649.95594882, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-15T12:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 69414.1664, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-15T13:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 68992.43816209, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-15T13:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68455.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-15T23:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68542.8, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-16T11:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68691.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-17T03:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 67342.07687729, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-17T14:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.083333, "price": 68039.0, "r_multiple": -1.083333, "reason": "STATE_2_ABORT", "rr": -1.083333, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-18T07:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67758.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-18T10:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 67967.9504285, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-18T15:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 2.703706, "price": 66220.2, "r_multiple": 2.703706, "reason": "STATE_2_ABORT", "rr": 2.703706, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-19T14:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66054.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-19T15:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66352.00441362, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-19T15:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 66416.6992, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-19T15:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 66574.65506377, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-19T17:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.591263, "price": 67172.48482608, "r_multiple": -0.591263, "reason": "HARD_SL", "rr": -0.591263, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-19T19:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67425.4, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-20T11:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 67011.59575348, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-20T13:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.659172, "price": 67782.8, "r_multiple": -1.659172, "reason": "STATE_2_ABORT", "rr": -1.659172, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-20T20:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67813.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-21T00:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 68327.6, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-21T16:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 68286.0559495, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-21T16:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 68180.5872, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-21T17:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.377571, "price": 68359.0, "r_multiple": 0.377571, "reason": "STATE_2_ABORT", "rr": 0.377571, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-21T20:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68013.5, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-22T02:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67656.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-22T15:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66841.58769171, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-23T00:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.624127, "price": 66251.6, "r_multiple": 1.624127, "reason": "STATE_2_ABORT", "rr": 1.624127, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-23T09:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66050.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-23T14:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66039.39801479, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-23T14:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 66185.4382, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-23T15:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 4.481265, "price": 63301.2, "r_multiple": 4.481265, "reason": "STATE_2_ABORT", "rr": 4.481265, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-24T14:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 63888.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-24T21:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 63979.27450953, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-24T21:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -2.8645, "price": 65563.6, "r_multiple": -2.8645, "reason": "STATE_2_ABORT", "rr": -2.8645, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-25T01:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 64820.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-25T05:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 68502.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-26T04:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 68392.69240684, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-26T04:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 67995.9922, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-26T07:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 67823.06813157, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-26T07:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.090716, "price": 68130.4, "r_multiple": 0.090716, "reason": "RUNNER_KIJUN_BREAK", "rr": 0.090716, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-26T11:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 67470.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-26T19:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 67372.5244767, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-26T19:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 66941.964, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-27T01:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 1.334462, "price": 67856.1, "r_multiple": 1.334462, "reason": "STATE_2_ABORT", "rr": 1.334462, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-02-27T08:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67583.5, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-27T09:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 64189.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-28T15:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 64307.79336303, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-28T15:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 64771.898, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-28T15:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.393821, "price": 64860.5, "r_multiple": -0.393821, "reason": "EVASION", "rr": -0.393821, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-02-28T16:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 67313.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T01:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66730.70888087, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T08:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.267048, "price": 66562.9, "r_multiple": -0.267048, "reason": "EVASION", "rr": -0.267048, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T09:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 66900.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T13:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 66902.05657569, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T14:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.018324, "price": 66913.5, "r_multiple": 0.018324, "reason": "STATE_2_ABORT", "rr": 0.018324, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T16:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66120.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T16:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 66534.670972, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T18:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.791444, "price": 65973.5, "r_multiple": 0.791444, "reason": "STATE_2_ABORT", "rr": 0.791444, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-01T22:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 65950.8, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T00:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66009.77380703, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T00:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.444952, "price": 65662.0, "r_multiple": -0.444952, "reason": "STATE_2_ABORT", "rr": -0.444952, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T07:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66132.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T09:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 65973.81877886, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T11:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 66292.7696, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T11:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.783468, "price": 66590.1, "r_multiple": -0.783468, "reason": "STATE_2_ABORT", "rr": -0.783468, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T14:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 69329.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T22:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 69314.93125424, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T22:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 68902.8884, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T23:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 68716.07585765, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-02T23:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.649663, "price": 68327.73764733, "r_multiple": -0.649663, "reason": "HARD_SL", "rr": -0.649663, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-03T02:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 67705.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-03T12:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 67309.18294052, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-03T12:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 67059.214, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-03T13:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 66892.38459478, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-03T13:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.643529, "price": 66424.90143026, "r_multiple": -0.643529, "reason": "HARD_SL", "rr": -0.643529, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-03T14:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 67495.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-03T15:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 68165.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-04T05:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 68132.12839212, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-04T05:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 4.606901, "price": 71378.6, "r_multiple": 4.606901, "reason": "STATE_2_ABORT", "rr": 4.606901, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-04T14:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 72886.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T04:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 72811.79419561, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T04:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 72462.1548, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T05:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 72301.71284394, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T05:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 71895.16423527, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T06:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 72604.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T07:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 72557.01214081, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T07:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 72304.125, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T07:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 71799.45901992, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T07:45:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 72577.8, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T09:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 72405.95783026, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T09:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.671416, "price": 71960.9, "r_multiple": -0.671416, "reason": "STATE_2_ABORT", "rr": -0.671416, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T14:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 71238.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T22:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 71115.59975788, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-05T23:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.214746, "price": 70420.8, "r_multiple": -1.214746, "reason": "STATE_2_ABORT", "rr": -1.214746, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T01:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 71115.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T01:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70952.16378836, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T03:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 70936.7454, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T04:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 70400.63786051, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T04:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 70835.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T07:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 71059.70662166, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T07:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 70590.7408, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T09:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 70443.03458339, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T09:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.675506, "price": 70180.25591962, "r_multiple": -0.675506, "reason": "HARD_SL", "rr": -0.675506, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T11:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68075.5, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-06T23:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 68073.44324093, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-07T00:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 68318.586, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-07T00:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.672542, "price": 68479.9, "r_multiple": -0.672542, "reason": "STATE_2_ABORT", "rr": -0.672542, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-07T03:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68189.2, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-07T03:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 68203.0105673, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-07T03:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 68189.984, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-07T03:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 2.156852, "price": 67420.0, "r_multiple": 2.156852, "reason": "STATE_2_ABORT", "rr": 2.156852, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T03:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67569.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T10:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 67615.92064687, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T11:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 68086.0956, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T12:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 68237.8891313, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T12:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.616717, "price": 68574.80228465, "r_multiple": -0.616717, "reason": "HARD_SL", "rr": -0.616717, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T13:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 68559.2, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T17:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 68449.74494773, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T18:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 68823.1608, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T19:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 68638.21132273, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-09T21:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.652087, "price": 69392.6, "r_multiple": 0.652087, "reason": "RUNNER_KIJUN_BREAK", "rr": 0.652087, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-10T04:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 70722.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-10T13:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 70559.13490422, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-10T13:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 70652.4596, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-10T14:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 70525.61055775, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-10T17:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.201882, "price": 69636.07264793, "r_multiple": -0.201882, "reason": "HARD_SL", "rr": -0.201882, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-10T21:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 69997.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-11T00:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 69814.6, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-11T13:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 69860.59249305, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-11T13:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.003716, "price": 69862.9, "r_multiple": 0.003716, "reason": "STATE_2_ABORT", "rr": 0.003716, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-12T01:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 69639.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-12T07:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70226.56461593, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-12T09:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 5.692734, "price": 72894.7, "r_multiple": 5.692734, "reason": "STATE_2_ABORT", "rr": 5.692734, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-13T14:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 70959.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T03:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70954.7605423, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T03:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 70757.9006, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T06:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 70500.13161507, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T06:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 70699.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T11:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70680.20307605, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T12:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.392154, "price": 70564.4, "r_multiple": -0.392154, "reason": "STATE_2_ABORT", "rr": -0.392154, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T14:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 70623.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T15:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 70623.5353955, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T16:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 70655.8282, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T16:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 70581.97424504, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T17:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.099895, "price": 70608.6, "r_multiple": -0.099895, "reason": "RUNNER_KIJUN_BREAK", "rr": -0.099895, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-14T21:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 70957.8, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-15T01:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 71584.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-15T14:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 71580.12545387, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-15T15:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 71370.794, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-15T15:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 71284.03946126, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-15T16:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 1.673207, "price": 73325.1, "r_multiple": 1.673207, "reason": "RUNNER_KIJUN_BREAK", "rr": 1.673207, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-16T08:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 73753.3, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-16T10:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 73661.51411862, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-16T11:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.135095, "price": 73583.2, "r_multiple": -0.135095, "reason": "STATE_2_ABORT", "rr": -0.135095, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-16T14:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 73799.8, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-16T15:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 73742.40579353, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-16T15:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 73538.9954, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-16T15:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 73339.43746469, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-16T16:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.523198, "price": 74918.6, "r_multiple": 0.523198, "reason": "RUNNER_KIJUN_BREAK", "rr": 0.523198, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-17T03:15:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 73971.3, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-17T11:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 73979.00172899, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-17T11:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 73853.4552, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-17T12:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 73711.43791009, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-17T12:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.218367, "price": 73305.22925503, "r_multiple": -0.218367, "reason": "HARD_SL", "rr": -0.218367, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-18T11:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 71199.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-18T21:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 71193.34590914, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-18T21:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.4176, "price": 71463.4, "r_multiple": -0.4176, "reason": "STATE_2_ABORT", "rr": -0.4176, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-19T03:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 71212.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-19T03:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 71206.66290968, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-19T03:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 71140.705, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-19T04:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.77843, "price": 70327.6, "r_multiple": 1.77843, "reason": "STATE_2_ABORT", "rr": 1.77843, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-19T19:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 69811.2, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-19T23:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 69914.57656137, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-19T23:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 70408.476, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-20T01:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 70549.21038627, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-20T01:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.577441, "price": 70787.65794774, "r_multiple": -0.577441, "reason": "HARD_SL", "rr": -0.577441, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-20T03:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 70469.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-20T09:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70741.65023671, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-20T11:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.504254, "price": 70989.9, "r_multiple": -0.504254, "reason": "STATE_2_ABORT", "rr": -0.504254, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-21T14:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 70587.5, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-21T14:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 69839.09899528, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-21T23:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 2.849221, "price": 68624.2, "r_multiple": 2.849221, "reason": "STATE_2_ABORT", "rr": 2.849221, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-23T08:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68117.7, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-23T09:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 68162.77821643, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-23T09:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.691791, "price": 68574.4, "r_multiple": -0.691791, "reason": "EVASION", "rr": -0.691791, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-23T10:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 71001.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-23T19:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 70945.68014492, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-23T19:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 70626.67, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-23T19:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 70437.36855083, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-23T23:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.09036, "price": 70151.32937326, "r_multiple": -0.09036, "reason": "HARD_SL", "rr": -0.09036, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-24T05:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 70500.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-24T06:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70676.10305904, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-24T07:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.887728, "price": 70287.0, "r_multiple": -0.887728, "reason": "STATE_2_ABORT", "rr": -0.887728, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-24T13:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 69973.3, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-24T20:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 70951.22424019, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T00:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.613893, "price": 71311.3, "r_multiple": 0.613893, "reason": "STATE_2_ABORT", "rr": 0.613893, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T12:15:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 71684.2, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T12:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 71388.45351135, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T14:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 71417.7232, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T14:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 71274.18808653, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T14:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 70776.96031426, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T15:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 71472.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T16:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 71267.76655279, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T16:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 71055.839, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T17:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 70879.67347211, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-25T17:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.471036, "price": 70413.56970626, "r_multiple": -0.471036, "reason": "HARD_SL", "rr": -0.471036, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-03-26T05:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 68720.6, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-26T22:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 68789.26726514, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-26T22:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 69054.2842, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-27T02:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 5.608347, "price": 66529.4, "r_multiple": 5.608347, "reason": "STATE_2_ABORT", "rr": 5.608347, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-28T07:45:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66220.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-28T09:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 66300.84171902, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-28T10:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 66457.0162, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-28T12:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 66600.68993019, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-28T13:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66793.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-28T19:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 66816.52730792, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-28T19:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 66858.1488, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-28T21:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 67098.75542845, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T03:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66659.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T05:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66669.43006604, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T05:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 66817.7084, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T06:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.010574, "price": 66740.7, "r_multiple": 0.010574, "reason": "STATE_2_ABORT", "rr": 0.010574, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T11:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66572.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T13:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 66666.90564732, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T13:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 66746.7654, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T14:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.095701, "price": 66675.0, "r_multiple": 0.095701, "reason": "STATE_2_ABORT", "rr": 0.095701, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T20:15:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66273.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T22:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 66430.04237872, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T22:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.719568, "price": 65828.1, "r_multiple": 1.719568, "reason": "STATE_2_ABORT", "rr": 1.719568, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-29T22:45:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 65824.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-30T00:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 65835.93291241, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-30T00:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -2.751137, "price": 67858.9, "r_multiple": -2.751137, "reason": "EVASION", "rr": -2.751137, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-30T08:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67463.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-30T09:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66405.42555902, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-30T19:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.36803, "price": 66620.9, "r_multiple": -0.36803, "reason": "STATE_2_ABORT", "rr": -0.36803, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-31T00:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67446.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-31T06:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66400.06305914, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-31T09:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 67672.4608, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-31T14:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 67647.9090793, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-31T14:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66562.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-03-31T14:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 68031.2, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-01T03:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 67984.01272358, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-01T04:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.793632, "price": 68365.4, "r_multiple": 0.793632, "reason": "STATE_2_ABORT", "rr": 0.793632, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-01T12:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 68483.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-01T14:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 68359.65297994, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-01T14:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 68144.2906, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-01T18:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 68000.26080055, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-01T18:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.129884, "price": 67588.13722526, "r_multiple": -0.129884, "reason": "HARD_SL", "rr": -0.129884, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-02T01:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66741.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-02T08:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66540.33289249, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-02T08:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.713051, "price": 66236.8, "r_multiple": 0.713051, "reason": "STATE_2_ABORT", "rr": 0.713051, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-02T13:45:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66227.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-02T14:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 66264.60227699, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-02T14:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.317053, "price": 67050.0, "r_multiple": -1.317053, "reason": "STATE_2_ABORT", "rr": -1.317053, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-03T07:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 66793.1, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-03T09:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66542.04068458, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-03T13:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 66929.3854, "reason": "L2_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-03T14:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 67017.58855419, "reason": "L3_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-03T16:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.353913, "price": 67135.28425729, "r_multiple": -0.353913, "reason": "HARD_SL", "rr": -0.353913, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-04T10:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67250.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-04T18:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 66788.06952034, "reason": "L1_FILL", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-05T06:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -3.171536, "price": 67467.5, "r_multiple": -3.171536, "reason": "STATE_2_ABORT", "rr": -3.171536, "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-05T15:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 67183.3, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "BTC/USDT:USDT", "ts": "2026-04-05T16:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 69085.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-06T07:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 69071.03146689, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-06T08:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 1.698055, "price": 69759.2, "r_multiple": 1.698055, "reason": "STATE_2_ABORT", "rr": 1.698055, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-06T16:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 69817.2, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-06T18:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 69750.2090388, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-06T18:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 69656.2028, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-06T18:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 69512.61241199, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-06T21:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.690931, "price": 69203.9439846, "r_multiple": -0.690931, "reason": "HARD_SL", "rr": -0.690931, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-06T22:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 68646.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-07T07:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 68592.29461279, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-07T07:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.333289, "price": 68694.7, "r_multiple": 0.333289, "reason": "STATE_2_ABORT", "rr": 0.333289, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-07T08:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 68266.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-07T17:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 68172.97294049, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-07T17:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 6.84571, "price": 71644.3, "r_multiple": 6.84571, "reason": "STATE_2_ABORT", "rr": 6.84571, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-08T13:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 71813.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-08T17:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 71773.36446999, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-08T18:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 71831.9686, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-09T15:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 71680.32390007, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-09T23:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.232709, "price": 72429.7, "r_multiple": 0.232709, "reason": "RUNNER_KIJUN_BREAK", "rr": 0.232709, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-10T16:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 72820.6, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-11T09:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 72810.93209207, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-11T09:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.11375, "price": 72565.9, "r_multiple": -1.11375, "reason": "STATE_2_ABORT", "rr": -1.11375, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-11T13:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 72720.5, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-11T15:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 72725.4556567, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-11T15:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -4.445136, "price": 71686.9, "r_multiple": -4.445136, "reason": "STATE_2_ABORT", "rr": -4.445136, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-12T01:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 71590.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-12T10:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 70938.8, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-13T00:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 74292.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-14T06:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 74259.06177174, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-14T12:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 74321.969, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-14T12:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 3.18816, "price": 75334.7, "r_multiple": 3.18816, "reason": "STATE_2_ABORT", "rr": 3.18816, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-14T14:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 75239.2, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-14T15:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 75135.08609112, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-14T15:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 75089.48, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-14T16:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 74469.99308992, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-14T16:45:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 74499.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T00:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 74277.41134502, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T02:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 73973.5388, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T05:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 73829.92534977, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T05:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.562418, "price": 73625.35798041, "r_multiple": -0.562418, "reason": "HARD_SL", "rr": -0.562418, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T07:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 74050.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T08:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 74014.44320552, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T08:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.460574, "price": 73835.6, "r_multiple": -0.460574, "reason": "STATE_2_ABORT", "rr": -0.460574, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T13:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 74014.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T13:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 73955.78453699, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T14:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 73988.6706, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T14:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 73872.82523013, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T15:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.29931, "price": 74622.8, "r_multiple": 0.29931, "reason": "RUNNER_KIJUN_BREAK", "rr": 0.29931, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-15T23:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 75151.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T02:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 74900.77550475, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T02:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 74579.817, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T07:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.697844, "price": 74484.6, "r_multiple": -0.697844, "reason": "STATE_2_ABORT", "rr": -0.697844, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T08:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 74697.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T12:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 74740.45926942, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T12:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.504779, "price": 74560.3, "r_multiple": -0.504779, "reason": "STATE_2_ABORT", "rr": -0.504779, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T13:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 74262.2, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T15:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 74747.67084895, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T15:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 73900.9002, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-16T17:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.550021, "price": 74710.0, "r_multiple": 0.550021, "reason": "STATE_2_ABORT", "rr": 0.550021, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-17T01:15:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 74814.3, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-17T06:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 74782.95778024, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-17T06:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 2.982456, "price": 75710.0, "r_multiple": 2.982456, "reason": "STATE_2_ABORT", "rr": 2.982456, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-17T09:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 75417.6, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-17T11:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 75425.98414298, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-17T11:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 75539.8588, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-17T11:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 2.399858, "price": 76760.4, "r_multiple": 2.399858, "reason": "STATE_2_ABORT", "rr": 2.399858, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-18T08:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 75771.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-18T22:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 75742.975523, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-18T23:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 75642.5128, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T00:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 75567.75756996, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T00:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.71213, "price": 75366.58118855, "r_multiple": -0.71213, "reason": "HARD_SL", "rr": -0.71213, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T02:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 75656.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T04:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 75593.35844351, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T04:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 75446.8904, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T06:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 75367.80596493, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T06:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.635215, "price": 75161.65473014, "r_multiple": -0.635215, "reason": "HARD_SL", "rr": -0.635215, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T07:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 75387.6, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T11:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 75250.2683657, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T16:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.038173, "price": 75231.3, "r_multiple": -0.038173, "reason": "STATE_2_ABORT", "rr": -0.038173, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-19T17:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 74637.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-20T01:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 74726.80352104, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-20T06:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 3.574135, "price": 76284.7, "r_multiple": 3.574135, "reason": "STATE_2_ABORT", "rr": 3.574135, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-20T20:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 75947.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-20T22:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 75897.08404876, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-20T22:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.403382, "price": 75711.9, "r_multiple": -0.403382, "reason": "STATE_2_ABORT", "rr": -0.403382, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-20T23:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 76056.1, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-21T00:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 76056.0320066, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-21T01:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 75772.1978, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-21T02:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 75667.37773404, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-21T02:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.487958, "price": 75616.2, "r_multiple": -0.487958, "reason": "RUNNER_KIJUN_BREAK", "rr": -0.487958, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-21T15:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 75538.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-21T21:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 75776.21322132, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-21T23:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 4.127917, "price": 78135.9, "r_multiple": 4.127917, "reason": "STATE_2_ABORT", "rr": 4.127917, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-22T12:15:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 78929.7, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-22T17:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 78741.96490508, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-22T17:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 78857.4738, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-22T17:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 78715.82474918, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-22T19:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.800076, "price": 78253.16769757, "r_multiple": -0.800076, "reason": "HARD_SL", "rr": -0.800076, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-22T23:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 78408.2, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T00:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 78345.68520932, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T00:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -2.103644, "price": 77180.1, "r_multiple": -2.103644, "reason": "STATE_2_ABORT", "rr": -2.103644, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T10:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 77730.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T12:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 77722.35506144, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T12:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 77507.9982, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T12:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 77406.94758563, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T13:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.422598, "price": 77793.4, "r_multiple": 0.422598, "reason": "RUNNER_KIJUN_BREAK", "rr": 0.422598, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T17:15:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 77918.9, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T18:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 77784.61435983, "reason": "L1_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T18:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 77838.7464, "reason": "L2_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T19:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L3", "price": 77657.60280166, "reason": "L3_FILL", "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-23T19:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.034694, "price": 77583.9, "r_multiple": -0.034694, "reason": "END_OF_WINDOW", "rr": -0.034694, "side": "long", "symbol": "BTC/USDT:USDT", "ts": "2026-04-24T05:15:00Z", "win": false}

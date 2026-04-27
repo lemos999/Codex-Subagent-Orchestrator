@@ -1,0 +1,32 @@
+{"coverage_days": 90, "coverage_end": "2026-04-24T05:15:00Z", "coverage_start": "2026-01-24T05:15:00Z", "event": "REPLAY_META", "source": "..\\predictive_runner_paper\\cache_180d", "symbols": ["XRP/USDT:USDT"], "ts": "2026-01-24T05:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.9177, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-24T06:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1.92061026, "reason": "L1_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-24T12:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.370488, "price": 1.9187, "r_multiple": 0.370488, "reason": "STATE_2_ABORT", "rr": 0.370488, "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-24T14:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.9183, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-24T14:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1.91821032, "reason": "L1_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-24T14:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.457569, "price": 1.9208, "r_multiple": -0.457569, "reason": "STATE_2_ABORT", "rr": -0.457569, "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-24T22:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.9157, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-24T23:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.8984, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-25T12:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1.89846856, "reason": "L1_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-25T12:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.029432, "price": 1.8982, "r_multiple": 0.029432, "reason": "STATE_2_ABORT", "rr": 0.029432, "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-26T12:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.9052, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-26T17:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1.91493498, "reason": "L1_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-26T18:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.401816, "price": 1.9059, "r_multiple": 0.401816, "reason": "STATE_2_ABORT", "rr": 0.401816, "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-27T16:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.894, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-27T17:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1.89356002, "reason": "L1_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-27T17:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 1.888179, "reason": "L2_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-27T17:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 1.91212999, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-27T20:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.9036, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T01:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1.90761325, "reason": "L1_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T05:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.322324, "price": 1.9115, "r_multiple": -0.322324, "reason": "STATE_2_ABORT", "rr": -0.322324, "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T05:45:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 1.9216, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T09:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1.91725388, "reason": "L1_FILL", "side": "long", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T14:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 1.9147864, "reason": "L2_FILL", "side": "long", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T14:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.757989, "price": 1.9039, "r_multiple": -0.757989, "reason": "STATE_2_ABORT", "rr": -0.757989, "side": "long", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T15:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.9189, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T18:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1.91645933, "reason": "L1_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T18:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 1.9090026, "reason": "L2_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T19:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 1.93136258, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T20:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1.9127, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T21:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1.91484022, "reason": "L1_FILL", "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-01-28T21:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 23.732607, "price": 1.4275, "r_multiple": 23.732607, "reason": "END_OF_WINDOW", "rr": 23.732607, "side": "short", "symbol": "XRP/USDT:USDT", "ts": "2026-04-24T05:15:00Z", "win": true}

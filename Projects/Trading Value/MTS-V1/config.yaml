@@ -1,5 +1,5 @@
 strategy: "MTS-V1"
-version: "v5.1"
+version: "v5.2"
 exchange: "binanceusdm"
 quote_asset: "USDT"
 contract_type: "perpetual"
@@ -14,7 +14,7 @@ symbols:
 
 timeframes:
   htf: "4h"
-  entry_tf: "1h"
+  entry_tf: "15m"
   ltf: "15m"
 
 risk:

@@ -1,0 +1,31 @@
+strategy: "MTS-V1"
+version: "v5.2"
+exchange: "binanceusdm"
+quote_asset: "USDT"
+contract_type: "perpetual"
+
+symbols:
+  - "BTC/USDT:USDT"
+  - "ETH/USDT:USDT"
+  - "SOL/USDT:USDT"
+  - "XRP/USDT:USDT"
+  - "BNB/USDT:USDT"
+
+timeframes:
+  htf: "4h"
+  entry_tf: "15m"
+  ltf: "15m"
+
+risk:
+  daily_max_loss_pct: 5
+  symbol_cooldown_hours: 24
+
+user_leverage: 10
+use_runner: true
+
+mmr:
+  "BTC/USDT:USDT": 0.005
+  "ETH/USDT:USDT": 0.005
+  "SOL/USDT:USDT": 0.005
+  "XRP/USDT:USDT": 0.005
+  "BNB/USDT:USDT": 0.005

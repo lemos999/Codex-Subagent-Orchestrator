@@ -1,0 +1,34 @@
+{
+  "artifacts": {
+    "summary_json": "..\\..\\..\\subagent-runs\\mts-v1-parity\\sol-state2-risk-gates\\missing_mmr_probe\\20260427T063815467228Z\\20260427T063815467242Z\\summary.json",
+    "trades_jsonl": "..\\..\\..\\subagent-runs\\mts-v1-parity\\sol-state2-risk-gates\\missing_mmr_probe\\20260427T063815467228Z\\20260427T063815467242Z\\trades.jsonl"
+  },
+  "block_reason": "risk_gate",
+  "blocked": true,
+  "events": 0,
+  "exits": 0,
+  "generated_at": "2026-04-27T06:38:15Z",
+  "mode": "paper",
+  "paper_only": true,
+  "risk_gate": {
+    "allows_new_signals": false,
+    "daily_max_loss_pct": 5.0,
+    "daily_pnl_pct": 0.0,
+    "failures": [
+      "BTC/USDT:USDT: missing maintenance margin rate"
+    ],
+    "leverage_caps": [
+      {
+        "effective_leverage": null,
+        "mmr": null,
+        "raw_cap": null,
+        "symbol": "BTC/USDT:USDT"
+      }
+    ]
+  },
+  "session_id": "20260427T063815467228Z",
+  "strategy": "MTS-V1",
+  "symbols": [
+    "BTC/USDT:USDT"
+  ]
+}

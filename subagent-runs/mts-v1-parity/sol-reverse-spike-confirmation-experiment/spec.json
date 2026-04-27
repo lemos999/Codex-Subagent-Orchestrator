@@ -1,0 +1,21 @@
+{
+  "task": "mts-v1-sol-reverse-spike-confirmation-experiment",
+  "date": "2026-04-27",
+  "skill": "vloop",
+  "scope": "Projects/Trading Value/MTS-V1",
+  "selected_candidate": "reverse-spike one-bar confirmation probe",
+  "protected_baseline": {
+    "btc_entry_matches": "64/64",
+    "btc_exit_timestamp_matches": "64/64",
+    "btc_exit_price_within_0_15": "62/64",
+    "btc_exit_price_within_1_0": "64/64",
+    "btc_sha256": "BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D"
+  },
+  "success_criteria": [
+    "Only one new replay candidate is tested.",
+    "Default replay remains equivalent for accepted artifacts.",
+    "SOL probe clearly reports whether one-bar reverse-spike confirmation improves timing.",
+    "BTC protected baseline gate remains unchanged.",
+    "No live-ready claim is made."
+  ]
+}

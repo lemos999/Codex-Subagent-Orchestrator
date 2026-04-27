@@ -1,0 +1,15 @@
+{
+  "task": "mts-v1-sol-state2-trigger-source",
+  "skill": "vloop",
+  "status": "pass",
+  "scope": "diagnostic telemetry only",
+  "target": "Expose Python STATE_2_ABORT trigger source for SOL as reverse_spike, htf_cross, both, or unknown without changing replay semantics.",
+  "selected_next_task": "SOL reverse-spike pulse parity inspection",
+  "protected_baseline": {
+    "btc_entry_matches": "64/64",
+    "btc_exit_timestamp_matches": "64/64",
+    "btc_exit_price_within_0_15": "62/64",
+    "btc_exit_price_within_1_0": "64/64",
+    "btc_sha256": "BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D"
+  }
+}

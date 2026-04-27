@@ -1,0 +1,247 @@
+{"coverage_days": 90, "coverage_end": "2026-04-24T05:15:00Z", "coverage_start": "2026-01-24T05:15:00Z", "event": "REPLAY_META", "source": "..\\predictive_runner_paper\\cache_180d", "symbols": ["ETH/USDT:USDT"], "ts": "2026-01-24T05:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2959.73, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-24T09:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2959.73, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-24T09:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2960.06, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-24T09:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.650609, "price": 2954.59, "r_multiple": 0.650609, "reason": "STATE_2_ABORT", "rr": 0.650609, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-24T14:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2955.44, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-24T20:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2955.44, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-24T20:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2955.11272, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-24T21:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 4.854283, "price": 2914.7, "r_multiple": 4.854283, "reason": "STATE_2_ABORT", "rr": 4.854283, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-26T08:15:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2894.91, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-26T10:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2895.7074109, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-26T11:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2912.85796, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-26T12:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2926.39350112, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-26T14:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2909.26, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-27T14:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2919.74074453, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-27T14:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2927.79098, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-27T15:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2948.24831554, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-27T16:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 3000.0, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-28T16:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 3000.0, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-28T16:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 3018.53336, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-28T17:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L3", "price": 3025.17272, "reason": "L3_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-28T20:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.663689, "price": 2815.41, "r_multiple": 1.663689, "reason": "RUNNER_KIJUN_BREAK", "rr": 1.663689, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-29T21:45:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2695.38, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-30T23:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2696.31544041, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-30T23:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2705.98, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-01-30T23:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 9.03001, "price": 2350.86, "r_multiple": 9.03001, "reason": "STATE_2_ABORT", "rr": 9.03001, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-02T14:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2343.15, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-02T18:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2344.75928883, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-02T19:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2348.36272, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-02T19:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.293834, "price": 2292.77, "r_multiple": 1.293834, "reason": "STATE_2_ABORT", "rr": 1.293834, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-03T15:15:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2280.02, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-03T15:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2282.29376997, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-03T15:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2302.3, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-03T15:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2338.90132572, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-03T20:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2128.83, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-04T22:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2132.59213577, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-04T22:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2136.03736, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-04T23:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 2.389124, "price": 1984.19, "r_multiple": 2.389124, "reason": "STATE_2_ABORT", "rr": 2.389124, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-06T14:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2062.25, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-06T23:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2062.25, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-06T23:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2072.44178, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T03:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.362077, "price": 2079.5, "r_multiple": -0.362077, "reason": "STATE_2_ABORT", "rr": -0.362077, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T03:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2029.53, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T14:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2036.56775648, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T15:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2040.40958, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T15:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.347746, "price": 2051.29, "r_multiple": -0.347746, "reason": "STATE_2_ABORT", "rr": -0.347746, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T15:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2060.13, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T17:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2060.13, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T17:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2064.76, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-07T18:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.690879, "price": 2101.32, "r_multiple": -0.690879, "reason": "EVASION", "rr": -0.690879, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-08T08:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2035.9, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-09T15:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2039.31252669, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-09T15:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2060.2, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-09T15:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2085.77695584, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-09T16:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2008.27, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-11T03:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2013.32387763, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-11T14:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2002.63, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-11T14:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.777487, "price": 1983.41, "r_multiple": 0.777487, "reason": "STATE_2_ABORT", "rr": 0.777487, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-13T14:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2066.79, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-14T08:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2066.79, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-14T08:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2075.05, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-14T08:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2086.02152107, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-14T09:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1955.79, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-16T02:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1955.79, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-16T02:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1970.93854, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-16T04:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 1981.28466228, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-16T09:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1984.38, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-18T15:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1984.38, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-18T15:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.959303, "price": 1958.98, "r_multiple": 0.959303, "reason": "STATE_2_ABORT", "rr": 0.959303, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-20T05:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1966.85, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-21T00:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1967.46596835, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-21T00:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1967.10478, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-21T01:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.611957, "price": 1975.06, "r_multiple": -0.611957, "reason": "STATE_2_ABORT", "rr": -0.611957, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-21T09:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 1983.57, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-21T16:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1983.05727665, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-21T16:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 1977.95598, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-21T20:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.670894, "price": 1973.21, "r_multiple": -0.670894, "reason": "STATE_2_ABORT", "rr": -0.670894, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-21T20:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1974.11, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-22T02:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1974.11, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-22T02:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1976.63352, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-22T06:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2_PROMO", "price": 1976.63352, "reason": "L2_PROMO_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-22T06:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 2.469174, "price": 1957.04, "r_multiple": 2.469174, "reason": "STATE_2_ABORT", "rr": 2.469174, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-22T23:45:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1903.43, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-23T15:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1905.00996143, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-23T15:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 3.508089, "price": 1826.97, "r_multiple": 3.508089, "reason": "STATE_2_ABORT", "rr": 3.508089, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-24T14:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1851.05, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-24T23:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1853.55187282, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-25T00:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1856.48548, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-25T01:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -2.079986, "price": 1903.63, "r_multiple": -2.079986, "reason": "STATE_2_ABORT", "rr": -2.079986, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-25T01:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2074.99, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-26T04:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2073.461979, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-26T04:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2045.51228, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-26T08:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.033853, "price": 2058.66, "r_multiple": -0.033853, "reason": "STATE_2_ABORT", "rr": -0.033853, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-26T14:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2029.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-26T19:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2029.0, "reason": "L1_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-26T19:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 1995.82428, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-27T10:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.132764, "price": 1985.48, "r_multiple": -1.132764, "reason": "STATE_2_ABORT", "rr": -1.132764, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-02-27T10:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1922.01, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-28T05:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1922.01, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-28T05:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 1.228794, "price": 1904.67, "r_multiple": 1.228794, "reason": "STATE_2_ABORT", "rr": 1.228794, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-02-28T13:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 1953.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-01T01:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1952.73639429, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-01T01:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 1.099567, "price": 1982.29, "r_multiple": 1.099567, "reason": "STATE_2_ABORT", "rr": 1.099567, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-01T11:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 1997.78, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-01T16:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1997.72341113, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-01T16:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2000.99532, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-01T16:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 1972.37272483, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-01T16:45:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 1982.96, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-03T16:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1971.26168073, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-03T17:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 1969.44, "reason": "L2_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-03T17:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.492381, "price": 1949.84, "r_multiple": -0.492381, "reason": "STATE_2_ABORT", "rr": -0.492381, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-04T03:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 1985.0, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-04T06:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1973.94, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-06T21:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1975.0426654, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-06T21:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1983.0701, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-06T21:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.159731, "price": 1982.35, "r_multiple": -0.159731, "reason": "STATE_2_ABORT", "rr": -0.159731, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-07T02:45:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1982.75, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-07T03:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1982.75, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-07T03:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1986.10852, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-07T08:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.757054, "price": 1993.23, "r_multiple": -0.757054, "reason": "STATE_2_ABORT", "rr": -0.757054, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-07T11:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1979.51, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-07T13:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1979.51, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-07T13:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1985.77746, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-07T14:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 3.182051, "price": 1944.86, "r_multiple": 3.182051, "reason": "STATE_2_ABORT", "rr": 3.182051, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-08T19:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1928.13, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-08T22:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1939.12695783, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-08T22:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1937.62756, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-08T22:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 1964.82857448, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-09T00:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2044.48, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-10T14:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2041.08366016, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-10T14:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2027.38084, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-10T19:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.588822, "price": 2016.21, "r_multiple": -0.588822, "reason": "STATE_2_ABORT", "rr": -0.588822, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-11T05:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2028.64, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-11T10:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2028.64, "reason": "L1_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-11T10:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2018.72768, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-11T11:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 2.129819, "price": 2057.21, "r_multiple": 2.129819, "reason": "STATE_2_ABORT", "rr": 2.129819, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-12T14:15:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2061.4, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-12T20:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2059.19774453, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-12T21:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2059.57, "reason": "L2_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-12T21:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 1.660183, "price": 2090.95, "r_multiple": 1.660183, "reason": "STATE_2_ABORT", "rr": 1.660183, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-13T23:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2074.26, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-14T12:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2072.55245978, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-14T13:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2071.01126, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-14T14:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 2.330428, "price": 2097.33, "r_multiple": 2.330428, "reason": "STATE_2_ABORT", "rr": 2.330428, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-15T13:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2110.25, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-15T19:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2338.09, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-17T21:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2330.56007244, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-17T22:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2326.1034, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-17T22:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2308.36320303, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-18T00:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2209.21, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-19T03:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2209.21, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-19T03:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 2.380045, "price": 2151.97, "r_multiple": 2.380045, "reason": "STATE_2_ABORT", "rr": 2.380045, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-20T07:30:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2133.82, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-20T16:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2135.16431948, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-20T16:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2136.44, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-20T16:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2160.04036457, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-20T22:00:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2145.34, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-21T23:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2145.34, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-21T23:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2153.33152, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-23T11:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -0.448466, "price": 2167.72, "r_multiple": -0.448466, "reason": "STATE_2_ABORT", "rr": -0.448466, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-23T11:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2158.77, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-23T20:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2158.77, "reason": "L1_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-23T20:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2159.22, "reason": "L2_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-23T20:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2131.25075965, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-24T00:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2156.8, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-25T03:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2156.8, "reason": "L1_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-25T03:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.852142, "price": 2170.83, "r_multiple": 0.852142, "reason": "STATE_2_ABORT", "rr": 0.852142, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-25T12:15:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2182.27, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-25T12:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2178.62122974, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-25T13:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2176.80248, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-25T14:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2155.57345405, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-03-25T15:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2057.76, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-27T05:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2058.44717996, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-27T05:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2062.9818, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-27T06:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 3.995633, "price": 2002.59, "r_multiple": 3.995633, "reason": "STATE_2_ABORT", "rr": 3.995633, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-28T06:15:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1996.14, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-28T09:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 1996.76018944, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-28T09:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2002.63862, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-28T10:00:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2007.90824463, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-28T13:30:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 1994.01, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-29T17:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 1994.01, "reason": "L1_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-29T17:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 1996.92544, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-29T18:30:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2008.02926324, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-29T20:15:00Z", "win": false}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2050.47, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-31T07:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2059.88165675, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-31T13:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2057.4, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-31T13:15:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2079.84808686, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-03-31T14:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2135.24, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-01T16:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2129.24158186, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-01T18:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2130.1, "reason": "L2_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-01T18:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.390965, "price": 2139.08, "r_multiple": 0.390965, "reason": "STATE_2_ABORT", "rr": 0.390965, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-02T01:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2056.15, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-04-02T22:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2059.55012842, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-04-02T22:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2060.56718, "reason": "L2_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-04-02T22:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": -1.0, "price": 2076.45624243, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-04-03T12:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2155.42, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-06T14:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2155.42, "reason": "L1_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-06T14:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2148.5448, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-06T16:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2128.66844582, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-06T17:00:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2087.11, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-07T19:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2087.06408767, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-07T19:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2093.99622, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-07T19:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 7.203326, "price": 2233.96, "r_multiple": 7.203326, "reason": "STATE_2_ABORT", "rr": 7.203326, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-08T13:30:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2213.8, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-08T21:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2212.57016781, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-08T21:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2211.55364, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-08T22:00:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2193.48234066, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-08T22:15:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2193.18, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-10T09:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2191.96, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-12T17:15:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2191.96, "reason": "L1_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-12T17:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.268711, "price": 2195.4, "r_multiple": 0.268711, "reason": "STATE_2_ABORT", "rr": 0.268711, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-12T22:00:00Z", "win": true}
+{"cvd_sign": -1, "event": "ENTRY_SIGNAL", "price": 2192.4, "reason": "ENTRY_TRIGGER", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-04-13T02:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2199.12823948, "reason": "L1_FILL", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-04-13T06:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2197.23, "reason": "L2_FILL_ON_CLOSE", "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-04-13T06:45:00Z"}
+{"cvd_sign": -1, "event": "EXIT", "pnl_r": 0.520032, "price": 2191.27, "r_multiple": 0.520032, "reason": "STATE_2_ABORT", "rr": 0.520032, "side": "short", "symbol": "ETH/USDT:USDT", "ts": "2026-04-13T12:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2376.75, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-14T07:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2372.19568535, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-14T10:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2374.01, "reason": "L2_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-14T10:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -0.232967, "price": 2369.6, "r_multiple": -0.232967, "reason": "STATE_2_ABORT", "rr": -0.232967, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-14T14:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2325.6, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-15T13:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2323.61069428, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-15T14:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2321.1317, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-15T15:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.789866, "price": 2340.4, "r_multiple": 0.789866, "reason": "STATE_2_ABORT", "rr": 0.789866, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-16T07:45:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2343.31, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-16T13:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2341.95348632, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-16T13:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2334.5919, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-16T13:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.456308, "price": 2306.7, "r_multiple": -1.456308, "reason": "EVASION", "rr": -1.456308, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-16T13:45:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2361.89, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-18T15:45:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2360.85877917, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-18T16:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2353.20606, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-18T16:15:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2339.47239576, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-18T18:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2298.41, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-20T08:00:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L1", "price": 2298.41, "reason": "L1_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-20T08:00:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2288.46088, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-20T08:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": 0.973432, "price": 2316.17, "r_multiple": 0.973432, "reason": "STATE_2_ABORT", "rr": 0.973432, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-21T11:00:00Z", "win": true}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2325.16, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-21T11:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2322.51926707, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-21T11:30:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2321.09, "reason": "L2_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-21T11:30:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2305.17243237, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-21T12:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2403.47, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-22T19:15:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2403.35287552, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-22T19:30:00Z"}
+{"cvd_sign": 1, "event": "ENTRY_L2", "price": 2393.47986, "reason": "L2_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-22T19:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2377.81294963, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-22T23:30:00Z", "win": false}
+{"cvd_sign": 1, "event": "ENTRY_SIGNAL", "price": 2331.58, "reason": "ENTRY_TRIGGER", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-24T01:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L1", "price": 2322.53115449, "reason": "L1_FILL", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-24T02:45:00Z"}
+{"cvd_sign": -1, "event": "ENTRY_L2", "price": 2318.29, "reason": "L2_FILL_ON_CLOSE", "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-24T02:45:00Z"}
+{"cvd_sign": 1, "event": "EXIT", "pnl_r": -1.0, "price": 2304.31328276, "r_multiple": -1.0, "reason": "HARD_SL", "rr": -1.0, "side": "long", "symbol": "ETH/USDT:USDT", "ts": "2026-04-24T03:30:00Z", "win": false}
