@@ -62,6 +62,7 @@ from ontology.layers import (
     MINORITY_PERSISTENCE_MAX_MEMBERS, MINORITY_PERSISTENCE_BOOST,
     FOUNDER_RESPAWN_EVERY, FOUNDER_RESPAWN_TARGET_ACTIVE,
     RESPAWN_GRACE_TICKS,
+    W_LINEAGE,
     NORM_PRIMITIVE_CATALOG, CHARTER_PRIMITIVE_COUNT,
     FACTION_PROJECT_EVERY, FACTION_HYSTERESIS,
     FACTION_TELEMETRY_BIAS_OWN, FACTION_TELEMETRY_BIAS_NEIGHBOR,
@@ -1236,6 +1237,15 @@ class MultiTickEngine:
                 if 0 < member_count <= MINORITY_PERSISTENCE_MAX_MEMBERS:
                     if self._same_territory(persona, fid) > 0.5:
                         score += MINORITY_PERSISTENCE_BOOST
+                # Stage 6 H-lite: founder lineage identity affinity (2026-04-26)
+                if W_LINEAGE > 0 and persona.faction:
+                    cur_faction = self.factions.get(persona.faction)
+                    cand_faction = self.factions.get(fid)
+                    if cur_faction and cand_faction:
+                        lineage_a = set(cur_faction.founder_lineage) | {cur_faction.founder_pid}
+                        lineage_b = set(cand_faction.founder_lineage) | {cand_faction.founder_pid}
+                        overlap = len(lineage_a & lineage_b) / max(len(lineage_a), len(lineage_b), 1)
+                        score += W_LINEAGE * overlap
                 scored[fid] = DECAY * prev_scores.get(fid, 0.0) + score
             ranked = sorted(scored.items(), key=lambda kv: (-kv[1], kv[0]))
             new_scores[pid] = dict(ranked[:MAX_TRACKED_FACTIONS_PER_PERSONA])
@@ -1352,6 +1362,7 @@ class MultiTickEngine:
                 charter=charter,
                 created_tick=self.time.tick,
                 grace_until_tick=self.time.tick + RESPAWN_GRACE_TICKS,
+                founder_lineage=(founder.id,),
             )
             self.factions[faction.id] = faction
             self._change_persona_faction(founder.id, faction.id, source="birth_founder")
@@ -1403,6 +1414,7 @@ class MultiTickEngine:
                 charter=charter,
                 created_tick=self.time.tick,
                 grace_until_tick=self.time.tick + RESPAWN_GRACE_TICKS,
+                founder_lineage=(founder.id,),
             )
             self.factions[faction.id] = faction
             self._change_persona_faction(founder.id, faction.id, source="birth_founder")
@@ -1454,6 +1466,7 @@ class MultiTickEngine:
                 founder_pid=founder.id,
                 charter=charter,
                 created_tick=0,
+                founder_lineage=(founder.id,),
             )
             self.factions[faction.id] = faction
             self._change_persona_faction(founder.id, faction.id, source="birth_founder")
