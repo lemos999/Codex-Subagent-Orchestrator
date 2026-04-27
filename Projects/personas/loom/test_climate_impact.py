@@ -72,6 +72,8 @@ for e in log:
     season = e.get("season", "?")
     for pid, p in e.get("personas", {}).items():
         if not p.get("sleeping", False):
+            if pid not in engine.personas:
+                continue
             key = (engine.personas[pid].region, season)
             if key not in season_actions:
                 season_actions[key] = Counter()

@@ -213,6 +213,73 @@ def _phase17_phi2_stage5_hash(seed: int = 42, ticks: int = 500) -> str:
     return hashlib.sha256(_phase17_phi2_stage5_snapshot(seed=seed, ticks=ticks)).hexdigest()
 
 
+def _phase17_phi2_stage6_snapshot(seed: int = 42, ticks: int = 500) -> bytes:
+    from core.multi_tick_engine import MultiTickEngine
+
+    engine = MultiTickEngine(seed=seed)
+    for _ in range(ticks):
+        engine.tick()
+    snapshot = {
+        "p_faction": {pid: engine.personas[pid].faction for pid in sorted(engine.personas)},
+        "p_cooldown": {pid: engine.personas[pid].faction_cooldown for pid in sorted(engine.personas)},
+        "i_aff": {pid: dict(engine.inners[pid].affiliation_scores) for pid in sorted(engine.inners)},
+        "i_residence": {pid: dict(engine.inners[pid].residence_ticks) for pid in sorted(engine.inners)},
+        "factions": {
+            fid: (
+                engine.factions[fid].founder_pid,
+                engine.factions[fid].grace_until_tick,
+                tuple(engine.factions[fid].charter),
+                tuple(engine.factions[fid].founder_lineage),
+            )
+            for fid in sorted(engine.factions)
+        },
+        "t_ref": {tid: engine.territories[tid].factionRef for tid in sorted(engine.territories)},
+    }
+    return pickle.dumps(snapshot, protocol=4)
+
+
+def _phase17_phi2_stage6_hash(seed: int = 42, ticks: int = 500) -> str:
+    return hashlib.sha256(_phase17_phi2_stage6_snapshot(seed=seed, ticks=ticks)).hexdigest()
+
+
+def test_phase17_phi2_stage6_founder_lineage_default() -> None:
+    """Stage 6: _init_founder_seeds로 생성된 Faction은 founder_pid가 lineage에 포함되어야 함."""
+    from core.multi_tick_engine import MultiTickEngine
+
+    engine = MultiTickEngine(seed=42)
+    for fid, faction in engine.factions.items():
+        assert isinstance(faction.founder_lineage, tuple), (
+            f"Faction {fid}: founder_lineage type={type(faction.founder_lineage).__name__} (expected tuple)"
+        )
+        assert faction.founder_pid in faction.founder_lineage, (
+            f"Faction {fid}: founder_pid={faction.founder_pid} not in lineage={faction.founder_lineage}"
+        )
+
+
+def test_phase17_phi2_stage6_respawn_lineage() -> None:
+    """Stage 6: respawn 경로로 생성된 Faction도 founder_pid 포함 lineage 보유."""
+    from ontology.layers import FOUNDER_RESPAWN_EVERY
+
+    engine = _prepare_respawn_probe_engine(seed=42)
+    initial_fids = set(engine.factions.keys())
+    for tick in range(1, FOUNDER_RESPAWN_EVERY + 1):
+        engine.time.tick = tick
+        engine._compute_affiliation_tick()
+        engine._commit_faction_tick()
+        engine._project_faction_tick()
+        engine._respawn_faction_tick()
+
+    new_fids = set(engine.factions.keys()) - initial_fids
+    assert len(new_fids) >= 1, "respawn cycle 후 새 Faction 생성되지 않음"
+    for fid in new_fids:
+        f = engine.factions[fid]
+        assert isinstance(f.founder_lineage, tuple), f"Faction {fid}: lineage type"
+        assert len(f.founder_lineage) >= 1, f"Faction {fid}: lineage empty"
+        assert f.founder_pid in f.founder_lineage, (
+            f"Faction {fid}: founder_pid={f.founder_pid} not in lineage={f.founder_lineage}"
+        )
+
+
 def test_phase17_phi2_perf_stage4() -> None:
     median, p95, samples = _measure_tick_ms_stable(seed=42)
     print(_format_tick_perf(median, p95, samples))
@@ -275,6 +342,28 @@ def main() -> int:
     print(f"[{status}] phi2_stage5_determinism_500 (grace_until_tick+residence_ticks): {stage5_a[:16]}…")
     if not stage5_ok:
         failures.append("phi2_stage5_determinism_500")
+
+    stage6_a = _phase17_phi2_stage6_hash(seed=42, ticks=500)
+    stage6_b = _phase17_phi2_stage6_hash(seed=42, ticks=500)
+    stage6_ok = stage6_a == stage6_b
+    status = "PASS" if stage6_ok else "FAIL"
+    print(f"[{status}] phi2_stage6_determinism_500 (founder_lineage): {stage6_a[:16]}…")
+    if not stage6_ok:
+        failures.append("phi2_stage6_determinism_500")
+
+    try:
+        test_phase17_phi2_stage6_founder_lineage_default()
+        print("[PASS] phi2_stage6_founder_lineage_default")
+    except AssertionError as exc:
+        print(f"[FAIL] phi2_stage6_founder_lineage_default: {exc}")
+        failures.append("phi2_stage6_founder_lineage_default")
+
+    try:
+        test_phase17_phi2_stage6_respawn_lineage()
+        print("[PASS] phi2_stage6_respawn_lineage")
+    except AssertionError as exc:
+        print(f"[FAIL] phi2_stage6_respawn_lineage: {exc}")
+        failures.append("phi2_stage6_respawn_lineage")
 
     print()
     if failures:
