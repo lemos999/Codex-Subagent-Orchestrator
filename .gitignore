@@ -7,6 +7,7 @@ dist/
 *.db-shm
 .npm-cache/
 .pytest_cache/
+.runner-symbol-expansion-smoke/
 
 # Python cache
 __pycache__/
@@ -14,3 +15,9 @@ __pycache__/
 
 # Data cache
 *.sqlite
+
+# Phase 17 transient probe/pytest stdout/stderr captures
+.phase17_stage*_probe.out
+.phase17_stage*_probe.err
+.phase17_stage*_pytest.out
+.phase17_stage*_pytest.err
