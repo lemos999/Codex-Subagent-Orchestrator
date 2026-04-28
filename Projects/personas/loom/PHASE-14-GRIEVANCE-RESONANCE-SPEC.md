@@ -5,7 +5,7 @@
 > 작업 유형: 기능 (mechanism 추가) + 위생 (SSoT 통합 + 중복 제거)
 > DB migration: 없음
 > 외부 의존: 없음
-> 변경 줄 수 예상: +60 / -30 (LoC)
+> 변경 줄 수 예상: +115 / -50 (LoC) — §5 변경 파일 합계 (layers.py +5, engine +60, observe -50, test +50)
 
 ---
 
@@ -377,13 +377,25 @@ def test_grievance_propagation_no_artificial_sticky():
     런타임 검증은 시뮬 내 다중 mechanism 간섭으로 결정성 확보가 어렵다.
     소스 정적 grep + propagation idempotency 검증으로 대체.
     트랩: hotfix v1 finding #4 (sticky lord_id guard) 재발 방지.
+
+    검출 방식: word-boundary regex (False-positive 방지).
+    예: "threshold"의 "hold" 부분 매칭은 무시. 토큰으로서의 "hold"만 검출.
     """
     import inspect
+    import re
     from core.multi_tick_engine import MultiTickEngine
     src = inspect.getsource(MultiTickEngine._propagate_grievance_lord_id_cross_territory)
 
-    forbidden_keywords = ["sticky", "floor", "_cache", "previous_lord", "prev_lord", "hold"]
-    for kw in forbidden_keywords:
+    # word-boundary 기반 토큰 매칭 (substring 매칭으로 인한 false-positive 방지)
+    forbidden_tokens = ["sticky", "previous_lord", "prev_lord", "hold"]
+    for kw in forbidden_tokens:
+        assert re.search(rf"\b{re.escape(kw)}\b", src) is None, (
+            f"propagation 본문에 sticky 의심 토큰 '{kw}' 검출 — hotfix v1 finding #4 재발 위험"
+        )
+
+    # 부분 매칭 의심 키워드 — 정당 용례가 거의 없으므로 substring으로 검사
+    forbidden_substrings = ["_cache", "_sticky_"]
+    for kw in forbidden_substrings:
         assert kw not in src, (
             f"propagation 본문에 sticky 의심 키워드 '{kw}' 검출 — hotfix v1 finding #4 재발 위험"
         )
@@ -409,9 +421,19 @@ def test_grievance_propagation_no_artificial_sticky():
 
 #### 7.3.4 `test_grievance_propagate_natural_emergence`
 
+> **부하 정책**: 본 테스트는 5000틱 × 3 seed로 단일 실행 시 수 분이 소요된다. pytest 기본 실행에서는 제외하고 `pytest -m slow` 또는 명시 호출 시에만 수행. acceptance #2 자연 PASS 최종 판정은 §7.4 probe 재측정으로 한다 (probe와 본 테스트는 같은 SSoT helper 호출).
+
 ```python
+import pytest
+
+@pytest.mark.slow
 def test_grievance_propagate_natural_emergence():
-    """5000틱 진행 후 cross-territory grievance pair가 자연 발생 — Φ-3 acceptance #2 자연 PASS."""
+    """5000틱 진행 후 cross-territory grievance pair가 자연 발생 — Φ-3 acceptance #2 자연 PASS.
+
+    부하: 5000틱 × 3 seed (수 분). 기본 pytest 실행에서 제외 (`@pytest.mark.slow`).
+    명시 실행: `py -m pytest test_phase17_acceptance.py -m slow`.
+    최종 판정 SSoT: §7.4 probe 재측정 (`observe_phase17_emergence.py --label phi3-phase14-resonance`).
+    """
     for seed in [7, 13, 42]:
         engine = run_simulation(seed=seed, ticks=5000)
         # min_carriers=1 (probe widest lens) 기준
@@ -424,6 +446,13 @@ def test_grievance_propagate_natural_emergence():
         assert pairs_strict >= 1, (
             f"seed {seed}: cross-territory 응결 실패 (pytest strict=2, pairs={pairs_strict})"
         )
+```
+
+**`pytest.ini` 또는 `pyproject.toml` 마커 등록 (없을 시 추가)**:
+```ini
+[pytest]
+markers =
+    slow: 무거운 시뮬 테스트 (5000틱+). 명시 호출 시에만 수행.
 ```
 
 ### 7.4 probe 재측정 (필수)
@@ -459,20 +488,21 @@ py observe_phase17_emergence.py --label phi3-phase14-resonance --seeds 7,13,42 -
 
 ## 8. Rollback
 
-본 spec 적용 commit (예상 hash 미정) revert:
+본 spec 적용 commit revert (commit 직후 본 spec §8에 hash 갱신):
 
 ```bash
+# 옵션 A: commit hash 기반 (commit 직후 hash 명기)
 git revert <commit_hash>
-```
 
-또는 파일별 수동 복원:
-```bash
+# 옵션 B: hash-free 파일별 수동 복원 (Phase 14 보강이 직전 commit인 경우)
 git checkout HEAD~1 -- \
     Projects/personas/loom/ontology/layers.py \
     Projects/personas/loom/core/multi_tick_engine.py \
     Projects/personas/loom/observe_phase17_emergence.py \
     Projects/personas/loom/test_phase17_acceptance.py
 ```
+
+> **hash 갱신 절차**: Phase 14 보강 closure commit 직후, 본 §8의 `<commit_hash>`를 실제 hash로 치환하여 `docs(loom): update Phase 14 spec rollback hash` commit으로 갱신.
 
 데이터 영향: 없음 (런타임 mechanism 추가만, persisted state 변경 없음). probe 결과 디렉토리는 `.gitignore`로 무시.
 
@@ -493,7 +523,7 @@ py -m pytest test_phase17_acceptance.py::test_phi2_phi3_continuity_hash
 - [ ] `py -m py_compile` 4개 파일 전부 통과
 - [ ] `_propagate_grievance_lord_id_cross_territory` 본문 ≤ 50줄
 - [ ] `shared_grievance_pairs_count` 본문 ≤ 20줄
-- [ ] sticky/floor/cache/hold 키워드 본문 0건 (`_propagate_grievance_lord_id_cross_territory` 한정)
+- [ ] sticky 의심 토큰 0건 (word-boundary 매칭, §9.6 기준 그대로)
 - [ ] `min_carriers < 1` ValueError 검증
 
 ### 9.2 SSoT 통합
@@ -524,9 +554,11 @@ py -m pytest test_phase17_acceptance.py::test_phi2_phi3_continuity_hash
 
 ### 9.6 거짓 PASS 차단
 
-- [ ] propagation 본문에 다음 키워드 0건: `sticky`, `hold`, `floor`, `min(`, `max(0.5,`, artificial 보정 의도 의심 표현
+- [ ] propagation 본문에 다음 토큰 0건 (word-boundary 검사): `sticky`, `hold`, `previous_lord`, `prev_lord`
+- [ ] propagation 본문에 다음 substring 0건: `_cache`, `_sticky_`
+- [ ] propagation 본문에 artificial 보정 의도 의심 표현 (예: `if score < threshold: score = threshold`, 후반부 강제 floor) 0건
 - [ ] propagation 결과는 24틱 주기마다 **재계산** (cache 잔존 없음)
-- [ ] donor가 grievance 0으로 떨어지면 propagation 결과도 사라짐 (`test_grievance_propagation_no_artificial_sticky` PASS)
+- [ ] propagation 본문에 sticky/cache/hold 키워드 grep 0건이며, 동일 입력 2회 호출 결과가 동일 (`test_grievance_propagation_no_artificial_sticky` PASS — 정적 grep + idempotency 검증)
 
 ---
 
