@@ -7,4 +7,4 @@ __pycache__/
 .pytest_cache/
 
 # 관측 probe 결과 (창발 실험 데이터)
-data/phase17_probe/
+data/phase17_probe*/

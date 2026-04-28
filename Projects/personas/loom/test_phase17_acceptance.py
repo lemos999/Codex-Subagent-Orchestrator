@@ -423,6 +423,146 @@ def test_phi3_determinism_seed42():
     assert h1 == h2, f"determinism break: {h1} vs {h2}"
 
 
+def test_branch_faction_id_no_collision() -> None:
+    """hotfix v1: D5 결함 형식(prefix [:6]) 동일 시 충돌이 발생할 수 있는 조건에서
+    풀 founder_pid 사용으로 충돌이 방지됨을 검증.
+
+    환경 의존 0%: stub parent Faction 2개를 self.factions에 직접 등록하여
+    150틱 진행·active faction 카운트 의존을 제거. self.time.tick=0 (생성 직후)에
+    spawn 두 번 호출 → 같은 tick에서 ID 충돌 시뮬 명확.
+    """
+    from core.multi_tick_engine import MultiTickEngine
+    from ontology.layers import Faction
+    eng = MultiTickEngine(seed=7)
+    # 환경 의존 제거: stub parent factions 직접 등록
+    eng.factions["stub-parent-a"] = Faction(
+        id="stub-parent-a",
+        name="StubParentA",
+        founder_pid="persona_001",
+        charter=("외세_배척", "능력주의", "자연_경외"),
+        created_tick=0,
+    )
+    eng.factions["stub-parent-b"] = Faction(
+        id="stub-parent-b",
+        name="StubParentB",
+        founder_pid="persona_002",
+        charter=("외세_배척", "능력주의", "자연_경외"),
+        created_tick=0,
+    )
+    # 같은 prefix 6자를 명시적으로 가진 임의 founder_pid 두 개 (D5 결함 형식 시뮬)
+    fake_p1 = "persona_001"
+    fake_p2 = "persona_002"
+    assert fake_p1[:6] == fake_p2[:6], "테스트 자체 가정 — fake pid prefix 6자 일치"
+    new_a = eng._spawn_branch_faction(founder_pid=fake_p1, parent_fid="stub-parent-a")
+    new_b = eng._spawn_branch_faction(founder_pid=fake_p2, parent_fid="stub-parent-b")
+    assert new_a != new_b, (
+        f"branch ID collision: {new_a!r} == {new_b!r} "
+        f"(D5 결함 형식 잔존 — founder_pid[:6] 동일 시 충돌)"
+    )
+    assert new_a in eng.factions, f"신규 분파 {new_a!r}이 factions registry에 미등록"
+    assert new_b in eng.factions, f"신규 분파 {new_b!r}이 factions registry에 미등록"
+
+
+def test_grievance_lord_id_not_sticky() -> None:
+    """hotfix v1: _update_grievances는 24틱 경계마다 lord_id를 항상 갱신 (sticky 가드 없음).
+
+    설계 주의:
+    - `_update_grievances`는 tick % 24 == 0에서만 실행
+    - lord 보유 territory에 거주하는 비-lord 페르소나만 갱신 대상
+    - 따라서 48틱 진행 후 FAKE_LORD 주입 → 24틱 추가 진행(=72) → 갱신 검증
+    - territory 이주 가드: 24틱 추가 진행 중 페르소나가 territory를 떠나면
+      _update_grievances 본문 진입 못해 lord_id 갱신 안됨 (false positive 회피)
+    """
+    from core.multi_tick_engine import MultiTickEngine
+    eng = MultiTickEngine(seed=7)
+    # 48틱(2 사이클) 진행 — territory의 lord_id 안정화
+    for _ in range(48):
+        eng.tick()
+    # lord 보유 territory에 거주 + 본인이 lord가 아닌 페르소나 선정
+    target_pid = None
+    expected_lord_hint = None
+    initial_tid = None
+    for tid, terr in eng.territories.items():
+        if not terr.lord_id or terr.lord_id not in eng.personas:
+            continue
+        residents = eng._get_territory_residents(tid)
+        for pid in residents:
+            if pid != terr.lord_id:
+                target_pid = pid
+                expected_lord_hint = terr.lord_id
+                initial_tid = tid
+                break
+        if target_pid:
+            break
+    assert target_pid is not None, (
+        "lord 보유 territory에 거주하는 비-lord 페르소나가 없음 — "
+        "Phase 14 territory.lord_id 분포 점검 필요"
+    )
+    # FAKE_LORD 강제 주입
+    eng.inners[target_pid].grievance = 0.7   # ≥ GRIEVANCE_MIN_SHARED
+    eng.inners[target_pid].grievance_lord_id = "FAKE_LORD"
+    # 다음 24틱 경계까지 진행 (48 → 72) → _update_grievances 본문 진입
+    for _ in range(24):
+        eng.tick()
+    # territory 이주 가드: target_pid가 동일 territory에 잔존하지 않으면 _update_grievances
+    # 본문 진입 못해 lord_id 갱신 발생 안 함 (false positive 회피)
+    if eng.personas[target_pid].territory != initial_tid:
+        return  # 이주 발생 — 환경 의존 skip
+    final_lord_id = eng.inners[target_pid].grievance_lord_id
+    assert final_lord_id != "FAKE_LORD", (
+        f"hotfix v1 위반: grievance_lord_id가 sticky 가드로 'FAKE_LORD' 보존됨 "
+        f"(expected: territory lord 갱신, 힌트={expected_lord_hint!r}, "
+        f"territory={initial_tid!r})"
+    )
+
+
+def test_uprising_tick_no_artificial_injection() -> None:
+    """hotfix v1: _uprising_tick은 trigger→emit 외 다른 faction 멤버에게 lord_id를 인공 주입하지 않는다.
+
+    1차 구현(Before)의 후반부 코드는 다음 조건에서 인공 주입을 발화시켰다:
+        (a) has_pair == False (≥2명 carrier가 있는 lord가 ≥2 faction에 분포 안 함)
+        (b) active_fids ≥ 2 (멤버 ≥ 2 faction이 2개 이상)
+        (c) source_lord_id 추출 가능 (한 faction에 carriers ≥ 2)
+    조건 충족 시 다른 faction 멤버 2명에게 source_lord_id를 강제 주입.
+
+    본 테스트는 (a)(b)(c) 조건을 직접 만들고, fid_b 멤버의 lord_id가 변동
+    없음을 검증한다. hotfix 후 코드는 trigger→emit 단순 호출만 수행.
+    """
+    from core.multi_tick_engine import MultiTickEngine
+    eng = MultiTickEngine(seed=7)
+    for _ in range(48):
+        eng.tick()
+    # 활성 faction 2개 이상 + 각 멤버 ≥ 2명 확보
+    pop = eng.faction_population_distribution()
+    active = sorted([fid for fid, c in pop.items() if c >= 2])
+    if len(active) < 2:
+        return  # 환경 의존 skip
+    fid_a, fid_b = active[0], active[1]
+    members_a = [p.id for p in eng._faction_members(fid_a)][:2]
+    members_b = [p.id for p in eng._faction_members(fid_b)][:2]
+    if len(members_a) < 2 or len(members_b) < 2:
+        return
+    fake_lord = sorted(eng.personas.keys())[0]
+    # 조건 (c): fid_a 멤버 2명에게 grievance_lord_id=fake_lord 강제
+    for pid in members_a:
+        eng.inners[pid].grievance = 0.7
+        eng.inners[pid].grievance_lord_id = fake_lord
+    # 조건 (a): fid_b 멤버는 lord_id 미설정 → carriers=1만 존재 → has_pair=False
+    for pid in members_b:
+        eng.inners[pid].grievance = 0.0
+        eng.inners[pid].grievance_lord_id = None
+    # _uprising_trigger 자체는 발화 못하도록 grievance를 GRIEVANCE_MIN_SHARED 미만으로
+    # (단, fid_a의 carrier 2명은 그대로 유지)
+    # → trigger candidates 0건 → emit 호출 없음 → 후반부만 검증 대상
+    before_b = {pid: eng.inners[pid].grievance_lord_id for pid in members_b}
+    eng._uprising_tick()
+    after_b = {pid: eng.inners[pid].grievance_lord_id for pid in members_b}
+    assert before_b == after_b, (
+        f"_uprising_tick이 fid_b 멤버에게 lord_id를 인공 주입함 "
+        f"(artificial injection 잔존): before={before_b}, after={after_b}"
+    )
+
+
 def test_phase17_phi2_perf_stage4() -> None:
     median, p95, samples = _measure_tick_ms_stable(seed=42)
     print(_format_tick_perf(median, p95, samples))
@@ -509,6 +649,9 @@ def main() -> int:
         failures.append("phi2_stage6_respawn_lineage")
 
     for label, fn in [
+        ("branch_faction_id_no_collision", test_branch_faction_id_no_collision),
+        ("grievance_lord_id_not_sticky", test_grievance_lord_id_not_sticky),
+        ("uprising_tick_no_artificial_injection", test_uprising_tick_no_artificial_injection),
         ("phi3_uprising_emerges_under_grievance_pressure", test_phi3_uprising_emerges_under_grievance_pressure),
         ("phi3_grievance_pairs_resonate", test_phi3_grievance_pairs_resonate),
         ("phi3_dom_share_natural_imbalance", test_phi3_dom_share_natural_imbalance),

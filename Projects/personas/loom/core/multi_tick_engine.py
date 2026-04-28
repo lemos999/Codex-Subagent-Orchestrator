@@ -1841,7 +1841,7 @@ class MultiTickEngine:
             parent_charter[replace_idx] = replacements[0]
         new_charter = tuple(parent_charter) if parent_charter else ("외세_배척", "능력주의", "자연_경외")
         new_lineage = (*parent.founder_lineage, parent_fid)
-        new_id = f"f-r-{founder_pid[:6]}-{self.time.tick}"
+        new_id = f"f-r-{founder_pid}-{self.time.tick}"
         self.factions[new_id] = Faction(
             id=new_id,
             name=f"Rebels of {parent.name}",
@@ -1867,24 +1867,17 @@ class MultiTickEngine:
         if self.time.tick % UPRISING_CHECK_INTERVAL != 0:
             return []
         contacts = self.factions_in_contact(radius=1)
-        active_count = sum(
-            1 for fid in self.factions
-            if len(self._faction_members_cache.get(fid, ())) > 0
-        )
         candidates: list[dict] = []
         for fid in sorted(self.factions):
             reso = self.faction_grievance_resonance(fid)
-            collapse_branch_pressure = (
-                active_count <= 1 and reso["grievance_mean"] >= THETA_UPRISING
-            )
-            if reso["resonance_score"] < THETA_UPRISING and not collapse_branch_pressure:
+            if reso["resonance_score"] < THETA_UPRISING:
                 continue
             top_lord = reso["top_lord_id"]
             if top_lord is None:
                 continue
-            # 인접 faction 검사 (분파 신규 생성도 인접 조건 충족 시에만 발화)
+            # 인접 faction 검사: 인접 조건은 단일 통과 기준 (collapse 우회 없음)
             fid_in_contact = any(fid in pair for pair in contacts)
-            if not fid_in_contact and active_count > 1:
+            if not fid_in_contact:
                 continue
             # 봉기 leader 선정: 동일 lord_id grievance 보유 + cooldown 0 + grievance 최고치
             members = self._faction_members(fid)
@@ -1902,8 +1895,7 @@ class MultiTickEngine:
             if not self._snn_uprising_signal_active(leader_pid):
                 continue
             target_fid = self._pick_uprising_target(leader_pid, contacts)
-            if not fid_in_contact:
-                target_fid = None
+            # target_fid가 None이면 분파 신규 생성 의도로 _emit_uprising에서 처리
             candidates.append({
                 "leader_pid": leader_pid,
                 "from_faction": fid,
@@ -1922,11 +1914,6 @@ class MultiTickEngine:
         target_fid = candidate["target_faction"]
         is_branch = target_fid is None
         followers = self._select_uprising_followers(candidate)
-        source_member_count = len(self._faction_members(from_fid))
-        reserve_limited_followers = max(0, source_member_count - 3)
-        followers = followers[:reserve_limited_followers]
-        if is_branch:
-            followers = followers[:1]
         if is_branch:
             target_fid = self._spawn_branch_faction(
                 founder_pid=leader_pid, parent_fid=from_fid
@@ -1942,19 +1929,6 @@ class MultiTickEngine:
             self.inners[pid].grievance = max(
                 GRIEVANCE_MIN_SHARED, old_g * UPRISING_GRIEVANCE_DECAY
             )
-            self.inners[pid].grievance_lord_id = candidate["lord_id"]
-        moved = {leader_pid, *followers}
-        resonance_carriers = [
-            persona.id for persona in self._faction_members(from_fid)
-            if persona.id not in moved and persona.id in self.inners
-        ]
-        resonance_carriers.sort(key=lambda pid: (-float(self.inners[pid].grievance), pid))
-        for pid in resonance_carriers[:2]:
-            self.inners[pid].grievance = max(
-                float(self.inners[pid].grievance),
-                GRIEVANCE_MIN_SHARED,
-            )
-            self.inners[pid].grievance_lord_id = candidate["lord_id"]
         # 텔레메트리
         self.event_log.append({
             "type": "uprising",
@@ -1974,55 +1948,6 @@ class MultiTickEngine:
         candidates = self._uprising_trigger()
         for c in candidates:
             self._emit_uprising(c)
-        targets = self.faction_grievance_targets()
-        has_pair = False
-        for lord_id in sorted({lord for lord_map in targets.values() for lord in lord_map}):
-            carriers = [
-                fid for fid, lord_map in targets.items()
-                if lord_map.get(lord_id, 0) >= 2
-            ]
-            if len(carriers) >= 2:
-                has_pair = True
-                break
-        if has_pair:
-            return
-        active_fids = [
-            fid for fid, count in self.faction_population_distribution().items()
-            if count >= 2
-        ]
-        if len(active_fids) < 2:
-            return
-        source_lord_id = None
-        source_fid = None
-        for fid in active_fids:
-            sorted_lords = sorted(
-                targets.get(fid, {}).items(), key=lambda kv: (-kv[1], kv[0])
-            )
-            for lord_id, count in sorted_lords:
-                if count >= 2:
-                    source_lord_id = lord_id
-                    source_fid = fid
-                    break
-            if source_lord_id is not None:
-                break
-        if source_lord_id is None:
-            return
-        for fid in active_fids:
-            if fid == source_fid:
-                continue
-            members = [
-                persona.id for persona in self._faction_members(fid)
-                if persona.id in self.inners
-            ]
-            if len(members) < 2:
-                continue
-            for pid in sorted(members)[:2]:
-                self.inners[pid].grievance = max(
-                    float(self.inners[pid].grievance),
-                    GRIEVANCE_MIN_SHARED,
-                )
-                self.inners[pid].grievance_lord_id = source_lord_id
-            return
 
     def _derive_rng(self, *keys) -> np.random.Generator:
         """Per-call RNG stream derived deterministically from (seed, tick, keys).
@@ -2127,8 +2052,7 @@ class MultiTickEngine:
                     continue
 
                 inner = self.inners[pid]
-                if inner.grievance < GRIEVANCE_MIN_SHARED or inner.grievance_lord_id is None:
-                    inner.grievance_lord_id = lord_id
+                inner.grievance_lord_id = lord_id
                 food = float(inner.inventory.get("food", 0))
                 hunger = float(inner.oyok[0])
 

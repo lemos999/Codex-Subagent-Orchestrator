@@ -123,10 +123,10 @@ def _spawn_branch_faction(
         # 교체 인덱스: tick 결정성 활용 (sorted 안정)
         replace_idx = self.time.tick % len(parent_charter)
         parent_charter[replace_idx] = replacements[0]
-    new_charter = tuple(parent_charter) if parent_charter else ("외세_배척",)
+    new_charter = tuple(parent_charter) if parent_charter else ("외세_배척", "능력주의", "자연_경외")
     # founder_lineage: 부모 lineage + 부모 fid 추가
     new_lineage = (*parent.founder_lineage, parent_fid)
-    new_id = f"f-r-{founder_pid[:6]}-{self.time.tick}"   # rebel branch ID
+    new_id = f"f-r-{founder_pid}-{self.time.tick}"        # rebel branch ID
     self.factions[new_id] = Faction(
         id=new_id,
         name=f"Rebels of {parent.name}",
@@ -152,10 +152,12 @@ def _spawn_branch_faction(
 - charter 변형: 부모 primitive 1개 교체. 12개 카탈로그 중 부모에 없는 첫 sorted primitive로 (결정성). 교체 인덱스는 `tick % len`으로 결정성 + 다양성 동시 확보
 - charter 길이 보존: Faction `__post_init__`이 [3,5] 검증 → 1개 교체로 길이 변동 0
 - charter 중복 검사: 교체 후에도 unique (replacements ⊂ NORM - parent set)
-- Edge case: `parent_charter` 비어 있을 수 없음 (Faction __post_init__이 보장). 안전장치로 `("외세_배척",)` 폴백 — 실제로는 도달 불가
+- Edge case: `parent_charter` 비어 있을 수 없음 (Faction __post_init__이 보장). 안전장치로 `("외세_배척", "능력주의", "자연_경외")` 폴백 — 실제로는 도달 불가
 - `founder_lineage`: Stage 6 H-lite 패턴. 분파 추적 + drift 감쇠 (Stage 6 W_LINEAGE=0.2 효과 자동 계승)
 - `grace_until_tick`: Stage 5 RESPAWN_GRACE_TICKS=200. 신생 분파가 즉시 모 faction에 재흡수되는 second-collapse 방지
 - ID 형식: `f-r-` prefix로 rebel branch 식별 가능
+- **ID 충돌 정정 (hotfix v1)**: `founder_pid[:6]`은 모든 페르소나가 같은 prefix를 가지면 충돌(예: `persona_001` ~ `persona_999`). 본 명세는 `founder_pid` 풀 ID 사용으로 정정.
+- **Charter 폴백 길이 정정 (hotfix v1)**: 폴백 `("외세_배척",)`(1개)은 `Faction.__post_init__` charter 길이 [3,5] 검증 위반. 안전장치로 3-primitive 폴백(실제 도달 불가, 검증 통과 보장)으로 정정.
 
 ---
 
