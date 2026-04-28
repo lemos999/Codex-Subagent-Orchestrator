@@ -18,6 +18,68 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+_SIMULATION_CACHE = {}
+
+
+def run_simulation(seed: int, ticks: int):
+    """Run and cache long deterministic acceptance simulations by seed/ticks."""
+    key = (seed, ticks)
+    if key not in _SIMULATION_CACHE:
+        from core.multi_tick_engine import MultiTickEngine
+
+        engine = MultiTickEngine(seed=seed)
+        for _ in range(ticks):
+            engine.tick()
+        _SIMULATION_CACHE[key] = engine
+    return _SIMULATION_CACHE[key]
+
+
+def _phi3_snapshot(seed: int = 42, ticks: int = 5000) -> bytes:
+    from core.multi_tick_engine import MultiTickEngine
+
+    engine = MultiTickEngine(seed=seed)
+    for _ in range(ticks):
+        engine.tick()
+    snapshot = {
+        "p_faction": {pid: engine.personas[pid].faction for pid in sorted(engine.personas)},
+        "p_cooldown": {pid: engine.personas[pid].faction_cooldown for pid in sorted(engine.personas)},
+        "i_aff": {pid: dict(engine.inners[pid].affiliation_scores) for pid in sorted(engine.inners)},
+        "i_grievance": {
+            pid: (
+                round(float(engine.inners[pid].grievance), 6),
+                engine.inners[pid].grievance_lord_id,
+            )
+            for pid in sorted(engine.inners)
+        },
+        "factions": {
+            fid: (
+                engine.factions[fid].founder_pid,
+                engine.factions[fid].grace_until_tick,
+                tuple(engine.factions[fid].charter),
+                tuple(engine.factions[fid].founder_lineage),
+            )
+            for fid in sorted(engine.factions)
+        },
+        "uprising_events": [
+            (
+                event.get("tick"),
+                event.get("leader_pid"),
+                event.get("from_faction"),
+                event.get("target_faction"),
+                event.get("branch"),
+                event.get("lord_id"),
+                event.get("members_count"),
+            )
+            for event in engine.event_log
+            if event.get("type") == "uprising"
+        ],
+        "t_ref": {tid: engine.territories[tid].factionRef for tid in sorted(engine.territories)},
+    }
+    return pickle.dumps(snapshot, protocol=4)
+
+
+def run_simulation_hash(seed: int, ticks: int) -> str:
+    return hashlib.sha256(_phi3_snapshot(seed=seed, ticks=ticks)).hexdigest()
 
 
 def _run(cmd: list[str], label: str) -> bool:
@@ -280,6 +342,87 @@ def test_phase17_phi2_stage6_respawn_lineage() -> None:
         )
 
 
+def test_phi3_uprising_emerges_under_grievance_pressure():
+    """Φ-3 acceptance #1: seed 7/13/42 5000틱 uprising_event ≥ 1 (3/3)."""
+    from ontology.layers import THETA_UPRISING
+
+    for seed in [7, 13, 42]:
+        engine = run_simulation(seed=seed, ticks=5000)
+        uprisings = [e for e in engine.event_log if e["type"] == "uprising"]
+        assert len(uprisings) >= 1, (
+            f"seed {seed}: 5000 ticks 내 uprising 0건. "
+            f"THETA_UPRISING={THETA_UPRISING} 또는 SNN_ANGER_FIRE_THRESHOLD 튜닝 필요"
+        )
+
+
+def test_phi3_grievance_pairs_resonate():
+    """Φ-3 acceptance #2: grievance_pairs_end ≥ 1 (3/3)."""
+    for seed in [7, 13, 42]:
+        engine = run_simulation(seed=seed, ticks=5000)
+        targets = engine.faction_grievance_targets()
+        # 같은 lord_id를 ≥ 2명씩 가진 faction 쌍 카운트
+        by_lord: dict[str, list[str]] = {}
+        for fid, lord_map in targets.items():
+            for lord_id, cnt in lord_map.items():
+                if cnt >= 2:
+                    by_lord.setdefault(lord_id, []).append(fid)
+        pair_count = sum(
+            len(fids) * (len(fids) - 1) // 2
+            for fids in by_lord.values() if len(fids) >= 2
+        )
+        assert pair_count >= 1, f"seed {seed}: grievance_pairs 0쌍"
+
+
+def test_phi3_dom_share_natural_imbalance():
+    """Φ-3 acceptance #3: dom_share_end ≥ 0.50 (3/3, OR-2 자연 충족)."""
+    for seed in [7, 13, 42]:
+        engine = run_simulation(seed=seed, ticks=5000)
+        pop = engine.faction_population_distribution()
+        if not pop:
+            assert False, f"seed {seed}: empty population"
+        total = sum(pop.values())
+        top = max(pop.values()) if pop else 0
+        share = top / total if total else 0.0
+        assert share >= 0.50, (
+            f"seed {seed}: dom_share={share:.3f} < 0.50. 봉기 후 멤버 재분포 부족"
+        )
+
+
+def test_phi3_no_deaths():
+    """Φ-3 무사망 보장: population_total 보존."""
+    for seed in [7, 13, 42]:
+        engine_start = run_simulation(seed=seed, ticks=1)
+        engine_end = run_simulation(seed=seed, ticks=5000)
+        assert sum(engine_end.faction_population_distribution().values()) >= sum(
+            engine_start.faction_population_distribution().values()
+        ) - 1   # ±1 허용 (Stage 3 anti-collapse 잔여 영향)
+
+
+def test_phi3_branch_lineage_chain():
+    """분파 신규 faction의 founder_lineage가 부모 fid 포함."""
+    for seed in [7, 13, 42]:
+        engine = run_simulation(seed=seed, ticks=5000)
+        branches = [
+            e for e in engine.event_log
+            if e["type"] == "faction_spawn" and e.get("source") == "uprising_branch"
+        ]
+        for b in branches:
+            new_fid = b["fid"]
+            parent_fid = b["parent_fid"]
+            new_faction = engine.factions[new_fid]
+            assert parent_fid in new_faction.founder_lineage, (
+                f"분파 {new_fid}의 founder_lineage에 부모 {parent_fid} 없음: "
+                f"{new_faction.founder_lineage}"
+            )
+
+
+def test_phi3_determinism_seed42():
+    """phi2_phi3_hash 결정성: seed=42 5000틱 2회 실행 hash 일치."""
+    h1 = run_simulation_hash(seed=42, ticks=5000)
+    h2 = run_simulation_hash(seed=42, ticks=5000)
+    assert h1 == h2, f"determinism break: {h1} vs {h2}"
+
+
 def test_phase17_phi2_perf_stage4() -> None:
     median, p95, samples = _measure_tick_ms_stable(seed=42)
     print(_format_tick_perf(median, p95, samples))
@@ -364,6 +507,21 @@ def main() -> int:
     except AssertionError as exc:
         print(f"[FAIL] phi2_stage6_respawn_lineage: {exc}")
         failures.append("phi2_stage6_respawn_lineage")
+
+    for label, fn in [
+        ("phi3_uprising_emerges_under_grievance_pressure", test_phi3_uprising_emerges_under_grievance_pressure),
+        ("phi3_grievance_pairs_resonate", test_phi3_grievance_pairs_resonate),
+        ("phi3_dom_share_natural_imbalance", test_phi3_dom_share_natural_imbalance),
+        ("phi3_no_deaths", test_phi3_no_deaths),
+        ("phi3_branch_lineage_chain", test_phi3_branch_lineage_chain),
+        ("phi3_determinism_seed42", test_phi3_determinism_seed42),
+    ]:
+        try:
+            fn()
+            print(f"[PASS] {label}")
+        except AssertionError as exc:
+            print(f"[FAIL] {label}: {exc}")
+            failures.append(label)
 
     print()
     if failures:

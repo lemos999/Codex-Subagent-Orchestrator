@@ -241,6 +241,15 @@ RESPAWN_GRACE_TICKS = 200
 # founder_lineage 공유 faction에 대한 소속 점수 가산. FactionChangeSource 4종 불변.
 W_LINEAGE = 0.2   # W_TRUST/W_TERRITORY_SAME(0.5)의 40% 수준
 
+# ── Phase 17 Φ-3 Struggle: 봉기 발화 (uprising) (2026-04-27) ──
+# 근거: Charter v2 Φ-3 진입 OR 측정에서 OR-3 grievance 0쌍 → Φ-3가 자연 발생시킬
+# faction-level 응결 + SNN 발화 + 멤버 재분포 mechanism. 신규 SNN 뉴런 0건.
+THETA_UPRISING = 0.40                # resonance_score 임계치 (max_lord_share × grievance_mean)
+UPRISING_CHECK_INTERVAL = 48         # 봉기 검사 주기 (FACTION_COOLDOWN_TICKS와 동일)
+UPRISING_GRIEVANCE_DECAY = 0.5       # 봉기 후 leader+followers grievance 감쇠 (try_exodus와 정합)
+UPRISING_FOLLOWER_MAX = 2            # 동조 멤버 최대 수 (leader + 2 = 최대 3명 이동)
+SNN_ANGER_FIRE_THRESHOLD = 0.6       # chiljeong[1] anger 발화 판정 (Phase 14-B 인프라)
+
 # 하위 호환 (기존 import 유지용, 실제 경로는 동적 계산이 우선)
 DRIFT_MARGIN = DRIFT_MARGIN_MIN  # deprecated: 동적 계산 사용
 W_TERRITORY = W_TERRITORY_SAME   # deprecated: same territory weight alias

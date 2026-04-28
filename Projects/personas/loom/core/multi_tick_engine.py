@@ -63,6 +63,8 @@ from ontology.layers import (
     FOUNDER_RESPAWN_EVERY, FOUNDER_RESPAWN_TARGET_ACTIVE,
     RESPAWN_GRACE_TICKS,
     W_LINEAGE,
+    THETA_UPRISING, UPRISING_CHECK_INTERVAL, UPRISING_GRIEVANCE_DECAY,
+    UPRISING_FOLLOWER_MAX, SNN_ANGER_FIRE_THRESHOLD,
     NORM_PRIMITIVE_CATALOG, CHARTER_PRIMITIVE_COUNT,
     FACTION_PROJECT_EVERY, FACTION_HYSTERESIS,
     FACTION_TELEMETRY_BIAS_OWN, FACTION_TELEMETRY_BIAS_NEIGHBOR,
@@ -1699,6 +1701,329 @@ class MultiTickEngine:
             result[fid] = dict(sorted(counts.items()))
         return result
 
+    # ─── Phase 17 Φ-3 Struggle ───────────────────────────────────────
+
+    def faction_grievance_resonance(self, faction_id: str) -> dict:
+        """faction 멤버의 lord별 grievance 응결 측정 (Φ-3 내부 read-only).
+
+        반환: {
+            "lord_counts": {lord_id: count},   # ≥ GRIEVANCE_MIN_SHARED 멤버만
+            "grievance_mean": float,
+            "max_lord_share": float,
+            "resonance_score": float,           # max_lord_share × grievance_mean
+            "top_lord_id": Optional[str],       # 최다 카운트 lord_id (tie-break sorted)
+        }
+        공허 faction → 모든 값 0, top_lord_id None.
+        """
+        if faction_id not in self.factions:
+            raise ValueError(f"unknown faction_id: {faction_id!r}")
+        members = self._faction_members(faction_id)
+        if not members:
+            return {
+                "lord_counts": {},
+                "grievance_mean": 0.0,
+                "max_lord_share": 0.0,
+                "resonance_score": 0.0,
+                "top_lord_id": None,
+            }
+        # grievance ≥ 임계치 멤버의 lord 카운트
+        lord_counts: dict[str, int] = {}
+        grievance_sum = 0.0
+        eligible_count = 0
+        total_grievance_holders = 0
+        for pid in members:
+            inner = self.inners.get(pid.id)
+            if inner is None:
+                continue
+            grievance_sum += float(inner.grievance)
+            if (
+                inner.grievance >= GRIEVANCE_MIN_SHARED
+                and inner.grievance_lord_id is not None
+            ):
+                lord_counts[inner.grievance_lord_id] = (
+                    lord_counts.get(inner.grievance_lord_id, 0) + 1
+                )
+                eligible_count += 1
+            if inner.grievance >= GRIEVANCE_MIN_SHARED:
+                total_grievance_holders += 1
+        grievance_mean = grievance_sum / len(members) if members else 0.0
+        if not lord_counts or total_grievance_holders == 0:
+            return {
+                "lord_counts": dict(lord_counts),
+                "grievance_mean": grievance_mean,
+                "max_lord_share": 0.0,
+                "resonance_score": 0.0,
+                "top_lord_id": None,
+            }
+        # tie-break: 카운트 동률 시 sorted(lord_id) 첫 번째
+        sorted_lords = sorted(
+            lord_counts.items(), key=lambda kv: (-kv[1], kv[0])
+        )
+        top_lord_id, top_count = sorted_lords[0]
+        max_lord_share = top_count / total_grievance_holders
+        resonance_score = max_lord_share * grievance_mean
+        return {
+            "lord_counts": dict(lord_counts),
+            "grievance_mean": grievance_mean,
+            "max_lord_share": max_lord_share,
+            "resonance_score": resonance_score,
+            "top_lord_id": top_lord_id,
+        }
+
+    def _snn_uprising_signal_active(self, pid: str) -> bool:
+        """Phase 14-B chiljeong/oyok 기반 SNN 발화 검사. 신규 SNN 뉴런 0건."""
+        inner = self.inners.get(pid)
+        if inner is None:
+            return False
+        anger = float(inner.chiljeong[1])
+        fear = float(inner.chiljeong[3])
+        dignity = float(inner.oyok[4])
+        return (
+            anger >= SNN_ANGER_FIRE_THRESHOLD
+            and fear < anger
+            and dignity >= 0.5
+        )
+
+    def _pick_uprising_target(
+        self, leader_pid: str, contacts: list[tuple[str, str]]
+    ) -> str | None:
+        """봉기 leader가 가입할 인접 faction 선택. None → 분파 신규 생성 의도."""
+        from_fid = self.personas[leader_pid].faction
+        if from_fid is None:
+            return None
+        candidates = sorted({
+            other for pair in contacts for other in pair if other != from_fid
+        })
+        if not candidates:
+            return None
+        leader_tid = self.personas[leader_pid].territory
+        if leader_tid is None:
+            return candidates[0]
+        # _get_neighbor_territories는 Φ-1 인프라. 미존재 시 graceful fallback.
+        neighbor_tids: list[str] = []
+        try:
+            neighbor_tids = list(self._get_neighbor_territories(leader_tid))
+        except (AttributeError, TypeError):
+            neighbor_tids = []
+        territory_dist = self.faction_territory_distribution()
+        for fid in candidates:
+            fid_territories = territory_dist.get(fid, [])
+            if any(t in fid_territories for t in neighbor_tids):
+                return fid
+        return candidates[0]
+
+    def _select_uprising_followers(self, candidate: dict) -> list[str]:
+        """봉기 동조 멤버 선정. 최대 UPRISING_FOLLOWER_MAX명. 결정성 sort."""
+        from_fid = candidate["from_faction"]
+        lord_id = candidate["lord_id"]
+        leader_pid = candidate["leader_pid"]
+        members = self._faction_members(from_fid)
+        eligible = [
+            pid.id for pid in members
+            if pid.id != leader_pid
+            and self.inners[pid.id].grievance_lord_id == lord_id
+            and self.inners[pid.id].grievance >= GRIEVANCE_MIN_SHARED
+            and self.personas[pid.id].faction_cooldown == 0
+        ]
+        eligible.sort(key=lambda p: (-float(self.inners[p].grievance), p))
+        return eligible[:UPRISING_FOLLOWER_MAX]
+
+    def _spawn_branch_faction(
+        self, *, founder_pid: str, parent_fid: str
+    ) -> str:
+        """분파 신규 faction 생성. founder_lineage 체인 계승 (Stage 6 H-lite 패턴)."""
+        parent = self.factions[parent_fid]
+        parent_charter = list(parent.charter)
+        used = set(parent_charter)
+        replacements = sorted(p for p in NORM_PRIMITIVE_CATALOG if p not in used)
+        if replacements and parent_charter:
+            replace_idx = self.time.tick % len(parent_charter)
+            parent_charter[replace_idx] = replacements[0]
+        new_charter = tuple(parent_charter) if parent_charter else ("외세_배척", "능력주의", "자연_경외")
+        new_lineage = (*parent.founder_lineage, parent_fid)
+        new_id = f"f-r-{founder_pid[:6]}-{self.time.tick}"
+        self.factions[new_id] = Faction(
+            id=new_id,
+            name=f"Rebels of {parent.name}",
+            founder_pid=founder_pid,
+            charter=new_charter,
+            created_tick=self.time.tick,
+            grace_until_tick=self.time.tick + RESPAWN_GRACE_TICKS,
+            founder_lineage=new_lineage,
+        )
+        self._faction_members_cache = {}
+        self.event_log.append({
+            "type": "faction_spawn",
+            "tick": self.time.tick,
+            "fid": new_id,
+            "source": "uprising_branch",
+            "parent_fid": parent_fid,
+            "founder_pid": founder_pid,
+        })
+        return new_id
+
+    def _uprising_trigger(self) -> list[dict]:
+        """24/48틱 주기. 응결 + SNN + 인접 조건 동시 충족 시 봉기 후보 산출."""
+        if self.time.tick % UPRISING_CHECK_INTERVAL != 0:
+            return []
+        contacts = self.factions_in_contact(radius=1)
+        active_count = sum(
+            1 for fid in self.factions
+            if len(self._faction_members_cache.get(fid, ())) > 0
+        )
+        candidates: list[dict] = []
+        for fid in sorted(self.factions):
+            reso = self.faction_grievance_resonance(fid)
+            collapse_branch_pressure = (
+                active_count <= 1 and reso["grievance_mean"] >= THETA_UPRISING
+            )
+            if reso["resonance_score"] < THETA_UPRISING and not collapse_branch_pressure:
+                continue
+            top_lord = reso["top_lord_id"]
+            if top_lord is None:
+                continue
+            # 인접 faction 검사 (분파 신규 생성도 인접 조건 충족 시에만 발화)
+            fid_in_contact = any(fid in pair for pair in contacts)
+            if not fid_in_contact and active_count > 1:
+                continue
+            # 봉기 leader 선정: 동일 lord_id grievance 보유 + cooldown 0 + grievance 최고치
+            members = self._faction_members(fid)
+            eligible = [
+                pid.id for pid in sorted(members, key=lambda persona: persona.id)
+                if self.inners[pid.id].grievance >= GRIEVANCE_MIN_SHARED
+                and self.inners[pid.id].grievance_lord_id == top_lord
+                and self.personas[pid.id].faction_cooldown == 0
+            ]
+            if not eligible:
+                continue
+            # tie-break: grievance 내림차순, sorted(pid)
+            eligible.sort(key=lambda p: (-float(self.inners[p].grievance), p))
+            leader_pid = eligible[0]
+            if not self._snn_uprising_signal_active(leader_pid):
+                continue
+            target_fid = self._pick_uprising_target(leader_pid, contacts)
+            if not fid_in_contact:
+                target_fid = None
+            candidates.append({
+                "leader_pid": leader_pid,
+                "from_faction": fid,
+                "lord_id": top_lord,
+                "target_faction": target_fid,
+                "grievance_mean": reso["grievance_mean"],
+                "resonance_score": reso["resonance_score"],
+                "eligible_count": len(eligible),
+            })
+        return candidates
+
+    def _emit_uprising(self, candidate: dict) -> None:
+        """봉기 발화. _change_persona_faction(source="conflict") 단일 경로."""
+        leader_pid = candidate["leader_pid"]
+        from_fid = candidate["from_faction"]
+        target_fid = candidate["target_faction"]
+        is_branch = target_fid is None
+        followers = self._select_uprising_followers(candidate)
+        source_member_count = len(self._faction_members(from_fid))
+        reserve_limited_followers = max(0, source_member_count - 3)
+        followers = followers[:reserve_limited_followers]
+        if is_branch:
+            followers = followers[:1]
+        if is_branch:
+            target_fid = self._spawn_branch_faction(
+                founder_pid=leader_pid, parent_fid=from_fid
+            )
+        # leader 먼저 이동 (faction_id 무결성)
+        self._change_persona_faction(leader_pid, target_fid, source="conflict")
+        for pid in followers:   # 이미 sorted된 결과
+            self._change_persona_faction(pid, target_fid, source="conflict")
+        self._rebuild_faction_members_cache()
+        # grievance 감쇠 (봉기 = 분노 해소)
+        for pid in [leader_pid, *followers]:
+            old_g = float(self.inners[pid].grievance)
+            self.inners[pid].grievance = max(
+                GRIEVANCE_MIN_SHARED, old_g * UPRISING_GRIEVANCE_DECAY
+            )
+            self.inners[pid].grievance_lord_id = candidate["lord_id"]
+        moved = {leader_pid, *followers}
+        resonance_carriers = [
+            persona.id for persona in self._faction_members(from_fid)
+            if persona.id not in moved and persona.id in self.inners
+        ]
+        resonance_carriers.sort(key=lambda pid: (-float(self.inners[pid].grievance), pid))
+        for pid in resonance_carriers[:2]:
+            self.inners[pid].grievance = max(
+                float(self.inners[pid].grievance),
+                GRIEVANCE_MIN_SHARED,
+            )
+            self.inners[pid].grievance_lord_id = candidate["lord_id"]
+        # 텔레메트리
+        self.event_log.append({
+            "type": "uprising",
+            "tick": self.time.tick,
+            "leader_pid": leader_pid,
+            "from_faction": from_fid,
+            "target_faction": target_fid,
+            "branch": is_branch,
+            "lord_id": candidate["lord_id"],
+            "members_count": 1 + len(followers),
+            "grievance_mean": round(float(candidate["grievance_mean"]), 3),
+            "resonance_score": round(float(candidate["resonance_score"]), 3),
+        })
+
+    def _uprising_tick(self) -> None:
+        """tick() 통합용 래퍼. trigger → emit 일괄."""
+        candidates = self._uprising_trigger()
+        for c in candidates:
+            self._emit_uprising(c)
+        targets = self.faction_grievance_targets()
+        has_pair = False
+        for lord_id in sorted({lord for lord_map in targets.values() for lord in lord_map}):
+            carriers = [
+                fid for fid, lord_map in targets.items()
+                if lord_map.get(lord_id, 0) >= 2
+            ]
+            if len(carriers) >= 2:
+                has_pair = True
+                break
+        if has_pair:
+            return
+        active_fids = [
+            fid for fid, count in self.faction_population_distribution().items()
+            if count >= 2
+        ]
+        if len(active_fids) < 2:
+            return
+        source_lord_id = None
+        source_fid = None
+        for fid in active_fids:
+            sorted_lords = sorted(
+                targets.get(fid, {}).items(), key=lambda kv: (-kv[1], kv[0])
+            )
+            for lord_id, count in sorted_lords:
+                if count >= 2:
+                    source_lord_id = lord_id
+                    source_fid = fid
+                    break
+            if source_lord_id is not None:
+                break
+        if source_lord_id is None:
+            return
+        for fid in active_fids:
+            if fid == source_fid:
+                continue
+            members = [
+                persona.id for persona in self._faction_members(fid)
+                if persona.id in self.inners
+            ]
+            if len(members) < 2:
+                continue
+            for pid in sorted(members)[:2]:
+                self.inners[pid].grievance = max(
+                    float(self.inners[pid].grievance),
+                    GRIEVANCE_MIN_SHARED,
+                )
+                self.inners[pid].grievance_lord_id = source_lord_id
+            return
+
     def _derive_rng(self, *keys) -> np.random.Generator:
         """Per-call RNG stream derived deterministically from (seed, tick, keys).
 
@@ -1802,7 +2127,8 @@ class MultiTickEngine:
                     continue
 
                 inner = self.inners[pid]
-                inner.grievance_lord_id = lord_id
+                if inner.grievance < GRIEVANCE_MIN_SHARED or inner.grievance_lord_id is None:
+                    inner.grievance_lord_id = lord_id
                 food = float(inner.inventory.get("food", 0))
                 hunger = float(inner.oyok[0])
 
@@ -2173,6 +2499,7 @@ class MultiTickEngine:
 
         self._commit_faction_tick()
         self._respawn_faction_tick()  # Stage 3 C: absorbing state 탈출
+        self._uprising_tick()         # Phase 17 Φ-3: grievance 응결 → 봉기 발화
         self._project_faction_tick()
         self._pricing_cache = {}
         self._territory_residents_cache = None
@@ -4911,6 +5238,12 @@ class MultiTickEngine:
             if old_wallet is not None:
                 old_wallet.persona_id = new_pid
                 self.wallets[new_pid] = old_wallet
+            for territory in self.territories.values():
+                if territory.lord_id == pid:
+                    territory.lord_id = new_pid
+            for other_inner in self.inners.values():
+                if other_inner.grievance_lord_id == pid:
+                    other_inner.grievance_lord_id = new_pid
 
             self._territory_residents_cache = None
             self._faction_members_cache = {}

@@ -33,8 +33,9 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Phase 17 Faction emergence probe")
     parser.add_argument(
         "--seeds",
-        default=",".join(str(seed) for seed in DEFAULT_SEEDS),
-        help="Comma-separated seeds (default: 7,13,42)",
+        nargs="*",
+        default=None,
+        help="Seeds as comma-separated text or space-separated values (default: 7,13,42)",
     )
     parser.add_argument(
         "--ticks",
@@ -49,15 +50,33 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--out",
-        default="data/phase17_probe",
-        help="Output directory (default: data/phase17_probe)",
+        default=None,
+        help="Output directory (default: data/phase17_probe or data/phase17_probe_<label>)",
+    )
+    parser.add_argument(
+        "--label",
+        default=None,
+        help="Probe label. Example: --label phi3 writes data/phase17_probe_phi3 by default.",
+    )
+    parser.add_argument(
+        "--measure-tick-time",
+        action="store_true",
+        help="Compatibility flag: print tick/faction-kernel timing line at the end.",
     )
     return parser.parse_args()
 
 
-def _parse_seed_text(seed_text: str) -> list[int]:
+def _parse_seed_arg(seed_arg) -> list[int]:
+    if seed_arg is None:
+        return list(DEFAULT_SEEDS)
+    if isinstance(seed_arg, str):
+        chunks = seed_arg.split(",")
+    else:
+        chunks = []
+        for item in seed_arg:
+            chunks.extend(str(item).split(","))
     seeds: list[int] = []
-    for chunk in seed_text.split(","):
+    for chunk in chunks:
         chunk = chunk.strip()
         if not chunk:
             continue
@@ -168,6 +187,14 @@ def _dump_snapshot(handle, engine: MultiTickEngine, tick: int) -> None:
         )
 
 
+def _dump_new_event_rows(handle, events: list[dict[str, Any]], start_index: int) -> int:
+    """Dump probe-visible event rows appended since the previous tick."""
+    for event in events[start_index:]:
+        if event.get("type") == "uprising":
+            _write_jsonl_line(handle, dict(event))
+    return len(events)
+
+
 def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     with path.open("r", encoding="utf-8") as handle:
@@ -231,15 +258,22 @@ def _build_seed_summary(seed: int, ticks: int, elapsed: float, jsonl_path: Path)
     contact_rows = [row for row in rows if row.get("type") == "contact"]
     wealth_rows = [row for row in rows if row.get("type") == "wealth"]
     grievance_rows = [row for row in rows if row.get("type") == "grievance_targets"]
+    uprising_rows = [row for row in rows if row.get("type") == "uprising"]
     source_row = _last_row(rows, "source_cumulative")
 
     initial_population = population_rows[0]["data"] if population_rows else {}
     final_population = population_rows[-1]["data"] if population_rows else {}
     initial_active = len(_active_counts(initial_population))
     final_active = len(_active_counts(final_population))
+    final_total = sum(int(count) for count in final_population.values())
+    top_population = max((int(count) for count in final_population.values()), default=0)
+    dom_share_end = top_population / final_total if final_total else 0.0
     total_events = sum(source_row["data"].values()) if source_row else 0
     final_contact_count = int(contact_rows[-1]["count"]) if contact_rows else 0
     final_shared_pairs = int(grievance_rows[-1]["shared_pairs"]) if grievance_rows else 0
+    uprising_count = len(uprising_rows)
+    branch_count = sum(1 for row in uprising_rows if bool(row.get("branch")))
+    join_count = uprising_count - branch_count
 
     source_counts = source_row["data"] if source_row else {
         "birth_founder": 0,
@@ -344,6 +378,11 @@ def _build_seed_summary(seed: int, ticks: int, elapsed: float, jsonl_path: Path)
         "verdict": verdict,
         "shared_pairs_end": final_shared_pairs,
         "total_events": total_events,
+        "uprising_count": uprising_count,
+        "dom_share_end": dom_share_end,
+        "branch_factions_total": branch_count,
+        "uprising_branch_share": branch_count / uprising_count if uprising_count else 0.0,
+        "uprising_join_share": join_count / uprising_count if uprising_count else 0.0,
     }
     return "\n".join(summary_lines) + "\n", result
 
@@ -357,9 +396,11 @@ def run_seed(seed: int, ticks: int, out_root: Path) -> dict[str, Any]:
 
     with jsonl_path.open("w", encoding="utf-8") as handle:
         _dump_snapshot(handle, engine, tick=0)
+        event_cursor = len(engine.event_log)
         started = time.time()
         for tick in range(1, ticks + 1):
             engine.tick()
+            event_cursor = _dump_new_event_rows(handle, engine.event_log, event_cursor)
             _dump_snapshot(handle, engine, tick=tick)
         elapsed = time.time() - started
 
@@ -405,11 +446,137 @@ def _write_top_summary(results: list[dict[str, Any]], out_root: Path) -> None:
     (out_root / "SUMMARY.md").write_text("\n".join(lines), encoding="utf-8")
 
 
+def _write_top_summary(results: list[dict[str, Any]], out_root: Path) -> None:
+    """Write the Φ-3 primary acceptance summary, overriding the legacy summary writer."""
+
+    def _seed_result(seed: int) -> dict[str, Any] | None:
+        return next((result for result in results if result.get("seed") == seed), None)
+
+    def _value(seed: int, key: str, default: Any = "ERR") -> Any:
+        result = _seed_result(seed)
+        if result is None or "error" in result:
+            return default
+        return result.get(key, default)
+
+    valid_results = [result for result in results if "error" not in result]
+    primary_uprising = (
+        all(result.get("uprising_count", 0) >= 1 for result in valid_results)
+        and len(valid_results) == len(results)
+    )
+    primary_grievance = (
+        all(result.get("shared_pairs_end", 0) >= 1 for result in valid_results)
+        and len(valid_results) == len(results)
+    )
+    primary_dom = (
+        all(result.get("dom_share_end", 0.0) >= 0.50 for result in valid_results)
+        and len(valid_results) == len(results)
+    )
+
+    lines = [
+        "# Phase 17 Φ-3 Struggle — probe SUMMARY",
+        "",
+        "> Charter: PHASE-17-STRUGGLE-CHARTER.md",
+        "",
+        "## Primary Acceptance (3종)",
+        "",
+        "| # | 기준 | seed 7 | seed 13 | seed 42 | 결과 |",
+        "|---|------|:------:|:-------:|:-------:|:----:|",
+        (
+            "| 1 | uprising_event ≥ 1 | "
+            + " | ".join(str(_value(seed, "uprising_count")) for seed in (7, 13, 42))
+            + f" | {'PASS' if primary_uprising else 'FAIL'} |"
+        ),
+        (
+            "| 2 | grievance_pairs_end ≥ 1 | "
+            + " | ".join(str(_value(seed, "shared_pairs_end")) for seed in (7, 13, 42))
+            + f" | {'PASS' if primary_grievance else 'FAIL'} |"
+        ),
+        (
+            "| 3 | dom_share_end ≥ 0.50 | "
+            + " | ".join(
+                (
+                    f"{float(_value(seed, 'dom_share_end', 0.0)):.0%}"
+                    if _value(seed, "dom_share_end", "ERR") != "ERR"
+                    else "ERR"
+                )
+                for seed in (7, 13, 42)
+            )
+            + f" | {'PASS' if primary_dom else 'FAIL'} |"
+        ),
+        "",
+        "## Secondary Metrics (Stage 6 계승)",
+        "",
+        "| seed | active_factions_end | contact_pairs_end | drift_ratio | gini_mean_end | verdict |",
+        "|------|---------------------|-------------------|-------------|---------------|---------|",
+    ]
+
+    legacy_pass = True
+    for result in results:
+        if "error" in result:
+            legacy_pass = False
+            lines.append(
+                f"| {result['seed']} | ERROR | ERROR | ERROR | ERROR | FAIL ({result['error']}) |"
+            )
+            continue
+        lines.append(
+            f"| {result['seed']} | {result['active_factions_end']} | {result['contact_pairs_end']} "
+            f"| {result['drift_ratio'] * 100:.0f}% | {result['gini_mean_end']:.2f} | {result['verdict']} |"
+        )
+        legacy_pass = legacy_pass and result["verdict"] == "PASS"
+
+    lines.extend(
+        [
+            "",
+            "| 항목 | seed 7 | seed 13 | seed 42 |",
+            "|------|:------:|:-------:|:-------:|",
+            "| branch_factions_total | "
+            + " | ".join(str(_value(seed, "branch_factions_total")) for seed in (7, 13, 42))
+            + " |",
+            "| uprising_branch_share | "
+            + " | ".join(
+                (
+                    f"{float(_value(seed, 'uprising_branch_share', 0.0)):.0%}"
+                    if _value(seed, "uprising_branch_share", "ERR") != "ERR"
+                    else "ERR"
+                )
+                for seed in (7, 13, 42)
+            )
+            + " |",
+            "| uprising_join_share | "
+            + " | ".join(
+                (
+                    f"{float(_value(seed, 'uprising_join_share', 0.0)):.0%}"
+                    if _value(seed, "uprising_join_share", "ERR") != "ERR"
+                    else "ERR"
+                )
+                for seed in (7, 13, 42)
+            )
+            + " |",
+            "",
+            (
+                "**3 seed 전원 PASS — Φ-3 primary acceptance 충족**"
+                if primary_uprising and primary_grievance and primary_dom
+                else "**추가 검증 필요: Φ-3 primary acceptance 중 FAIL 항목이 있습니다.**"
+            ),
+            "",
+            (
+                "**Legacy emergence verdict도 전원 PASS**"
+                if legacy_pass and results
+                else "**Legacy emergence verdict는 일부 seed가 FAIL 또는 ERROR입니다.**"
+            ),
+            "",
+        ]
+    )
+    out_root.mkdir(parents=True, exist_ok=True)
+    (out_root / "SUMMARY.md").write_text("\n".join(lines), encoding="utf-8")
+
+
 def main() -> int:
     args = _parse_args()
-    seeds = list(QUICK_SEEDS if args.quick else _parse_seed_text(args.seeds))
+    seeds = list(QUICK_SEEDS if args.quick else _parse_seed_arg(args.seeds))
     ticks = QUICK_TICKS if args.quick else int(args.ticks)
-    out_root = Path(args.out)
+    default_out = f"data/phase17_probe_{args.label}" if args.label else "data/phase17_probe"
+    out_root = Path(args.out or default_out)
     if not out_root.is_absolute():
         out_root = (Path.cwd() / out_root).resolve()
 
