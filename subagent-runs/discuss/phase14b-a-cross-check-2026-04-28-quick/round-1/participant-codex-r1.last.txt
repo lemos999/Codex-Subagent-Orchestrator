@@ -1,0 +1,1 @@
+[POSITION: axis A는 도메인 인과는 있으나 현재 상수형 hard gate는 보정 PASS 위험이 커서 계측 실험 후 승격해야 한다]

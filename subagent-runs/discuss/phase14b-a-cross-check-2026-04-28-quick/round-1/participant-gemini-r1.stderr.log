@@ -1,0 +1,17 @@
+Warning: True color (24-bit) support not detected. Using a terminal with true color enabled will result in a better visual experience.
+YOLO mode is enabled. All tool calls will be automatically approved.
+YOLO mode is enabled. All tool calls will be automatically approved.
+Error when talking to Gemini API Full report available at: C:\Users\haj\AppData\Local\Temp\gemini-client-error-Turn.run-sendMessageStream-2026-04-28T14-42-49-292Z.json ModelNotFoundError: Requested entity was not found.
+    at classifyGoogleError (file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/chunk-UIBQS45C.js:274655:12)
+    at retryWithBackoff (file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/chunk-UIBQS45C.js:275324:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async GeminiChat.makeApiCallAndProcessStream (file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/chunk-UIBQS45C.js:312614:28)
+    at async GeminiChat.streamWithRetries (file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/chunk-UIBQS45C.js:312452:29)
+    at async Turn.run (file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/chunk-UIBQS45C.js:312945:24)
+    at async GeminiClient.processTurn (file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/chunk-UIBQS45C.js:323362:22)
+    at async GeminiClient.sendMessageStream (file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/chunk-UIBQS45C.js:323475:14)
+    at async file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/gemini-JN2NUSDI.js:10213:26
+    at async main (file:///C:/Users/haj/AppData/Roaming/npm/node_modules/@google/gemini-cli/bundle/gemini-JN2NUSDI.js:15258:5) {
+  code: 404
+}
+An unexpected critical error occurred:[object Object]

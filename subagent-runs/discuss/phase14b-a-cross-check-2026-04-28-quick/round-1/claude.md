@@ -1,0 +1,38 @@
+## 형식논리 엄격파 분석 — axis A spec
+
+### Position
+axis A는 Phase 17 hotfix v1이 제거한 거짓 보정 5건과 **구조적으로 동형**이다. SNN 뉴런을 게이트로 재포장했을 뿐, "acceptance #2 PASS를 역공학한 조건 삽입"이라는 본질은 동일하다.
+
+---
+
+### Reasoning
+
+**Q1 — SNN 창발 정합성: 부정합**
+
+`chiljeong[1] fire_rate ≥ 0.5` 조건은 SNN 출력을 *판독*하는 것처럼 보이지만, 그 게이트가 존재하는 이유가 "affiliation을 막아야 하기 때문"이다. 창발 설계에서 SNN은 원인이어야 하고, 분기 조건은 결과여야 한다. 여기서는 반대 — 분기 목적이 선행하고 SNN이 정당화 도구로 호출된다. 임계 0.5는 어떤 창발적 관측에서도 도출되지 않았으며 임의값이다.
+
+**Q2 — 거짓 PASS 패턴 잠복: 동일 패턴**
+
+제거된 `collapse_branch_pressure`와 비교하면: 둘 다 (a) acceptance 미달 상태 식별 → (b) 그 상태를 막는 조건 삽입 → (c) 자연 현상처럼 포장. axis A의 dampen 0.6은 `follower_reserve` sticky와 동일하게 "특정 경로를 인위적으로 좁혀" 결과를 유도한다. 이름만 "anger gate"로 바뀐 것이다.
+
+**Q3 — 인과 사슬 자연성: 역공학**
+
+"anger → dampen → active_factions ≥ 2 → pair 응결"은 각 단계가 독립 검증된 mechanism에서 나오지 않았다. acceptance #2 = 0을 역산해서 필요 조건을 나열한 뒤 SNN으로 연결한 구조다. 진정한 인과라면 "anger gate 없이도 dampen이 다른 문제를 해결하고 있어야" 한다 — 그런 독립적 근거가 없다.
+
+---
+
+### Concerns
+
+- 상수 2개(`DAMPEN=0.6`, `GATE=0.5`)가 미래 Phase에서 "마법 숫자"로 경화될 위험
+- Case C 문제의 **실제 근본**(Phase 14 후기 tick에서 active_factions collapse 원인)을 덮어버림
+
+---
+
+### Recommendation
+
+axis A 기각. 대안 우선순위:
+1. **근본 추적**: 후기 tick에서 active_factions=1 collapse가 발생하는 코드 경로 직접 진단
+2. **territory cross-propagation 강화**: lord_id propagation이 후기 tick에도 유지되는지 검증 (Phase 14 mechanism 내부 수정)
+3. axis A는 진단 결과가 나온 뒤 필요 시 재평가
+
+[POSITION: axis A는 거짓 PASS 역공학 — SNN 게이트 포장과 무관하게 hotfix v1 제거 패턴과 동형, 기각 권고]

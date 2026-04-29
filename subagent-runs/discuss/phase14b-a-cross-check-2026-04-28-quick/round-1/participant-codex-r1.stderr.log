@@ -1,0 +1,299 @@
+Reading prompt from stdin...
+OpenAI Codex v0.125.0 (research preview)
+--------
+workdir: C:\Users\haj\projects\subagent-orchestrator
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR, C:\Users\haj\.codex\memories]
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019dd48a-bec1-7073-918d-5ea6510d098a
+--------
+user
+Note: This prompt contains non-ASCII characters (Korean/CJK). If file content appears garbled, the file is UTF-8 encoded Korean text.
+
+PERMISSION: READ-ONLY. Do NOT create, modify, or delete any files.
+## Discussion Topic
+Phase 14B-A axis A spec 외부 엔진 cross-check (1라운드 quick).
+
+## 컨텍스트
+
+loom 프로젝트는 자율 사회 시뮬 + SNN 창발 + PersonaBrain 논문 출판이 3계층 목표. 현재 Phase 17 Φ-3 Struggle 단계. Φ-3 acceptance 3종 중 #2 (grievance_pairs_end ≥ 1)가 자연 측정에서 0/0/0으로 FAIL (Case C). 진단: Phase 14 propagation은 작동(중간 tick pair=1)했으나 후기 active_factions=1 collapse로 cross-faction pair 소멸.
+
+## axis A 제안 (검토 대상)
+
+_compute_affiliation_tick (line 1207~1256)에 dampen 블록 8줄 추가:
+- 페르소나의 grievance_lord_id가 후보 faction의 lord 집합에 포함
+- AND SNN anger 뉴런 chiljeong[1] fire_rate ≥ SNN_ANGER_AFFILIATION_GATE (=0.5)
+- AND grievance_count ≥ MIN_SHARED_GRIEVANCE_COUNT (=2, 기존 상수)
+- → score *= GRIEVANCE_LORD_FACTION_DAMPEN (=0.6)
+
+신규 상수 2개: GRIEVANCE_LORD_FACTION_DAMPEN=0.6, SNN_ANGER_AFFILIATION_GATE=0.5
+
+인과 가설: anger fire 페르소나가 자기 grievance 대상 lord faction에 affiliation dampen → 흡수 회피 → active_factions ≥ 2 유지 → cross-faction pair 응결 가능 → acceptance #2 자연 PASS
+
+## 검토 질문 (3가지)
+
+1. **SNN 창발 정신 정합성**: SNN anger 뉴런(chiljeong[1])을 자연 게이트로 활용하는 설계가 "규칙 < 창발" 원칙에 정합하는가? 아니면 또 다른 규칙 강제(threshold 기반 분기)인가? 게이트 임계 0.5는 정당화 가능한가?
+
+2. **거짓 PASS 패턴 잠복 위험**: dampen 0.6 값이 acceptance #2를 "자연 PASS"시키는 게 아니라 "강제 PASS"시키는 인공 보정 아닌가? Phase 17 hotfix v1에서 제거된 5건의 거짓 보정(collapse_branch_pressure, follower reserve, resonance carrier sticky, artificial grievance pair injection, sticky lord_id guard)과 본질적으로 다른가, 아니면 동일 패턴인가?
+
+3. **인과 사슬 자연성**: 위 인과 가설(anger gate → dampen → active_factions 유지 → pair 응결)이 자연 mechanism의 연쇄로 보이는가, 아니면 "acceptance #2를 풀기 위해 거꾸로 설계된" 역공학 인과인가? 필요 시 axis A 외 다른 차원(예: territory cross-propagation 강화, MIN_SHARED_GRIEVANCE_COUNT 조정, 다른 SNN 뉴런 활용)이 더 자연스러운가?
+
+## 응답 형식
+
+각 질문에 대해 결론(정합/위험/대안) + 근거 1-2문장. 모호한 합의보다 명확한 이견을 더 가치 있게 평가. 본인의 엔진 강점(Claude=정밀 검증, Codex=구현 가능성, Gemini=확장성·창발) 관점 명시.
+
+## Your Persona
+You are: **실행가능성 현실주의자**
+Stay in character throughout your response. Speak from this persona's perspective and expertise.
+
+## Your Role
+You are analyzing this topic from the perspective of: **구현 가능성·코드 영향 관점**
+
+
+## Instructions
+Provide your analysis. Structure your response:
+1. **Position**: your main argument
+2. **Reasoning**: supporting evidence
+3. **Concerns**: potential risks or downsides
+4. **Recommendation**: your suggested approach
+
+IMPORTANT: End your response with EXACTLY ONE of these labels on its own line:
+[POSITION: one-line summary of your stance]
+
+Keep response under 40 lines.
+
+---
+RESPONSE LIMIT: Keep your response under 30 lines.
+RESPONSE STYLE: Be concise. No explanations unless asked. Code and results only.
+
+codex
+Read-only로 진행합니다. 세션 규칙의 상태 파일은 읽되, WKI 인덱싱은 `.knowledge` 갱신 가능성이 있어 실행하지 않겠습니다.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -LiteralPath .\\project-status\\current.md" in C:\Users\haj\projects\subagent-orchestrator
+ succeeded in 885ms:
+# Project Status ??Current
+
+> ???뚯씪? 紐⑤뱺 AI ?붿쭊(Claude, Codex/GPT, Gemini)??李몄“?⑸땲??
+> ???대뜑?먯꽌 ?묒뾽?섎뒗 AI?????뚯씪???쎄퀬 ?꾩옱 ?곹깭瑜??뚯븙?섏꽭??
+> ?꾨즺 湲곕줉? project-status/2026-Q2.md??吏곸젒 異붽??쒕떎.
+> current.md?먮뒗 ?꾨즺 ?대젰??湲곕줉?섏? ?딅뒗??
+> ???꾨즺 ?대젰: project-status/2026-Q2.md
+
+---
+
+## Project: Subagent Orchestrator
+
+硫??AI ?붿쭊(Claude, Codex/GPT, Gemini)??議곗쑉?섎뒗 ?ㅼ??ㅽ듃?덉씠???쒖뒪??
+
+## ?듭떖 援ъ꽦 ?붿냼
+
+| 援ъ꽦 ?붿냼 | ?곹깭 | 寃쎈줈 |
+|---|---|---|
+| TS ?곗쿂 (primary) | ?꾨즺 | `packages/launcher/` |
+| PS ?곗쿂 (legacy fallback) | ?좎? | `skills/codex-subagent-orchestrator/scripts/` |
+| WKI (Workspace Knowledge Index) | ?꾨즺 | `workspace-knowledge-index/` |
+| Claude ?ㅼ??ㅽ듃?덉씠??(/sub) | ?꾨즺 | `skills/claude-subagent-orchestrator/` |
+| 硫?곗뿏吏??ㅼ??ㅽ듃?덉씠??(/submix) | ?꾨즺 | `.claude/skills/submix/` |
+| Gemini ?ㅼ??ㅽ듃?덉씠??| ?꾨즺 | `skills/gemini-subagent-orchestrator/` |
+| Codex ?ㅼ??ㅽ듃?덉씠??| ?꾨즺 | `skills/codex-subagent-orchestrator/` |
+| **?좊줎 ?쒖뒪??(/discuss)** | **Phase 1~3 ?꾨즺** | `packages/launcher/src/discussion/` |
+| **???щ꼫 TS** | **Phase 1~2 ?꾨즺** | `packages/launcher/src/queue/` |
+| **踰붿슜 ?ㅺ퀎 ?붾젆??(/design)** | **?꾨즺** | `skills/design-director/` + `.claude/skills/design/` |
+| **寃뚯엫 湲고쉷 ?붾젆??(/gdd)** | **?꾨즺** | `skills/game-design-director/` + `.claude/skills/gdd/` |
+| **Intelligent Delegation ?꾨젅?꾩썙??* | **?꾨즺** | `packages/launcher/src/` + `config/capabilities/` + 湲고쉷??`Projects/intelligent-delegation/` |
+
+## ?ㅼ쓬 ?묒뾽 (?곗꽑?쒖쐞 ??
+
+1. **?섎Ⅴ?뚮굹 援?? ??Phase 17 過-2 Faction 李⑹닔 ?湲?(援?? ?먯뿰?꾩깮 濡쒕뱶留?**
+   - Phase 11: 寃쎌젣 ?명봽??(goods/P2P/NPC/?꾧뎄) ???꾨즺
+   - Phase 12 / 12-B: SNN 寃쎌젣 ?곌껐 + ?깅뒫 理쒖쟻??+ NPC SNN?????꾨즺
+   - Phase 13~16: ?듭튂/?멸툑/?앸웾/怨듦났洹쇰줈 ??16-H 寃쎌젣 ?덉젙?붾줈 ?섎졃 (Hard 5吏??PASS, 2026-04-20)
+   - **Phase 17 過-1 Land ??CLOSED (2026-04-22)**: LandCell + Territory ?댁썝 遺꾨━, `_change_persona_territory()` ?ы띁 ?⑥씪 吏꾩썝吏, `_derive_rng()` cross-process determinism, acceptance gate (7 ?뚯씪 PASS + 161.6ms/tick), addendum v2.1 APPROVE
+   - **Phase 17 過-2 Faction ??李⑹닔 ?湲?*: Territory???뺤튂??吏묓빀泥??ㅺ퀎. Contract-first + Direct-proof test ?⑦꽩 ?ъ궗??   - 濡쒕뱶留? **~~過-1 Land~~ ??過-2 Faction ??過-3 Struggle ??過-4 Nation** (?먯뿰 ?꾩깮)
+2. **WKI 異붽? 媛쒖꽑** ??Mean nDCG 0.819, Line-scoped 0.655 (Min 0.630)
+3. **/design domains/software/ ?ㅼ쟾 ?ъ슜**
+
+## ?섎Ⅴ?뚮굹 援?? ?ㅺ퀎 ?꾪솴 (2026-04-12 ?꾨즺)
+
+| Charter | 踰꾩쟾 | ?곹깭 |
+|---------|------|:----:|
+| world-ontology | Phase A ?섏젙 ?꾨즺 | ??|
+| constitution | 8??27議?| ??|
+| economy-whitepaper | 11??| ??|
+| physis-charter-v2 | v2.4 | ??|
+| tick-daemon-charter | v1.1 | ??|
+| humanity-charter | H1~H6 | ??|
+| death-reincarnation-charter | v1 | ??|
+| order-charter | v1 | ??|
+| society-charter-draft | v1.1 | ??|
+| secret-rumor-evidence-charter | v1.1 | ??|
+| **personabrain-snn-charter** | **v3.1** | ??|
+
+PersonaBrain SNN: 50M ?대윴, 12?대윭占쏙옙??V-L-S-B-A-T-C-G-F-I-D-P), 湲곗뼲 5?좏삎+留앷컖 寃쎌젣?? 20K紐?CPU 10ms
+
+## 二쇱슂 紐낅졊??
+```bash
+# TS ?곗쿂 ?ㅽ뻾
+node packages/launcher/dist/cli.js --spec <spec.json>
+
+# WKI ?몃뜳??node workspace-knowledge-index/dist/index.js index
+
+# WKI 寃??node workspace-knowledge-index/dist/index.js search "<query>" --top 5
+
+# WKI ?곹깭 ?뺤씤
+node workspace-knowledge-index/dist/index.js status
+
+# WKI 寃???덉쭏 ?됯?
+node workspace-knowledge-index/dist/index.js eval workspace-knowledge-index/eval/gold-set-v2.json
+
+# ???щ꼫 ?ㅽ뻾
+node packages/launcher/dist/queue/queue-cli.js --config <queue.json>
+node packages/launcher/dist/queue/queue-cli.js --config <queue.json> --max-polls 10
+
+# ?좊줎 ?ㅽ뻾
+node packages/launcher/dist/discussion/discuss-cli.js "二쇱젣"
+node packages/launcher/dist/discussion/discuss-cli.js --auto "二쇱젣"
+
+# WKI lock 臾몄젣 ??rm .knowledge/.wki.lock
+```
+
+## 臾몄젣 ?닿껐
+
+臾몄젣 諛쒖깮 ??`problem-resolution-log.md`瑜?癒쇱? ?뺤씤?섏꽭?? 8嫄댁쓽 ?닿껐 ?щ?媛 湲곕줉?섏뼱 ?덉뒿?덈떎.
+
+## 洹쒖튃
+
+- **?몄뀡 ?쒖옉 ??WKI ?몃뜳???꾩닔** ??泥??묒뾽 ?꾩뿉 `node workspace-knowledge-index/dist/index.js index` 瑜?1???ㅽ뻾. ?ㅻⅨ AI/?몄뀡??蹂寃쎌궗??씠 諛섏쁺?? 蹂寃??놁쑝硫?利됱떆 諛섑솚 (0珥?.
+- ?뚯씪 ??젣 ??諛섎뱶???ъ슜?먯뿉寃??뺤씤 ??吏꾪뻾
+- ???대뜑?먮뒗 蹂꾨룄 ?꾨줈?앺듃 ?대뜑媛 議댁옱?????덉쓬 (game-design-director, trading-quest ??
+- Evidence 湲곕줉? ?꾩닔 ??寃곌낵 蹂닿퀬 ?꾩뿉 諛섎뱶??湲곕줉
+---
+
+## Trading Value Update (2026-04-22)
+
+- Added Phase 1 Runner predictive-exit implementation in `Projects/Trading Value/scripts/runner.py` and `Projects/Trading Value/scripts/peak_detector.py`.
+- Added static Tier-1 event seed file at `Projects/Trading Value/data/event_calendar.csv`.
+- Added focused regression coverage in `Projects/Trading Value/tests/test_runner_predictive_exit.py`.
+- Verification completed with Python 3.12 direct path: `pyflakes`, PeakDetector import, Runner dry-run, pytest (5 passed), and dashboard snapshot curl on port `8901`.
+- Restored the missing `Projects/Trading Value/src/trading_value/` package from repo history so the package imports used by `tests/` and `scripts/` resolve again.
+- Added `Projects/Trading Value/conftest.py` and `Projects/Trading Value/pytest.ini` to make `pytest` use workspace-local imports and tmp directories under the current Windows sandbox.
+- Updated `Projects/Trading Value/pyproject.toml` dependency metadata for `gymnasium` and `optuna`.
+- Added goal-based acceptance automation in `Projects/Trading Value/predictive_runner_paper/acceptance.py` plus `--mode acceptance` and `--strict-acceptance` in `predictive_runner_paper/main.py`.
+- Acceptance output now writes `predictive/`, `reactive/`, and `acceptance_report.json`, and current benchmark on `runs/predictive_lock_v5` vs `runs/expand90d_reactive` evaluates to `pass_narrow`.
+- Added `--mode walkforward`, cached CSV input via `--data-dir`, and a local auto-refresh dashboard in `Projects/Trading Value/predictive_runner_paper/dashboard.py`.
+- Current walk-forward run `predictive_runner_paper/runs/walkforward_live` scanned 6 rolling windows from `cache_90d` and evaluated to `fail` with `accepted_window_count=2/6`, `mean_expectancy_delta=0.003338`, `mean_return_sum_delta=0.081733`.
+- Added a position-level predictive regime gate in `Projects/Trading Value/predictive_runner_paper/strategy.py` keyed off entry-time `trend_strength`, with focused coverage in `predictive_runner_paper/tests/test_strategy.py`.
+- Current gate experiment `predictive_runner_paper/runs/walkforward_d` evaluates to `noop`: `accepted_window_count=2/6`, `fail_unprofitable_count=0`, `noop_count=4`, `mean_expectancy_delta=0.005980`, `mean_return_sum_delta=0.092650`, while W05/W06 remain `pass`.
+- Added predictive diagnostics panels, expanded `predictive_runner_paper/cache_90d_plus` to 20 local 15m symbols, and verified that the full 20-symbol probe still failed formally at `predictive_runner_paper/runs/walkforward_plus20_a260_pb080` with `accepted_window_count=3/6`, `status=fail_unprofitable`.
+- Added `predictive_runner_paper/universes/liquid_expansion_10.txt` plus `--assets-file` and predictive threshold overrides in `predictive_runner_paper/main.py` so validated universes can be replayed from the CLI without inline scripts.
+- Current best-known walk-forward run is `predictive_runner_paper/runs/walkforward_plus10_liquid_a260_pb080` and was reproduced through the public CLI as `predictive_runner_paper/runs/walkforward_liquid10_cli` on the validated 10-symbol liquid universe (`BTC ETH XRP BNB ADA LINK LTC BCH DOT SUI`) with probe settings `predictive_arming_r=2.6`, `predictive_maturity_lock_r=3.6`, `predictive_min_pullback_r=0.8`, `predictive_min_bars=10`: `status=pass_narrow`, `accepted_window_count=5/6`, `pass_count=2`, `pass_narrow_count=3`.
+- Added `--entry-volume-z-min` and `--predictive-score-threshold` CLI overrides plus `predictive_runner_paper/universes/strong_core8_momo.txt` so the strong-pass profile can be reproduced without inline scripts.
+- Breakthrough iteration found a stronger 8-symbol profile by rotating `DOT` out for `BCH` and raising `predictive_maturity_lock_r` from `3.6` to `4.5`, which removed the late-window BCH early-lock regression while preserving the prior BTC/ETH/ADA/SUI improvements.
+- Breakthrough iteration found a stronger follow-on profile by keeping the same 8-symbol BCH-rotated core universe and `1.6 / 6 / 4.5` entry/structure/maturity settings, then relaxing `predictive_min_pullback_r` from `0.6` to `0.5`.
+- Current best-known strong-pass run is `predictive_runner_paper/runs/walkforward_strong_core8_bch_ext16_struct6_pb05_cli` on the 8-symbol universe (`BTC ETH DOGE ADA LINK LTC SUI BCH`) with settings `entry_volume_z_min=1.0`, `max_entry_extension_atr=1.6`, `structure_lookback=6`, `predictive_arming_r=2.35`, `predictive_maturity_lock_r=4.5`, `predictive_min_pullback_r=0.5`, `predictive_min_bars=5`, `predictive_score_threshold=0.53`: `status=pass`, `accepted_window_count=6/6`, `pass_count=6`, `pass_narrow_count=0`, `mean_expectancy_delta=0.094429`, `mean_return_sum_delta=1.471867`.
+- Added `predictive_runner_paper/universes/strong_core8_bch_ext16_struct6_pb05.txt` and updated README/tests so the new strongest profile is pinned through the public CLI and regression-covered at the argv/universe boundary.
+- Transfer check: the same `pb05` profile still passes an alternate `2400/720` walk-forward slice on the same 8-symbol universe (`accepted_window_count=7/9`, `mean_expectancy_delta=0.083760`, `mean_return_sum_delta=1.069267`), but broader `liquid_expansion_10` and 20-symbol universes remain below acceptance.
+- Current verification target: `python -m pytest tests predictive_runner_paper/tests -q` -> `436 passed, 20 warnings` on Python 3.12.
+- Step 8/9 paper-only unblock completed after 180d OOS FAIL: formula remains sealed, R2 routing allow-list now uses the actual 180d pass set `BTC/BNB/XRP`, and `ETH/DOGE/SOL` are skipped before runner variant dispatch.
+- Added `scripts/paper_trading_runner.py` for no-real-orders Step 9 paper operation, JSONL/summary artifacts under `scripts/paper_logs/`, and `/api/state` for the unified dashboard.
+- Follow-up review fixes: restored runner state now prunes positions, trade logs, and memory records outside the current allow-list; paper artifacts now use full in-memory trade logs with per-session filenames rather than snapshot tails/daily overwrite; allow-list overrides can only narrow the fixed OOS pass set.
+- Updated `scripts/dashboard_unified.py` to proxy `r2paper` on `127.0.0.1:8902` and bind the unified dashboard to `127.0.0.1`.
+- Pine/MTS-V1 risk reduction applied: `strategy.pine` now derives order qty from equity fraction, uses `entry_tf` security data for Step 5/6 indicators, handles same-bar Hard SL after L2/L3 stop creation, and includes pending L2 promotion size in L3 aggregate fill threshold.
+- MTS-V1 local blocker closed: added `offline_replay.py`, connected `strategy.py --mode backtest` to the local 90d OHLCV replay, emitted `MTS-V1/logs/trades_mtsv1_offline_90d.jsonl`, and generated `MTS-V1/runs/mtsv1_offline_90d/BACKTEST_VERDICT.md`.
+- MTS-V1 performance improvement attempt: offline replay now applies State 2 abort/evasion, raising canonical 90d replay from 43 events / 11 exits to 853 events / 245 exits.
+- MTS-V1 offline 90d verdict remains FAIL on strategy quality, not tooling: coverage `2026-01-24T05:00:00Z` to `2026-04-24T05:00:00Z`, 0/4 walk-forward pass windows, per-symbol trades 35-46, and avg RR 0.260-0.732.
+- BTC 15m replay probe crossed the trade-count gate with 165 exits, but still failed on avg RR (`0.242`) and Wilson-vs-breakeven; full 15m 6-symbol replay needs replay performance optimization before it is practical.
+- Paper operation handoff fixed: `scripts/start_unified.bat` now starts `scripts/paper_trading_runner.py --serve --tick-sec 60 --port 8902` before the unified dashboard.
+- MTS-V1 PASS reached without changing the base trade direction or using L3 cap: best accepted replay is `runs/mtsv1_improve_core5_symbol_rsm_best5_nol3cap/BACKTEST_VERDICT.md`, scope `BTC/ETH/SOL/XRP/BNB`, `entry_tf=15m`, symbol rsm map `BTC=6.3, ETH=6.8, SOL=5.5, XRP=6.3, BNB=2.5`, walk-forward `3/4`, portfolio total R `296.054456`.
+- MTS-V1 backtest scoring fixed to align with SPEC: avg RR is payoff ratio for BE(RR), and walk-forward windows are selected-symbol portfolio windows rather than per-symbol mini samples.
+- After PASS, the +0.2% target was `296.646565`; 20 additional no-L3-cap attempts failed to exceed it, so the improvement loop stopped per user rule. DOGE remains excluded because it still fails avgRR/trade-count gates.
+- Latest verification: `pytest tests -q` in `Projects/Trading Value` -> 424 passed, 20 warnings; `pytest tests -q -p no:cacheprovider` in `MTS-V1` -> 82 passed; `predictive_runner_paper/tests` -> 23 passed; targeted ruff and `mypy --strict strategy.py` passed. TradingView Pine compile/runtime and real CSV parity remain external blockers.
+- Runner paper allow-list expanded per 2026-04-25 user request: `DOGE`, `STX`, `SOL` plus the provided Bitget stock/ETF/commodity universe are now accepted by `scripts/runner.py`; `predictive_runner_paper/universes/bitget_expanded_watchlist.txt` stores the watchlist. This is a tradable-universe expansion, not a PASS claim for the added assets.
+- VLoop skill now lives at `skills/vloop/` as the shortened successor to `validated-delivery-loop`; it covers backlog selection, plan validation, implementation, repeated verification, fixes, and replayable evidence. Trading Value runner universe gates are separated into `watchlist_symbols`, `paper_enabled_symbols`, and `live_enabled_symbols`. Current result: 57 watchlist/paper symbols, 3 live-enabled R2 symbols (`BTC`, `BNB`, `XRP`), 54 paper-only symbols including `DOGE`, `STX`, and `SOL`. Bitget market validation passed for all 57 symbols and evidence was written under `Projects/Trading Value/runs/runner_universe_validation_bitget_20260425/`.
+- 4-model maximum-profit tournament layer implemented: added `scripts/meta_tournament.py` on port `8903`, unified `V2/V3/TriArb/R2 Paper` metrics into a survival-gated profit schema, and exposed `/api/state`, `/api/ranking`, and `/api/allocation`.
+- Unified dashboard topology repaired: `scripts/dashboard_unified.py` now proxies `r2paper` (`8902`) and `meta` (`8903`), and `scripts/start_unified.bat` starts V2/V3/TriArb/R2 Paper/Meta/Unified Dashboard with readiness checks.
+- R2 Paper Runner now supports `--market-data-mode real` so paper-only execution can use public OHLCV while still never sending orders; current service state is `paper_only=true`, `market_data_mode=real`, assets `BTC/BNB/XRP`.
+- Model-specific improvement hooks added: V3 memory role variants (`full`, `blacklist`, `sizing`, `entry_filter`, `off`), TriArb cost-edge diagnostics, and V2 native confidence/cost-aware gate metadata. Verification: `pytest tests -q` -> 438 passed, 20 warnings; `pytest predictive_runner_paper/tests -q` -> 24 passed.
+- Trading Value reboot autostart configured via the existing Windows Startup shortcut `TradingValue.lnk`, targeting `Projects/Trading Value/scripts/start_unified.bat` with minimized window style. `start_unified.bat` now cleans stale Trading Value listeners before launching the single unified dashboard stack (`8897/8898/8899/8902/8903` feeding user dashboard `8900`).
+- Trading Value unified dashboard UX renewed for operator decisions: `scripts/dashboard_unified.py` now opens with a decision cockpit showing current real-use availability, best/allocated/equal-weight returns, model-by-model performance, sample size, practical verdict, and next action before the detailed panels. Meta promotion is stricter: a negative eligible winner is no longer marked `promote=true`.
+- Trading Value dashboard no-blink renewal applied: `scripts/dashboard_unified.py` now separates the top decision cockpit from detailed model panels, updates unchanged HTML in place, removes repeated blink/pulse entrance animations, and uses a cleaner KPI plus model-verdict layout for the 8900 unified dashboard.
+- Trading Value model improvement pass applied: `scripts/v3.py` now uses soft HTF gating plus 3 new control/scout variants to accelerate sample accumulation around the currently positive V3 control path; `scripts/triarb.py` now enforces correlation and expected cost-edge entry gates plus a new `triarb-cost-edge` variant; `scripts/v2.py` now has a recent-expectancy circuit breaker that blocks new entries when its live tail expectancy is negative. Services were restarted and `8900/api/all` now shows V3 13 variants, TriArb 6 variants, and V2 `allows_new_entries=false`. Verification: `pytest tests -q` -> 440 passed, 20 warnings.
+- Trading Value dashboard system-program skin applied: `scripts/dashboard_unified.py` now uses a native control-panel style with OS titlebar chrome, dense system tables, squared panels, subdued grey/blue surfaces, monospaced numeric readouts, and a `SYSTEM DECISION CONSOLE` header while preserving the existing no-blink refresh architecture. Verification: `py_compile dashboard_unified.py`, `pytest tests/test_meta_tournament.py -q` -> 9 passed; 8900 restarted and served the new CSS.
+- Trading Value dashboard service/model count clarified: the header now reports `5/5 ?쒕퉬???⑤씪?? because it includes `meta`, and the top cockpit now shows a `SERVICE BUS` strip for `META TOURNAMENT`, `R2 PAPER`, `V3`, `TRIARB`, and `V2`; the trading decision table remains focused on the 4 actual trading models. Verification: `py_compile dashboard_unified.py`, `pytest tests/test_meta_tournament.py -q` -> 9 passed; 8900 restarted.
+- Trading Value dashboard utility-readiness display added: the top trading model table in `scripts/dashboard_unified.py` now includes `?⑥슜 ?먯젙 ?곗씠??, showing current/required accumulated trades and the model-specific utility threshold (`R2` 30 paper trades, `V3` memory warmup/full activation, `TriArb` cost-edge status, `V2` recent-expectancy gate). Verification: `py_compile dashboard_unified.py`, `pytest tests/test_meta_tournament.py -q` -> 9 passed; 8900 restarted.
+
+- Trading Value dashboard readability pass applied: every `scripts/dashboard_unified.py` CSS or inline dashboard font declaration that was 11px or smaller was increased by exactly 1px for denser-but-readable system UI text. Verification: `py_compile dashboard_unified.py`, `pytest tests/test_meta_tournament.py -q` -> 9 passed; 8900 restarted.
+- Trading Value V2 sufficient-data action completed: `scripts/v2.py` now treats 1000 closed trades as the utility evaluation point, keeps negative-return V2 out of live/meta promotion, restores post-restart accuracy/entropy from recent valid `v2.jsonl` logs, and allows only high-confidence low-risk `probation_recovery` entries (`0.2x` size multiplier, `3x` leverage cap) while preserving direct-prediction identity. `scripts/meta_tournament.py` now excludes V2 from eligible ranking unless `utility_evaluation.verdict == promote_candidate`, and `scripts/dashboard_unified.py` shows the V2 probation verdict. Current live state: `probation_recovery`, sufficient data true, meta eligible false, dashboard 5/5 online. Verification: `py_compile`, `pytest tests/test_meta_tournament.py -q` -> 13 passed, `pytest tests -q` -> 444 passed, 20 warnings.
+
+- MTS-V1 parity/paper preparation implemented: Pine now exposes the accepted symbol-specific RSM profile (`BTC=6.3`, `ETH=6.8`, `SOL=5.5`, `XRP=6.3`, `BNB=2.5`), `parity_check.py` supports symbol filtering and per-symbol TradingView CSV batch reports, and `MTS-V1/mts_paper_runner.py` provides an MTS-only paper artifact path with no exchange client or real orders.
+- MTS-V1 TradingView CSV capture completed via logged-in chart scraping because official Strategy Report CSV export was plan-gated. Saved parity-ready and raw Strategy Report CSVs for `BTC/ETH/SOL/XRP/BNB` under `Projects/Trading Value/MTS-V1/samples/`; parity script now tolerates UTF-8 BOM JSONL input, and the current scraped-vs-Python parity run is a FAIL baseline.
+- MTS-V1 BTC parity diff isolated the first root cause layer: TradingView raw closed trades must be matched to Python `ENTRY_L1/L2/L3`, not `ENTRY_SIGNAL`; current BTC scrape has 31 filled trades from `2026-03-02T04:15:00Z` to `2026-04-24T16:30:00Z`, while the compared Python PASS JSONL has 106 BTC filled entries in that same window and only 0/31 matches at 15m tolerance (1/31 at 1h). Next fix is to regenerate the Python comparison artifact with the exact TradingView chart/profile/history window before semantic parity work.
+- MTS-V1 BTC parity push continued: Pine/config defaults now use accepted `entry_tf=15m`; TradingView instance inputs were verified in UI as `HTF=4h`, `Entry TF=15m`, `LTF=15m`, `BTC RSM=6.3`, bar magnifier off, and process orders on bar close. A new BTC TradingView scrape was saved as `samples/tradingview_mtsv1_BTC_entry15_raw.csv` / `.csv` with 64 filled rows.
+- MTS-V1 Python replay parity fixes applied: `offline_replay.py` now enforces Pine's Fibo temporal gate before layer placement and aligns HTF `request.security(..., lookahead_off)` data to the last 15m bar of the HTF window to avoid 4h lookahead. Added focused regression coverage in `tests/test_offline_replay.py`.
+- MTS-V1 exact-market BTC artifact generated from newly fetched Binance USDM 15m OHLCV through `2026-04-25T04:30:00Z` under `runs/mtsv1_tv_btc_binanceusdm_cache/` and replayed to `runs/mtsv1_tv_btc_15m_binanceusdm_profile/trades.jsonl`. Current BTC diff improved from old 0/31 baseline to 31/64 exact event/side matches at 15m tolerance (36/64 at 1h diagnostic), with Python date-window filled entries now close to TV count (66 vs 64). Remaining gap is semantic indicator/order timing parity, not profile/data freshness.
+- MTS-V1 BTC parity push advanced TradingView order-emulator parity: Python replay now models marketable `process_orders_on_close` L1 fills, same-close L2 fills at close price, active limit fills at favorable bar opens, pending L2 fills before same-bar State 2 abort, and defers L2 hard-stop recognition to the next calculation pass. `btc_parity_diff.py` now uses global closest-pair matching and closed-cycle candidate filtering. Current BTC result is 50/64 matched at 15m tolerance (51/64 at 1h diagnostic); Python date-window filled entries are 89 vs TradingView 64, so the remaining gap is stale/extra Python position cycles, likely around ATR/Hard-SL micro-differences and missing global cooldown parity. Verification: targeted pytest 32 passed, targeted ruff passed, `py_compile` passed.
+- MTS-V1 BTC parity cooldown/L2/Hard-SL pass: `offline_replay.py` now carries Pine-style per-symbol cooldown across replay cycles, uses a mutable replay clock so cooldown starts from the actual exit bar time, refreshes child L2/L3 prices exactly once when the Pine-equivalent L1 fill recognition pass creates child orders, and avoids one-tick boundary Hard-SL wick false positives in replay. A naive every-bar L2 refresh was tested and rejected because it degraded 15m parity from 52/64 to 46/64 by mutating already-placed Pine orders; regression coverage now locks the one-shot order-price behavior. Current BTC result is 61/64 matched at 15m tolerance (61/64 at 1h diagnostic). Remaining gaps are `2026-04-02` L2 timestamp and `2026-04-21` shifted/missing signal. Verification: targeted pytest 40 passed, targeted ruff passed.
+- MTS-V1 BTC TradingView/Python entry parity reached 64/64 at 15m tolerance. `offline_replay.py` now models Pine's 48h State 1 timeout as wall-clock time instead of 48 entry bars, and prevents newly created child L2/L3 orders from filling against the creation bar's earlier high/low while still allowing `process_orders_on_close` fills at the creation close. This resolved the `2026-04-21` pending L1/L2 miss and the `2026-04-02` premature L2 timestamp without reintroducing every-bar L2 repricing. Verification: targeted pytest 43 passed, targeted ruff passed, BTC replay regenerated, `btc_parity_diff.py` and `btc_parity_trace.py` both report 64/64 matched with Python date-window filled entries equal to TV (64).
+- MTS-V1 BTC exit-timing parity advanced after cross-verification: HTF cross signals now pulse only on the aligned HTF update bar, preventing repeated 4h cross aborts on every 15m bar, and active L2 fills that immediately trigger same-bar HardSL now close on the same bar like Pine's L2 fill + Hard SL branch. Current BTC parity remains 64/64 entries, independent CSV/JSONL matcher reports 64/64 with 0 missing/extra, and exit timestamps now match 64/64. Remaining BTC gap is exit price/PnL parity: 42/64 exit prices are within 0.15 USDT, with residual differences concentrated in HardSL stop-price/ATR/position-average semantics. Verification: targeted pytest 45 passed, full MTS-V1 pytest 110 passed, targeted ruff passed.
+- MTS-V1 BTC HardSL price parity improved: active intrabar L2 fills now recognize on the same calculation bar, while signal-close L2 fills still defer to the next calculation pass. This matches Pine's distinction between active limit fills and `process_orders_on_close` fills, preserving entry parity and fixing most HardSL stop-price drift. Current BTC metrics: entry 64/64, exit timestamp 64/64, exit price within 0.15 USDT 56/64, exit price within 1.0 USDT 64/64, max exit price delta 0.8094 USDT, average exit price delta 0.0718 USDT. Verification: targeted pytest 46 passed, targeted ruff passed, BTC replay/diff/trace regenerated.
+- MTS-V1 full validation follow-up closed public execution drift: accepted `15m/core5/symbol-RSM` profile is now centralized in `MTS-V1/mts_profile.py`, `strategy.py --mode paper/backtest` defaults to accepted core5 instead of config DOGE, backtest uses the same accepted replay kwargs as the paper runner, MTS paper serve port moved off Meta `8903` to `8904`, and serve ticks now write distinct run artifact directories. Verification: `pytest tests -q -p no:cacheprovider` -> 114 passed; targeted `ruff` passed; `py_compile` passed; BTC diff/trace regenerated at 64/64 filled-entry matches.
+- MTS-V1 parity baseline update: initial contract-quantity replay sizing preserved BTC `64/64` filled entries and `64/64` exit timestamps, then the follow-up below corrected sizing to Pine order-price quantities and superseded the earlier `56/64` exit-price baseline. Added `core5_parity_report.py` for Core5 raw CSV discovery and mismatch classification, and added HTF/BTC replay precompute. Docs now mark DOGE as historical/experimental, `mts_profile.py` as source of truth, root `BACKTEST_VERDICT.md` as stale historical, and live-ready claims as blocked on MMR leverage cap plus daily max-loss fail-closed validation.
+- MTS-V1 parity implementation follow-up: Python replay now models pending Pine `L2_PROMO` fills as additional L2 contract quantity without replacing the L2 Hard SL, blocks L3 aggregate recognition while the promo order is pending, and uses Pine order-price contract quantities for L1/L2 fills. `btc_parity_diff.py` includes worst matched exit-price residuals; regenerated BTC parity remains entries `64/64`, exit timestamps `64/64`, exit price <= `0.15` improved to `62/64`, <= `1.0` `64/64`, max delta `0.179403`, SHA256 `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`. ETH/SOL/XRP/BNB TradingView Strategy Report captures were refreshed as verified `*_entry15_raw.csv` files; Core5 now classifies all five symbols as `semantic_replay_mismatch` rather than `profile_input_mismatch` (ETH `48/69`, SOL `40/71`, XRP `26/58`, BNB `38/85` entry matches). Verification: MTS-V1 focused report/trace tests `18 passed`, focused parity tests `63 passed`, full MTS-V1 tests `135 passed`, targeted `ruff` and `py_compile` passed, BTC diff/trace and Core5 report regenerated.
+- MTS-V1 Core5 parity gate foundation completed: `core5_parity_report.py` now supports `--gate off|baseline|strict`, uses common TV/Python coverage rows for semantic denominators, preserves raw TV capture counts, and fails baseline on missing data, profile-input mismatch, BTC baseline regression, trade-number discontinuity, or missing detail reports. Baseline gate passes with BTC locked at entries `64/64`, exit timestamps `64/64`, exit price <=`0.15` `62/64`, <=`1.0` `64/64`, SHA256 `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`; current common-window entry matches are ETH `48/65`, SOL `40/69`, XRP `24/52`, BNB `38/77`, with TV tails outside Python artifact coverage ETH `4`, SOL `2`, XRP `6`, BNB `8`. SOL/XRP detail reports now classify unmatched rows and summarize matched exits by Python reason, exposing `STATE_2_ABORT` as the dominant matched residual axis. Status is input/profile baseline secured plus semantic parity gate in progress; no live-ready claim until MMR leverage cap and daily max-loss fail-closed validation pass. Verification: focused tests `23 passed`, full MTS-V1 tests `140 passed`, targeted `ruff` and `py_compile` passed, Core5 baseline gate report regenerated.
+- MTS-V1 SOL State2 diagnostic loop started under the requested plan/validator/watchdog workflow. Added matched-exit timing residual diagnostics and regenerated reports; SOL diff/trace now separate raw TV rows `71`, common-window rows `69`, tail outside Python artifact `2`, and common-window match `40/69`. SOL State2 matched timing residuals are all Python-early: `unknown_state2_abort` `4`, `same_bar_close_or_fill_ordering` `2`, `entry_cycle_drift` `1`; non-State2 late residuals are `HARD_SL` rows. Current JSONL lacks HTF-vs-reverse-spike trigger source, so the next task is `SOL STATE_2_ABORT trigger-source telemetry/reconstruction` before any semantic replay rule change. BTC baseline gate still passes with SHA256 `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`. Verification in current sandbox: `py_compile`, Core5 `--gate baseline`, dependency-free `verify_task.py`, focused `pytest` (`26 passed`), and targeted `ruff` all passed using local `uv` cache paths; reproducible wrapper added at `subagent-runs/mts-v1-parity/sol-state2-diagnosis/run_cached_checks.ps1`. No live-ready claim.
+
+- MTS-V1 SOL State2 trigger-source telemetry completed through `$vloop`: `offline_replay.py` now writes additive `state2_*` telemetry on State2 exits while preserving `reason=STATE_2_ABORT`, and diff/trace reports render Python State2 trigger source. SOL artifact was regenerated only after a probe matched the old artifact exactly with telemetry stripped (`old_rows=254 new_rows=254 stripped_equal=True`). SOL matched State2 split is now `reverse_spike` `20` (`13` timestamp matches, `7` Python-early) and `htf_cross` `4` (`4` timestamp matches, no early/late); the four formerly unknown long residual rows are now `state2_reverse_spike`. Core5 baseline gate passes; BTC SHA remains `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`; SOL telemetry artifact SHA is `29477E417024C8D115C77FF80EBCC3B74180763687F17AC770BF642E263B198F`. Verification: focused tests `72 passed`, full MTS-V1 tests `147 passed`, targeted `ruff` and `py_compile` passed, SOL probe replay `253` events / `65` exits, Core5 `--gate baseline` passed, evidence under `subagent-runs/mts-v1-parity/sol-state2-trigger-source/`. Next task is SOL reverse-spike pulse parity inspection; no live-ready claim.
+- MTS-V1 SOL reverse-spike pulse inspection completed through `$vloop`: State2 telemetry now includes reverse-spike CVD delta, abs-SMA, threshold, ratio, and margin, and SOL diff residual rows expose those values. SOL old/new artifacts remain semantically equivalent with telemetry stripped (`old_rows=254 new_rows=254 stripped_equal=True`). The largest early pair (`64/65`, `1305m`) is threshold-edge at ratio `1.0015` and margin `-186.1697`; the short pair (`56/57`, `390m`) is stronger at ratio `1.3136`. Core5 baseline gate passes; BTC SHA remains `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`; SOL telemetry artifact SHA is `2E70E938E97C19E42D63F3464DCE913A7068D3F91999D3C0FF109A9639E3F559`. Verification: focused tests `73 passed`, full MTS-V1 tests `148 passed`, targeted `ruff` and `py_compile` passed, SOL probe replay `253` events / `65` exits, Core5 `--gate baseline` passed, evidence under `subagent-runs/mts-v1-parity/sol-reverse-spike-pulse-inspection/`. Next task is one SOL reverse-spike threshold/confirmation experiment; no live-ready claim.
+- MTS-V1 SOL reverse-spike threshold experiment completed through `$vloop`: `offline_replay.py` now has replay-only `reverse_spike_min_ratio` / `--reverse-spike-min-ratio`; default `1.0` keeps the accepted profile behavior and default SOL replay is byte-identical to the official SOL artifact. The single tested candidate `1.005` generated `250` events / `64` exits and improved SOL price residuals (`exit_price_within_0_15` `35/40`, avg exit delta `0.072249`) but did not improve exit timing (`27/40` unchanged), so it was not promoted and official SOL/BTC artifacts were not overwritten. Core5 baseline gate passes; BTC SHA remains `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`. Verification: focused tests `61 passed`, full MTS-V1 tests `150 passed`, targeted `ruff` and `py_compile` passed, evidence under `subagent-runs/mts-v1-parity/sol-reverse-spike-threshold-experiment/`. Next task is SOL reverse-spike calculation-pass/order-timing inspection; no live-ready claim.
+- MTS-V1 SOL reverse-spike confirmation experiment completed through `$vloop`: `offline_replay.py` now has replay-only `reverse_spike_confirm_bars` / `--reverse-spike-confirm-bars`; accepted profile default remains `1`. SOL diff residuals now expose previous reverse-spike ratio/pulse plus last fill event/reason/age and L2 fill state. Default SOL replay stayed semantically equal after stripping `state2_*`, official SOL artifact was updated for telemetry only, and SOL SHA is now `EEC7A0BD5C1D8B61A78E66AB88DF9A66F802EB754A4AB625D28809922CCE1AF8`. The single candidate `confirm_bars=2` was rejected: SOL probe fell to `140` events / `35` exits, entry matches `28/71`, exit timestamp `12/28`, and exit price <=`0.15` `19/28`. Core5 baseline gate passes; BTC SHA remains `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`. Verification: focused tests `62 passed`, full MTS-V1 tests `151 passed`, targeted `ruff` and `py_compile` passed, evidence under `subagent-runs/mts-v1-parity/sol-reverse-spike-confirmation-experiment/`. Next task is CVD input parity around isolated SOL reverse-spike pulse bars; no live-ready claim.
+- MTS-V1 SOL CVD input parity diagnostic completed through `$vloop`: added `cvd_input_parity_report.py` and generated `parity_reports/sol_cvd_input_parity.md` from local OHLCV cache using Pine-style `delta_bar=(close-open)*volume`, `sma(abs(delta_bar),20)`, and accepted SOL RSM `5.5`. Of the `7` SOL reverse-spike exit-timing residuals, `4` also have a Python-formula pulse at the TradingView exit bar, while `3` are isolated Python pulses with no pulse at the TradingView exit bar. This narrows the next task away from more threshold/confirmation tuning and toward State2/order calculation pass timing; direct TradingView CVD plot export remains external if exact plot-value parity is required. No accepted replay artifacts changed; Core5 baseline gate passes and BTC SHA remains `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`. Verification: focused tests `61 passed`, full MTS-V1 tests `154 passed`, targeted `ruff` and `py_compile` passed, evidence under `subagent-runs/mts-v1-parity/sol-cvd-input-parity/`; no live-ready claim.
+- MTS-V1 SOL State2 risk-gate pass completed through `$vloop`: the tested semantic candidate `reverse_spike_min_ratio=1.5` was rejected because SOL entry matches regressed to `35/71`, exit timestamp matches were only `26/35`, and missing cycles increased. Added `risk_gate.py`, strict `mts_paper_runner.py --require-risk-ready`, `--daily-pnl-pct`, and Pine `f_effective_leverage()` MMR sizing cap. Missing MMR and daily max-loss probes both fail closed before replay with `events=0`/`exits=0`. Core5 baseline gate passes and BTC SHA remains `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`. Verification: focused tests `78 passed`, full MTS-V1 tests `160 passed`, targeted `ruff` and `py_compile` passed, evidence under `subagent-runs/mts-v1-parity/sol-state2-risk-gates/`. Local risk gates are implemented, but live-readiness remains blocked until exchange MMR wiring and live daily PnL accounting are validated.
+- MTS-V1 SOL L2-hold timing probe completed through `$vloop`: added replay-only `offline_replay.py --state2-reverse-min-minutes-since-l2` with default `0.0` so accepted behavior is unchanged. Tested `60` and `300` minute L2-hold candidates; both are rejected. `60` minutes produced SOL entry `40/71`, exit timestamp `26/40`, price <=`0.15` `34/40`; `300` minutes produced entry `39/71`, exit timestamp `27/39`, price <=`0.15` `37/39`. Price residuals improved in the longer probe, but cycle/entry alignment regressed, so no artifact/profile promotion. Core5 baseline gate passes and BTC SHA remains `BE6FDFE9CD6A853D7983B51DCDA4D61DA41EEFE546FF8FCEDB84114630AFB41D`. Verification: focused replay/diff tests `63 passed`, full MTS-V1 tests `162 passed`, targeted `ruff` and `py_compile` passed, evidence under `subagent-runs/mts-v1-parity/sol-l2-hold-timing/`.
+- MTS-V1 SOL cycle/order-state drift diagnostic completed through `$vloop`: `btc_parity_trace.py` now groups unmatched TradingView rows by active Python cycle and nearest same-event/side entry state. SOL common-window unmatched rows split into `active_same_side_layer_timing_shift=17`, `no_active_cycle_nearest_after=6`, `no_active_cycle_nearest_before=5`, and `active_same_side_layer_mismatch=1`, narrowing the next local semantic investigation toward layer placement/fill timing drift rather than more State2 hold/threshold tuning. Core5 baseline gate passes; no replay rule, profile, or official JSONL artifact was promoted. Verification: full MTS-V1 tests `165 passed`, focused trace/diff/core5 tests `32 passed`, `ruff`, `mypy --strict btc_parity_trace.py core5_parity_report.py`, `py_compile`, Core5 `--gate baseline`, and replayable wrapper passed; evidence under `subagent-runs/mts-v1-parity/sol-cycle-order-drift-diagnostics/`.
+
+- MTS-V1 vloop 1-5 sequence completed: added `layer_timing_drift_report.py` and `parity_reports/sol_layer_timing_drift.md`, confirming SOL's dominant unmatched bucket is layer placement/fill timing drift (`17` active same-side timing-shift rows; local candles touch Python active layers for `10` and miss for `7`). Added default-off `offline_replay.py --limit-touch-epsilon` as a semantic candidate and rejected the tested `0.05` probe because SOL regressed to `35/71` entry matches and `25/35` exit timestamp matches. Core5 baseline still passes; strict probe still blocks promotion on SOL (`sol_entry_rate:0.580`, `sol_exit_time_rate:0.675`) and XRP (`xrp_entry_rate:0.462`, `xrp_exit_time_rate:0.542`). External blockers are now explicit TradingView SOL OHLCV/order-state/CVD plot exports. Live-readiness remains blocked and fail-closed: `mts_paper_runner.py --require-risk-ready` produced `blocked=true`, `events=0`, `exits=0` with missing MMR for BTC/ETH/SOL/XRP/BNB. Verification: full MTS-V1 tests `170 passed`, focused tests `69 passed`, `ruff`, `py_compile`, `mypy --strict --follow-imports=silent layer_timing_drift_report.py`, Core5 `--gate baseline`, and replayable wrapper passed; evidence under `subagent-runs/mts-v1-parity/vloop-1-to-5-20260427/`.
+
+- MTS-V1 live-ready follow-up advanced: added `live_risk_inputs.py` and wired `mts_paper_runner.py --require-risk-ready` to require a fresh `--risk-snapshot` containing per-symbol MMR plus account daily PnL. Missing, stale, malformed, missing-MMR, and missing-daily-PnL snapshots now fail closed before replay; a local strict-pass fixture produced `blocked=false`, `risk_inputs.ready=true`, `risk_gate.allows_new_signals=true`, `19` events, and `5` exits while remaining paper-only. The vloop 1-5 evidence bundle was tightened: `verify_task.py` is now explicitly smoke-scope, writes the SOL drift regeneration to a temp path, and validates blocker document content; the external evidence wording no longer overclaims proof beyond local artifacts. Verification: targeted pytest `17 passed`, vloop smoke passed, strict risk-input probe passed, targeted `ruff`, and `py_compile` passed. Evidence under `subagent-runs/mts-v1-parity/live-ready-risk-inputs-20260428/`. No live order path or live-ready approval is promoted until a real venue/accounting snapshot producer is wired.
+
+- MTS-V1 live risk snapshot producer completed: added read-only `live_risk_snapshot.py` to generate the strict risk snapshot from ccxt Binance USDM account data, including per-symbol MMR, UTC-day realized PnL, and USDT futures equity. Missing credentials fail closed with exit code `2` and write no snapshot; generated `state/live_risk_snapshot*.json` files are ignored. Verification: full MTS-V1 tests `182 passed`, focused producer/consumer/risk tests `22 passed`, Core5 baseline, vloop smoke, producer smoke, `ruff`, strict mypy for `live_risk_snapshot.py live_risk_inputs.py`, `py_compile`, and `git diff --check` passed. Evidence under `subagent-runs/mts-v1-parity/live-risk-snapshot-producer-20260428/`. Remaining live-ready blocker: run the producer with real read-only Binance USDM credentials and review the produced snapshot before promotion.
+
+- MTS-V1 live readiness credential gate and account reconciliation gate completed locally: the current environment has no `BINANCE_API_KEY` or `BINANCE_API_SECRET`, so direct producer execution, end-to-end `live_readiness_gate.py`, and the new `live_account_reconciliation.py` all fail closed before writing state snapshots, readiness summaries, reconciliation summaries, or temp files. Added read-only reconciliation against local state files vs exchange open positions/open orders, and hardened `StartupReconciliation` so missing local state with exchange exposure is a mismatch. Follow-up review fixes make strict `mts_paper_runner.py --require-risk-ready` return non-zero on blocked gates, paginate Binance income history full pages, reject non-finite risk numbers, ignore all generated account-state artifacts, isolate ambient credentials in tests, and type accepted replay kwargs for strict mypy. Verification: full MTS-V1 tests `195 passed`, focused reconciliation/persistence tests `10 passed`, focused live readiness/risk tests `31 passed`, Core5 baseline, credential-missing producer/readiness/reconciliation probes returning `2`, ignored artifact checks, `ruff`, strict mypy with `types-PyYAML`, `py_compile`, and `git diff --check` passed. Evidence under `subagent-runs/mts-v1-parity/live-readiness-credential-gate-20260428/` and `subagent-runs/mts-v1-parity/live-account-reconciliation-gate-20260428/`. Remaining blocker: provide read-only Binance USDM credentials and review the real snapshot, readiness gate, and reconciliation output before live-ready approval.
+- MTS-V1 Binance credential retry follow-up: `live_risk_snapshot.py` now strips leading/trailing whitespace from pasted API key/secret values before constructing the ccxt Binance USDM client. This only hardens credential entry; the latest reported real run still blocks at Binance authentication (`exchange maintenance margin fetch failed: AuthenticationError`). Verification: `pytest tests/test_live_risk_snapshot.py -q -p no:cacheprovider` -> 9 passed; `ruff check live_risk_snapshot.py tests/test_live_risk_snapshot.py` passed; local no-credential producer probe still fails closed.
+- MTS-V1 live-risk snapshot ccxt fallback follow-up: when ccxt Binance USDM unified MMR methods raise `NotSupported`, `live_risk_snapshot.py` now falls back to Binance raw `fapiPrivateGetLeverageBracket`; optional positions MMR lookup also treats `NotSupported` as unavailable rather than fatal. This addresses the reported real run blocker `exchange maintenance margin fetch failed: NotSupported` without weakening auth/permission failures. Verification: `pytest tests/test_live_risk_snapshot.py -q -p no:cacheprovider` -> 10 passed; `ruff check live_risk_snapshot.py tests/test_live_risk_snapshot.py` passed; `py_compile` passed; local no-credential producer probe still fails closed.
+- MTS-V1 live-risk snapshot authentication diagnostics improved: wrapped exchange failures now include safe Binance JSON `code/msg` when ccxt exposes them, while omitting raw non-JSON exception text to avoid accidental secret leakage. This is intended to distinguish `-2015` API/IP/permission failures from signature/timestamp failures during real credential retry. Verification: `pytest tests/test_live_risk_snapshot.py -q -p no:cacheprovider` -> 11 passed; `ruff check live_risk_snapshot.py tests/test_live_risk_snapshot.py` passed; `py_compile` passed.
+- MTS-V1 live-risk snapshot nonce follow-up: reported Binance `InvalidNonce code=-1021` showed the local request timestamp was 1000ms ahead of server time. `live_risk_snapshot.py` now enables ccxt Binance `adjustForTimeDifference` while preserving USDM futures mode, and tests assert the option is passed. Verification: `pytest tests/test_live_risk_snapshot.py -q -p no:cacheprovider` -> 11 passed; `ruff check live_risk_snapshot.py tests/test_live_risk_snapshot.py` passed; `py_compile` passed. User still needs Windows clock sync if the host clock remains ahead.
+- MTS-V1 Binance auth isolation probe added: `binance_auth_probe.py` performs a direct stdlib HMAC-signed read-only Binance USDM balance request using server time, prints only key/secret presence/length/shape plus safe `code/msg`, and never prints API values, signatures, or balances. This distinguishes ccxt integration issues from HMAC credential/key-type problems after repeated `-1022` reports. Verification: `pytest tests/test_binance_auth_probe.py tests/test_live_risk_snapshot.py -q -p no:cacheprovider` -> 15 passed; targeted `ruff` passed; `py_compile` passed.
+- MTS-V1 real credential probe result reported by user: mainnet direct HMAC probe returned `code=-1022` while testnet returned `code=-2015`, with `key_len=64`, `secret_len=64`, and `secret_shape=hmac_64_alnum_candidate`. This classifies the current blocker as a mainnet API key recognized by Binance but paired with a non-matching HMAC secret or incompatible key generation path; not a ccxt producer bug.
+- MTS-V1 live-readiness credential blocker cleared with a newly generated Binance HMAC API key: direct `binance_auth_probe.py` returned `signed_balance=ready http_status=200`, `live_risk_snapshot.py` wrote `state/live_risk_snapshot.real.json` with `ready=true`, `live_readiness_gate.py` returned `blocked=False allows_new_signals=True events=19 exits=5`, and `live_account_reconciliation.py` returned `ready=true symbols_ready=5/5`. These are read-only / paper-only gates only; no live order path or live-ready promotion is approved without explicit operator decision.
+- MTS-V1 paper-only soak preparation completed: added `paper_soak_runner.py` to repeat read-only Binance risk snapshots, strict paper runner cycles, account reconciliation, and model/scenario validation; added `model_scenario_validation.py` to verify accepted profile (`15m/4h`, core5 RSM, no L3 cap), risk gate state, reconciliation cleanliness, trade lifecycle coverage, and secret-safe artifacts. Existing real paper artifact validates as `ready=true failures=0` with 19 events, 5 exits, 5 entry signals, 9 layer fills, and 4 risk exits. Verification: `py_compile`, `ruff`, strict `mypy --follow-imports=silent`, targeted new tests `4 passed`, adjacent live/paper tests `23 passed`, and `git diff --check` passed. Live orders remain unapproved.
+- MTS-V1 paper-only soak first real operator run stopped at cycle 1 on Binance `InvalidNonce code=-1021` (`Timestamp ... 1000ms ahead of the server's time`) before paper artifacts were produced. `paper_soak_runner.py` now retries only that nonce-ahead failure once after explicit ccxt exchange time-difference refresh, while preserving fail-closed behavior for other exchange errors. Verification: `py_compile`, `ruff`, focused soak tests `3 passed`, adjacent live/paper tests `24 passed`, and strict `mypy --follow-imports=silent` passed.
+- MTS-V1 1-hour paper-only soak completed successfully on real read-only Binance credentials: `paper_soak_runner.py --cycles 12 --interval-sec 300 --days 1` returned `ready=true cycles=12/12`. All cycles had `failures=[]`, strict paper `blocked=false`, `risk_gate_allows_new_signals=true`, reconciliation `symbols_ready=5/5`, and scenario validation `ready=true failures=0`; each cycle reproduced the same 1-day paper artifact shape (`events=19`, `exits=5`, `entry_signals=5`, `layer_fills=9`, `risk_exits=4`). This remains paper-only evidence; live order enablement is still not approved.
+
+## Mostria (vibe-web) ?꾨즺 ?대젰
+
+??`project-status/2026-Q2.md` 李몄“. `git log --oneline Projects/vibe-web/` 濡쒕룄 ?뺤씤 媛??
+
+codex
+**Position**  
+axis A는 구현은 작고 원인 위치도 맞지만, 현재 수치 그대로는 “자연 PASS”보다 “목표 지표 보정” 위험이 큽니다.
+
+**Reasoning**  
+1. SNN 정합성: 부분 정합. anger fire를 affiliation 저항 신호로 쓰는 것은 자연스럽지만, `fire_rate >= 0.5` 하드 게이트는 창발 신호를 다시 규칙 분기로 환원합니다. `0.5`는 분포/기존 발화 의미/민감도 실험 없이는 정당화가 약합니다.
+
+2. 거짓 PASS 위험: 중간 위험. pair를 직접 주입하거나 sticky state를 만들지는 않으므로 이전 5개 hotfix보다는 낫지만, `score *= 0.6`이 active_factions 유지라는 acceptance 병목을 직접 겨냥합니다. seed 3개만 통과하면 사실상 보정 PASS입니다.
+
+3. 인과 사슬 자연성: 가능하지만 역공학 냄새가 있습니다. “분노한 피해자가 가해 lord faction에 덜 흡수된다”는 도메인 인과는 자연스럽지만, 최종 목표가 `grievance_pairs_end >= 1`이고 조작점이 collapse 직전 affiliation score라면 검증 없이는 후행 지표 맞춤입니다.
+
+**Concerns**  
+구현 영향은 작아도 회귀면은 넓습니다: faction absorption, active_factions, grievance propagation, lord membership, SNN indexing 안정성에 걸립니다. 특히 `chiljeong[1]` 인덱스 의존과 lord set 조회 비용/결측 처리, fire_rate 미초기화 케이스를 방어해야 합니다.
+
+**Recommendation**  
+axis A를 바로 상수 확정 패치로 넣지 말고 실험 플래그/계측으로 먼저 검증하십시오. 최소 비교는 baseline, threshold 없이 연속 dampen, `0.5/0.6` hard gate, territory cross-propagation 강화입니다. 승격 조건은 acceptance #2만이 아니라 active_factions 분포, affiliation transition 로그, grievance 대상 lord faction 흡수율, 비-grievance population 영향이 함께 자연스럽게 움직이는 것입니다.
+
+[POSITION: axis A는 도메인 인과는 있으나 현재 상수형 hard gate는 보정 PASS 위험이 커서 계측 실험 후 승격해야 한다]
+2026-04-28T14:43:15.788125Z ERROR codex_core::session: failed to record rollout items: thread 019dd48a-bec1-7073-918d-5ea6510d098a not found
+tokens used
+27,497

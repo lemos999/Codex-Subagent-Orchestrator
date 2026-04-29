@@ -1,0 +1,60 @@
+# Discussion Summary
+
+**Topic**: Phase 14B-A axis A spec 외부 엔진 cross-check (1라운드 quick).
+
+## 컨텍스트
+
+loom 프로젝트는 자율 사회 시뮬 + SNN 창발 + PersonaBrain 논문 출판이 3계층 목표. 현재 Phase 17 Φ-3 Struggle 단계. Φ-3 acceptance 3종 중 #2 (grievance_pairs_end ≥ 1)가 자연 측정에서 0/0/0으로 FAIL (Case C). 진단: Phase 14 propagation은 작동(중간 tick pair=1)했으나 후기 active_factions=1 collapse로 cross-faction pair 소멸.
+
+## axis A 제안 (검토 대상)
+
+_compute_affiliation_tick (line 1207~1256)에 dampen 블록 8줄 추가:
+- 페르소나의 grievance_lord_id가 후보 faction의 lord 집합에 포함
+- AND SNN anger 뉴런 chiljeong[1] fire_rate ≥ SNN_ANGER_AFFILIATION_GATE (=0.5)
+- AND grievance_count ≥ MIN_SHARED_GRIEVANCE_COUNT (=2, 기존 상수)
+- → score *= GRIEVANCE_LORD_FACTION_DAMPEN (=0.6)
+
+신규 상수 2개: GRIEVANCE_LORD_FACTION_DAMPEN=0.6, SNN_ANGER_AFFILIATION_GATE=0.5
+
+인과 가설: anger fire 페르소나가 자기 grievance 대상 lord faction에 affiliation dampen → 흡수 회피 → active_factions ≥ 2 유지 → cross-faction pair 응결 가능 → acceptance #2 자연 PASS
+
+## 검토 질문 (3가지)
+
+1. **SNN 창발 정신 정합성**: SNN anger 뉴런(chiljeong[1])을 자연 게이트로 활용하는 설계가 "규칙 < 창발" 원칙에 정합하는가? 아니면 또 다른 규칙 강제(threshold 기반 분기)인가? 게이트 임계 0.5는 정당화 가능한가?
+
+2. **거짓 PASS 패턴 잠복 위험**: dampen 0.6 값이 acceptance #2를 "자연 PASS"시키는 게 아니라 "강제 PASS"시키는 인공 보정 아닌가? Phase 17 hotfix v1에서 제거된 5건의 거짓 보정(collapse_branch_pressure, follower reserve, resonance carrier sticky, artificial grievance pair injection, sticky lord_id guard)과 본질적으로 다른가, 아니면 동일 패턴인가?
+
+3. **인과 사슬 자연성**: 위 인과 가설(anger gate → dampen → active_factions 유지 → pair 응결)이 자연 mechanism의 연쇄로 보이는가, 아니면 "acceptance #2를 풀기 위해 거꾸로 설계된" 역공학 인과인가? 필요 시 axis A 외 다른 차원(예: territory cross-propagation 강화, MIN_SHARED_GRIEVANCE_COUNT 조정, 다른 SNN 뉴런 활용)이 더 자연스러운가?
+
+## 응답 형식
+
+각 질문에 대해 결론(정합/위험/대안) + 근거 1-2문장. 모호한 합의보다 명확한 이견을 더 가치 있게 평가. 본인의 엔진 강점(Claude=정밀 검증, Codex=구현 가능성, Gemini=확장성·창발) 관점 명시.
+**Rounds**: 1/1
+**Converged**: no
+
+## Conclusion
+
+## Final Conclusion — Phase 14B-A axis A Cross-Check
+
+### Consensus
+- axis A는 acceptance #2 PASS를 목적으로 설계된 역공학 조건
+- 후기 active_factions collapse가 Case C의 실제 근본 원인
+- 근본 추적 없이 dampen 삽입은 선행 제거된 5건 거짓 보정과 구조 동형 위험
+
+### Disputed
+- **도메인 인과 인정 여부**: Claude(기각 — 재포장 거짓 보정) vs. Codex(조건부 허용 — 실험 후 승격)
+- **SNN gate 0.5의 창발 정당화**: 두 엔진 모두 정당화 근거 미확보
+
+### Recommendation
+**axis A 기각, territory cross-propagation 강화 우선 추적.**
+- Phase 14 propagation 중간 tick에서 pair=1이 후기에 0으로 collapse하는 인과 경로를 먼저 확정
+- active_factions ≥ 2 유지는 affiliation dampen이 아닌 territory 설계 차원에서 해결
+- axis A는 근본 해결 후 창발 관찰 데이터가 anger gate 임계를 지지할 때 재평가
+
+### Open Questions
+1. active_factions collapse의 정확한 tick 및 트리거 조건
+2. territory cross-prop 강화만으로 Case C 해결 가능한지 시뮬 검증 필요
+3. SNN anger fire_rate를 hardcode가 아닌 적응형 임계로 전환 가능성
+
+### Actionable Tasks
+- `/sub Phase 17 Case C: active_factions collapse 인과 추적 — tick별 faction count 로그 + 소멸 조건 특정, axis A 없이 territory cross-prop 강화 패치 설계`

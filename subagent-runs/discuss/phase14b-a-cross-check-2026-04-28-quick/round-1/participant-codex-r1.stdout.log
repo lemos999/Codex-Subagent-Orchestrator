@@ -1,0 +1,17 @@
+**Position**  
+axis A는 구현은 작고 원인 위치도 맞지만, 현재 수치 그대로는 “자연 PASS”보다 “목표 지표 보정” 위험이 큽니다.
+
+**Reasoning**  
+1. SNN 정합성: 부분 정합. anger fire를 affiliation 저항 신호로 쓰는 것은 자연스럽지만, `fire_rate >= 0.5` 하드 게이트는 창발 신호를 다시 규칙 분기로 환원합니다. `0.5`는 분포/기존 발화 의미/민감도 실험 없이는 정당화가 약합니다.
+
+2. 거짓 PASS 위험: 중간 위험. pair를 직접 주입하거나 sticky state를 만들지는 않으므로 이전 5개 hotfix보다는 낫지만, `score *= 0.6`이 active_factions 유지라는 acceptance 병목을 직접 겨냥합니다. seed 3개만 통과하면 사실상 보정 PASS입니다.
+
+3. 인과 사슬 자연성: 가능하지만 역공학 냄새가 있습니다. “분노한 피해자가 가해 lord faction에 덜 흡수된다”는 도메인 인과는 자연스럽지만, 최종 목표가 `grievance_pairs_end >= 1`이고 조작점이 collapse 직전 affiliation score라면 검증 없이는 후행 지표 맞춤입니다.
+
+**Concerns**  
+구현 영향은 작아도 회귀면은 넓습니다: faction absorption, active_factions, grievance propagation, lord membership, SNN indexing 안정성에 걸립니다. 특히 `chiljeong[1]` 인덱스 의존과 lord set 조회 비용/결측 처리, fire_rate 미초기화 케이스를 방어해야 합니다.
+
+**Recommendation**  
+axis A를 바로 상수 확정 패치로 넣지 말고 실험 플래그/계측으로 먼저 검증하십시오. 최소 비교는 baseline, threshold 없이 연속 dampen, `0.5/0.6` hard gate, territory cross-propagation 강화입니다. 승격 조건은 acceptance #2만이 아니라 active_factions 분포, affiliation transition 로그, grievance 대상 lord faction 흡수율, 비-grievance population 영향이 함께 자연스럽게 움직이는 것입니다.
+
+[POSITION: axis A는 도메인 인과는 있으나 현재 상수형 hard gate는 보정 PASS 위험이 커서 계측 실험 후 승격해야 한다]

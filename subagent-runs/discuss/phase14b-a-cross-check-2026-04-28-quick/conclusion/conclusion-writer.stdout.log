@@ -1,0 +1,24 @@
+## Final Conclusion — Phase 14B-A axis A Cross-Check
+
+### Consensus
+- axis A는 acceptance #2 PASS를 목적으로 설계된 역공학 조건
+- 후기 active_factions collapse가 Case C의 실제 근본 원인
+- 근본 추적 없이 dampen 삽입은 선행 제거된 5건 거짓 보정과 구조 동형 위험
+
+### Disputed
+- **도메인 인과 인정 여부**: Claude(기각 — 재포장 거짓 보정) vs. Codex(조건부 허용 — 실험 후 승격)
+- **SNN gate 0.5의 창발 정당화**: 두 엔진 모두 정당화 근거 미확보
+
+### Recommendation
+**axis A 기각, territory cross-propagation 강화 우선 추적.**
+- Phase 14 propagation 중간 tick에서 pair=1이 후기에 0으로 collapse하는 인과 경로를 먼저 확정
+- active_factions ≥ 2 유지는 affiliation dampen이 아닌 territory 설계 차원에서 해결
+- axis A는 근본 해결 후 창발 관찰 데이터가 anger gate 임계를 지지할 때 재평가
+
+### Open Questions
+1. active_factions collapse의 정확한 tick 및 트리거 조건
+2. territory cross-prop 강화만으로 Case C 해결 가능한지 시뮬 검증 필요
+3. SNN anger fire_rate를 hardcode가 아닌 적응형 임계로 전환 가능성
+
+### Actionable Tasks
+- `/sub Phase 17 Case C: active_factions collapse 인과 추적 — tick별 faction count 로그 + 소멸 조건 특정, axis A 없이 territory cross-prop 강화 패치 설계`

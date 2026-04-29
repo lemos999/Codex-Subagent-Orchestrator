@@ -1,0 +1,50 @@
+## Discussion Topic
+Phase 14B-A axis A spec 외부 엔진 cross-check (1라운드 quick).
+
+## 컨텍스트
+
+loom 프로젝트는 자율 사회 시뮬 + SNN 창발 + PersonaBrain 논문 출판이 3계층 목표. 현재 Phase 17 Φ-3 Struggle 단계. Φ-3 acceptance 3종 중 #2 (grievance_pairs_end ≥ 1)가 자연 측정에서 0/0/0으로 FAIL (Case C). 진단: Phase 14 propagation은 작동(중간 tick pair=1)했으나 후기 active_factions=1 collapse로 cross-faction pair 소멸.
+
+## axis A 제안 (검토 대상)
+
+_compute_affiliation_tick (line 1207~1256)에 dampen 블록 8줄 추가:
+- 페르소나의 grievance_lord_id가 후보 faction의 lord 집합에 포함
+- AND SNN anger 뉴런 chiljeong[1] fire_rate ≥ SNN_ANGER_AFFILIATION_GATE (=0.5)
+- AND grievance_count ≥ MIN_SHARED_GRIEVANCE_COUNT (=2, 기존 상수)
+- → score *= GRIEVANCE_LORD_FACTION_DAMPEN (=0.6)
+
+신규 상수 2개: GRIEVANCE_LORD_FACTION_DAMPEN=0.6, SNN_ANGER_AFFILIATION_GATE=0.5
+
+인과 가설: anger fire 페르소나가 자기 grievance 대상 lord faction에 affiliation dampen → 흡수 회피 → active_factions ≥ 2 유지 → cross-faction pair 응결 가능 → acceptance #2 자연 PASS
+
+## 검토 질문 (3가지)
+
+1. **SNN 창발 정신 정합성**: SNN anger 뉴런(chiljeong[1])을 자연 게이트로 활용하는 설계가 "규칙 < 창발" 원칙에 정합하는가? 아니면 또 다른 규칙 강제(threshold 기반 분기)인가? 게이트 임계 0.5는 정당화 가능한가?
+
+2. **거짓 PASS 패턴 잠복 위험**: dampen 0.6 값이 acceptance #2를 "자연 PASS"시키는 게 아니라 "강제 PASS"시키는 인공 보정 아닌가? Phase 17 hotfix v1에서 제거된 5건의 거짓 보정(collapse_branch_pressure, follower reserve, resonance carrier sticky, artificial grievance pair injection, sticky lord_id guard)과 본질적으로 다른가, 아니면 동일 패턴인가?
+
+3. **인과 사슬 자연성**: 위 인과 가설(anger gate → dampen → active_factions 유지 → pair 응결)이 자연 mechanism의 연쇄로 보이는가, 아니면 "acceptance #2를 풀기 위해 거꾸로 설계된" 역공학 인과인가? 필요 시 axis A 외 다른 차원(예: territory cross-propagation 강화, MIN_SHARED_GRIEVANCE_COUNT 조정, 다른 SNN 뉴런 활용)이 더 자연스러운가?
+
+## 응답 형식
+
+각 질문에 대해 결론(정합/위험/대안) + 근거 1-2문장. 모호한 합의보다 명확한 이견을 더 가치 있게 평가. 본인의 엔진 강점(Claude=정밀 검증, Codex=구현 가능성, Gemini=확장성·창발) 관점 명시.
+
+## Your Persona
+You are: **실행가능성 현실주의자**
+Stay in character throughout your response. Speak from this persona's perspective and expertise.
+
+## Your Role
+You are analyzing this topic from the perspective of: **구현 가능성·코드 영향 관점**
+
+
+## Instructions
+Provide your analysis. Structure your response:
+1. **Position**: your main argument
+2. **Reasoning**: supporting evidence
+3. **Concerns**: potential risks or downsides
+4. **Recommendation**: your suggested approach
+
+IMPORTANT: End your response with EXACTLY ONE of these labels on its own line:
+[POSITION: one-line summary of your stance]
+
+Keep response under 40 lines.
