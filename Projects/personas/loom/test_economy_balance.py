@@ -17,6 +17,19 @@ from core.multi_tick_engine import MultiTickEngine
 from ontology import NPC_PRICES, Relationship
 
 
+class _ExodusForceRng:
+    """Test-only wrapper: force exodus roll while delegating all other RNG calls."""
+
+    def __init__(self, base):
+        self._base = base
+
+    def random(self):
+        return 0.0
+
+    def __getattr__(self, name):
+        return getattr(self._base, name)
+
+
 def total_gold(engine: MultiTickEngine) -> float:
     wallets = sum(wallet.total_in_gold() for wallet in engine.wallets.values())
     treasuries = sum(t.treasury_gold for t in engine.territories.values())
@@ -164,12 +177,12 @@ def test_exodus_event_and_population_shift() -> tuple[bool, str]:
     before_from = sum(1 for p in engine.personas.values() if p.territory == from_tid)
     before_to = sum(1 for p in engine.personas.values() if p.territory == to_tid)
 
-    old_random = np.random.random
-    np.random.random = lambda: 0.0
+    old_rng = engine._np_rng
+    engine._np_rng = _ExodusForceRng(old_rng)
     try:
         result = engine.tick()
     finally:
-        np.random.random = old_random
+        engine._np_rng = old_rng
 
     exodus = [
         evt for evt in result.get("economy_events", [])
