@@ -227,7 +227,7 @@ HOMEOSTASIS_DRIFT_MARGIN_SCALE = 0.5   # 완화 모드에서의 DRIFT_MARGIN_MIN
 # 근거: v6 probe 3 seed 전원 active_end=1 붕괴 (absorbing state). B+C 조합으로 예방+치료.
 # B. Minority persistence: 소규모 faction의 territory 동거 가산을 줘서 멸종 직전 유지
 MINORITY_PERSISTENCE_MAX_MEMBERS = 2      # members <= 2일 때 boost 적용
-MINORITY_PERSISTENCE_BOOST = 0.15         # score 가산값 (= DRIFT_MARGIN_MIN * HOMEOSTASIS_DRIFT_MARGIN_SCALE 와 동일 규모)
+MINORITY_PERSISTENCE_BOOST = 0.20         # score 가산값 (Phase 17 Case-C v2 [2026-04-30]: 0.15→0.20 강화 — drift_recovery 빈도 ↑ 목적, closure-v2 데이터 근거)
 # C. Founder respawn: active < target이면 K틱 주기로 territory lord 기반 신규 faction 생성
 FOUNDER_RESPAWN_EVERY = 480               # FACTION_COMMIT_EVERY * 10 (48 * 10). commit 주기와 정합
 FOUNDER_RESPAWN_TARGET_ACTIVE = 2         # active 가 2 미만일 때만 발동 (overspawn 방지)
@@ -249,6 +249,17 @@ UPRISING_CHECK_INTERVAL = 48         # 봉기 검사 주기 (FACTION_COOLDOWN_TI
 UPRISING_GRIEVANCE_DECAY = 0.5       # 봉기 후 leader+followers grievance 감쇠 (try_exodus와 정합)
 UPRISING_FOLLOWER_MAX = 2            # 동조 멤버 최대 수 (leader + 2 = 최대 3명 이동)
 SNN_ANGER_FIRE_THRESHOLD = 0.6       # chiljeong[1] anger 발화 판정 (Phase 14-B 인프라)
+
+# ── Phase 14 grievance resonance 보강 (2026-04-28) ──────────────────────
+# Φ-3 hotfix v1 closure §6 주 finding 대응: cross-territory lord_id 자연 전파.
+# 자기 territory grievance가 강하면 자기 lord 유지 (자연 가중치 비교).
+GRIEVANCE_PROPAGATE_TRUST_MIN = 0.6
+GRIEVANCE_DONOR_MIN = 0.5
+
+# ── Phase 17 Φ-3 Case-C P2: Founder grace affiliation 흡수 면역 (2026-04-30) ──
+# 근거: respawn fallback founder의 즉시 흡수 (DIAGNOSIS H2c) 완화.
+# grace_until_tick 동안 founder_lineage 멤버에게 자연 boost. RESPAWN_GRACE_TICKS=200 기존값 무수정.
+GRACE_AFFILIATION_BOOST = 0.12       # W_LINEAGE(0.2)의 60% 수준. THETA_JOIN 우회 금지값.
 
 # 하위 호환 (기존 import 유지용, 실제 경로는 동적 계산이 우선)
 DRIFT_MARGIN = DRIFT_MARGIN_MIN  # deprecated: 동적 계산 사용

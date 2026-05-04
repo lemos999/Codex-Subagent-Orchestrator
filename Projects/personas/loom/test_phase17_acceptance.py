@@ -17,6 +17,8 @@ import sys
 import time
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parent
 _SIMULATION_CACHE = {}
 
@@ -356,21 +358,65 @@ def test_phi3_uprising_emerges_under_grievance_pressure():
 
 
 def test_phi3_grievance_pairs_resonate():
-    """Φ-3 acceptance #2: grievance_pairs_end ≥ 1 (3/3)."""
+    """Φ-3 acceptance #2: grievance_pairs_end >= 1 (3/3, cross-territory 자연 응결)."""
     for seed in [7, 13, 42]:
         engine = run_simulation(seed=seed, ticks=5000)
-        targets = engine.faction_grievance_targets()
-        # 같은 lord_id를 ≥ 2명씩 가진 faction 쌍 카운트
-        by_lord: dict[str, list[str]] = {}
-        for fid, lord_map in targets.items():
-            for lord_id, cnt in lord_map.items():
-                if cnt >= 2:
-                    by_lord.setdefault(lord_id, []).append(fid)
-        pair_count = sum(
-            len(fids) * (len(fids) - 1) // 2
-            for fids in by_lord.values() if len(fids) >= 2
+        pair_count = engine.shared_grievance_pairs_count(min_carriers=2)
+        assert pair_count >= 1, f"seed {seed}: grievance_pairs 0쌍 (cross-territory 자연 응결 실패)"
+
+
+def test_grievance_pair_helper_ssot():
+    """probe와 pytest가 같은 engine helper를 호출한다."""
+    import observe_phase17_emergence as observe_mod
+    from core.multi_tick_engine import MultiTickEngine
+
+    assert not hasattr(observe_mod, "_shared_grievance_pairs"), (
+        "legacy probe helper _shared_grievance_pairs는 SSoT 통합으로 제거되어야 함"
+    )
+    assert hasattr(MultiTickEngine, "shared_grievance_pairs_count"), (
+        "engine.shared_grievance_pairs_count helper 누락"
+    )
+    engine = MultiTickEngine(seed=7)
+    with pytest.raises(ValueError):
+        engine.shared_grievance_pairs_count(min_carriers=0)
+
+
+def test_grievance_propagation_no_artificial_sticky():
+    """propagation 본문 정적 검사와 동일 입력 반복 호출 안정성 검증."""
+    import inspect
+    import re
+    from core.multi_tick_engine import MultiTickEngine
+
+    src = inspect.getsource(MultiTickEngine._propagate_grievance_lord_id_cross_territory)
+    forbidden_tokens = ["sticky", "previous_lord", "prev_lord", "hold"]
+    for kw in forbidden_tokens:
+        assert re.search(rf"\b{re.escape(kw)}\b", src) is None, (
+            f"propagation 본문에 금지 토큰 '{kw}' 발견"
         )
-        assert pair_count >= 1, f"seed {seed}: grievance_pairs 0쌍"
+    for kw in ["_cache", "_sticky_"]:
+        assert kw not in src, f"propagation 본문에 금지 문자열 '{kw}' 발견"
+
+    engine = run_simulation(seed=7, ticks=200)
+    engine._propagate_grievance_lord_id_cross_territory()
+    snapshot_b = {pid: inner.grievance_lord_id for pid, inner in engine.inners.items()}
+    engine._propagate_grievance_lord_id_cross_territory()
+    snapshot_c = {pid: inner.grievance_lord_id for pid, inner in engine.inners.items()}
+    assert snapshot_b == snapshot_c, "propagation 반복 호출 결과가 동일해야 함"
+
+
+@pytest.mark.slow
+def test_grievance_propagate_natural_emergence():
+    """5000틱 이후 cross-territory grievance pair가 자연 발생한다."""
+    for seed in [7, 13, 42]:
+        engine = run_simulation(seed=seed, ticks=5000)
+        pairs_wide = engine.shared_grievance_pairs_count(min_carriers=1)
+        pairs_strict = engine.shared_grievance_pairs_count(min_carriers=2)
+        assert pairs_wide >= 1, (
+            f"seed {seed}: cross-territory propagation 실패 (probe lens=1, pairs={pairs_wide})"
+        )
+        assert pairs_strict >= 1, (
+            f"seed {seed}: cross-territory 응결 실패 (pytest strict=2, pairs={pairs_strict})"
+        )
 
 
 def test_phi3_dom_share_natural_imbalance():
@@ -399,13 +445,18 @@ def test_phi3_no_deaths():
 
 
 def test_phi3_branch_lineage_chain():
-    """분파 신규 faction의 founder_lineage가 부모 fid 포함."""
+    """분파 신규 faction의 founder_lineage가 부모 fid 포함.
+
+    skip-when-zero 차단: 3 seed 합계 branches >= 1을 명시 assertion으로 보장 (R5 H2c).
+    """
+    total_branches = 0
     for seed in [7, 13, 42]:
         engine = run_simulation(seed=seed, ticks=5000)
         branches = [
             e for e in engine.event_log
             if e["type"] == "faction_spawn" and e.get("source") == "uprising_branch"
         ]
+        total_branches += len(branches)
         for b in branches:
             new_fid = b["fid"]
             parent_fid = b["parent_fid"]
@@ -414,6 +465,9 @@ def test_phi3_branch_lineage_chain():
                 f"분파 {new_fid}의 founder_lineage에 부모 {parent_fid} 없음: "
                 f"{new_faction.founder_lineage}"
             )
+    assert total_branches >= 1, (
+        "3 seed 합계 uprising_branch 0건 = mechanism 단절 (R5 H2c 거짓 PASS 차단)"
+    )
 
 
 def test_phi3_determinism_seed42():
@@ -421,6 +475,143 @@ def test_phi3_determinism_seed42():
     h1 = run_simulation_hash(seed=42, ticks=5000)
     h2 = run_simulation_hash(seed=42, ticks=5000)
     assert h1 == h2, f"determinism break: {h1} vs {h2}"
+
+
+def test_respawn_seed_group_emitted():
+    """P1: respawn 시 seed_group 이벤트가 자연 발생 (founder만 만들지 않음).
+
+    Phase 17 Φ-3 Case-C P1 핵심 검증. seed group 동기 가입 mechanism 자연 발화 보장.
+    """
+    total_seed_events = 0
+    for seed in [7, 13, 42]:
+        engine = run_simulation(seed=seed, ticks=5000)
+        total_seed_events += sum(
+            1 for e in engine.event_log if e["type"] == "respawn_seed_group"
+        )
+    assert total_seed_events >= 1, (
+        "3 seed 합계 respawn_seed_group 이벤트 0건 = P1 미작동"
+    )
+
+
+def test_grace_boost_terminates():
+    """P2: grace 종료 시 boost가 정확히 0으로 사라짐 (top-down 보호 차단).
+
+    검증 흐름 (micro-simulation 으로 결정성 보존):
+    1. seed=42, 2000틱 진행. respawn_faction 이벤트는 없을 수 있으므로
+       대신 첫 번째 created faction 의 grace_until_tick 추출 (init_founder_seeds 또는 respawn 무관).
+    2. grace 활성 구간 중간 tick `t_mid` 에서 affiliation score 측정 1
+    3. grace 종료 직후 tick `t_post = grace_until_tick + 1` 에서 측정 2
+    4. boost = (grace 활성 score) - (grace 비활성 score) 비교
+
+    boost 측정 방식: 같은 engine 상태에서 faction.grace_until_tick 을 0 으로 강제 설정한
+    상태와 원본 상태의 score 차이를 측정. _compute_affiliation_tick 직접 호출.
+    """
+    from core.multi_tick_engine import MultiTickEngine
+
+    engine = MultiTickEngine(seed=42)
+    # 충분한 tick 진행으로 faction grace 가 형성된 상태 확보
+    for _ in range(200):
+        engine.tick()
+
+    # grace 활성 faction 식별: grace_until_tick > current_tick
+    cur_tick = engine.time.tick
+    grace_active = [
+        (fid, fac) for fid, fac in engine.factions.items()
+        if fac.grace_until_tick > cur_tick
+    ]
+    if not grace_active:
+        # grace 활성 faction 없으면 검증 전제 미달 — skip-equivalent (skipped pass 차단을 위해 명시 fail)
+        # 단 init_founder_seeds 의 created_tick=0 + RESPAWN_GRACE_TICKS=200 이므로
+        # cur_tick<200 이면 활성. 200틱 진행 후 cur_tick=200 → grace 종료 직후 케이스 가능.
+        # 따라서 100틱만 진행한 후 다시 측정.
+        engine = MultiTickEngine(seed=42)
+        for _ in range(100):
+            engine.tick()
+        cur_tick = engine.time.tick
+        grace_active = [
+            (fid, fac) for fid, fac in engine.factions.items()
+            if fac.grace_until_tick > cur_tick
+        ]
+
+    assert grace_active, (
+        "grace 활성 faction 0건 — P2 검증 전제 실패 (RESPAWN_GRACE_TICKS=200 가정)"
+    )
+
+    fid_test, faction_test = grace_active[0]
+
+    # boost 측정: faction.grace_until_tick 의 원본 / 강제 0 두 케이스에서 score 비교
+    # _compute_affiliation_tick 은 inners[*].affiliation_scores 를 update 하므로
+    # 호출 전후 prev_scores 보존 + score deepcopy 비교
+
+    def _measure_score(fid: str, force_grace_off: bool) -> dict[str, float]:
+        """모든 persona 의 fid 에 대한 affiliation score 측정. force_grace_off=True 시 grace 강제 종료."""
+        original_grace = engine.factions[fid].grace_until_tick
+        if force_grace_off:
+            engine.factions[fid].grace_until_tick = 0
+        # affiliation_scores snapshot 보존 + recompute
+        prev_snapshot = {
+            pid: dict(engine.inners[pid].affiliation_scores)
+            for pid in engine.inners
+        }
+        engine._compute_affiliation_tick()
+        scores = {
+            pid: engine.inners[pid].affiliation_scores.get(fid, 0.0)
+            for pid in engine.inners
+        }
+        # 복원
+        for pid, snap in prev_snapshot.items():
+            engine.inners[pid].affiliation_scores = snap
+        engine.factions[fid].grace_until_tick = original_grace
+        return scores
+
+    scores_with_grace = _measure_score(fid_test, force_grace_off=False)
+    scores_no_grace = _measure_score(fid_test, force_grace_off=True)
+
+    # boost 는 같은 territory 거주자에게만 적용 → 그런 persona 식별
+    same_territory_pids = [
+        pid for pid in engine.inners
+        if engine._same_territory(engine.personas[pid], fid_test) > 0.5
+    ]
+    assert same_territory_pids, (
+        f"faction {fid_test} 와 같은 territory persona 0명 — boost 측정 전제 실패"
+    )
+
+    # grace 활성 구간: same-territory persona 에 boost 가산이 있어야 함
+    boost_present = any(
+        scores_with_grace[pid] - scores_no_grace[pid] >= 0.10
+        for pid in same_territory_pids
+    )
+    assert boost_present, (
+        f"grace 활성 구간 boost 미관측 "
+        f"(same-territory persona {len(same_territory_pids)}명 중 0명에서 boost ≥ 0.10) — "
+        f"P2 grace boost 분기 미작동"
+    )
+
+    # grace 종료 시뮬: faction.grace_until_tick = cur_tick (즉 cur_tick > grace_until_tick = false)
+    engine.factions[fid_test].grace_until_tick = engine.time.tick
+    # 측정
+    prev_snapshot = {
+        pid: dict(engine.inners[pid].affiliation_scores)
+        for pid in engine.inners
+    }
+    engine._compute_affiliation_tick()
+    scores_post_grace = {
+        pid: engine.inners[pid].affiliation_scores.get(fid_test, 0.0)
+        for pid in engine.inners
+    }
+    for pid, snap in prev_snapshot.items():
+        engine.inners[pid].affiliation_scores = snap
+
+    # grace 종료 직후 boost 잔존 검사: scores_post_grace ≈ scores_no_grace (force_grace_off=True 와 등가)
+    # 단 prev_scores DECAY 가 다를 수 있으므로 임계 0.005 (자연 가산 4 조건 중 #2: 정확히 0)
+    boost_residual_max = max(
+        abs(scores_post_grace[pid] - scores_no_grace[pid])
+        for pid in same_territory_pids
+    )
+    assert boost_residual_max < 0.005, (
+        f"grace 종료 후 boost 잔존 (max={boost_residual_max:.4f}) — top-down 보호 의심 "
+        f"(자연 가산 4 조건 중 #2 'grace 종료 정확히 0' 위반)"
+    )
 
 
 def test_branch_faction_id_no_collision() -> None:
@@ -654,6 +845,9 @@ def main() -> int:
         ("uprising_tick_no_artificial_injection", test_uprising_tick_no_artificial_injection),
         ("phi3_uprising_emerges_under_grievance_pressure", test_phi3_uprising_emerges_under_grievance_pressure),
         ("phi3_grievance_pairs_resonate", test_phi3_grievance_pairs_resonate),
+        ("grievance_pair_helper_ssot", test_grievance_pair_helper_ssot),
+        ("grievance_propagation_no_artificial_sticky", test_grievance_propagation_no_artificial_sticky),
+        ("grievance_propagate_natural_emergence", test_grievance_propagate_natural_emergence),
         ("phi3_dom_share_natural_imbalance", test_phi3_dom_share_natural_imbalance),
         ("phi3_no_deaths", test_phi3_no_deaths),
         ("phi3_branch_lineage_chain", test_phi3_branch_lineage_chain),

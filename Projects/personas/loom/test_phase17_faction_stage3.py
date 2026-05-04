@@ -29,10 +29,13 @@ def test_stage3_minority_boost_constants_bounded() -> None:
         "boost 적용 범위와 homeostasis trigger 범위는 정합해야 한다"
     )
     assert 0 < MINORITY_PERSISTENCE_BOOST < 1.0, "boost는 score 스케일 내"
-    # boost == relaxed drift margin (0.15)
+    # Case-C v2 strengthened the boost above the relaxed drift margin.
     relaxed = DRIFT_MARGIN_MIN * HOMEOSTASIS_DRIFT_MARGIN_SCALE
-    assert abs(MINORITY_PERSISTENCE_BOOST - relaxed) < 1e-9, (
-        f"boost={MINORITY_PERSISTENCE_BOOST}는 relaxed margin={relaxed}와 동일 규모여야 한다"
+    assert MINORITY_PERSISTENCE_BOOST >= relaxed, (
+        f"boost={MINORITY_PERSISTENCE_BOOST}는 relaxed margin={relaxed} 이상이어야 한다"
+    )
+    assert abs(MINORITY_PERSISTENCE_BOOST - 0.20) < 1e-9, (
+        f"boost={MINORITY_PERSISTENCE_BOOST}는 Case-C v2 계약값 0.20이어야 한다"
     )
 
 

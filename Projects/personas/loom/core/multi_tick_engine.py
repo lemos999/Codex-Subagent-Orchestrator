@@ -65,6 +65,8 @@ from ontology.layers import (
     W_LINEAGE,
     THETA_UPRISING, UPRISING_CHECK_INTERVAL, UPRISING_GRIEVANCE_DECAY,
     UPRISING_FOLLOWER_MAX, SNN_ANGER_FIRE_THRESHOLD,
+    GRIEVANCE_PROPAGATE_TRUST_MIN, GRIEVANCE_DONOR_MIN,
+    GRACE_AFFILIATION_BOOST,
     NORM_PRIMITIVE_CATALOG, CHARTER_PRIMITIVE_COUNT,
     FACTION_PROJECT_EVERY, FACTION_HYSTERESIS,
     FACTION_TELEMETRY_BIAS_OWN, FACTION_TELEMETRY_BIAS_NEIGHBOR,
@@ -799,6 +801,27 @@ class MultiTickEngine:
                         "territory": metric.territory_id,
                         "density_ratio": round(metric.density_ratio, 4),
                     })
+        self._record_cross_faction_lord_pair_events()
+        if self.time.tick > 0 and self.time.tick % 500 == 0:
+            cross_faction_lord_pairs = {
+                lord_id: sorted(state["factions"])
+                for lord_id, state in getattr(self, "_cfl_pair_state", {}).items()
+            }
+            self.event_log.append({
+                "type": "active_factions_snapshot",
+                "tick": self.time.tick,
+                "active_count": sum(
+                    1 for fid in self.factions
+                    if len(self._faction_members_cache.get(fid, ())) > 0
+                ),
+                "faction_sizes": {
+                    fid: len(self._faction_members_cache.get(fid, ()))
+                    for fid in self.factions
+                    if len(self._faction_members_cache.get(fid, ())) > 0
+                },
+                "cross_faction_lord_count": len(cross_faction_lord_pairs),
+                "cross_faction_lord_pairs": cross_faction_lord_pairs,
+            })
         if economy_events:
             tick_result["economy_events"] = economy_events
             self.event_log.extend(economy_events)
@@ -1049,13 +1072,59 @@ class MultiTickEngine:
             "employment_cleanup": employment_cleanup,
         }
 
-    def _change_persona_faction(
+    def _record_founder_absorbed_snn_snapshot(
         self,
         pid: str,
+        prev: str | None,
         new_faction_id: str | None,
-        *,
         source: FactionChangeSource,
     ) -> None:
+        prev_faction_obj = self.factions.get(prev) if prev is not None else None
+        if (
+            prev_faction_obj is None
+            or prev_faction_obj.founder_pid != pid
+            or source not in ("affiliation", "drift")
+            or new_faction_id is None
+            or new_faction_id == prev
+        ):
+            return
+        founder_inner = self.inners[pid]
+        new_member_pids = [
+            p.id for p in self.personas.values()
+            if p.faction == new_faction_id and p.id in self.inners
+        ]
+        if new_member_pids:
+            avg_anger = float(np.mean([float(self.inners[m].chiljeong[1]) for m in new_member_pids]))
+            avg_fear = float(np.mean([float(self.inners[m].chiljeong[3]) for m in new_member_pids]))
+            avg_dignity = float(np.mean([float(self.inners[m].oyok[4]) for m in new_member_pids]))
+            avg_chronic = float(np.mean([float(self.inners[m].chronic_stress) for m in new_member_pids]))
+        else:
+            avg_anger = avg_fear = avg_dignity = avg_chronic = 0.0
+        from_member_pids = [
+            p.id for p in self.personas.values()
+            if p.faction == prev and p.id in self.inners
+        ]
+        self.event_log.append({
+            "type": "founder_absorbed_snn_snapshot",
+            "tick": self.time.tick,
+            "founder_pid": pid,
+            "from_faction": prev,
+            "to_faction": new_faction_id,
+            "source": source,
+            "founder_anger": float(founder_inner.chiljeong[1]),
+            "founder_fear": float(founder_inner.chiljeong[3]),
+            "founder_dignity": float(founder_inner.oyok[4]),
+            "founder_chronic_stress": float(founder_inner.chronic_stress),
+            "founder_grievance": float(founder_inner.grievance),
+            "absorbing_faction_avg_anger": avg_anger,
+            "absorbing_faction_avg_fear": avg_fear,
+            "absorbing_faction_avg_dignity": avg_dignity,
+            "absorbing_faction_avg_chronic": avg_chronic,
+            "absorbing_faction_size": len(new_member_pids),
+            "from_faction_size_at_absorb": len(from_member_pids),
+        })
+
+    def _change_persona_faction(self, pid: str, new_faction_id: str | None, *, source: FactionChangeSource) -> None:
         """persona.faction 쓰기 유일 경로. AST whitelist로 강제."""
         if source not in ("birth_founder", "affiliation", "drift", "conflict"):
             raise ValueError(f"invalid faction change source: {source!r}")
@@ -1079,6 +1148,18 @@ class MultiTickEngine:
             "to_faction": new_faction_id,
             "source": source,
         })
+        if source == "drift" and new_faction_id is not None:
+            new_member_count = len(self._faction_members_cache.get(new_faction_id, ())) + 1
+            if new_member_count <= MINORITY_PERSISTENCE_MAX_MEMBERS + 1:
+                self.event_log.append({
+                    "type": "drift_recovery_to_minority",
+                    "tick": self.time.tick,
+                    "pid": pid,
+                    "to_faction": new_faction_id,
+                    "new_member_count": new_member_count,
+                })
+        # [Phase 14B-d1 telemetry] founder_absorbed_snn_snapshot — G2 검증용 (mechanism 무수정)
+        self._record_founder_absorbed_snn_snapshot(pid, prev, new_faction_id, source)
 
     def _tick_faction_cooldown(self, pid: str) -> None:
         """persona.faction_cooldown 매 틱 1 감소."""
@@ -1203,12 +1284,44 @@ class MultiTickEngine:
         avg = sum(dists) / len(dists)
         return max(0.0, 1.0 - avg / PROXIMITY_DECAY_SCALE)
 
+    def _record_small_faction_snn_snapshot(self, fid: str, member_count: int) -> None:
+        if self.time.tick % FACTION_COMMIT_EVERY != 0:
+            return
+        members = self._faction_members_cache.get(fid, ())
+        if not members:
+            return
+        snn_dist = []
+        for member in members:
+            inner = self.inners[member.id]
+            snn_dist.append({
+                "pid": member.id,
+                "anger": float(inner.chiljeong[1]),
+                "fear": float(inner.chiljeong[3]),
+                "dignity": float(inner.oyok[4]),
+                "chronic_stress": float(inner.chronic_stress),
+                "grievance": float(inner.grievance),
+            })
+        self.event_log.append({
+            "type": "small_faction_snn_snapshot",
+            "tick": self.time.tick,
+            "fid": fid,
+            "member_count": member_count,
+            "members_snn": snn_dist,
+        })
+
+    def _grace_affiliation_bonus(self, persona: Persona, faction_id: str) -> float:
+        faction = self.factions.get(faction_id)
+        if faction is None or faction.grace_until_tick <= self.time.tick:
+            return 0.0
+        return GRACE_AFFILIATION_BOOST if self._same_territory(persona, faction_id) > 0.5 else 0.0
+
     def _compute_affiliation_tick(self) -> None:
         """매 틱 affiliation score를 갱신한다."""
         self._rebuild_faction_members_cache()
         # v6: 활성 인구 집계 (size tax 분모). inners 기준 = 살아있는 페르소나
         total_active = max(1, sum(1 for pid in self.personas if pid in self.inners))
         new_scores: dict[str, dict[str, float]] = {}
+        diagnostic_first_pid = min(self.personas, default=None)
         for pid in sorted(self.personas):
             if pid not in self.inners:
                 continue
@@ -1239,6 +1352,10 @@ class MultiTickEngine:
                 if 0 < member_count <= MINORITY_PERSISTENCE_MAX_MEMBERS:
                     if self._same_territory(persona, fid) > 0.5:
                         score += MINORITY_PERSISTENCE_BOOST
+                        if pid == diagnostic_first_pid:
+                            self.event_log.append({"type": "minority_boost_applied", "tick": self.time.tick, "fid": fid, "member_count": member_count})
+                            # [Phase 14B-d1 telemetry] small_faction_snn_snapshot — G3 검증용 (mechanism 무수정)
+                            self._record_small_faction_snn_snapshot(fid, member_count)
                 # Stage 6 H-lite: founder lineage identity affinity (2026-04-26)
                 if W_LINEAGE > 0 and persona.faction:
                     cur_faction = self.factions.get(persona.faction)
@@ -1248,6 +1365,10 @@ class MultiTickEngine:
                         lineage_b = set(cand_faction.founder_lineage) | {cand_faction.founder_pid}
                         overlap = len(lineage_a & lineage_b) / max(len(lineage_a), len(lineage_b), 1)
                         score += W_LINEAGE * overlap
+                # Φ-3 Case-C P2: founder grace 흡수 면역 (2026-04-30)
+                # 자연 가산 — same-territory 거주자에 grace 200틱 동안 GRACE_AFFILIATION_BOOST 가산.
+                # grace 종료 시 정확히 0. score *= 형태 금지 (임계 우회 차단).
+                score += self._grace_affiliation_bonus(persona, fid)
                 scored[fid] = DECAY * prev_scores.get(fid, 0.0) + score
             ranked = sorted(scored.items(), key=lambda kv: (-kv[1], kv[0]))
             new_scores[pid] = dict(ranked[:MAX_TRACKED_FACTIONS_PER_PERSONA])
@@ -1300,14 +1421,7 @@ class MultiTickEngine:
         self._rebuild_faction_members_cache()
 
     def _respawn_faction_tick(self) -> None:
-        """Stage 3 C: active faction 수가 TARGET 미만이면 K틱 주기로 territory lord 기반 신규 faction 생성.
-
-        **Absorbing state 탈출 유일 경로**. 기존 `_init_founder_seeds`(tick=0)와 달리 매 K틱 검사.
-        불변 제약:
-            - RNG는 반드시 `_derive_rng("faction_respawn", ...)`로 격리 (기존 seed 스트림 오염 방지)
-            - SSoT: `_change_persona_faction(..., source="birth_founder")` 재사용 (신규 source 금지)
-            - 기존 territory의 lord를 founder로 재사용. lord 없으면 최고 trust persona.
-        """
+        """Stage 3 C: respawn faction when active count is below target."""
         if self.time.tick == 0:
             return
         if self.time.tick % FOUNDER_RESPAWN_EVERY != 0:
@@ -1318,10 +1432,12 @@ class MultiTickEngine:
             if len(self._faction_members_cache.get(fid, ())) > 0
         )
         if active_count >= FOUNDER_RESPAWN_TARGET_ACTIVE:
+            self.event_log.append({"type": "respawn_skip_reason", "tick": self.time.tick, "phase": "pre", "reason": "active_target_met", "active_count": active_count})
             return
 
         # territory 우선순위: lord 존재 > faction 없는 거주자 수 많음 > sorted(id)
         territory_priority: list[tuple[int, int, str]] = []
+        phase_a_skips = []
         for territory in self.territories.values():
             free_residents = [
                 persona for persona in self.personas.values()
@@ -1330,6 +1446,7 @@ class MultiTickEngine:
                 and persona.id in self.inners
             ]
             if len(free_residents) < 3:
+                phase_a_skips.append({"territory_id": territory.id, "free_residents_count": len(free_residents)})
                 continue
             has_lord = 1 if territory.lord_id else 0
             # 우선순위 = lord 있음 우선(-has_lord), 거주자 많음 우선(-count), id 오름차순(territory.id)
@@ -1339,6 +1456,7 @@ class MultiTickEngine:
 
         for _, _, territory_id in territory_priority:
             if active_count >= FOUNDER_RESPAWN_TARGET_ACTIVE:
+                self.event_log.append({"type": "respawn_skip_reason", "tick": self.time.tick, "phase": "after_a", "reason": "phase_a_succeeded", "active_count": active_count, "phase_a_skips": phase_a_skips})
                 return  # 목표 달성 시 즉시 중단 (한 틱에 하나만 생성해도 target 도달하면 끝)
             territory = self.territories[territory_id]
             free_residents = [
@@ -1372,12 +1490,15 @@ class MultiTickEngine:
             active_count += 1
 
         if active_count >= FOUNDER_RESPAWN_TARGET_ACTIVE:
+            self.event_log.append({"type": "respawn_skip_reason", "tick": self.time.tick, "phase": "after_a", "reason": "phase_a_succeeded", "active_count": active_count, "phase_a_skips": phase_a_skips})
             self._rebuild_faction_members_cache()
             return
 
         # Stage 3 C fallback: collapse 이후 free resident가 0명이면 기존 거주자에서 founder를 분리한다.
         # 신규 source 없이 birth_founder를 재사용하고, faction write는 SSoT helper만 통과한다.
+        self.event_log.append({"type": "respawn_fallback_attempt", "tick": self.time.tick, "active_count_after_a": active_count, "phase_a_skips": phase_a_skips})
         territory_priority = []
+        phase_b_skips = []
         for territory in self.territories.values():
             residents = [
                 persona for persona in self.personas.values()
@@ -1385,6 +1506,7 @@ class MultiTickEngine:
                 and persona.id in self.inners
             ]
             if len(residents) < 3:
+                phase_b_skips.append({"territory_id": territory.id, "residents_count": len(residents)})
                 continue
             has_lord = 1 if territory.lord_id else 0
             territory_priority.append((-has_lord, -len(residents), territory.id))
@@ -1420,9 +1542,11 @@ class MultiTickEngine:
             )
             self.factions[faction.id] = faction
             self._change_persona_faction(founder.id, faction.id, source="birth_founder")
+            self.event_log.append({"type": "respawn_fallback_founder_created", "tick": self.time.tick, "founder_pid": founder.id, "faction_id": faction.id, "territory_id": territory.id})
             self.personas[founder.id].faction_cooldown = FOUNDER_RESPAWN_EVERY  # noqa: PHASE17_FACTION_SSOT_WRITE
             active_count += 1
 
+        self.event_log.append({"type": "respawn_skip_reason", "tick": self.time.tick, "phase": "after_b", "reason": "phase_b_done" if active_count >= FOUNDER_RESPAWN_TARGET_ACTIVE else "phase_b_insufficient", "active_count": active_count, "phase_b_skips": phase_b_skips})
         self._rebuild_faction_members_cache()
 
     def _pick_founder(self, candidates: list[Persona], territory: Territory) -> Persona | None:
@@ -1617,6 +1741,7 @@ class MultiTickEngine:
         if radius < 1:
             raise ValueError(f"radius must be >= 1, got {radius}")
         pairs: set[tuple[str, str]] = set()
+        # Path 1: territoryRef based contact.
         for tid in sorted(self.territories):
             ref_a = self.territories[tid].factionRef
             if ref_a is None:
@@ -1630,6 +1755,92 @@ class MultiTickEngine:
                 a, b = sorted((ref_a, ref_b))
                 pairs.add((a, b))
         return sorted(pairs)
+
+    def _record_cross_faction_lord_pair_events(self) -> None:
+        """
+        v3 (rev.2): PROBE definition(grievance target lord) + v2 rich state(H5a/b/c).
+
+        Difference from PROBE script:
+        - PROBE: filters events by anger >= T in post-processing simulation
+        - v3:    accumulates natural, unthresholded observations
+
+        v2 territory.factionRef(owner definition) is discarded. closure-v2 §7.2 Finding A
+        uses the PROBE definition(grievance target lord).
+
+        Call frequency: same tick() call site as v2 (line 804).
+        """
+        if not hasattr(self, "_cfl_pair_state"):
+            self._cfl_pair_state = {}
+
+        # PROBE definition: accumulated uprising_leader_snn_snapshot events -> top_lord_id to fid set
+        lord_to_factions: dict[str, set[str]] = {}
+        for event in self.event_log:
+            if event.get("type") != "uprising_leader_snn_snapshot":
+                continue
+            lid = event.get("top_lord_id")
+            fid = event.get("fid")
+            if lid is not None and fid is not None:
+                lord_to_factions.setdefault(lid, set()).add(fid)
+
+        current_pairs = {
+            lord_id: frozenset(fids)
+            for lord_id, fids in lord_to_factions.items()
+            if len(fids) >= 2
+        }
+        prev_pairs = {
+            lord_id: state["factions"]
+            for lord_id, state in self._cfl_pair_state.items()
+        }
+
+        # emerged
+        for lord_id, fids in current_pairs.items():
+            if lord_id not in prev_pairs:
+                self.event_log.append({
+                    "type": "cross_faction_lord_pair_emerged",
+                    "tick": self.time.tick,
+                    "lord_id": lord_id,
+                    "factions": sorted(fids),
+                    "definition": "probe_top_lord_id_accumulated",
+                })
+                self._cfl_pair_state[lord_id] = {
+                    "factions": fids,
+                    "first_seen_tick": self.time.tick,
+                }
+
+        # collapsed (v2 H5a/b/c classification kept, definition based on PROBE)
+        for lord_id, prev_fids in prev_pairs.items():
+            if lord_id in current_pairs:
+                continue
+            # H5c: lord persona disappeared
+            if lord_id not in self.personas or lord_id not in self.inners:
+                reason = "lord_persona_missing"
+            # H5b: lord_id is no longer a grievance target in any uprising_leader_snn_snapshot
+            elif not any(
+                event.get("type") == "uprising_leader_snn_snapshot"
+                and event.get("top_lord_id") == lord_id
+                for event in self.event_log
+            ):
+                reason = "lord_id_replaced"
+            # H5a: faction consolidated (accumulated events now have one fid)
+            else:
+                reason = "faction_consolidated"
+            first_seen_tick = int(self._cfl_pair_state[lord_id]["first_seen_tick"])
+            self.event_log.append({
+                "type": "cross_faction_lord_pair_collapsed",
+                "tick": self.time.tick,
+                "lord_id": lord_id,
+                "prev_factions": sorted(prev_fids),
+                "first_seen_tick": first_seen_tick,
+                "duration_ticks": self.time.tick - first_seen_tick,
+                "collapse_reason": reason,
+                "definition": "probe_top_lord_id_accumulated",
+            })
+            del self._cfl_pair_state[lord_id]
+
+        # update existing pairs
+        for lord_id, fids in current_pairs.items():
+            if lord_id in prev_pairs and prev_pairs[lord_id] != fids:
+                self._cfl_pair_state[lord_id]["factions"] = fids
 
     def faction_wealth_distribution(self) -> dict[str, dict[str, float]]:
         """{faction_id: {'total', 'mean', 'gini', 'top_decile_share'}}."""
@@ -1700,6 +1911,23 @@ class MultiTickEngine:
                     counts[inner.grievance_lord_id] = counts.get(inner.grievance_lord_id, 0) + 1
             result[fid] = dict(sorted(counts.items()))
         return result
+
+    def shared_grievance_pairs_count(self, min_carriers: int = 1) -> int:
+        """Count faction pairs sharing the same grievance_lord_id."""
+        if min_carriers < 1:
+            raise ValueError(f"min_carriers must be >= 1, got {min_carriers}")
+        targets = self.faction_grievance_targets()
+        by_lord: dict[str, list[str]] = {}
+        for fid, lord_map in targets.items():
+            for lord_id, cnt in lord_map.items():
+                if cnt >= min_carriers:
+                    by_lord.setdefault(lord_id, []).append(fid)
+        pair_count = 0
+        for fids in by_lord.values():
+            if len(fids) < 2:
+                continue
+            pair_count += len(fids) * (len(fids) - 1) // 2
+        return pair_count
 
     # ─── Phase 17 Φ-3 Struggle ───────────────────────────────────────
 
@@ -1862,6 +2090,55 @@ class MultiTickEngine:
         })
         return new_id
 
+    def _record_uprising_leader_snn_snapshot(
+        self,
+        *,
+        fid: str,
+        leader_pid: str,
+        gate_passed: bool,
+        eligible: list[str],
+        resonance: dict,
+        top_lord: str,
+    ) -> None:
+        leader_inner = self.inners[leader_pid]
+        follower_snn = []
+        for fpid in eligible[1:UPRISING_FOLLOWER_MAX + 1]:
+            inner = self.inners[fpid]
+            follower_snn.append({
+                "pid": fpid,
+                "anger": float(inner.chiljeong[1]),
+                "fear": float(inner.chiljeong[3]),
+                "dignity": float(inner.oyok[4]),
+                "chronic_stress": float(inner.chronic_stress),
+                "grievance": float(inner.grievance),
+            })
+        self.event_log.append({
+            "type": "uprising_leader_snn_snapshot",
+            "tick": self.time.tick,
+            "fid": fid,
+            "leader_pid": leader_pid,
+            "gate_passed": gate_passed,
+            "leader_anger": float(leader_inner.chiljeong[1]),
+            "leader_fear": float(leader_inner.chiljeong[3]),
+            "leader_dignity": float(leader_inner.oyok[4]),
+            "leader_chronic_stress": float(leader_inner.chronic_stress),
+            "leader_grievance": float(leader_inner.grievance),
+            "follower_candidates": follower_snn,
+            "resonance_score": float(resonance["resonance_score"]),
+            "top_lord_id": top_lord,
+        })
+
+    def _eligible_uprising_leaders(self, fid: str, top_lord: str) -> list[str]:
+        members = self._faction_members(fid)
+        eligible = [
+            pid.id for pid in sorted(members, key=lambda persona: persona.id)
+            if self.inners[pid.id].grievance >= GRIEVANCE_MIN_SHARED
+            and self.inners[pid.id].grievance_lord_id == top_lord
+            and self.personas[pid.id].faction_cooldown == 0
+        ]
+        eligible.sort(key=lambda p: (-float(self.inners[p].grievance), p))
+        return eligible
+
     def _uprising_trigger(self) -> list[dict]:
         """24/48틱 주기. 응결 + SNN + 인접 조건 동시 충족 시 봉기 후보 산출."""
         if self.time.tick % UPRISING_CHECK_INTERVAL != 0:
@@ -1878,21 +2155,28 @@ class MultiTickEngine:
             # 인접 faction 검사: 인접 조건은 단일 통과 기준 (collapse 우회 없음)
             fid_in_contact = any(fid in pair for pair in contacts)
             if not fid_in_contact:
+                self.event_log.append({"type": "uprising_skip_no_contact", "tick": self.time.tick, "fid": fid, "resonance_score": float(reso["resonance_score"]), "top_lord_id": top_lord})
                 continue
             # 봉기 leader 선정: 동일 lord_id grievance 보유 + cooldown 0 + grievance 최고치
-            members = self._faction_members(fid)
-            eligible = [
-                pid.id for pid in sorted(members, key=lambda persona: persona.id)
-                if self.inners[pid.id].grievance >= GRIEVANCE_MIN_SHARED
-                and self.inners[pid.id].grievance_lord_id == top_lord
-                and self.personas[pid.id].faction_cooldown == 0
-            ]
+            eligible = self._eligible_uprising_leaders(fid, top_lord)
             if not eligible:
                 continue
             # tie-break: grievance 내림차순, sorted(pid)
-            eligible.sort(key=lambda p: (-float(self.inners[p].grievance), p))
             leader_pid = eligible[0]
-            if not self._snn_uprising_signal_active(leader_pid):
+            gate_passed = self._snn_uprising_signal_active(leader_pid)
+            # [Phase 14B-d1 telemetry] uprising_leader_snn_snapshot — G1 검증용 (mechanism 무수정, gate 분포 측정)
+            self._record_uprising_leader_snn_snapshot(
+                fid=fid,
+                leader_pid=leader_pid,
+                gate_passed=gate_passed,
+                eligible=eligible,
+                resonance=reso,
+                top_lord=top_lord,
+            )
+            if not gate_passed:
+                # Φ-3 Case-C: SNN 게이트 미통과 telemetry (2026-04-30)
+                # 본체 로직 무수정. snn_gate_pass / (pass + skip_snn_inactive) 비율 측정용.
+                self.event_log.append({"type": "uprising_skip_snn_inactive", "tick": self.time.tick, "fid": fid, "leader_pid": leader_pid, "resonance_score": float(reso["resonance_score"]), "top_lord_id": top_lord})
                 continue
             target_fid = self._pick_uprising_target(leader_pid, contacts)
             # target_fid가 None이면 분파 신규 생성 의도로 _emit_uprising에서 처리
@@ -2194,7 +2478,53 @@ class MultiTickEngine:
                     "share_high": round(share_high, 3),
                 })
 
+        # 단계 D — Phase 14 보강: cross-territory grievance_lord_id 자연 전파
+        self._propagate_grievance_lord_id_cross_territory()
+
         return events
+
+    def _propagate_grievance_lord_id_cross_territory(self) -> None:
+        """Recompute cross-territory lord_id influence on the tax cadence."""
+        candidates: dict[str, tuple[str, float]] = {}
+        for pid, persona in self.personas.items():
+            inner = self.inners.get(pid)
+            if inner is None:
+                continue
+            territory = self.territories.get(persona.territory)
+            own_lord = territory.lord_id if territory else None
+            if pid == own_lord:
+                continue
+
+            best_lord: str | None = None
+            best_score = 0.0
+            if own_lord is not None and inner.grievance > 0.0:
+                best_lord = own_lord
+                best_score = float(inner.grievance)
+
+            for other_pid in sorted(self.personas):
+                if other_pid == pid:
+                    continue
+                other_inner = self.inners.get(other_pid)
+                if other_inner is None:
+                    continue
+                if other_inner.grievance < GRIEVANCE_DONOR_MIN:
+                    continue
+                if other_inner.grievance_lord_id is None:
+                    continue
+                rel_key = Relationship(persona_a=pid, persona_b=other_pid).key()
+                rel = self.relationships.get(rel_key)
+                if rel is None or rel.trust < GRIEVANCE_PROPAGATE_TRUST_MIN:
+                    continue
+                score = float(other_inner.grievance) * float(rel.trust)
+                if score > best_score:
+                    best_score = score
+                    best_lord = other_inner.grievance_lord_id
+
+            if best_lord is not None and best_score > 0.0:
+                candidates[pid] = (best_lord, best_score)
+
+        for pid, (lord_id, _score) in candidates.items():
+            self.inners[pid].grievance_lord_id = lord_id
 
     def _auto_economy_tick(self) -> list[dict]:
         """영주의 deliberation으로 일자리 생성 + 무직자 구직.
@@ -2431,6 +2761,40 @@ class MultiTickEngine:
             for territory in self.territories.values():
                 territory.quarter_tax_income = 0.0
                 territory.quarter_public_spend = 0.0
+        # [Phase 14B-d1 telemetry] territory_snn_distribution — G4 검증용 (mechanism 무수정, 100틱 주기)
+        if self.time.tick > 0 and self.time.tick % 100 == 0:
+            for tid, territory in self.territories.items():
+                residents = [
+                    p for p in self.personas.values()
+                    if p.territory == tid and p.id in self.inners
+                ]
+                if not residents:
+                    continue
+                residents_inners = [self.inners[p.id] for p in residents]
+                snn_payload = {
+                    "type": "territory_snn_distribution",
+                    "tick": self.time.tick,
+                    "territory_id": tid,
+                    "resident_count": len(residents),
+                    "lord_id": territory.lord_id,
+                    "avg_anger": float(np.mean([float(i.chiljeong[1]) for i in residents_inners])),
+                    "avg_fear": float(np.mean([float(i.chiljeong[3]) for i in residents_inners])),
+                    "avg_dignity": float(np.mean([float(i.oyok[4]) for i in residents_inners])),
+                    "avg_chronic_stress": float(np.mean([float(i.chronic_stress) for i in residents_inners])),
+                    "avg_grievance": float(np.mean([float(i.grievance) for i in residents_inners])),
+                    "active_faction_count_in_territory": len(set(
+                        p.faction for p in residents if p.faction is not None
+                    )),
+                }
+                if territory.last_snn_signals_tick >= 0:
+                    snn_payload["territory_snn_tension"] = float(
+                        territory.last_snn_signals.get("tension", 0.0)
+                    )
+                    snn_payload["territory_snn_growth"] = float(
+                        territory.last_snn_signals.get("growth", 0.0)
+                    )
+                    snn_payload["territory_snn_signal_age"] = self.time.tick - territory.last_snn_signals_tick
+                self.event_log.append(snn_payload)
         return events
 
     def _collect_taxes(self) -> list[dict]:
