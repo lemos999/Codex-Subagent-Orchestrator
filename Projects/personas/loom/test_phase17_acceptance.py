@@ -242,6 +242,7 @@ def _phase17_phi2_stage4_hash(seed: int = 42, ticks: int = 500) -> str:
     return hashlib.sha256(_phase17_phi2_stage4_snapshot(seed=seed, ticks=ticks)).hexdigest()
 
 
+@pytest.mark.slow
 def test_phase17_phi2_determinism_500_ticks_stage4() -> None:
     """Stage 4: 5-channel byte-level determinism."""
     h1 = _phase17_phi2_stage4_hash(seed=42, ticks=500)
@@ -344,6 +345,7 @@ def test_phase17_phi2_stage6_respawn_lineage() -> None:
         )
 
 
+@pytest.mark.slow
 def test_phi3_uprising_emerges_under_grievance_pressure():
     """Φ-3 acceptance #1: seed 7/13/42 5000틱 uprising_event ≥ 1 (3/3)."""
     from ontology.layers import THETA_UPRISING
@@ -357,6 +359,7 @@ def test_phi3_uprising_emerges_under_grievance_pressure():
         )
 
 
+@pytest.mark.slow
 def test_phi3_grievance_pairs_resonate():
     """Φ-3 acceptance #2: grievance_pairs_end >= 1 (3/3, cross-territory 자연 응결)."""
     for seed in [7, 13, 42]:
@@ -381,6 +384,7 @@ def test_grievance_pair_helper_ssot():
         engine.shared_grievance_pairs_count(min_carriers=0)
 
 
+@pytest.mark.slow
 def test_grievance_propagation_no_artificial_sticky():
     """propagation 본문 정적 검사와 동일 입력 반복 호출 안정성 검증."""
     import inspect
@@ -419,6 +423,7 @@ def test_grievance_propagate_natural_emergence():
         )
 
 
+@pytest.mark.slow
 def test_phi3_dom_share_natural_imbalance():
     """Φ-3 acceptance #3: dom_share_end ≥ 0.50 (3/3, OR-2 자연 충족)."""
     for seed in [7, 13, 42]:
@@ -434,6 +439,7 @@ def test_phi3_dom_share_natural_imbalance():
         )
 
 
+@pytest.mark.slow
 def test_phi3_no_deaths():
     """Φ-3 무사망 보장: population_total 보존."""
     for seed in [7, 13, 42]:
@@ -444,6 +450,7 @@ def test_phi3_no_deaths():
         ) - 1   # ±1 허용 (Stage 3 anti-collapse 잔여 영향)
 
 
+@pytest.mark.slow
 def test_phi3_branch_lineage_chain():
     """분파 신규 faction의 founder_lineage가 부모 fid 포함.
 
@@ -470,6 +477,7 @@ def test_phi3_branch_lineage_chain():
     )
 
 
+@pytest.mark.slow
 def test_phi3_determinism_seed42():
     """phi2_phi3_hash 결정성: seed=42 5000틱 2회 실행 hash 일치."""
     h1 = run_simulation_hash(seed=42, ticks=5000)
@@ -477,6 +485,7 @@ def test_phi3_determinism_seed42():
     assert h1 == h2, f"determinism break: {h1} vs {h2}"
 
 
+@pytest.mark.slow
 def test_respawn_seed_group_emitted():
     """P1: respawn 시 seed_group 이벤트가 자연 발생 (founder만 만들지 않음).
 
@@ -496,48 +505,27 @@ def test_respawn_seed_group_emitted():
 def test_grace_boost_terminates():
     """P2: grace 종료 시 boost가 정확히 0으로 사라짐 (top-down 보호 차단).
 
-    검증 흐름 (micro-simulation 으로 결정성 보존):
-    1. seed=42, 2000틱 진행. respawn_faction 이벤트는 없을 수 있으므로
-       대신 첫 번째 created faction 의 grace_until_tick 추출 (init_founder_seeds 또는 respawn 무관).
-    2. grace 활성 구간 중간 tick `t_mid` 에서 affiliation score 측정 1
-    3. grace 종료 직후 tick `t_post = grace_until_tick + 1` 에서 측정 2
-    4. boost = (grace 활성 score) - (grace 비활성 score) 비교
+    검증 흐름 (micro-contract 으로 결정성 보존):
+    1. seed=42 엔진의 초기 faction 하나를 선택한다.
+    2. 테스트가 grace_until_tick 을 현재 tick + RESPAWN_GRACE_TICKS 로 명시해
+       grace 활성 상태를 만든다. 초기 founder seed 는 grace 를 자동 부여하지 않는다.
+    3. grace 활성 score 와 강제 비활성 score 를 비교한다.
+    4. grace 종료 직후 score 가 비활성 score 와 같은지 확인한다.
 
     boost 측정 방식: 같은 engine 상태에서 faction.grace_until_tick 을 0 으로 강제 설정한
     상태와 원본 상태의 score 차이를 측정. _compute_affiliation_tick 직접 호출.
     """
     from core.multi_tick_engine import MultiTickEngine
+    from ontology.layers import RESPAWN_GRACE_TICKS
 
     engine = MultiTickEngine(seed=42)
-    # 충분한 tick 진행으로 faction grace 가 형성된 상태 확보
-    for _ in range(200):
-        engine.tick()
-
-    # grace 활성 faction 식별: grace_until_tick > current_tick
     cur_tick = engine.time.tick
-    grace_active = [
-        (fid, fac) for fid, fac in engine.factions.items()
-        if fac.grace_until_tick > cur_tick
-    ]
-    if not grace_active:
-        # grace 활성 faction 없으면 검증 전제 미달 — skip-equivalent (skipped pass 차단을 위해 명시 fail)
-        # 단 init_founder_seeds 의 created_tick=0 + RESPAWN_GRACE_TICKS=200 이므로
-        # cur_tick<200 이면 활성. 200틱 진행 후 cur_tick=200 → grace 종료 직후 케이스 가능.
-        # 따라서 100틱만 진행한 후 다시 측정.
-        engine = MultiTickEngine(seed=42)
-        for _ in range(100):
-            engine.tick()
-        cur_tick = engine.time.tick
-        grace_active = [
-            (fid, fac) for fid, fac in engine.factions.items()
-            if fac.grace_until_tick > cur_tick
-        ]
-
-    assert grace_active, (
-        "grace 활성 faction 0건 — P2 검증 전제 실패 (RESPAWN_GRACE_TICKS=200 가정)"
+    fid_test = next(
+        (fid for fid in sorted(engine.factions) if engine._faction_members(fid)),
+        None,
     )
-
-    fid_test, faction_test = grace_active[0]
+    assert fid_test is not None, "초기 faction 0건 — P2 grace boost 검증 전제 실패"
+    engine.factions[fid_test].grace_until_tick = cur_tick + RESPAWN_GRACE_TICKS
 
     # boost 측정: faction.grace_until_tick 의 원본 / 강제 0 두 케이스에서 score 비교
     # _compute_affiliation_tick 은 inners[*].affiliation_scores 를 update 하므로
@@ -754,6 +742,7 @@ def test_uprising_tick_no_artificial_injection() -> None:
     )
 
 
+@pytest.mark.slow
 def test_phase17_phi2_perf_stage4() -> None:
     median, p95, samples = _measure_tick_ms_stable(seed=42)
     print(_format_tick_perf(median, p95, samples))
