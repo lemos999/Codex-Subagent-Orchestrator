@@ -1,0 +1,375 @@
+{
+  "seed": 42,
+  "total_ticks": 20000,
+  "window_size": 720,
+  "windows": [
+    {
+      "window_start": 0,
+      "window_end": 720,
+      "partial": false,
+      "dom_share": 0.4,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 0.3,
+        "b7bf5679ed288c14cd4390c2b62f20ab": 0.4,
+        "dd418852db2c8dc16f54c47a790837ff": 0.3
+      },
+      "conflict_pair_count": 3,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 720,
+      "window_end": 1440,
+      "partial": false,
+      "dom_share": 0.6,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 0.1,
+        "b7bf5679ed288c14cd4390c2b62f20ab": 0.6,
+        "dd418852db2c8dc16f54c47a790837ff": 0.3
+      },
+      "conflict_pair_count": 2,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 1440,
+      "window_end": 2160,
+      "partial": false,
+      "dom_share": 0.5,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 0.5,
+        "b7bf5679ed288c14cd4390c2b62f20ab": 0.2,
+        "dd418852db2c8dc16f54c47a790837ff": 0.3
+      },
+      "conflict_pair_count": 6,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 2160,
+      "window_end": 2880,
+      "partial": false,
+      "dom_share": 0.6,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 0.6,
+        "dd418852db2c8dc16f54c47a790837ff": 0.4
+      },
+      "conflict_pair_count": 1,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 2880,
+      "window_end": 3600,
+      "partial": false,
+      "dom_share": 0.6666666666666666,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 0.6666666666666666,
+        "dd418852db2c8dc16f54c47a790837ff": 0.3333333333333333
+      },
+      "conflict_pair_count": 0,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 3600,
+      "window_end": 4320,
+      "partial": false,
+      "dom_share": 0.6,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 0.6,
+        "dd418852db2c8dc16f54c47a790837ff": 0.4
+      },
+      "conflict_pair_count": 6,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 4320,
+      "window_end": 5040,
+      "partial": false,
+      "dom_share": 0.6666666666666666,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 0.3333333333333333,
+        "dd418852db2c8dc16f54c47a790837ff": 0.6666666666666666
+      },
+      "conflict_pair_count": 3,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 5040,
+      "window_end": 5760,
+      "partial": false,
+      "dom_share": 0.5,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 0.5,
+        "dd418852db2c8dc16f54c47a790837ff": 0.5
+      },
+      "conflict_pair_count": 0,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 5760,
+      "window_end": 6480,
+      "partial": false,
+      "dom_share": 1.0,
+      "member_share_per_faction": {
+        "279da009bd0345cb435f8833f62a680b": 1.0
+      },
+      "conflict_pair_count": 0,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 6480,
+      "window_end": 7200,
+      "partial": false,
+      "dom_share": 1.0,
+      "member_share_per_faction": {
+        "83a75f49d379021ee240612be107e5c9": 1.0
+      },
+      "conflict_pair_count": 0,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 7200,
+      "window_end": 7920,
+      "partial": false,
+      "dom_share": 1.0,
+      "member_share_per_faction": {
+        "d75b1baba581c84890cb16860b6c9e98": 1.0
+      },
+      "conflict_pair_count": 0,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 7920,
+      "window_end": 8640,
+      "partial": false,
+      "dom_share": 1.0,
+      "member_share_per_faction": {
+        "69ec8d49bd029b38da5dceed5b1b4f4b": 1.0
+      },
+      "conflict_pair_count": 0,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 8640,
+      "window_end": 9360,
+      "partial": false,
+      "dom_share": 0.6666666666666666,
+      "member_share_per_faction": {
+        "1220037f1587fda40606268e3a29c522": 0.3333333333333333,
+        "4613d73056f33a8eb5be1c474b6dfb0c": 0.6666666666666666
+      },
+      "conflict_pair_count": 2,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 9360,
+      "window_end": 10080,
+      "partial": false,
+      "dom_share": 0.9,
+      "member_share_per_faction": {
+        "1220037f1587fda40606268e3a29c522": 0.1,
+        "aba63394b174a5b05acec93b4c348d36": 0.9
+      },
+      "conflict_pair_count": 4,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 10080,
+      "window_end": 10800,
+      "partial": false,
+      "dom_share": 0.6666666666666666,
+      "member_share_per_faction": {
+        "6ad6c59cd81431d39fcd25e3ee00763f": 0.3333333333333333,
+        "9b80d77d791b8eaecb12c290cda79698": 0.6666666666666666
+      },
+      "conflict_pair_count": 2,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 10800,
+      "window_end": 11520,
+      "partial": false,
+      "dom_share": 0.75,
+      "member_share_per_faction": {
+        "5cec21dfd7dfb81b026100beeb2f3e17": 0.25,
+        "9b80d77d791b8eaecb12c290cda79698": 0.75
+      },
+      "conflict_pair_count": 4,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 11520,
+      "window_end": 12240,
+      "partial": false,
+      "dom_share": 0.6,
+      "member_share_per_faction": {
+        "2eeb804b6c370e4c3f8af2daf9fe2e90": 0.4,
+        "9b80d77d791b8eaecb12c290cda79698": 0.6
+      },
+      "conflict_pair_count": 1,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 12240,
+      "window_end": 12960,
+      "partial": false,
+      "dom_share": 1.0,
+      "member_share_per_faction": {
+        "2eeb804b6c370e4c3f8af2daf9fe2e90": 1.0
+      },
+      "conflict_pair_count": 3,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 12960,
+      "window_end": 13680,
+      "partial": false,
+      "dom_share": 0.8,
+      "member_share_per_faction": {
+        "1ed1ac3e7fe30c3566cecb10b9ac921b": 0.2,
+        "a1be1da10c22dfecbc0919774934b31a": 0.8
+      },
+      "conflict_pair_count": 2,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 13680,
+      "window_end": 14400,
+      "partial": false,
+      "dom_share": 0.7,
+      "member_share_per_faction": {
+        "0ab91313020ca06ecb7a566144282450": 0.7,
+        "1ed1ac3e7fe30c3566cecb10b9ac921b": 0.3
+      },
+      "conflict_pair_count": 3,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 14400,
+      "window_end": 15120,
+      "partial": false,
+      "dom_share": 0.5555555555555556,
+      "member_share_per_faction": {
+        "0ab91313020ca06ecb7a566144282450": 0.4444444444444444,
+        "0d17dff2efe9434c39e2a800366b19c3": 0.5555555555555556
+      },
+      "conflict_pair_count": 2,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 15120,
+      "window_end": 15840,
+      "partial": false,
+      "dom_share": 1.0,
+      "member_share_per_faction": {
+        "0ab91313020ca06ecb7a566144282450": 1.0
+      },
+      "conflict_pair_count": 5,
+      "cross_faction_lord_count": 2
+    },
+    {
+      "window_start": 15840,
+      "window_end": 16560,
+      "partial": false,
+      "dom_share": 0.7777777777777778,
+      "member_share_per_faction": {
+        "0ab91313020ca06ecb7a566144282450": 0.2222222222222222,
+        "d090c5b3c4a891f1b20590e58912a144": 0.7777777777777778
+      },
+      "conflict_pair_count": 4,
+      "cross_faction_lord_count": 0
+    },
+    {
+      "window_start": 16560,
+      "window_end": 17280,
+      "partial": false,
+      "dom_share": 1.0,
+      "member_share_per_faction": {
+        "c78793ab5328ca60632fcb18b761b306": 1.0
+      },
+      "conflict_pair_count": 1,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 17280,
+      "window_end": 18000,
+      "partial": false,
+      "dom_share": 0.6,
+      "member_share_per_faction": {
+        "bf82a01af11b114d45d3d3b0007287d0": 0.4,
+        "e46ba8fba15797a7d53fa6d0e9de70e5": 0.6
+      },
+      "conflict_pair_count": 3,
+      "cross_faction_lord_count": 2
+    },
+    {
+      "window_start": 18000,
+      "window_end": 18720,
+      "partial": false,
+      "dom_share": 1.0,
+      "member_share_per_faction": {
+        "3e8c064fb60e056c345a1c07db8d0624": 1.0
+      },
+      "conflict_pair_count": 2,
+      "cross_faction_lord_count": 1
+    },
+    {
+      "window_start": 18720,
+      "window_end": 19440,
+      "partial": false,
+      "dom_share": 0.8,
+      "member_share_per_faction": {
+        "3e8c064fb60e056c345a1c07db8d0624": 0.8,
+        "d8347806756eee12b5234a21ca26064f": 0.2
+      },
+      "conflict_pair_count": 2,
+      "cross_faction_lord_count": 2
+    },
+    {
+      "window_start": 19440,
+      "window_end": 20000,
+      "partial": true,
+      "dom_share": 0.5555555555555556,
+      "member_share_per_faction": {
+        "3e8c064fb60e056c345a1c07db8d0624": 0.4444444444444444,
+        "c68292673fa0c1bf3ba299795c375233": 0.5555555555555556
+      },
+      "conflict_pair_count": 3,
+      "cross_faction_lord_count": 0
+    }
+  ],
+  "quantiles_per_metric": {
+    "dom_share": {
+      "P25": 0.6,
+      "P50": 0.6833333333333333,
+      "P67": 0.809,
+      "P75": 1.0,
+      "P90": 1.0
+    },
+    "member_share": {
+      "P25": 0.3333333333333333,
+      "P50": 0.5,
+      "P67": 0.6666666666666666,
+      "P75": 0.725,
+      "P90": 1.0
+    },
+    "conflict_pair_count": {
+      "P25": 1.0,
+      "P50": 2.0,
+      "P67": 3.0,
+      "P75": 3.0,
+      "P90": 4.300000000000001
+    },
+    "cross_faction_lord_count": {
+      "P25": 0.0,
+      "P50": 1.0,
+      "P67": 1.0,
+      "P75": 1.0,
+      "P90": 1.3000000000000007
+    }
+  },
+  "v3_validation": {
+    "cfl_total": 19,
+    "expected_cfl_total": 19,
+    "last_contact_count_at_20000": 1,
+    "expected_last_contact": 1,
+    "passed": true
+  }
+}

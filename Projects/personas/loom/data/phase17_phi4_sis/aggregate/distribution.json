@@ -1,0 +1,199 @@
+{
+  "seeds_combined": [
+    7,
+    13,
+    42
+  ],
+  "total_ticks": 20000,
+  "window_size": 720,
+  "aggregate_quantiles": {
+    "dom_share": {
+      "P25": 0.6,
+      "P50": 0.7777777777777778,
+      "P67": 1.0,
+      "P75": 1.0,
+      "P90": 1.0
+    },
+    "member_share": {
+      "P25": 0.34375,
+      "P50": 0.5555555555555556,
+      "P67": 0.6666666666666666,
+      "P75": 0.9,
+      "P90": 1.0
+    },
+    "conflict_pair_count": {
+      "P25": 1.0,
+      "P50": 2.0,
+      "P67": 3.0,
+      "P75": 4.0,
+      "P90": 5.700000000000003
+    },
+    "cross_faction_lord_count": {
+      "P25": 0.0,
+      "P50": 1.0,
+      "P67": 1.0,
+      "P75": 1.0,
+      "P90": 2.0
+    }
+  },
+  "consistency_within_10pct": {
+    "dom_share": {
+      "P50": false,
+      "P67": false,
+      "P75": true
+    },
+    "member_share": {
+      "P50": false,
+      "P67": false,
+      "P75": false
+    },
+    "conflict_pair_count": {
+      "P50": false,
+      "P67": false,
+      "P75": false
+    },
+    "cross_faction_lord_count": {
+      "P50": false,
+      "P67": true,
+      "P75": false
+    }
+  },
+  "consistency_details": {
+    "dom_share": {
+      "P50": {
+        "values_by_seed": {
+          "7": 0.9,
+          "13": 0.7388888888888889,
+          "42": 0.6833333333333333
+        },
+        "mean": 0.7740740740740741,
+        "within_10pct": false
+      },
+      "P67": {
+        "values_by_seed": {
+          "7": 1.0,
+          "13": 1.0,
+          "42": 0.809
+        },
+        "mean": 0.9363333333333334,
+        "within_10pct": false
+      },
+      "P75": {
+        "values_by_seed": {
+          "7": 1.0,
+          "13": 1.0,
+          "42": 1.0
+        },
+        "mean": 1.0,
+        "within_10pct": true
+      }
+    },
+    "member_share": {
+      "P50": {
+        "values_by_seed": {
+          "7": 0.5777777777777777,
+          "13": 0.4444444444444444,
+          "42": 0.5
+        },
+        "mean": 0.5074074074074074,
+        "within_10pct": false
+      },
+      "P67": {
+        "values_by_seed": {
+          "7": 0.9,
+          "13": 0.6040000000000001,
+          "42": 0.6666666666666666
+        },
+        "mean": 0.7235555555555555,
+        "within_10pct": false
+      },
+      "P75": {
+        "values_by_seed": {
+          "7": 0.975,
+          "13": 0.8888888888888888,
+          "42": 0.725
+        },
+        "mean": 0.8629629629629628,
+        "within_10pct": false
+      }
+    },
+    "conflict_pair_count": {
+      "P50": {
+        "values_by_seed": {
+          "7": 3.0,
+          "13": 2.5,
+          "42": 2.0
+        },
+        "mean": 2.5,
+        "within_10pct": false
+      },
+      "P67": {
+        "values_by_seed": {
+          "7": 3.0,
+          "13": 4.0,
+          "42": 3.0
+        },
+        "mean": 3.3333333333333335,
+        "within_10pct": false
+      },
+      "P75": {
+        "values_by_seed": {
+          "7": 4.0,
+          "13": 4.0,
+          "42": 3.0
+        },
+        "mean": 3.6666666666666665,
+        "within_10pct": false
+      }
+    },
+    "cross_faction_lord_count": {
+      "P50": {
+        "values_by_seed": {
+          "7": 0.5,
+          "13": 1.0,
+          "42": 1.0
+        },
+        "mean": 0.8333333333333334,
+        "within_10pct": false
+      },
+      "P67": {
+        "values_by_seed": {
+          "7": 1.0,
+          "13": 1.0,
+          "42": 1.0
+        },
+        "mean": 1.0,
+        "within_10pct": true
+      },
+      "P75": {
+        "values_by_seed": {
+          "7": 1.25,
+          "13": 1.25,
+          "42": 1.0
+        },
+        "mean": 1.1666666666666667,
+        "within_10pct": false
+      }
+    }
+  },
+  "v3_validation": {
+    "7": {
+      "cfl_total": 22,
+      "expected_cfl_total": 22,
+      "last_contact_count_at_20000": 1,
+      "expected_last_contact": 1
+    },
+    "13": {
+      "cfl_total": 23,
+      "expected_cfl_total": 23,
+      "last_contact_count_at_20000": 1,
+      "expected_last_contact": 1
+    },
+    "42": {
+      "cfl_total": 19,
+      "expected_cfl_total": 19,
+      "last_contact_count_at_20000": 1,
+      "expected_last_contact": 1
+    }
+  }
+}
