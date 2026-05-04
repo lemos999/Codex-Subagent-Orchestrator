@@ -1,0 +1,352 @@
+{
+  "spec": "PHASE-14B-B-ANGER-COUPLING-PROBE-SPEC.md",
+  "phi3_7_chain": "§3.7 4단 (임계 분위수) + 5단 cross-check 입력",
+  "seeds": [
+    7,
+    13,
+    42
+  ],
+  "per_seed": [
+    {
+      "seed": 7,
+      "n_total": 44,
+      "n_pass": 20,
+      "n_fail": 24,
+      "pass_quantiles": {
+        "n": 20,
+        "min": 0.60302734375,
+        "p25": 0.65869140625,
+        "p50": 0.70849609375,
+        "p67": 0.73974609375,
+        "p75": 0.765625,
+        "p80": 0.77978515625,
+        "p90": 0.85791015625,
+        "max": 0.89501953125,
+        "mean": 0.723291015625,
+        "median": 0.7060546875,
+        "stdev": 0.08639232249865914
+      },
+      "fail_quantiles": {
+        "n": 24,
+        "min": 0.317138671875,
+        "p25": 0.39013671875,
+        "p50": 0.48193359375,
+        "p67": 0.51416015625,
+        "p75": 0.54345703125,
+        "p80": 0.54638671875,
+        "p90": 0.61328125,
+        "max": 0.89404296875,
+        "mean": 0.4934794108072917,
+        "median": 0.478271484375,
+        "stdev": 0.12423414384094704
+      },
+      "all_quantiles": {
+        "n": 44,
+        "min": 0.317138671875,
+        "p25": 0.474609375,
+        "p50": 0.61328125,
+        "p67": 0.67822265625,
+        "p75": 0.70361328125,
+        "p80": 0.71923828125,
+        "p90": 0.8408203125,
+        "max": 0.89501953125,
+        "mean": 0.5979392311789773,
+        "median": 0.608154296875,
+        "stdev": 0.15796229655817817
+      }
+    },
+    {
+      "seed": 13,
+      "n_total": 62,
+      "n_pass": 14,
+      "n_fail": 48,
+      "pass_quantiles": {
+        "n": 14,
+        "min": 0.6220703125,
+        "p25": 0.64404296875,
+        "p50": 0.6865234375,
+        "p67": 0.79443359375,
+        "p75": 0.80859375,
+        "p80": 0.80859375,
+        "p90": 0.85107421875,
+        "max": 0.8642578125,
+        "mean": 0.7292829241071429,
+        "median": 0.717529296875,
+        "stdev": 0.09003699998829584
+      },
+      "fail_quantiles": {
+        "n": 48,
+        "min": 0.3603515625,
+        "p25": 0.461181640625,
+        "p50": 0.5166015625,
+        "p67": 0.54052734375,
+        "p75": 0.54833984375,
+        "p80": 0.57373046875,
+        "p90": 0.615234375,
+        "max": 0.71826171875,
+        "mean": 0.5116780598958334,
+        "median": 0.516357421875,
+        "stdev": 0.08392979003989276
+      },
+      "all_quantiles": {
+        "n": 62,
+        "min": 0.3603515625,
+        "p25": 0.472412109375,
+        "p50": 0.53564453125,
+        "p67": 0.59130859375,
+        "p75": 0.63427734375,
+        "p80": 0.65478515625,
+        "p90": 0.74853515625,
+        "max": 0.8642578125,
+        "mean": 0.5608146421370968,
+        "median": 0.5380859375,
+        "stdev": 0.12477505650768575
+      }
+    },
+    {
+      "seed": 42,
+      "n_total": 99,
+      "n_pass": 16,
+      "n_fail": 83,
+      "pass_quantiles": {
+        "n": 16,
+        "min": 0.60009765625,
+        "p25": 0.6591796875,
+        "p50": 0.70166015625,
+        "p67": 0.734375,
+        "p75": 0.76318359375,
+        "p80": 0.77490234375,
+        "p90": 0.79150390625,
+        "max": 0.85791015625,
+        "mean": 0.70623779296875,
+        "median": 0.6923828125,
+        "stdev": 0.072689510922265
+      },
+      "fail_quantiles": {
+        "n": 83,
+        "min": 0.31103515625,
+        "p25": 0.42431640625,
+        "p50": 0.482177734375,
+        "p67": 0.51953125,
+        "p75": 0.54248046875,
+        "p80": 0.55615234375,
+        "p90": 0.5927734375,
+        "max": 0.814453125,
+        "mean": 0.4873723409262048,
+        "median": 0.482177734375,
+        "stdev": 0.09143141187478519
+      },
+      "all_quantiles": {
+        "n": 99,
+        "min": 0.31103515625,
+        "p25": 0.429443359375,
+        "p50": 0.49755859375,
+        "p67": 0.55615234375,
+        "p75": 0.5927734375,
+        "p80": 0.60009765625,
+        "p90": 0.6865234375,
+        "max": 0.85791015625,
+        "mean": 0.5227445351957071,
+        "median": 0.49755859375,
+        "stdev": 0.11983481335793436
+      }
+    }
+  ],
+  "combined": {
+    "n_total": 205,
+    "n_pass": 50,
+    "n_fail": 155,
+    "pass_quantiles": {
+      "n": 50,
+      "min": 0.60009765625,
+      "p25": 0.64892578125,
+      "p50": 0.70166015625,
+      "p67": 0.76318359375,
+      "p75": 0.77783203125,
+      "p80": 0.79150390625,
+      "p90": 0.85107421875,
+      "max": 0.89501953125,
+      "mean": 0.71951171875,
+      "median": 0.70263671875,
+      "stdev": 0.08217621593873525
+    },
+    "fail_quantiles": {
+      "n": 155,
+      "min": 0.31103515625,
+      "p25": 0.427490234375,
+      "p50": 0.4873046875,
+      "p67": 0.5322265625,
+      "p75": 0.5439453125,
+      "p80": 0.56103515625,
+      "p90": 0.59716796875,
+      "max": 0.89404296875,
+      "mean": 0.49584488407258065,
+      "median": 0.4873046875,
+      "stdev": 0.09499431902335334
+    },
+    "all_quantiles": {
+      "n": 205,
+      "min": 0.31103515625,
+      "p25": 0.4521484375,
+      "p50": 0.529296875,
+      "p67": 0.59423828125,
+      "p75": 0.640625,
+      "p80": 0.6640625,
+      "p90": 0.74853515625,
+      "max": 0.89501953125,
+      "mean": 0.5503977705792683,
+      "median": 0.529296875,
+      "stdev": 0.1330604397313371
+    }
+  },
+  "threshold_candidates": {
+    "P50": 0.529296875,
+    "P67": 0.59423828125,
+    "P75": 0.640625,
+    "fail_P50": 0.4873046875,
+    "pass_P25": 0.64892578125
+  },
+  "threshold_simulation_per_seed": {
+    "seed-7": {
+      "P50": {
+        "threshold": 0.529296875,
+        "meet_count": 27,
+        "meet_pass": 20,
+        "meet_fail": 7,
+        "meet_pass_ratio": 0.7407407407407407,
+        "unique_top_lords": 10,
+        "cross_faction_lord_count": 4
+      },
+      "P67": {
+        "threshold": 0.59423828125,
+        "meet_count": 24,
+        "meet_pass": 20,
+        "meet_fail": 4,
+        "meet_pass_ratio": 0.8333333333333334,
+        "unique_top_lords": 10,
+        "cross_faction_lord_count": 4
+      },
+      "P75": {
+        "threshold": 0.640625,
+        "meet_count": 20,
+        "meet_pass": 18,
+        "meet_fail": 2,
+        "meet_pass_ratio": 0.9,
+        "unique_top_lords": 9,
+        "cross_faction_lord_count": 4
+      },
+      "fail_P50": {
+        "threshold": 0.4873046875,
+        "meet_count": 31,
+        "meet_pass": 20,
+        "meet_fail": 11,
+        "meet_pass_ratio": 0.6451612903225806,
+        "unique_top_lords": 10,
+        "cross_faction_lord_count": 4
+      },
+      "pass_P25": {
+        "threshold": 0.64892578125,
+        "meet_count": 17,
+        "meet_pass": 15,
+        "meet_fail": 2,
+        "meet_pass_ratio": 0.8823529411764706,
+        "unique_top_lords": 9,
+        "cross_faction_lord_count": 4
+      }
+    },
+    "seed-13": {
+      "P50": {
+        "threshold": 0.529296875,
+        "meet_count": 35,
+        "meet_pass": 14,
+        "meet_fail": 21,
+        "meet_pass_ratio": 0.4,
+        "unique_top_lords": 9,
+        "cross_faction_lord_count": 5
+      },
+      "P67": {
+        "threshold": 0.59423828125,
+        "meet_count": 20,
+        "meet_pass": 14,
+        "meet_fail": 6,
+        "meet_pass_ratio": 0.7,
+        "unique_top_lords": 8,
+        "cross_faction_lord_count": 4
+      },
+      "P75": {
+        "threshold": 0.640625,
+        "meet_count": 15,
+        "meet_pass": 11,
+        "meet_fail": 4,
+        "meet_pass_ratio": 0.7333333333333333,
+        "unique_top_lords": 7,
+        "cross_faction_lord_count": 3
+      },
+      "fail_P50": {
+        "threshold": 0.4873046875,
+        "meet_count": 44,
+        "meet_pass": 14,
+        "meet_fail": 30,
+        "meet_pass_ratio": 0.3181818181818182,
+        "unique_top_lords": 9,
+        "cross_faction_lord_count": 5
+      },
+      "pass_P25": {
+        "threshold": 0.64892578125,
+        "meet_count": 13,
+        "meet_pass": 9,
+        "meet_fail": 4,
+        "meet_pass_ratio": 0.6923076923076923,
+        "unique_top_lords": 6,
+        "cross_faction_lord_count": 2
+      }
+    },
+    "seed-42": {
+      "P50": {
+        "threshold": 0.529296875,
+        "meet_count": 41,
+        "meet_pass": 16,
+        "meet_fail": 25,
+        "meet_pass_ratio": 0.3902439024390244,
+        "unique_top_lords": 9,
+        "cross_faction_lord_count": 6
+      },
+      "P67": {
+        "threshold": 0.59423828125,
+        "meet_count": 24,
+        "meet_pass": 16,
+        "meet_fail": 8,
+        "meet_pass_ratio": 0.6666666666666666,
+        "unique_top_lords": 8,
+        "cross_faction_lord_count": 3
+      },
+      "P75": {
+        "threshold": 0.640625,
+        "meet_count": 17,
+        "meet_pass": 14,
+        "meet_fail": 3,
+        "meet_pass_ratio": 0.8235294117647058,
+        "unique_top_lords": 6,
+        "cross_faction_lord_count": 3
+      },
+      "fail_P50": {
+        "threshold": 0.4873046875,
+        "meet_count": 53,
+        "meet_pass": 16,
+        "meet_fail": 37,
+        "meet_pass_ratio": 0.3018867924528302,
+        "unique_top_lords": 9,
+        "cross_faction_lord_count": 6
+      },
+      "pass_P25": {
+        "threshold": 0.64892578125,
+        "meet_count": 17,
+        "meet_pass": 14,
+        "meet_fail": 3,
+        "meet_pass_ratio": 0.8235294117647058,
+        "unique_top_lords": 6,
+        "cross_faction_lord_count": 3
+      }
+    }
+  }
+}
