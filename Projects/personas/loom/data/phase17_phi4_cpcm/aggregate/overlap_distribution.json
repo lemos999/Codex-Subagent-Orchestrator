@@ -1,0 +1,87 @@
+{
+  "seeds_combined": [
+    7,
+    13,
+    42
+  ],
+  "total_ticks": 20000,
+  "snapshot_interval": 500,
+  "snapshot_count_per_seed": 40,
+  "algorithm": "jaccard",
+  "total_pair_observations": 106,
+  "aggregate_quantiles": {
+    "P25": 0.2857142857142857,
+    "P50": 0.5,
+    "P67": 1.0,
+    "P75": 1.0,
+    "P90": 1.0
+  },
+  "consistency_within_10pct": {
+    "P50": {
+      "values_by_seed": {
+        "7": 1.0,
+        "13": 0.5,
+        "42": 0.3333333333333333
+      },
+      "mean": 0.611111111111111,
+      "within_10pct": false
+    },
+    "P67": {
+      "values_by_seed": {
+        "7": 1.0,
+        "13": 1.0,
+        "42": 1.0
+      },
+      "mean": 1.0,
+      "within_10pct": true
+    },
+    "P75": {
+      "values_by_seed": {
+        "7": 1.0,
+        "13": 1.0,
+        "42": 1.0
+      },
+      "mean": 1.0,
+      "within_10pct": true
+    }
+  },
+  "per_seed_summary": [
+    {
+      "seed": 7,
+      "quantiles": {
+        "P25": 0.5,
+        "P50": 1.0,
+        "P67": 1.0,
+        "P75": 1.0,
+        "P90": 1.0
+      },
+      "n": 27,
+      "nan_count": 0
+    },
+    {
+      "seed": 13,
+      "quantiles": {
+        "P25": 0.2857142857142857,
+        "P50": 0.5,
+        "P67": 1.0,
+        "P75": 1.0,
+        "P90": 1.0
+      },
+      "n": 43,
+      "nan_count": 0
+    },
+    {
+      "seed": 42,
+      "quantiles": {
+        "P25": 0.125,
+        "P50": 0.3333333333333333,
+        "P67": 1.0,
+        "P75": 1.0,
+        "P90": 1.0
+      },
+      "n": 36,
+      "nan_count": 0
+    }
+  ],
+  "v3_anchor_validation_all_seeds": true
+}

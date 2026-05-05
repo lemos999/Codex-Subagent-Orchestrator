@@ -1,0 +1,686 @@
+{
+  "seed": 7,
+  "total_ticks": 20000,
+  "snapshot_interval": 500,
+  "snapshot_count": 40,
+  "algorithm": "jaccard",
+  "snapshots": [
+    {
+      "tick": 500,
+      "active_count": 3,
+      "active_fids": [
+        "41b743a3971a181d4e40961261601d3d",
+        "55d6b8568d809f9b785b45ce68e99aef",
+        "6f38d94a2f85d9517bd17bc2a67e393c"
+      ],
+      "pair_count": 3,
+      "pairs": [
+        {
+          "a": "41b743a3971a181d4e40961261601d3d",
+          "b": "55d6b8568d809f9b785b45ce68e99aef",
+          "jaccard": 0.5
+        },
+        {
+          "a": "41b743a3971a181d4e40961261601d3d",
+          "b": "6f38d94a2f85d9517bd17bc2a67e393c",
+          "jaccard": 0.5
+        },
+        {
+          "a": "55d6b8568d809f9b785b45ce68e99aef",
+          "b": "6f38d94a2f85d9517bd17bc2a67e393c",
+          "jaccard": 0.25
+        }
+      ],
+      "mean_jaccard": 0.4166666666666667,
+      "max_jaccard": 0.5,
+      "min_jaccard": 0.25
+    },
+    {
+      "tick": 1000,
+      "active_count": 3,
+      "active_fids": [
+        "41b743a3971a181d4e40961261601d3d",
+        "55d6b8568d809f9b785b45ce68e99aef",
+        "6f38d94a2f85d9517bd17bc2a67e393c"
+      ],
+      "pair_count": 3,
+      "pairs": [
+        {
+          "a": "41b743a3971a181d4e40961261601d3d",
+          "b": "55d6b8568d809f9b785b45ce68e99aef",
+          "jaccard": 0.5
+        },
+        {
+          "a": "41b743a3971a181d4e40961261601d3d",
+          "b": "6f38d94a2f85d9517bd17bc2a67e393c",
+          "jaccard": 0.5
+        },
+        {
+          "a": "55d6b8568d809f9b785b45ce68e99aef",
+          "b": "6f38d94a2f85d9517bd17bc2a67e393c",
+          "jaccard": 0.25
+        }
+      ],
+      "mean_jaccard": 0.4166666666666667,
+      "max_jaccard": 0.5,
+      "min_jaccard": 0.25
+    },
+    {
+      "tick": 1500,
+      "active_count": 3,
+      "active_fids": [
+        "41b743a3971a181d4e40961261601d3d",
+        "55d6b8568d809f9b785b45ce68e99aef",
+        "6f38d94a2f85d9517bd17bc2a67e393c"
+      ],
+      "pair_count": 3,
+      "pairs": [
+        {
+          "a": "41b743a3971a181d4e40961261601d3d",
+          "b": "55d6b8568d809f9b785b45ce68e99aef",
+          "jaccard": 0.5
+        },
+        {
+          "a": "41b743a3971a181d4e40961261601d3d",
+          "b": "6f38d94a2f85d9517bd17bc2a67e393c",
+          "jaccard": 0.5
+        },
+        {
+          "a": "55d6b8568d809f9b785b45ce68e99aef",
+          "b": "6f38d94a2f85d9517bd17bc2a67e393c",
+          "jaccard": 0.25
+        }
+      ],
+      "mean_jaccard": 0.4166666666666667,
+      "max_jaccard": 0.5,
+      "min_jaccard": 0.25
+    },
+    {
+      "tick": 2000,
+      "active_count": 2,
+      "active_fids": [
+        "55d6b8568d809f9b785b45ce68e99aef",
+        "f2b6b6575885cb2e789b1079583eae22"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "55d6b8568d809f9b785b45ce68e99aef",
+          "b": "f2b6b6575885cb2e789b1079583eae22",
+          "jaccard": 0.5
+        }
+      ],
+      "mean_jaccard": 0.5,
+      "max_jaccard": 0.5,
+      "min_jaccard": 0.5
+    },
+    {
+      "tick": 2500,
+      "active_count": 1,
+      "active_fids": [
+        "f2b6b6575885cb2e789b1079583eae22"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 3000,
+      "active_count": 1,
+      "active_fids": [
+        "d2548ad1423c2186a138b3fe0387d329"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 3500,
+      "active_count": 1,
+      "active_fids": [
+        "89b09c7b54454d84cd723103f3a13246"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 4000,
+      "active_count": 1,
+      "active_fids": [
+        "e7eb335ce450b62ae8599f7054c17743"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 4500,
+      "active_count": 1,
+      "active_fids": [
+        "e7eb335ce450b62ae8599f7054c17743"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 5000,
+      "active_count": 2,
+      "active_fids": [
+        "e7eb335ce450b62ae8599f7054c17743",
+        "f5a71f47d91cdf30cb580979f211984d"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "e7eb335ce450b62ae8599f7054c17743",
+          "b": "f5a71f47d91cdf30cb580979f211984d",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 5500,
+      "active_count": 2,
+      "active_fids": [
+        "72f23040a1d84b9ee7de470db00d3e0b",
+        "f5a71f47d91cdf30cb580979f211984d"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "72f23040a1d84b9ee7de470db00d3e0b",
+          "b": "f5a71f47d91cdf30cb580979f211984d",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 6000,
+      "active_count": 2,
+      "active_fids": [
+        "1f77d435ac5b3eabab5e7a0f31e95855",
+        "f5a71f47d91cdf30cb580979f211984d"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "1f77d435ac5b3eabab5e7a0f31e95855",
+          "b": "f5a71f47d91cdf30cb580979f211984d",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 6500,
+      "active_count": 1,
+      "active_fids": [
+        "71b63fd0af158e77e9035dbeb7d92486"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 7000,
+      "active_count": 2,
+      "active_fids": [
+        "71b63fd0af158e77e9035dbeb7d92486",
+        "750b130bcfb89f7f66e0cc0abea1863b"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "71b63fd0af158e77e9035dbeb7d92486",
+          "b": "750b130bcfb89f7f66e0cc0abea1863b",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 7500,
+      "active_count": 1,
+      "active_fids": [
+        "71b63fd0af158e77e9035dbeb7d92486"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 8000,
+      "active_count": 2,
+      "active_fids": [
+        "4a1ae36d7225579845e68d20153e9a78",
+        "71b63fd0af158e77e9035dbeb7d92486"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "4a1ae36d7225579845e68d20153e9a78",
+          "b": "71b63fd0af158e77e9035dbeb7d92486",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 8500,
+      "active_count": 1,
+      "active_fids": [
+        "26e4d5aa26ba83f058adbcdcecabbcf5"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 9000,
+      "active_count": 1,
+      "active_fids": [
+        "009ab74cb49f422da105f0949262d1c2"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 9500,
+      "active_count": 1,
+      "active_fids": [
+        "009ab74cb49f422da105f0949262d1c2"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 10000,
+      "active_count": 1,
+      "active_fids": [
+        "07212090456d03648002200ea1bcd380"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 10500,
+      "active_count": 1,
+      "active_fids": [
+        "07212090456d03648002200ea1bcd380"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 11000,
+      "active_count": 1,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 11500,
+      "active_count": 1,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 12000,
+      "active_count": 2,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc",
+        "b657ea9d200b128e81f5110b91d8cf4f"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "13f5f651ae5511c5e0dcfbfdd123f1fc",
+          "b": "b657ea9d200b128e81f5110b91d8cf4f",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 12500,
+      "active_count": 2,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc",
+        "768003677d212bcdecafb1631feef85e"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "13f5f651ae5511c5e0dcfbfdd123f1fc",
+          "b": "768003677d212bcdecafb1631feef85e",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 13000,
+      "active_count": 2,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc",
+        "e1ad312cff1bd04b93bd537cc815b740"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "13f5f651ae5511c5e0dcfbfdd123f1fc",
+          "b": "e1ad312cff1bd04b93bd537cc815b740",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 13500,
+      "active_count": 2,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc",
+        "718d47ab158dd578edce16170ff03532"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "13f5f651ae5511c5e0dcfbfdd123f1fc",
+          "b": "718d47ab158dd578edce16170ff03532",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 14000,
+      "active_count": 1,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 14500,
+      "active_count": 2,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc",
+        "24370a98d218fb26008f8f3d45f35ecb"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "13f5f651ae5511c5e0dcfbfdd123f1fc",
+          "b": "24370a98d218fb26008f8f3d45f35ecb",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 15000,
+      "active_count": 2,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc",
+        "24370a98d218fb26008f8f3d45f35ecb"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "13f5f651ae5511c5e0dcfbfdd123f1fc",
+          "b": "24370a98d218fb26008f8f3d45f35ecb",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 15500,
+      "active_count": 2,
+      "active_fids": [
+        "13f5f651ae5511c5e0dcfbfdd123f1fc",
+        "9dc7895b33919bbdd97bef151289951a"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "13f5f651ae5511c5e0dcfbfdd123f1fc",
+          "b": "9dc7895b33919bbdd97bef151289951a",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 16000,
+      "active_count": 1,
+      "active_fids": [
+        "9dc7895b33919bbdd97bef151289951a"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 16500,
+      "active_count": 2,
+      "active_fids": [
+        "9dc7895b33919bbdd97bef151289951a",
+        "fe22f3948735ff84413d67b5066eff02"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "9dc7895b33919bbdd97bef151289951a",
+          "b": "fe22f3948735ff84413d67b5066eff02",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 17000,
+      "active_count": 2,
+      "active_fids": [
+        "9dc7895b33919bbdd97bef151289951a",
+        "c8c2d695090cd2e030794cd6587fd581"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "9dc7895b33919bbdd97bef151289951a",
+          "b": "c8c2d695090cd2e030794cd6587fd581",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 17500,
+      "active_count": 1,
+      "active_fids": [
+        "9dc7895b33919bbdd97bef151289951a"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 18000,
+      "active_count": 2,
+      "active_fids": [
+        "301814308f2861efb49b90faea8bc6fc",
+        "9dc7895b33919bbdd97bef151289951a"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "301814308f2861efb49b90faea8bc6fc",
+          "b": "9dc7895b33919bbdd97bef151289951a",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 18500,
+      "active_count": 1,
+      "active_fids": [
+        "9dc7895b33919bbdd97bef151289951a"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 19000,
+      "active_count": 2,
+      "active_fids": [
+        "56af017d6d7615bce4e4c913d90dfaad",
+        "9dc7895b33919bbdd97bef151289951a"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "56af017d6d7615bce4e4c913d90dfaad",
+          "b": "9dc7895b33919bbdd97bef151289951a",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    },
+    {
+      "tick": 19500,
+      "active_count": 1,
+      "active_fids": [
+        "9dc7895b33919bbdd97bef151289951a"
+      ],
+      "pair_count": 0,
+      "pairs": [],
+      "mean_jaccard": null,
+      "max_jaccard": null,
+      "min_jaccard": null
+    },
+    {
+      "tick": 20000,
+      "active_count": 2,
+      "active_fids": [
+        "558c9de959dad473521a83484ffb2c40",
+        "9dc7895b33919bbdd97bef151289951a"
+      ],
+      "pair_count": 1,
+      "pairs": [
+        {
+          "a": "558c9de959dad473521a83484ffb2c40",
+          "b": "9dc7895b33919bbdd97bef151289951a",
+          "jaccard": 1.0
+        }
+      ],
+      "mean_jaccard": 1.0,
+      "max_jaccard": 1.0,
+      "min_jaccard": 1.0
+    }
+  ],
+  "all_pair_jaccard_distribution": {
+    "n": 27,
+    "nan_count": 0,
+    "quantiles": {
+      "P25": 0.5,
+      "P50": 1.0,
+      "P67": 1.0,
+      "P75": 1.0,
+      "P90": 1.0
+    }
+  },
+  "v3_anchor_validation": {
+    "snapshot_count_match": true,
+    "fid_set_match_per_snapshot": true,
+    "active_count_self_consistency": true,
+    "passed": true
+  }
+}

@@ -66,7 +66,7 @@ V3 raw `case_c_events.json`의 핵심 메트릭 이벤트 (`active_factions_snap
 - `sovereignty_score`를 mechanism으로 사용 (telemetry로만 추가, 의사결정 trigger 사용 금지)
 - 임계 분위수 magic threshold freeze (예: `>= 0.55` 결정 금지 — 분위수 후보 **도출만**)
 - mojibake `summary.md` 사용 (raw JSON / `case_c_events.json` + `metrics.jsonl`만)
-- 무파괴 9 / 안전 전제 5종 (HYSTERESIS=2, FOUNDER_RESPAWN_EVERY=480, TARGET_ACTIVE=2, COMMIT_EVERY=48, MAX_MEMBERS=2) / BOOST=0.20 / 회귀 7종 변경
+- 무파괴 9 / 안전 전제 5종 (HYSTERESIS=2, FOUNDER_RESPAWN_EVERY=480, TARGET_ACTIVE=2, COMMIT_EVERY=48, MAX_MEMBERS=2) / BOOST=0.20 / 회귀 6종 변경 (소급 정정 2026-05-04: test_persistence.py 부재)
 - charter 본문 (`PHASE-17-NATION-CHARTER-*.md`) 변경
 - territory 단위 분석 (별도 spec — rev.2 분리 결정). 영지 매핑이 필요하면 본 spec 외 helper 작성 후 합류.
 
@@ -376,7 +376,7 @@ if __name__ == "__main__":
 - `Projects/personas/loom/persona/*`
 - `Projects/personas/loom/ontology/*`
 - `Projects/personas/loom/PHASE-17-NATION-CHARTER-*.md` (charter 본문)
-- 회귀 7종 테스트 파일 (목록 아래 명시)
+- 회귀 6종 테스트 파일 (소급 정정 2026-05-04 — 목록 아래 명시)
 
 ---
 
@@ -396,16 +396,17 @@ if __name__ == "__main__":
 - [ ] 3 seed 분위수 일관성 (±10% 이내) 자동 판정 결과 출력 (`consistency_within_10pct` boolean per metric × per quantile)
 - [ ] summary.md 인코딩 UTF-8 명시 + 한글 깨짐 없음 (실제 텍스트 헤더 "분위수", "주의" 등으로 검증)
 
-### 회귀 검증 (필수)
-- [ ] 회귀 7종 테스트 PASS:
+### 회귀 검증 (필수, 소급 정정 2026-05-04: 7종 → 6종)
+- [ ] 회귀 6종 테스트 PASS:
   1. `tests/test_phase14b_snn_integration.py`
   2. `tests/test_phase17_faction_handoff_contract.py`
   3. `tests/test_phase17_faction_stage3.py`
   4. `tests/test_phase17_acceptance.py` (3 known phi-3 EXPECTED FAIL 유지)
   5. `tests/test_economy.py` + `tests/test_economy_balance.py`
-  6. `tests/test_persistence.py`
-  7. `tests/test_class_promotion.py` + `tests/test_nomos.py`
+  6. `tests/test_class_promotion.py` + `tests/test_nomos.py`
 - [ ] `git diff core/multi_tick_engine.py persona/ ontology/` = empty 확인
+
+> **소급 정정 근거 (2026-05-04)**: 본 spec rev.2 작성 시 `tests/test_persistence.py` (또는 동등 파일) 실재 미확인으로 잘못 인용. `find Projects/personas/loom -name "test_persist*.py"` glob 매치 0건. DC-2 CPCM rev.3 작성 과정에서 Codex가 발견하여 보고. DC-2 spec도 동일 정정.
 
 ### V3 데이터 일치 검증 (필수)
 - [ ] **9-a**: per-seed `cross_faction_lord_count` window delta **합계** = V3 보고서 22 (seed 7), 23 (seed 13), 19 (seed 42) — `AssertionError`로 강제
@@ -431,7 +432,7 @@ Remove-Item -Recurse -Force Projects/personas/loom/data/phase17_phi4_sis/
 Remove-Item Projects/personas/loom/scripts/phase17_phi4_sis_extractor.py
 ```
 
-데이터 영향: 분석 산출물만 생성, mechanism 무변경 → rollback 안전. 회귀 7종 재실행 후 PASS 확인 권장.
+데이터 영향: 분석 산출물만 생성, mechanism 무변경 → rollback 안전. 회귀 6종 재실행 후 PASS 확인 권장 (소급 정정 2026-05-04).
 
 ---
 
@@ -485,14 +486,14 @@ Python 3.11+, numpy (이미 설치). Phase 17 Φ-3 closure 완료, Φ-4 Nation C
    a. mypy + ruff (프로젝트 설정 사용, 미설정 시 ast.parse fallback + 그 사실 명시)
    b. 스크립트 실행 → 출력 파일 8개 확인 (3 seed × 2 + aggregate × 2)
    c. V3 일치 검증 (assert 통과)
-   d. 회귀 7종 테스트 PASS
+   d. 회귀 6종 테스트 PASS (소급 정정 2026-05-04)
    e. Anti-pattern 검증 (magic threshold 없음 + sovereignty_score telemetry only)
 9. 보고 내용:
    - 변경 파일 목록
    - 분위수 도출 결과 (per seed + aggregate, 4 metric × 5 quantile)
    - 3 seed 일관성 자동 판정 결과 (P50/P67/P75 × 4 metric × seed)
    - V3 일치 검증 결과 (cfl_total, last_contact_count)
-   - 회귀 7종 PASS 확인
+   - 회귀 6종 PASS 확인 (소급 정정)
    - Anti-pattern 검증 결과
 10. **Codex 자율성 존중** — [필수]/[금지] 경계 안에서 구현 방식(데이터 구조, 함수 분해, 타입 어노테이션 스타일 등) 자유.
 ```
