@@ -1,153 +1,173 @@
 # `/sub` Command Protocol
 
-## Purpose
+Treat `/sub` as a request for supervised internal delegation.
 
-This protocol defines how the parent Codex instance should interpret requests that begin with `/sub`.
+If the runtime cannot provide the required internal agent tools, do not invent delegated workers. State that `/sub` delegation is unavailable in this runtime, fall back to a parent-only execution path, and keep the same plan-first and evidence-preservation rules.
 
-## Trigger Rule
+## Parse
 
-When the user message begins with `/sub`, treat it as an explicit request to enter supervisor mode and delegate execution to one or more `codex exec` workers.
+- strip the `/sub` prefix
+- treat the remaining text as the actual task request
+- keep any explicit user constraints, deadlines, review requirements, or tool limitations
 
-Interpret:
+## Plan First
 
-```text
-/sub <request>
-```
+Before any worker starts, the parent must establish at least a provisional execution view:
 
-as:
+- whether one worker is enough or whether a team is likely justified
+- whether execution should likely be serial, parallel, or mixed
+- whether the work should stay inside one issue-sized run or become an in-session queue
+- which workers need write access
+- where review belongs
+- which imported vendor skills each phase or worker actually needs
 
-- orchestration is required
-- direct parent-only execution is not the preferred path
-- the parent should choose and supervise the correct orchestration shape
+For any new coding request, or any later coding request that is not already covered by the active approved plan record, the parent must also activate the shared gate defined in `skills/agent-skills-integration/agent-skill-routing.md`, use `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay for coding stages and coding workers, deliver the short understanding report required by `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md`, and obtain explicit user approval before any writable worker can launch.
+For coding requests, the parent must write or update the approved full PLAN under repo-root `plan/` before any writable worker can launch.
+For coding requests, the parent must keep that active plan file updated so it clearly shows plan type, version, status, completion state, completed work, remaining work, blockers, next step, and `Scoreboard` state as the run progresses.
+For coding requests, the parent owns score tracking even when workers perform the delegated execution. Explicit user scores should be recorded as authoritative, and missing score feedback should not block the run; instead maintain a conservative provisional score based on the current evidence without using a fixed fallback number, and do not set that provisional score above `50`.
+For coding requests, the parent must keep `orchestration-plan.md`, `status.md`, and the active file under `plan/` aligned on the same active plan path, version, current status, and current score state.
+For coding requests, any pre-approval judgment about delegation, worker count, execution mode, or role split is provisional only. Finalize the actual team shape only after the understanding report and coding direction have been explicitly approved.
+If a later tiny follow-up edit, repair step, or similar writable coding action is already explicitly covered by the active approved plan record and does not materially change the approved direction, continue under that plan by refreshing the active plan file instead of reopening a fresh approval gate.
 
-The parent must route `/sub` to one of two execution paths:
+## Mandatory Pre-Launch Report
 
-- `team mode`: one-off bounded work using `start-codex-subagent-team.ps1`
-- `queue mode`: unattended tracker-driven work using `start-codex-subagent-queue.ps1`
+Report this to the user before launch:
 
-Default routing:
+- request summary
+- user constraints
+- delegation justification
+- approval status and reason
+- planned worker count
+- execution mode: serial | parallel | mixed
+- each worker id, role, mission, writable scope, model, reasoning effort, and stage
+- reviewer or validator timing or policy
+- acceptance strategy
+- approved plan file path in `plan/` for coding runs
+- plan artifact type, version, and current status for coding runs
+- current score and score source from the active plan for coding runs
+- evidence paths on disk
 
-- choose `team mode` for finite requests such as:
-  - fix or implement a specific task
-  - work one ticket or one deliverable
-  - review or verify a bounded artifact
-  - generate one bounded output
-- choose `queue mode` for ongoing requests such as:
-  - watch a local queue file
-  - watch a local tasks folder
-  - keep processing tickets as they arrive
-  - run unattended in the background
-  - handle multiple tracker issues over time
-  - maintain one workspace per issue automatically
+For coding runs, the worker topology, delegation justification, and execution mode may be provisional before the approval gate and should be finalized only after the understanding report and coding direction have been explicitly approved.
+For any new coding request, or any later coding request that is not already covered by the active approved plan record, always pause first for explicit approval of the understanding report and coding direction. After that gate is satisfied, finalize delegation justification, worker count, execution mode, per-worker assignments, and the rest of the pre-launch report before writable worker launch. Blanket authority or explicit proceed-now language do not waive this gate.
+If a later tiny follow-up edit, repair step, or similar writable coding action is already explicitly covered by the active approved plan record and does not materially change the approved direction, refresh the active plan file and continue without reopening a fresh approval pause.
 
-## Parent Actions
+## Approval Skip Conditions
 
-When `/sub` is used, the parent should:
+For non-coding runs, skip the approval pause by default and continue directly into the normal pre-launch report and launch-preparation flow.
 
-1. strip the `/sub` prefix
-2. interpret the remaining text as the true task request
-3. decide whether the request should run in `team mode` or `queue mode`
-4. if `team mode`, decide whether the task needs one worker or a team
-5. choose worker roles autonomously
-6. choose model, sandbox, and reasoning per worker
-7. launch and supervise the workers or the queue runner
-8. validate outputs before reporting back
-9. preserve enough evidence for later review: manifest, prompt files, worker summaries, queue state, and per-run archives
-10. if the parent recovers from a wrong delivery path or wrong workspace root, run the reviewer or verifier again against the final successful artifact before accepting it
-11. if a reviewer finds a material issue, launch a bounded fixer worker instead of patching the deliverable directly in the parent
-12. when building a launcher spec for deliverable work, include `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"` so unsafe team shapes fail fast
-13. when building a queue config, prefer one workspace per issue, `hooks.after_create`, and auto-detected `AGENTS.md`/`WORKFLOW.md`
+For coding runs, the mandatory plan-first gate may never be skipped.
 
-## Team Sizing Rule
+After the mandatory coding plan-first gate has already been satisfied, later execution pacing may skip extra pauses when one of these is true:
 
-This section applies after `/sub` has already resolved to `team mode`.
+- the user clearly delegated blanket authority for the run
+- the user explicitly said to proceed immediately
 
-The team should be chosen autonomously.
+Ambiguous urgency is not enough.
 
-Use:
+These skip conditions never override the mandatory plan-first gate for coding requests and never allow writable coding work to start before the understanding report has been approved.
 
-- `1` worker when one bounded worker can finish the task cleanly
-- `2` workers when one worker should implement and one should verify, or when two outputs are cleanly independent
-- `3` workers when planning, implementation, and review should be separated
-- `4+` workers only when the work is truly parallelizable and file-level merge risk remains manageable
+## Adaptive Team Rules
 
-Do not add workers just because `/sub` was used. Add workers only when team structure improves execution quality or throughput.
+Use one implementer when:
 
-## Worker Contract Rule
+- the task is narrow
+- the writable surface is shared or nested
+- one change depends on another
+- a single contract is likely to be touched from multiple sides
 
-Every worker should receive:
+Use multiple implementers only when:
 
-- the shared operating contract from workspace `AGENTS.md` when available
-- a role-specific mission from the parent
-- a bounded task definition
-- explicit writable scope
-- validation instructions
-- a return contract
+- writable surfaces are independent
+- outputs can merge without negotiation
+- the parent can land accepted changes into the primary workspace without ambiguity
+- final acceptance can still be handled by one read-only reviewer or validator
 
-Reviewers and validators should default to `read-only` unless a narrower exception is explicitly justified.
+## Adaptive Review Rules
 
-## Efficiency Rule
+Default to one late read-only reviewer or validator.
 
-`/sub` does not mean "use maximum reasoning everywhere."
+Move review earlier only when:
 
-The parent should adjust reasoning efficiently:
+- risk justifies an intermediate gate
+- a parallel branch merge needs reconciliation
+- a bounded fixer gate is cheaper than a broad rerun
 
-- `low` for routine execution workers
-- `medium` for moderate ambiguity
-- `high` only when the worker's decision burden is genuinely complex
-- `xhigh` only for exceptional cases
+Do not add a reviewer after every writer.
 
-The same rule applies to model choice. Use the cheapest model that still safely fits the worker's task.
+Suppress redundant final reviewers and validators when one acceptance pass is enough.
 
-Do not evaluate orchestration quality by absolute token totals alone.
+## Model And Reasoning Rules
 
-Prefer structure-first efficiency signals:
+Choose model and reasoning only after the plan exists.
 
-- keep parent intervention small
-- avoid unnecessary full reruns
-- prefer reviewer -> fixer -> reviewer loops over rerunning the whole team
-- keep worker count proportional to requested deliverables
-- use token totals only as a secondary comparison signal
+Base the choice on:
 
-If the parent intentionally chooses a model, it should pass `-m` explicitly so the run is reproducible.
+- ambiguity
+- failure cost
+- writable scope
+- dependency depth
+- verification burden
+- review burden
 
-## Parallel Rule
+Choose from the internal agent capabilities available in the active session. Do not rely on repository-local hardcoded model catalogs or fallback priority lists.
 
-Run workers in parallel only when:
+## Imported Skill Selection Rules
 
-- they are independent
-- they do not compete for the same writable scope
-- the parent can merge results deterministically
+Choose imported vendor skills only after role, writable scope, and review timing are fixed.
 
-When the launcher is used, prefer same-stage parallel workers plus a later-stage reviewer or validator instead of putting writers and reviewers in the same stage.
+Use this adaptive algorithm:
 
-If those conditions are not met, use staged execution instead.
+1. write down the active judgment criteria first:
+   - dominant technical surfaces
+   - acceptance risks
+   - verification burdens
+   - review burdens
+2. start with the role core from `skills/agent-skills-integration/agent-skill-routing.md`
+3. add task-shaped skills only when one of the written criteria says the worker needs that extra discipline
+4. add risk-shaped skills only when acceptance genuinely depends on that extra risk lens
+5. keep expanding only while each added imported skill changes behavior, validation, or acceptance in a way the parent can explain
+6. stop when the next imported skill would only restate an already-covered behavior or check
 
-## Queue Rule
+Do not attach every plausible imported skill by habit.
+Do not enforce a rigid small cap either. Use as many imported skills as the active criteria justify, and no more.
+If the parent cannot explain why a selected imported skill changes the worker's behavior or acceptance bar, remove it.
 
-Choose `queue mode` when the request implies repetition, monitoring, or unattended tracker work.
+## Status Rules
 
-In `queue mode`, the parent should:
+The parent must keep reporting during execution.
 
-- prepare a queue config instead of a one-off team spec
-- prefer local `tracker.kind = "local-json"` or `tracker.kind = "local-files"` when the user did not explicitly ask for an external tracker
-- use one workspace per issue
-- prefer `hooks.after_create` for workspace bootstrap
-- let the downstream launcher auto-detect `AGENTS.md` and `WORKFLOW.md` after bootstrap
-- preserve `queue-state.json`, `queue-report.md`, per-issue generated specs, per-issue logs, and per-issue launcher outputs
+Each status update should say:
 
-Do not use `queue mode` for a single bounded request unless the user explicitly wants polling or repeated dispatch.
+- current stage
+- active agents
+- waiting agents
+- completed agents
+- failed agents
+- what active agents are working on
+- whether the run is blocked on approval, verification, or review
+- current score state when it changed or when that state matters to the next action
 
-## Reporting Rule
+## Acceptance Rules
 
-The parent remains the final reporting authority.
+Accept only when:
 
-Workers produce bounded outputs. The parent integrates, validates, and reports the final result.
+- requested deliverables are present
+- accepted writable worker outputs have been landed in the primary workspace
+- promised checks have passed
+- promised reviewer or validator verdicts have been captured
+- evidence files are updated
 
-When the launcher path fails, preserve the failed spec and fallback reason, then pivot cleanly to direct `codex exec` rather than silently switching behavior.
+If a review finding exceeds the current bounded repair plan, re-plan or re-approve instead of silently widening the fix.
 
-If the parent pivots to direct `codex exec`, it should preserve the intended worker settings explicitly:
+## Material Issue Threshold
 
-- pass `-m` when the model choice matters
-- pass `-c 'model_reasoning_effort="low"'` for routine workers unless the task risk justifies more
-- keep `-o` so the final worker message is preserved on disk
+Treat a finding as material when any of the following is true:
+
+- a requested deliverable is missing or incorrect
+- a promised check failed
+- a reviewer or validator cannot accept the artifact
+- the repair would cross the approved writable scope
+- parallel branch outputs cannot be merged deterministically
+- the finding introduces security, rollback, or contract risk that changes acceptance
+
+Do not burn a fixer loop on cosmetic-only observations that do not affect acceptance.

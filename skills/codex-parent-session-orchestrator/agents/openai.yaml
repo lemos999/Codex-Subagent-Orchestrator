@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Parent Session Orchestrator"
+  short_description: "Run a parent-only scan, plan, implement, verify, and review workflow with disk-backed checkpoints."
+  default_prompt: "Use $codex-parent-session-orchestrator when the task should stay inside one Codex session with plan-first gating, compact status checkpoints, and no delegated subagents."
+
+policy:
+  allow_implicit_invocation: false

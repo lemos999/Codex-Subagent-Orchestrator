@@ -1,88 +1,126 @@
 ---
-name: subagent-orchestrator
-description: Orchestrate one or more `codex exec` subagents for delegated implementation, review, analysis, or generation work. Use when Codex should act as a supervisor that decomposes a user request, autonomously decides team size and worker roles, assigns bounded tasks to child Codex runs, adjusts model, sandbox, and reasoning effort per worker, runs workers sequentially or in parallel, resumes workers as needed, and validates outputs before reporting back. Trigger when the user explicitly starts a request with `/sub`, or asks for subagents, worker teams, parallel Codex execution, delegated task execution, supervisory workflows, or multi-agent delivery inside a local workspace.
+name: codex-subagent-orchestrator
+description: Orchestrate one or more internal chat-session subagents for delegated implementation, review, analysis, or generation work. Use when Codex should act as a supervisor that decomposes a request, decides whether delegation is justified, chooses team size and worker roles, adapts model and reasoning per worker, runs workers serially or in parallel, preserves evidence on disk, and validates outputs before reporting back. Trigger when the user explicitly starts a request with /sub, or asks for subagents, worker teams, parallel help, delegated execution, supervisory workflows, or multi-agent delivery inside a local workspace.
 ---
 
-# Subagent Orchestrator
-
-## Migration Notice
-
-The primary launcher is now the TypeScript launcher at `packages/launcher/dist/cli.js`. The PowerShell script `start-codex-subagent-team.ps1` remains available as a legacy fallback.
-
-TS launcher command: `node packages/launcher/dist/cli.js --spec <spec.json>`
+# Codex Subagent Orchestrator
 
 ## Overview
 
-Use this skill when the parent Codex instance should supervise execution rather than perform the whole task directly.
+Use this skill when the parent Codex session should supervise internal chat-session agents rather than do the whole task alone.
 
 The parent should:
 
 - treat `/sub <request>` as an orchestration entrypoint
-- classify the task
-- decide whether `/sub` should resolve to a one-off team run or a queue run
-- decide whether subagents are justified
-- autonomously choose team size and team shape
-- choose the smallest useful skill set
-- choose team shape, sandbox, model, and reasoning per worker
-- launch one or more bounded workers
-- validate outputs
-- resume or retry workers only when bounded follow-up is cleaner than a fresh run
-- preserve worker evidence so later sessions can audit what actually happened
+- classify the task before any worker starts
+- produce an orchestration plan before launch
+- apply `skills/karpathy-guidelines/SKILL.md` as the default local anti-overengineering overlay for coding stages and coding worker roles so the run favors explicit assumptions, the smallest complete design, surgical edits, and goal-driven verification
+- for coding requests, require the shared plan-first approval gate from `skills/agent-skills-integration/agent-skill-routing.md` before any writable worker launch or implementation activity; do not treat blanket authority or immediate-approval language as a waiver of that gate
+- for coding requests, treat the approved full PLAN as a living disk artifact under repo-root `plan/`, not as a chat code block dump
+- for coding `/sub` runs, keep score tracking in the active plan artifact and treat the parent as the owner of score updates, including explicit user scores and provisional score maintenance capped at `50` when the user gives no score yet
+- decide whether delegation is justified and whether one worker or a team is warranted
+- choose team size, worker roles, model, and reasoning per worker from the internal agent capabilities available in the active session
+- decide whether execution should be serial, parallel, or mixed
+- keep reviewers scarce, read-only, and late unless risk justifies something earlier
+- preserve worker evidence on disk
+- validate outputs before acceptance
+- treat every `/sub` coding request as an explicit request for the shared plan-first flow and use `skills/plan-mode-default/SKILL.md` plus `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the default planning contract before any implementation begins, unless the user explicitly overrides the contract format while preserving the understanding-report and explicit-approval gate
 
 ## Read In This Order
 
-- Read `references/orchestration-workflow.md` for the operating model, prompt contract, team patterns, and supervision loop.
-- Read `references/sub-command-protocol.md` when the user request starts with `/sub`.
-- Read `references/spec-format.md` when you need the launcher input format or want to create a reusable worker-team spec.
-- Read `references/testing-playbook.md` when you need to validate the launcher itself or prepare a reproducible handoff to another session.
-- Read `references/queue-runner.md` when you need tracker polling, issue workspaces, or a Symphony-lite unattended supervisor loop.
-- Use `scripts/start-codex-subagent-team.ps1` when you want deterministic local execution of one or more workers from a JSON spec.
+- read `skills/agent-skills-integration/agent-skill-routing.md` first for the shared plan-first authority and worker-routing rules
+- classify whether the `/sub` request is coding or non-coding before loading coding-only overlays
+- if the run is coding, read `skills/karpathy-guidelines/SKILL.md` next for the default local anti-overengineering posture on coding stages and workers
+- if the run is coding, read `skills/plan-mode-default/SKILL.md` next for the default workspace planning behavior
+- if the run is coding, read `skills/plan-mode-default/references/coding-plan-prompt-en.md` after that for the detailed planning contract text
+- read `references/orchestration-workflow.md` for the internal operating model, supervision loop, and worker patterns
+- read `references/sub-command-protocol.md` when the user request starts with `/sub`
+- read `references/spec-format.md` when you need the on-disk run kit or worker brief format
+- read `references/testing-playbook.md` when you need to validate the internal workflow itself
+- read `references/queue-runner.md` when the user wants repeated backlog handling in the current live session
+- read `references/subagent-persona-guide.md` when a worker needs a distilled expert overlay
 
 ## Operating Rules
 
-- Keep the parent responsible for decomposition, acceptance criteria, and rollback thinking.
-- Keep the parent out of requested deliverable-file edits whenever a bounded worker can do the work instead.
-- Treat the text after `/sub` as the actual user request.
-- Route `/sub` automatically:
-  - choose the team launcher for finite work such as "fix this bug", "implement this file", "work this one ticket", or "review these changes"
-  - choose the queue runner for ongoing work such as "keep processing queue.json", "watch the tasks folder", "run unattended", "poll for new issues", or "handle all matching tasks in the background"
-- Keep each worker focused on one bounded deliverable.
-- Use the workspace `AGENTS.md` as the primary shared operating contract when it exists.
-- Inject the shared principal-engineer operating contract into every worker, but do not duplicate long instructions unless the worker genuinely needs them.
-- Add a role-specific mission on top of the shared contract for each worker.
-- For `custom` workers that launch nested teams, declare `required_paths` and preferably `required_non_empty_paths` so the launcher can reject false-success runs.
-- Prefer `workspace-write` over `danger-full-access`.
-- Use reasoning efficiently. Default to `low` for routine workers and raise it only when ambiguity or risk justifies it.
-- Prefer `shared_directive_mode: "reference"` for routine workspace-local workers, and fall back to `"compact"` when you want a short inlined contract instead of the full directive.
-- Use parallel workers only when tasks are independent enough that output merging remains clear.
-- When parallel workers feed a final reviewer, put the parallel builders in the same stage and the reviewer in a later stage.
-- Do not create large teams by default. Expand the team only when the decomposition really earns it.
-- Treat skills as routing hints for workers, not as an excuse to bloat every worker prompt.
-- Pass `-m` explicitly when model choice matters.
-- Keep `last.txt`, prompt files, and the launcher manifest unless the user explicitly wants cleanup.
-- Prefer the generated orchestration summary over raw stdout when bringing worker results back into parent context.
-- Validate files and summaries before accepting a worker result.
-- **Evidence는 필수이며 생략 불가.** 런처가 `output_dir`에 evidence를 생성했는지 확인. `orchestration-summary.md`, `orchestration-manifest.json`, prompt 파일이 없으면 직접 작성. 사용자에게 결과 보고 전에 evidence 존재를 확인해야 한다.
-- Evaluate efficiency structure-first: fewer parent interventions, fewer full reruns, bounded fixer loops, and clean reviewer coverage matter more than raw token totals alone.
-- Default reviewers and validators to `read-only`. If they need write access, the parent should justify that deviation explicitly.
-- If a reviewer or validator finds a material issue, launch a bounded fixer worker and then re-run review or validation on the repaired artifact before acceptance.
-- When the launcher is used for deliverable work, prefer top-level policy fields `requested_deliverables`, `supervisor_only: true`, `require_final_read_only_review: true`, and `material_issue_strategy: "fixer_then_rereview"` so unsafe team shapes fail before execution.
+- keep the parent responsible for decomposition, acceptance criteria, rollback thinking, and final acceptance
+- use bounded internal workers to plan, draft, or review the change whenever that is cleaner than doing all reasoning in the parent, but remember that internal workers operate in forked workspaces and the parent must land accepted writable changes into the primary workspace
+- treat the text after `/sub` as the actual user request
+- do not launch any external runtime, wrapper command, detached terminal, or background watcher
+- satisfy `/sub` only by using internal chat-session agents
+- use vendored `agent-skills` as worker execution discipline; keep local `/sub` rules authoritative for approval, team shape, parent landing, status, and acceptance
+- for coding stages and coding workers, treat `skills/karpathy-guidelines/SKILL.md` as the default local overlay for simplicity, surgical scope, and explicit assumption handling
+- use `spawn_agent` for bounded worker execution
+- use `send_input` only when reusing an existing worker is cleaner than replacing it
+- use `wait_agent` sparingly and only when the parent is blocked on the next critical result
+- use `close_agent` when the run ends or a worker is abandoned
+- if the runtime cannot provide the required internal agent tools, do not fake multi-agent execution; state that `/sub` delegation is unavailable in this runtime and fall back to `skills/codex-parent-session-orchestrator/SKILL.md` while preserving the same plan-first contract and on-disk evidence discipline
+- produce a pre-launch report before execution starts:
+  - request summary
+  - user constraints
+  - delegation justification
+  - approval status and reason
+  - worker count
+  - execution mode: serial | parallel | mixed
+  - each worker id, role, mission, writable scope, model, reasoning effort, and stage
+  - review timing or review policy
+  - acceptance strategy
+  - approved plan file path in `plan/` for coding runs
+  - plan artifact type, version, and current status for coding runs
+  - current score and score source from the active plan for coding runs
+  - evidence file paths
+- for coding runs, treat delegation justification, worker count, execution mode, and per-worker assignments as provisional before approval and finalize them only after the understanding report and coding direction have been explicitly approved
+- for coding requests, the shared understanding-report approval gate is mandatory and cannot be skipped; blanket authority or "proceed immediately" may only affect later execution pacing after that gate has been satisfied
+- for coding requests, minor subtasks, one-line fixes, tiny follow-up edits, or repair steps are not exempt; every writable coding action must already fit the active approved plan record or reopen planning first
+- for coding requests, write or update the approved full PLAN under repo-root `plan/` before any writable worker launch
+- for coding requests, keep the active approved plan file versioned, time-sortable, clearly typed, and updated with progress, completion state, blockers, next step, and scoreboard state as the run advances
+- for coding requests, record explicit user scores as authoritative and otherwise keep a conservative provisional score capped at `50` in the active plan instead of waiting for feedback or using a fixed fallback number
+- choose model dynamically from the models currently available to internal agents in the active session; if you cannot distinguish the available options safely, say so instead of inventing a model catalog
+- choose reasoning dynamically from task risk, ambiguity, writable scope, dependency depth, verification burden, and review burden
+- default reviewers and validators to read-only
+- default `review_policy` to one late read-only acceptance pass; add earlier review only when risk, reconciliation cost, or a bounded fixer gate justifies it
+- do not attach a reviewer after every writer
+- suppress redundant final reviewers or validators when one acceptance pass is enough
+- retime a final reviewer behind the last writable stage unless there is a concrete reason to review earlier
+- keep one implementer when work is narrow, sequential, shared-state, structurally overlapping, or merge-sensitive
+- expand to multiple implementers only when deliverables are independently writable and merge behavior remains deterministic
+- treat writable worker output as a proposal until the parent integrates the accepted change into the primary workspace
+- when a reviewer or validator finds a material issue, prefer a bounded fixer followed by re-review or re-validation instead of rerunning the whole team by default
+- if a finding exceeds the approved fix scope, re-plan or re-approve instead of silently widening the repair
+- keep status visible in chat while agents work:
+  - current stage
+  - active agent count
+  - waiting agents
+  - completed agents
+  - failed agents
+  - what each active agent is doing
+  - current score state when it changed or when it matters to the next action
+- keep evidence on disk under `subagent-runs/<run-id>/` unless the user explicitly wants cleanup
+- do not attach all vendored skills to every worker; route the minimum set that materially sharpens that worker's role through `skills/agent-skills-integration/agent-skill-routing.md`
+- every selected imported skill must have a short justification tied to the worker's mission, risk, or acceptance bar; if the parent cannot explain why a selected imported skill changes behavior, remove it
+- store required fixer scope in `review-verdict.md`, keep the active approved fix scope in `status.md`, and keep `acceptance.md` for the final supervisor verdict only
+- for planner workers and for the mandatory first-stage planning gate on any coding `/sub` run, treat `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` as the default planning contract unless the user explicitly asks for a different contract format that still preserves the understanding-report and explicit-approval gate
 
 ## Worker Prompt Contract
 
-Every worker prompt should explicitly state:
+Every worker brief should explicitly state:
 
-- the shared principal-engineer contract
+- the shared principal-engineer contract from `AGENTS.md`
 - the worker role and mission
 - the concrete task
-- the files to inspect first
+- the files to read first
 - the writable scope
 - the output contract
 - the validation steps
 - any required skills
-- a stop condition
+- the stop condition
+
+When a worker's job is planning or plan refinement for coding work, its `files to read first` should include `skills/plan-mode-default/SKILL.md` and `skills/plan-mode-default/references/coding-plan-prompt-en.md` by default when those files exist, unless the user explicitly overrides the planning contract format while preserving the understanding-report and explicit-approval gate.
+Do not launch implementer or fixer workers for coding work until a planner-like stage has produced the required understanding report and the user has explicitly approved proceeding.
+When the parent materializes an approved full PLAN for coding work, it should save that artifact under repo-root `plan/` in the primary workspace, keep it updated as the run progresses, and keep chat output brief.
 
 Do not let workers expand scope or modify unrelated files.
+For write tasks, ask workers to leave a merge-ready explanation of what changed so the parent can land the accepted result in the primary workspace.
+When imported `agent-skills` are selected, list their exact vendor paths in the worker brief so the worker can reopen only what it needs.
 
 ## Team Patterns
 
@@ -90,51 +128,66 @@ Use a single worker when one bounded task is enough.
 
 Use a small team by default:
 
-- `1` worker for a narrow task
-- `2` workers for implementer/verifier or two independent outputs
-- `3` workers for planner/implementer/reviewer or similarly clean separation
-- `4+` workers only when parallelism is real and merge cost stays controlled
+- `1` worker for a narrow or tightly coupled task
+- `2` workers for implementer plus reviewer, or for two truly independent outputs
+- `3` workers for two parallel implementers plus one final reviewer, or planner plus implementer plus reviewer when the split is materially cleaner
+- `4+` workers only when parallelism is real, writable scope is disjoint, and merge cost stays controlled
 
-Use parallel workers when:
+Use parallel workers only when:
 
-- tasks are independent
-- each worker has a clean output boundary
-- the parent can merge or compare results deterministically
+- tasks are independent enough to merge deterministically
+- each worker has a clear writable boundary
+- the parent can explain why one worker would be slower or riskier than a small fanout
 
-Use a staged team when:
+Use `mixed` execution mode when:
 
-- one worker produces a plan or artifact
-- later workers consume that result
-- the parent needs to gate each phase
+- the overall run is staged serially
+- at least one stage contains parallel workers
+- the parent needs to report both the serial stage order and the parallel branch fanout explicitly
 
-## Launcher Guidance
+Use staged teams when:
 
-### Primary: TS Launcher
+- one worker produces a plan or artifact that later workers consume
+- the review must gate a risky handoff
+- a bounded fixer loop is safer than a broad rerun
 
-Use `node packages/launcher/dist/cli.js --spec <spec.json>` when:
+## In-Session Queue Guidance
 
-- you want `/sub` requests translated into repeatable worker orchestration
-- you want repeatable worker orchestration
-- you want multiple workers launched in parallel
-- you want per-worker reasoning, sandbox, or output control
-- you want prompt files, `last.txt`, and a manifest for later supervision or forensics
-- you need multi-engine support (codex, claude, gemini) in a single run
+Use queue mode only inside the current live session.
 
-### Legacy Fallback: PS Launcher
+Queue mode is appropriate when:
 
-Use `scripts/start-codex-subagent-team.ps1` with a JSON spec when:
+- the user wants repeated issue handling in one active session
+- each issue can be planned and accepted separately
+- per-issue evidence should live on disk
 
-- you want `/sub` requests translated into repeatable worker orchestration
-- you want repeatable worker orchestration
-- you want multiple workers launched in parallel
-- you want per-worker reasoning, sandbox, or output control
-- you want prompt files, `last.txt`, and a manifest for later supervision or forensics
+Queue mode is not detached background execution. If the user asks for unattended work after the session ends, say that the internal-only edition does not support it.
 
-If the request is simple enough, you may still invoke `codex exec` directly without the launcher.
+## Evidence
 
-Use `scripts/start-codex-subagent-queue.ps1` with a queue config when:
+The default run directory is:
 
-- the user wants one `/sub` request to keep processing multiple issues over time
-- the user wants local backlog polling or background issue dispatch
-- the work should continue unattended until the queue is drained or stopped
-- each issue should get its own workspace and per-issue launcher evidence
+```text
+subagent-runs/<run-id>/
+|-- orchestration-plan.md
+|-- status.md
+|-- worker-briefs/
+|-- results/
+|-- review-verdict.md
+`-- acceptance.md
+```
+
+Use the templates under `skills/codex-subagent-orchestrator/assets/run-templates/` when you want a consistent structure.
+
+## Imported Discipline
+
+The canonical imported-skill mapping lives in `skills/agent-skills-integration/agent-skill-routing.md`.
+
+Use that file as the only source of truth for:
+
+- planner, implementer, fixer, reviewer, and validator defaults
+- task-shaped and risk-shaped add-ons
+- specialist overlays and checklists
+- release-only overlays that are not part of the default worker plan unless the task explicitly needs them
+
+Do not restate a separate default mapping here.

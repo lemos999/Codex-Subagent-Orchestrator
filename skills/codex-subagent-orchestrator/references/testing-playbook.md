@@ -1,108 +1,166 @@
-# Testing Playbook
+# Internal `/sub` Testing Playbook
 
-## Purpose
+Test the internal-only edition with internal chat-session agents, not with shell launchers.
 
-Use this playbook when you need to validate the launcher after edits or hand the skill to another session for replay.
+## Required Regression Matrix
 
-## What Good Looks Like
+Run these checks before claiming the workflow is stable.
 
-A healthy launcher run should produce:
+Before runtime tests, verify the imported vendor pack is intact:
 
-- the expected worker output files
-- one `orchestration-manifest.json`
-- one prompt file per worker
-- one `last.txt` file per worker unless overridden
-- stable absolute paths in stdout, stderr, and manifest entries
-- a manifest `workspace_root` that still points at the real workspace root even when the spec file lives under `subagent-runs/codex/...`
+- `vendor/agent-skills/skills/` contains all 20 upstream skills
+- `vendor/agent-skills/agents/` contains all 3 specialist personas
+- `vendor/agent-skills/references/` contains all 4 upstream checklists
+- `skills/agent-skills-integration/agent-skill-routing.md` references every imported skill at least once
 
-## Recommended Test Order
+### 0. Hard plan-first gate
 
-1. Run a single sequential write worker.
-2. Run two independent workers in parallel.
-3. Run two independent writers in parallel and a read-only reviewer in a later stage.
-4. Run a nested-spec root-safety check where the spec file itself lives under `subagent-runs/codex/...` but `cwd: "."` still resolves to the real workspace root.
-5. Re-run at least one spec with an absolute non-ASCII workspace path if you need portability confidence for extracted folders.
-6. Only after those pass, test a full `/sub` request from chat.
+Prove that every new coding request, and any later coding request that is not already covered by the active approved plan record, triggers the understanding report and explicit approval gate before implementation, even when the request is tiny, urgent, or explicitly says to code immediately.
 
-## Template Specs
+Check:
 
-Use the bundled templates under `assets/spec-templates/`:
+- no code, patch, or code-level implementation guidance appears before approval
+- no writable worker launches before approval
+- "do it now", blanket authority, or tiny scope do not bypass the gate
+- tiny follow-up edits and repair steps do not escape the active approved plan record; if they are not already explicitly covered or they materially change the approved direction, they reopen the gate before implementation resumes
+- follow-up material change requests reopen the gate before implementation resumes
+- the approved full PLAN is written under repo-root `plan/`
+- the full approved PLAN is not dumped into chat as a Markdown code block by default
+- the active plan file uses a time-sortable versioned filename with an explicit plan-type marker
+- the active plan file records status, completion state, completed work, remaining work, blockers, and next step
+- later implementation or review progress updates refresh the active plan file instead of leaving the plan stale
+- `orchestration-plan.md`, `status.md`, and the active file under `plan/` all point to the same active plan artifact
+- the recorded active plan path exists on disk during the run
+- when a material plan revision creates a new version, the new version becomes the active artifact and the prior version is marked clearly as related or superseded
 
-- `minimal-write.template.json`
-- `parallel-two-files.template.json`
-- `parallel-implementers-reviewer.template.json`
-- `implementer-reviewer.template.json`
-- `nested-root-safety.template.json`
+### 1. Single bounded implementer
 
-The bundled templates now default to:
+Prove that a narrow task stays on one implementer and reaches acceptance without unnecessary extra roles.
 
-- `cwd: "."`
-- `cwd_resolution: "invocation"`
+Check:
 
-That means you can usually copy them into the workspace root and run them without editing a path first.
+- one implementer chosen
+- no redundant reviewer attached
+- acceptance recorded
 
-Only use an explicit absolute `cwd` when you are intentionally testing deployment-specific portability. In that case, use forward slashes or escaped backslashes so the JSON stays valid.
+### 2. Parallel independent implementers
 
-If you are debugging the launcher itself, set:
+Prove that two independent writable scopes can run in parallel and still converge cleanly through parent integration.
 
-- `timeout_seconds`
-- `debug_log_file`
+Check:
 
-in the spec before running.
+- two implementers launched in the same stage
+- writable scopes are disjoint
+- the parent lands the accepted changes into the primary workspace
+- one late reviewer or validator accepts the merged result in the primary workspace
+- status reporting names both active workers while they run
 
-## Command Pattern
+### 3. Shared-state serialization
 
-```powershell
-& ".\\skills\\codex-subagent-orchestrator\\scripts\\start-codex-subagent-team.ps1" `
-  -SpecPath ".\\your-spec.json" `
-  -AsJson
-```
+Prove that overlapping, nested, or order-dependent work does not fan out by mistake.
 
-## Validation Checklist
+Check:
 
-- The manifest `workspace_root` and worker `cwd` match the intended workspace.
-- Parallel workers that should finish before review are in an earlier stage than the reviewer or validator.
-- The manifest records `invocation_cwd`, `cwd_requested`, and `cwd_resolution_mode` so you can explain how the workspace root was chosen.
-- Relative-path specs and any deployment-specific absolute-path specs both resolve to the same intended workspace when you test portability.
-- Every worker has a `prompt.txt`.
-- Every worker has a `last.txt` or an explicit override path.
-- The run produces `orchestration-summary.md` unless `write_summary_file` was disabled.
-- Requested versus actual model, sandbox, and reasoning fields make sense.
-- Child session IDs are captured when stdout exposes them.
-- No worker writes outside its declared scope.
-- The manifest `stage_plan` matches the intended parallel grouping.
-- If `debug_log_file` is enabled, the trace reaches `manifest_written`.
-- If a recovery run creates a second delivery attempt, run a reviewer worker against the final successful artifact before accepting it.
+- one implementer is kept
+- the parent can explain why parallelism was rejected
 
-## Efficiency Checklist
+### 4. Reviewer throttling
 
-- Use `low` reasoning for routine writer and reviewer workers.
-- Prefer `shared_directive_mode: "reference"` for routine workspace-local workers.
-- Use `shared_directive_mode: "compact"` when you want a short inlined contract and do not want to rely on a file reference.
-- Prefer compact response style and consume `orchestration-summary.md` before reading raw logs.
-- Pass `-m` explicitly when you care about reproducibility.
-- Avoid replaying full worker stdout into the parent context.
-- Keep the team small unless the task has real parallel branches.
+Prove that the plan does not attach one reviewer after every writer by default.
 
-## Fallback Rule
+Check:
 
-If the launcher itself fails:
+- review is late by default
+- redundant final reviewers are suppressed
+- early review happens only with a clear justification
 
-1. keep the failed spec file
-2. keep the manifest or error output if any
-3. record the failure reason
-4. pivot to direct `codex exec` with explicit cost controls
-5. do not pretend the launcher path worked
+### 5. Bounded fixer loop
 
-Recommended direct fallback pattern for a routine worker:
+Prove that a material review finding triggers one bounded fixer and then re-review or re-validation.
 
-```powershell
-Get-Content -Raw .\worker.prompt.txt | codex exec `
-  -C . `
-  --skip-git-repo-check `
-  -m gpt-5.4 `
-  -s workspace-write `
-  -c 'model_reasoning_effort="low"' `
-  -o .\subagent-runs\codex\direct-fallback\worker.last.txt `
-  -
-```
+Check:
+
+- fixer scope is named explicitly
+- the fix does not silently expand the writable surface
+- acceptance happens only after the repaired artifact is rechecked
+- the active plan artifact is refreshed before writable repair work begins
+- `status.md` and the active plan file stay aligned on version, status, and next step after the repair path advances
+- the active plan artifact's scoreboard is refreshed when the repair path changes likely satisfaction state
+
+### 6. Approval gate
+
+Prove that the pre-launch report appears before worker launch and that coding runs still pause for the mandatory plan-first gate.
+
+Check:
+
+- worker count reported
+- execution mode reported as `serial`, `parallel`, or `mixed`
+- per-worker model and reasoning reported
+- review timing reported
+- launch is skipped until the understanding-report approval gate is satisfied
+- the pre-launch evidence names the current score state for coding runs
+
+### 6.5 Scoreboard continuity
+
+Prove that the active plan artifact keeps a usable score log through normal execution and `/sub` delegation.
+
+Check:
+
+- the active plan artifact contains a `Scoreboard` section
+- an explicit user score is recorded as authoritative when one is given
+- when the user gives no score, the workflow continues with a conservative provisional score instead of blocking, and that provisional score never exceeds `50`
+- no fixed hardcoded fallback number is required by the docs
+- unchanged score is treated as the current overall rating staying the same, not as zero new points
+- when an explicit user score replaces a provisional score with the same numeric value, the score-history log still preserves both states
+- `orchestration-plan.md`, `status.md`, and the active plan artifact stay aligned on the current score state during delegated runs
+
+### 7. Queue mode
+
+Prove that backlog handling remains in-session and evidence is preserved per issue.
+
+Check:
+
+- `queue-state.md` exists
+- each issue gets its own evidence folder
+- the workflow does not claim detached unattended processing
+
+## Auditing For Regressions
+
+After rewriting the workflow, audit the repository for:
+
+- `codex exec`
+- external shell wrappers
+- Python launch instructions
+- PowerShell launcher instructions
+- detached watcher or background-run claims
+
+Any remaining mention of those as the primary `/sub` path is a regression.
+
+Also audit for integration regressions:
+
+- imported vendor skills exist on disk
+- parent and `/sub` docs both reference `skills/agent-skills-integration/agent-skill-routing.md`
+- that routing file is the only canonical imported-skill mapping and local orchestrator docs do not maintain divergent default tables
+- the local orchestrators still keep approval, evidence, and parent-landing authority instead of outsourcing those concerns to upstream skill prose
+- worker briefs and parent phases still force imported-skill selection to stay minimal and justified instead of loading the full vendor pack by habit
+
+## Minimum-Set Discipline Checks
+
+When validating active use of `agent-skills`, verify all of the following:
+
+- the parent or worker selected a bounded imported skill set instead of attaching many plausible skills
+- the parent or worker wrote the judgment criteria first instead of starting from a hardcoded fixed stack
+- the selected imported skills match the active role or phase core first
+- task-shaped or risk-shaped add-ons were added only when the task surface or acceptance bar truly required them
+- every selected imported skill has a short rationale that says what behavior or check it changes
+- imported skill count is judged by justification quality, not by a rigid ceiling; a larger set is acceptable when the written criteria prove it is necessary
+
+## Suggested Internal-Agent Validation Pattern
+
+Use internal agents to validate the workflow itself:
+
+- one explorer to audit for leftover external-process guidance
+- one explorer to audit whether approval, visibility, adaptive sizing, and reviewer throttling are all still specified
+- one or more worker agents to produce bounded change proposals in forks, followed by parent landing and final review in the primary workspace
+
+Preserve the audit notes under `subagent-runs/<test-run-id>/`.
