@@ -244,6 +244,13 @@ public works priority / recovery work priority / food reserve allocation / SNN `
 - **무관**: OQ 1~6 결정 / §7-1 spec rev.0 본문 모두 변경 없음
 - **trigger**: §7-1 collector/extractor hotfix 동시 commit (synthetic smoke 라벨 + strict JSON + `--ticks` argparse + Future Work memo)
 
+### v0.3 — 2026-05-07 DC-1B ClimateEngine collector spec 분리 cross-reference
+- **추가**: §12 Future Work — DC-1B ClimateEngine 기반 collector 신규 author (finding 1-b 응답)
+- **링크**: [`PHASE-17-LAND-REV-NEXT-DC-1B-CLIMATEENGINE-COLLECTOR-SPEC.md`](PHASE-17-LAND-REV-NEXT-DC-1B-CLIMATEENGINE-COLLECTOR-SPEC.md) (rev.1 / 2026-05-07)
+- **무관**: OQ 1~6 결정 / §7-1 spec rev.0 본문 / DC-1B spec 본문 모두 변경 없음
+- **trigger**: synthetic smoke baseline 봉인 commit (`6197f8e`)과 분리된 cross-reference commit
+  (사용자 정책: "synthetic baseline 봉인과 같은 변경 단위에 섞지 않음")
+
 ---
 
 ## 12. Open Questions / Future Work
@@ -258,3 +265,26 @@ public works priority / recovery work priority / food reserve allocation / SNN `
 - `status: Literal["candidate", "confirmed"]` (자연 발생 검증 상태)
 
 v1 wrapper는 v0과 별도 모듈(예: `api/nation_p5r_v1.py`)로 author하여 v0 invariant 유지.
+
+### Future Work — DC-1B ClimateEngine 기반 collector (Major — 2026-05-07 finding 1-b)
+
+DC-1 §7-1 rev.0 봉인 (commit `6197f8e`)의 collector
+(`scripts/phase17_phi1_land_climate_collect.py`)는 **synthetic random walk** baseline.
+paper §7-1 evidence value의 raw 기반으로는 **부족** — 실제 evidence는
+`physis.climate_engine.ClimateEngine` 기반 자연 진화 결과여야 한다.
+
+본 후속 spec은 synthetic baseline을 **무수정 보존**하면서 real driver를 **분리 author**한다:
+
+- **신규 collector**: `scripts/phase17_phi1_land_climate_collect_real.py`
+- **분리 출력 dir**: `data/phase17_phi1_land_climate_probe_real/` (synthetic `_probe/` 무영향)
+- **wiring**: ClimateEngine `tick()` return → `LandCell.climate` direct mapping
+  (`weather["precipitation_mm"]` / `weather["temperature_c"]`)
+- **default ticks**: 90 (current/cumulative 분리 검증 기본값)
+- **무수정 보존**: synthetic baseline / `LandClimateTelemetry` / extractor / `ClimateEngine` /
+  `LandCell` / 단방향 계약 영역
+
+권위 spec: [`PHASE-17-LAND-REV-NEXT-DC-1B-CLIMATEENGINE-COLLECTOR-SPEC.md`](PHASE-17-LAND-REV-NEXT-DC-1B-CLIMATEENGINE-COLLECTOR-SPEC.md)
+(rev.1 / 2026-05-07 — OQ 1B-1 + 1B-3 사용자 결정 반영, sub-implementer spawn 가능)
+
+§7-2 mechanism spec 진입 전 본 후속 spec 결과 raw 분포가 **evidence base**로 사용된다.
+synthetic vs real 비교 분포 차이가 유의미하면 paper §7-1 evidence value 봉인 단계로 진입.
