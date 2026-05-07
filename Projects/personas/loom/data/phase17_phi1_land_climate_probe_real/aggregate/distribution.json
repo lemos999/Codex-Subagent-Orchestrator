@@ -1,0 +1,732 @@
+{
+  "seeds_combined": [
+    7,
+    13,
+    42
+  ],
+  "consistency_tolerance": 0.1,
+  "counts_per_seed": {
+    "7": {
+      "current": 1920,
+      "cumulative": 5760
+    },
+    "13": {
+      "current": 1920,
+      "cumulative": 5760
+    },
+    "42": {
+      "current": 1920,
+      "cumulative": 5760
+    }
+  },
+  "aggregate_quantiles": {
+    "soil_moisture": {
+      "current": {
+        "P25": 0.2541666666666667,
+        "P50": 0.29147286821705426,
+        "P67": 0.3127853881278539,
+        "P75": 0.32482758620689656,
+        "P90": 0.3732442600810342
+      },
+      "cumulative": {
+        "P25": 0.19621212121212123,
+        "P50": 0.26458333333333334,
+        "P67": 0.3007575757575758,
+        "P75": 0.317037037037037,
+        "P90": 0.37534246575342467
+      }
+    },
+    "fertility": {
+      "current": {
+        "P25": 0.225,
+        "P50": 0.2833333333333333,
+        "P67": 0.30873015873015874,
+        "P75": 0.32196969696969696,
+        "P90": 0.3695258620689667
+      },
+      "cumulative": {
+        "P25": 0.15,
+        "P50": 0.25625000000000003,
+        "P67": 0.29375,
+        "P75": 0.3125925925925926,
+        "P90": 0.37031963470319634
+      }
+    },
+    "rainfall_30d": {
+      "current": {
+        "P25": 12.674999999999999,
+        "P50": 34.7,
+        "P67": 41.9,
+        "P75": 63.8,
+        "P90": 159.2300000000001
+      },
+      "cumulative": {
+        "P25": 11.5,
+        "P50": 29.2,
+        "P67": 40.1,
+        "P75": 43.800000000000004,
+        "P90": 160.5
+      }
+    },
+    "temperature_30d": {
+      "current": {
+        "P25": 12.319999999999999,
+        "P50": 20.48166666666667,
+        "P67": 21.333333333333332,
+        "P75": 23.34,
+        "P90": 30.37333333333333
+      },
+      "cumulative": {
+        "P25": 11.646843434343433,
+        "P50": 20.109166666666667,
+        "P67": 21.10666666666667,
+        "P75": 22.572499999999998,
+        "P90": 30.026666666666664
+      }
+    },
+    "drought_days": {
+      "current": {
+        "P25": 0.0,
+        "P50": 0.0,
+        "P67": 1.0,
+        "P75": 1.0,
+        "P90": 3.0
+      },
+      "cumulative": {
+        "P25": 0.0,
+        "P50": 0.0,
+        "P67": 1.0,
+        "P75": 1.0,
+        "P90": 3.0
+      }
+    },
+    "depletion": {
+      "current": {
+        "P25": 0.0,
+        "P50": 0.0,
+        "P67": 0.0,
+        "P75": 0.0,
+        "P90": 0.0
+      },
+      "cumulative": {
+        "P25": 0.0,
+        "P50": 0.0,
+        "P67": 0.0,
+        "P75": 0.0,
+        "P90": 0.0
+      }
+    },
+    "recovery_rate": {
+      "current": {
+        "P25": 0.0,
+        "P50": 0.0,
+        "P67": 0.0,
+        "P75": 0.0,
+        "P90": 0.0
+      },
+      "cumulative": {
+        "P25": 0.0,
+        "P50": 0.0,
+        "P67": 0.0,
+        "P75": 0.0,
+        "P90": 0.0
+      }
+    },
+    "hazard_damage": {
+      "current": {
+        "P25": 1.0,
+        "P50": 1.0,
+        "P67": 1.0,
+        "P75": 1.0,
+        "P90": 1.0
+      },
+      "cumulative": {
+        "P25": 0.6,
+        "P50": 1.0,
+        "P67": 1.0,
+        "P75": 1.0,
+        "P90": 1.0
+      }
+    }
+  },
+  "consistency_within_tolerance": {
+    "soil_moisture": {
+      "current": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      },
+      "cumulative": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      }
+    },
+    "fertility": {
+      "current": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      },
+      "cumulative": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      }
+    },
+    "rainfall_30d": {
+      "current": {
+        "P50": false,
+        "P67": true,
+        "P75": true
+      },
+      "cumulative": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      }
+    },
+    "temperature_30d": {
+      "current": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      },
+      "cumulative": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      }
+    },
+    "drought_days": {
+      "current": {
+        "P50": false,
+        "P67": true,
+        "P75": false
+      },
+      "cumulative": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      }
+    },
+    "depletion": {
+      "current": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      },
+      "cumulative": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      }
+    },
+    "recovery_rate": {
+      "current": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      },
+      "cumulative": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      }
+    },
+    "hazard_damage": {
+      "current": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      },
+      "cumulative": {
+        "P50": true,
+        "P67": true,
+        "P75": true
+      }
+    }
+  },
+  "consistency_details": {
+    "soil_moisture": {
+      "current": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.3,
+            "13": 0.2884920634920635,
+            "42": 0.2828638497652582
+          },
+          "mean": 0.29045197108577386,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 0.3190476190476191,
+            "13": 0.3196969696969697,
+            "42": 0.3020833333333333
+          },
+          "mean": 0.31360930735930737,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 0.33749999999999997,
+            "13": 0.32651515151515154,
+            "42": 0.30697674418604654
+          },
+          "mean": 0.3236639652337327,
+          "within_tolerance": true
+        }
+      },
+      "cumulative": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.2625,
+            "13": 0.2625,
+            "42": 0.275
+          },
+          "mean": 0.26666666666666666,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 0.2977777777777778,
+            "13": 0.30624999999999997,
+            "42": 0.2992592592592592
+          },
+          "mean": 0.30109567901234563,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 0.3158730158730159,
+            "13": 0.3212121212121212,
+            "42": 0.31118721461187215
+          },
+          "mean": 0.3160907838990031,
+          "within_tolerance": true
+        }
+      }
+    },
+    "fertility": {
+      "current": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.29953051643192485,
+            "13": 0.2674603174603175,
+            "42": 0.27674418604651163
+          },
+          "mean": 0.28124500664625135,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 0.3190476190476191,
+            "13": 0.3103174603174603,
+            "42": 0.2968992248062015
+          },
+          "mean": 0.3087547680570936,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 0.33492063492063495,
+            "13": 0.32651515151515154,
+            "42": 0.3031963470319635
+          },
+          "mean": 0.32154404448925,
+          "within_tolerance": true
+        }
+      },
+      "cumulative": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.25555555555555554,
+            "13": 0.24722222222222223,
+            "42": 0.2644444444444444
+          },
+          "mean": 0.25574074074074077,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 0.29375,
+            "13": 0.29791666666666666,
+            "42": 0.2911111111111111
+          },
+          "mean": 0.2942592592592593,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 0.30952380952380953,
+            "13": 0.3174242424242424,
+            "42": 0.30444444444444446
+          },
+          "mean": 0.3104641654641655,
+          "within_tolerance": true
+        }
+      }
+    },
+    "rainfall_30d": {
+      "current": {
+        "P50": {
+          "values_by_seed": {
+            "7": 29.25,
+            "13": 36.35,
+            "42": 35.7
+          },
+          "mean": 33.76666666666667,
+          "within_tolerance": false
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 40.2,
+            "13": 41.9,
+            "42": 42.7
+          },
+          "mean": 41.6,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 65.425,
+            "13": 67.95,
+            "42": 63.8
+          },
+          "mean": 65.72500000000001,
+          "within_tolerance": true
+        }
+      },
+      "cumulative": {
+        "P50": {
+          "values_by_seed": {
+            "7": 27.1,
+            "13": 29.0,
+            "42": 31.1
+          },
+          "mean": 29.066666666666666,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 38.1,
+            "13": 40.4,
+            "42": 41.1
+          },
+          "mean": 39.86666666666667,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 41.800000000000004,
+            "13": 43.6,
+            "42": 44.7
+          },
+          "mean": 43.366666666666674,
+          "within_tolerance": true
+        }
+      }
+    },
+    "temperature_30d": {
+      "current": {
+        "P50": {
+          "values_by_seed": {
+            "7": 20.48166666666667,
+            "13": 20.48166666666667,
+            "42": 20.48166666666667
+          },
+          "mean": 20.48166666666667,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 21.333333333333332,
+            "13": 21.333333333333332,
+            "42": 21.333333333333332
+          },
+          "mean": 21.333333333333332,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 23.34,
+            "13": 23.34,
+            "42": 23.34
+          },
+          "mean": 23.34,
+          "within_tolerance": true
+        }
+      },
+      "cumulative": {
+        "P50": {
+          "values_by_seed": {
+            "7": 20.109166666666667,
+            "13": 20.109166666666667,
+            "42": 20.109166666666667
+          },
+          "mean": 20.109166666666667,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 21.10666666666667,
+            "13": 21.10666666666667,
+            "42": 21.10666666666667
+          },
+          "mean": 21.10666666666667,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 22.572499999999998,
+            "13": 22.572499999999998,
+            "42": 22.572499999999998
+          },
+          "mean": 22.5725,
+          "within_tolerance": true
+        }
+      }
+    },
+    "drought_days": {
+      "current": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 1.0,
+            "42": 0.0
+          },
+          "mean": 0.3333333333333333,
+          "within_tolerance": false
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 1.0,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 2.0,
+            "42": 1.0
+          },
+          "mean": 1.3333333333333333,
+          "within_tolerance": false
+        }
+      },
+      "cumulative": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 1.0,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 1.0,
+          "within_tolerance": true
+        }
+      }
+    },
+    "depletion": {
+      "current": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        }
+      },
+      "cumulative": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        }
+      }
+    },
+    "recovery_rate": {
+      "current": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        }
+      },
+      "cumulative": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 0.0,
+            "13": 0.0,
+            "42": 0.0
+          },
+          "mean": 0.0,
+          "within_tolerance": true
+        }
+      }
+    },
+    "hazard_damage": {
+      "current": {
+        "P50": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 1.0,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 1.0,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 1.0,
+          "within_tolerance": true
+        }
+      },
+      "cumulative": {
+        "P50": {
+          "values_by_seed": {
+            "7": 0.9666666666666666,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 0.9888888888888889,
+          "within_tolerance": true
+        },
+        "P67": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 1.0,
+          "within_tolerance": true
+        },
+        "P75": {
+          "values_by_seed": {
+            "7": 1.0,
+            "13": 1.0,
+            "42": 1.0
+          },
+          "mean": 1.0,
+          "within_tolerance": true
+        }
+      }
+    }
+  }
+}

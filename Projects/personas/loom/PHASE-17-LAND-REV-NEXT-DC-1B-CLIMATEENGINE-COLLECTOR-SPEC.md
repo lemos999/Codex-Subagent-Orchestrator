@@ -1,6 +1,6 @@
 # [분석 스크립트] DC-1B ClimateEngine Collector — Φ-1 Land rev.next §7-1 evidence base 보강
 
-> **상태**: rev.1 (OQ 1B-1 + 1B-3 사용자 결정 반영 — 2026-05-07; sub-implementer spawn 가능)
+> **상태**: rev.2 (sub-implementer 1차 결과 통합 — 2026-05-07; OQ 1B-1/1B-2/1B-3/1B-5 [확정], paper §7-1 evidence value 봉인 가능)
 > **긴급도**: 중간 (DC-1 §7-1 synthetic smoke baseline 봉인 직후 — paper §7-1 raw evidence value 보강)
 > **선행 조건**:
 > - DC-1 §7-1 SPEC rev.0 [봉인] (commit `6197f8e`, 2026-05-07)
@@ -45,6 +45,15 @@ DC-1 §7-1 spec rev.0 §0.2와 동일. 본 spec은 **driver wiring + CLI**만 fr
 
 - ClimateEngine `weather` dict → `LandCell.climate` direct mapping 식 (§2.3 — type signature freeze)
 - `--ticks` default = 90 (current/cumulative 분리 검증 기본값; 30은 smoke 최소값으로 별도 보존)
+
+본 spec rev.2에서 freeze **확정** 추가 영역 (sub-impl 1차 결과 검증 후 승격):
+
+- LandCell region tag 부재 처리: collector 내부 `_assign_region(cell)` helper의
+  8x8 grid 3등분 결정론 (§2.4 — y<3=claude / 3≤y<6=codex / y≥6=gemini, 24/24/16 cells).
+  LandCell.region_id 필드 추가 0건 invariant 영구 유지.
+- synthetic vs real 분포 비교 보고서 위치: `impl.result.md` inline §4 (별도 dir 신설 없음, §5 OQ 표 참조).
+- extractor 재실행 정책: collector_real.py 내부 wrapper (`runtime DATA_ROOT swap` try-finally).
+  extractor 본문 0건 변경 invariant 영구 유지.
 
 ### 0.3 보존 invariant 7종 + 본 spec 추가 3종
 
@@ -201,14 +210,29 @@ temperature = weather.get("temperature_c",    weather.get("temperature", 20.0))
 | (b) normalized (`precip_mm / 30.0`) | 정규화 자체가 mechanism 진입 신호. raw 단계에서 차단. |
 | (c) mean of 3 region | LandCell의 region tag 부재 처리는 §2.4 OQ-1B-2로 분리. 매핑 식과 무관. |
 
-### 2.4 LandCell region tag 확보
+### 2.4 LandCell region tag 확보 [확정 — rev.2 / 2026-05-07]
 
-OQ-1B-2: LandCell이 region tag (`"claude"/"codex"/"gemini"`)를 보유하는가?
+OQ-1B-2 검증 결과: `physis/world.py:23` LandCell dataclass `slots=True` invariant 유지
++ region tag 필드 부재. driver는 cell index 기반 결정론적 region 할당 채택.
 
-- `physis/world.py` 본 spec에서 변경 0건.
-- 만약 region tag 부재 → driver는 cell index 기반 결정론적 region 할당 (8x8 grid 3등분).
+**결정**: collector 내부 helper `_assign_region(cell: LandCell) -> str`로 8x8 grid 3등분
+결정론 할당. LandCell.region_id 필드 추가 **금지** (영원 invariant).
 
-이는 collector 내부 helper로 처리 — `LandCell.region_id` 필드 추가 **금지** (LandCell 본문 무수정).
+```python
+def _assign_region(cell: LandCell) -> str:
+    if cell.y < 3:        # y=[0,1,2] = 3 rows × 8 cols = 24 cells → claude
+        return "claude"
+    if cell.y < 6:        # y=[3,4,5] = 3 rows × 8 cols = 24 cells → codex
+        return "codex"
+    return "gemini"        # y=[6,7]   = 2 rows × 8 cols = 16 cells
+```
+
+근거 (sub-impl 1차 결과 기반):
+
+- LandCell `slots=True` invariant — 필드 추가 시 모든 call site 영향. 본 spec writable boundary 침해.
+- `cell.y` 기반 결정론 함수 — seed 무관 + mechanism coupling 0건.
+- 8x8 grid 분할 (24/24/16 cells) — paper §5.2의 "3-region terrain sheet" 비례 (claude
+  대륙성 + codex 온대 해양 + gemini 열대 — `physis/regions.py`) 와 일관.
 
 ---
 
@@ -265,6 +289,41 @@ DC-1 §7-1 hotfix 동형:
 
 → §1.0 caveat 위반 0건 유지.
 
+### 3.5 sub-impl 1차 결과 evidence (rev.2 봉인 진입)
+
+sub-implementer (`subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/`)
+1차 결과: **12 / 12 PASS**.
+
+| 영역 | 결과 |
+|---|---|
+| collector_real 신규 author | 467 LOC, mypy strict + ruff PASS |
+| 자동 산출 data | 11 파일 (probe.json 3 + distribution.json 4 + summary.md 4) |
+| forbidden zone git diff | 8 paths 모두 empty (synthetic baseline / extractor / telemetry / ClimateEngine / world.py / core / ontology / struggle / brain / api / test 0건 변경) |
+| current vs cumulative 분리 | 1920 (30 × 64) ≠ 5760 (90 × 64) — numerical proof |
+| Provenance 라벨 | "ClimateEngine real evolution" 4 summary.md 매치 |
+| §1.0 caveat 위반 | 0건 |
+
+**synthetic vs real 분포 비교** (sub-impl §4.1, [results/impl.result.md](../../../subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/results/impl.result.md) §4):
+
+| metric | window | synthetic P50 | real P50 | relative Δ |
+|---|---|---:|---:|---:|
+| soil_moisture | cumulative | 0.197 | 0.265 | +34.3% |
+| fertility | cumulative | 0.179 | 0.256 | +43.4% |
+| rainfall_30d | cumulative | 5.40 | 29.20 | **+440.7%** |
+| temperature_30d | cumulative | 19.98 | 20.11 | +0.6% (P50; P25/P75는 ±5°C 분포 변동) |
+| drought_days | cumulative | 0.0 | 0.0 | tail (P67/P90 0→1 / 1→3) |
+| hazard_damage | cumulative | 0.167 | 1.000 | **+500.0%** |
+
+**결론**: 차이 유의미 → paper §7-1 evidence value 봉인 진입 가능. 5개 metric에서 synthetic
+random walk 대비 ClimateEngine 자연 진화 분포의 질적 차이 입증.
+
+**Evidence cross-reference** (rev.2 봉인 시점 영구 인용):
+
+- run-summary: [`subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/run-summary.md`](../../../subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/run-summary.md)
+- impl.result: [`subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/results/impl.result.md`](../../../subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/results/impl.result.md)
+- impl.prompt: [`subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/prompts/impl.prompt.md`](../../../subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/prompts/impl.prompt.md)
+- run-manifest: [`subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/run-manifest.md`](../../../subagent-runs/claude/phase17-phi1-land-climate-real-collector-2026-05-07/run-manifest.md)
+
 ---
 
 ## §4. 변경 파일
@@ -294,10 +353,10 @@ DC-1 §7-1 hotfix 동형:
 | # | 질문 | 결정 / 권고 | 상태 |
 |---:|---|---|:---:|
 | 1B-1 | weather dict → LandCell.climate 매핑 식 (§2.3) | **direct**: `precipitation_mm` / `temperature_c` (collector 내부 legacy fallback 1단) | **[확정 — rev.1 / 2026-05-07]** |
-| 1B-2 | LandCell region tag — 부재 시 collector 내부 결정론적 할당 (§2.4) | 8x8 grid 3등분 권고 | sub-impl 진입 시 검증 |
+| 1B-2 | LandCell region tag — 부재 시 collector 내부 결정론적 할당 (§2.4) | **8x8 grid 3등분 결정론** (`_assign_region(cell)` helper, 24/24/16 cells; LandCell.region_id 필드 추가 0건) | **[확정 — rev.2 / 2026-05-07]** |
 | 1B-3 | `--ticks` default | **90** (current/cumulative 분리 검증; 30은 smoke 최소값으로 별도 보존) | **[확정 — rev.1 / 2026-05-07]** |
-| 1B-4 | planet-config 다양화 — single default vs multi-region | single default (rev.1) | rev.next |
-| 1B-5 | synthetic vs real 비교 보고서 위치 | `impl.result.md` inline | sub-impl 진입 시 결정 |
+| 1B-4 | planet-config 다양화 — single default vs multi-region | single default (rev.1) — sub-impl 1차 결과 5배 차이가 single config 한정인지 검증 필요 | rev.next |
+| 1B-5 | synthetic vs real 비교 보고서 위치 | **`impl.result.md` inline §4** (별도 dir 신설 없음, sub-impl §4.1 표 1개로 통합) | **[확정 — rev.2 / 2026-05-07]** |
 
 ---
 
@@ -350,9 +409,29 @@ synthetic baseline / extractor / LandCell / ClimateEngine 모두 무영향 — R
 - commit 분리 정책: 본 rev.1 반영 commit은 `6197f8e` (synthetic baseline 봉인) 와 섞지 않음 —
   STUB v0.3 §12 link 추가와 동일 commit으로 묶음.
 
-### rev.2 — TBD (sub-implementer 1차 결과 후)
+### rev.2 — 2026-05-07 sub-implementer 1차 결과 통합
 
-- OQ 1B-2 / 1B-5 결정 명시 (sub-impl 진입 시 결정 사항)
-- sub-implementer 결과 evidence 인용 (run-summary + impl.result)
-- synthetic vs real 분포 비교 보고서 통합
-- spec status: **[확정]** (rev.2 봉인 후 본 collector_real는 §7-2 진입 전 raw evidence base)
+- **OQ 1B-2 [확정]**: collector 내부 `_assign_region(cell)` helper로 8x8 grid 3등분 결정론
+  (y<3=claude / 3≤y<6=codex / y≥6=gemini, 24/24/16 cells). LandCell.region_id 필드 추가
+  0건 invariant 영구 유지. 본 결정 sub-impl 1차 검증 통과.
+- **OQ 1B-5 [확정]**: synthetic vs real 비교 보고서는 `impl.result.md` inline §4 (별도 dir
+  신설 없음, sub-impl §4.1 8 metric × 2 window 표 1개로 통합).
+- §0.2 §1.0 caveat에 "rev.2 freeze **확정** 추가 영역" sub-section 추가
+  (region helper + 비교 위치 + extractor wrapper 정책).
+- §2.4 LandCell region tag 확보를 rev.0 결정 영역에서 [확정] 본문으로 승격 + 헬퍼 코드 인용.
+- §3.5 sub-impl 1차 결과 evidence sub-section 신규 추가 — 12 / 12 PASS 표 + synthetic vs real
+  분포 비교 표 + paper §7-1 evidence value 봉인 진입 가능 결론 + evidence cross-reference 4건.
+- §5 OQ 표 1B-2 / 1B-5 status를 **[확정 — rev.2 / 2026-05-07]** 로 update.
+- 헤더 status: **rev.2 — sub-impl 1차 결과 통합** (paper §7-1 evidence value 봉인 가능).
+- commit 분리 정책: 본 rev.2 반영 commit은 `6197f8e` (synthetic baseline) /
+  `658ee29` (DC-1B rev.1 + STUB v0.3) 와 섞지 않음 — collector_real.py + probe_real
+  data + sub-impl evidence + 본 rev.2 spec을 단일 commit으로 묶음.
+
+### rev.next — TBD (paper §7-1 evidence value 봉인 후)
+
+- OQ 1B-4 (planet-config 다양화) sub-impl 분리 — sub-impl 1차 결과 5배 차이가 single
+  NovaPlanet config 한정인지 multi-config (planet variation) 에서도 일관되는지 검증.
+- (b) normalized / (c) mean 후보 재검토 — sub-impl 1차 `rainfall_30d` 5배 이상 차이가 raw
+  단위 (ClimateEngine mm/hour vs synthetic random[0,1]) 의 차이에 기인하는지 정량화.
+- §7-2 mechanism spec 진입 시 본 raw 분포가 evidence base — saturation cap 재검토
+  (sub-impl §Uncertainty: real `hazard_damage` P50=1.0 도달 신호).
