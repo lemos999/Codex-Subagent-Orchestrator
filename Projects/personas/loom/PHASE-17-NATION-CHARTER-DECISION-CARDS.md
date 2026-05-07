@@ -65,8 +65,8 @@
 - 대안 검토 (비코어 우회): SIS·CPCM 측정만으로 분기 추론 →
   기각 사유: branch 결정은 결정 시점·결정 주체가 필요한 mechanism, 측정만으로 환원 불가.
 - 추가 요건 (Codex Optional #4): 구현 전 /spec-review 또는 3엔진 cross-check 필수
-- 사용자 사전 승인 일자: 2026-05-04
-- 사용자 결정: [ 승인 / 조건부 승인 / 거부 ] — 대기
+- 사용자 사전 승인 일자: 2026-05-07
+- 사용자 결정: [승인] (사용자 발화: "권고대로", 2026-05-07)
 ```
 
 ### 사전 승인 요청 #2: NDP — Nation Dissolution Path
@@ -79,8 +79,8 @@
 - 대안 검토 (비코어 우회): SIS sovereignty 감소만으로 dissolution 추론 →
   기각 사유: Φ-3 재진입 신호는 acceptance 정의 필요, acceptance는 코어.
 - 추가 요건 (Codex Optional #4): 구현 전 /spec-review 또는 3엔진 cross-check 필수
-- 사용자 사전 승인 일자: 2026-05-04
-- 사용자 결정: [ 승인 / 조건부 승인 / 거부 ] — 대기
+- 사용자 사전 승인 일자: 2026-05-07
+- 사용자 결정: [승인] (사용자 발화: "권고대로", 2026-05-07)
 ```
 
 ### 사전 승인 요청 #3: LRT — Lord Replacement Trigger
@@ -94,8 +94,8 @@
 - 대안 검토 (비코어 우회): grievance + sovereignty 측정만 노출 →
   기각 사유: replacement event 자체가 state 변경 mechanism, 측정만으로 환원 불가.
 - 추가 요건 (Codex Optional #4): 구현 전 /spec-review 또는 3엔진 cross-check 필수
-- 사용자 사전 승인 일자: 2026-05-04
-- 사용자 결정: [ 승인 / 조건부 승인 / 거부 ] — 대기
+- 사용자 사전 승인 일자: 2026-05-07
+- 사용자 결정: [승인] (사용자 발화: "권고대로", 2026-05-07)
 ```
 
 ---
